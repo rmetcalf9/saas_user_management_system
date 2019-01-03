@@ -44,7 +44,7 @@ TODO
 ### JWT Token Structure
 
 Example token:
-'''
+```
 {
   "iss": "saas_user_management_system_jwtkey",
   "exp": 1546520660,
@@ -64,7 +64,7 @@ Example token:
     }
   ]
 }
-'''
+```
 
 userid is the unique identifier for each user. Since a single user can have mutiple auth providers setup it may be different depending on the auth provider used.
 
@@ -73,7 +73,26 @@ TODO - decide if this should be extended to contain more user information of if 
 
 ### Internal data structures
 
-Roles <-> Users -> UserAuthProfiles <-> AuthProviders <- AuthProviderType
+Tennants
+ - Name (Unique key)
+ - AuthProviders
+   - GUID
+   - Type (Internal, Google, etc)
+   - ConfigXML
+
+Roles
+ - Name (Unique key)
+
+Users
+ - UserID (Unique key)
+ - Roles (List of role names)
+
+UserAuths
+ - UserID
+ - Tennant
+ - AuthProviderGUID
+ - AuthXML (Data depends on auth provider type)
+
 
 
 
