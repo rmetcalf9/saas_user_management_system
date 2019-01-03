@@ -73,13 +73,16 @@ TODO - decide if this should be extended to contain more user information of if 
 
 ### Internal data structures
 
-Tennants
+Tenants
  - Name (Unique key)
+ - Description
+ - AllowUserCreation (if true signing up for the first time with a new id allows creation - if auth provider allows)
  - AuthProviders
    - GUID
    - MenuText
    - IconLink
    - Type (Internal, Google, etc)
+   - AllowUserCreation (user creation only allowed if both tennat and authprovider have true)
    - ConfigXML
 
 Roles
@@ -91,9 +94,23 @@ Users
 
 UserAuths
  - UserID
- - Tennant
+ - Tenant
  - AuthProviderGUID
  - AuthXML (Data depends on auth provider type)
+
+### Bootstrap
+
+The user management system admin API uses the login endpoints for auth. To enable this to work the following process is run on startup if no data exists in the tenant datastore.
+
+A tennant called "usersystem" is created with a single auth provider "internal", allowuser creation is false at both levels.
+A user is setup in this tenant with the roles "loggedin" and "systemadmin". 
+A userauth is setup for this userID against the "usersystem" tenant with username=APIAPP_DEFAULTHOMEADMINUSERNAME password=APIAPP_DEFAULTHOMEADMINPASSWORD.
+
+The User Management master admin API's will only work with users of the "usersystem" tenant with the role "systemadmin" granted.
+
+### Auto user creation
+
+If an authprovider has allowusercreation enabled and it is also enabled against the tenant then users are created with the role "loggedin" when they first log in.
 
 ### Deployment
 
