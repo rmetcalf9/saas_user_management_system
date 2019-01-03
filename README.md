@@ -93,7 +93,9 @@ UserAuths
  - AuthProviderGUID
  - AuthXML (Data depends on auth provider type)
 
+### Deployment
 
+All components are designed to be deployed in a single container and a codefresh.yml file handles configuring Kong frontend.
 
 
 
