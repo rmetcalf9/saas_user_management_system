@@ -77,6 +77,8 @@ Tennants
  - Name (Unique key)
  - AuthProviders
    - GUID
+   - MenuText
+   - IconLink
    - Type (Internal, Google, etc)
    - ConfigXML
 
