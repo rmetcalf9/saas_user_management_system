@@ -100,7 +100,7 @@ UserAuths
 
 ### Bootstrap
 
-The user management system admin API uses the login endpoints for auth. To enable this to work the following process is run on startup if no data exists in the tenant datastore.
+The user management system admin API uses the login endpoints for auth. To enable this to work the following process is run on startup if there is no tenant called "usersystem" in the tenant datastore.
 
 A tennant called "usersystem" is created with a single auth provider "internal", allowuser creation is false at both levels.
 A user is setup in this tenant with the roles "loggedin" and "systemadmin". 
