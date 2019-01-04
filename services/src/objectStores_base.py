@@ -14,6 +14,13 @@ class objectStoreMemoryClass():
     return self.objectData[objectType]
   def saveJSONObject(self, appObj, objectType, objectKey, JSONString):
     self.getDictForObjectType(objectType)[objectKey] = JSONString
+   
+  # Update the object in single operation. make transaction safe??
+  def updateJSONObject(self, appObj, objectType, objectKey, updateFn):
+    obj = self.getObjectJSON(appObj, objectType, objectKey)
+    obj = updateFn(obj)
+    self.saveJSONObject(appObj, objectType, objectKey, obj)
+  
   def getObjectJSON(self, appObj, objectType, objectKey):
     objectTypeDict = self.getDictForObjectType(objectType)
     if objectKey in objectTypeDict:

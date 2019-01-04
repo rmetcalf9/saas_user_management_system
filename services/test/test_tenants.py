@@ -1,6 +1,6 @@
-from TestHelperSuperClass import testHelperAPIClient
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException
-from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
+from TestHelperSuperClass import testHelperAPIClient, env
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login
+from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
 
 class test_tenants(testHelperAPIClient):
@@ -24,14 +24,31 @@ class test_tenants(testHelperAPIClient):
       "guid": "ignored",
       "MenuText": masterTenantDefaultAuthProviderMenuText,
       "IconLink": masterTenantDefaultAuthProviderMenuIconLink,
-      "Type":  "Internal",
+      "Type":  "internal",
       "AllowUserCreation": False,
       "ConfigJSON": {
-        "PasswordStoreObjectType": "internalDataStore"
+        "userSufix": "@internalDataStore"
       }
     }
     self.assertEqual(len(masterTenant['AuthProviders']),1, msg="No internal Auth Providers found")
-    masterTenant['AuthProviders'][0]['guid'] = "ignored"
-    self.assertJSONStringsEqual(masterTenant['AuthProviders'][0], expectedAuthProviderJSON, msg="Internal Auth Provider default data incorrect")
+    singleAuthProvGUID = ""
+    for key in masterTenant['AuthProviders']:
+      singleAuthProvGUID = key
+      masterTenant['AuthProviders'][singleAuthProvGUID]['guid'] = "ignored"
 
-    #TODO Check initial user has been created
+    self.assertJSONStringsEqual(masterTenant['AuthProviders'][singleAuthProvGUID], expectedAuthProviderJSON, msg="Internal Auth Provider default data incorrect")
+
+    #Check initial user has been created and we could log in
+    UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
+      'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+    })
+    #An exception is raised if the login fails
+    expectedRoles = {
+      "UserID": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      "TenantRoles": {
+        "usersystem": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+       }
+    }
+    self.assertJSONStringsEqual(UserIDandRoles, expectedRoles, msg="Returned roles incorrect")
+    

@@ -16,7 +16,10 @@ env = {
   'APIAPP_FRONTEND': '_',
   'APIAPP_APIURL': 'http://apiurlxxx',
   'APIAPP_FRONTENDURL': 'http://frontenddummytestxxx',
-  'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]'
+  'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
+  'APIAPP_MASTERPASSWORDFORPASSHASH': 'TestPPP',
+  'APIAPP_DEFAULTHOMEADMINUSERNAME': 'AdminTestSet',
+  'APIAPP_DEFAULTHOMEADMINPASSWORD': 'sadfdsfdsf4325g...ds'
 }
 
 class testHelperSuperClass(unittest.TestCase):

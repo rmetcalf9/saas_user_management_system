@@ -83,7 +83,7 @@ Tenants
    - IconLink
    - Type (Internal, Google, etc)
    - AllowUserCreation (user creation only allowed if both tennat and authprovider have true)
-   - ConfigXML
+   - ConfigJSON
 
 Roles
  - Name (Unique key)
@@ -93,28 +93,32 @@ Users
  - TenantRoles (List of tenant name and roles exactly how it appears in the JWT token)
 
 UserAuths
- - UserID
- - Tenant
- - AuthProviderGUID
- - AuthXML (Data depends on auth provider type)
+ - AuthUserKey (Unique Key)
+ - AuthProviderType (Unique Key)
+ - UserID (Must be unique)
+ - AuthProviderJSON
 
 ### Bootstrap
 
 The user management system admin API uses the login endpoints for auth. To enable this to work the following process is run on startup if no data exists in the tenant datastore.
 
 A tennant called "usersystem" is created with a single auth provider "internal", allowuser creation is false at both levels.
-A user is setup in this tenant with the roles "loggedin" and "systemadmin". 
+A user is setup in this tenant with the roles "hasaccount" and "systemadmin". 
 A userauth is setup for this userID against the "usersystem" tenant with username=APIAPP_DEFAULTHOMEADMINUSERNAME password=APIAPP_DEFAULTHOMEADMINPASSWORD.
 
 The User Management master admin API's will only work with users of the "usersystem" tenant with the role "systemadmin" granted.
 
 ### Auto user creation
 
-If an authprovider has allowusercreation enabled and it is also enabled against the tenant then users are created with the role "loggedin" when they first log in.
+If an authprovider has allowusercreation enabled and it is also enabled against the tenant then users are created with the role "hasaccount" when they first log in.
 
 ### Deployment
 
 All components are designed to be deployed in a single container and a codefresh.yml file handles configuring Kong frontend.
 
 
+## Env Vars
 
+APIAPP_MASTERPASSWORDFORPASSHASH - Must be set for security
+APIAPP_DEFAULTHOMEADMINUSERNAME -
+APIAPP_DEFAULTHOMEADMINPASSWORD  -

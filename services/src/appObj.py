@@ -21,6 +21,9 @@ class appObjClass(parAppObj):
   serverStartTime = None
   version = None
   objectStore = None
+  APIAPP_MASTERPASSWORDFORPASSHASH = None
+  APIAPP_DEFAULTHOMEADMINUSERNAME = None
+  APIAPP_DEFAULTHOMEADMINPASSWORD = None
 
   def init(self, env, serverStartTime, testingMode = False):
     self.curDateTimeOverrideForTesting = None
@@ -28,6 +31,11 @@ class appObjClass(parAppObj):
     self.version = readFromEnviroment(env, 'APIAPP_VERSION', None, None)
     super(appObjClass, self).init(env)
     resetMainApi(self)
+    
+    self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None)
+    self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None)
+    self.APIAPP_DEFAULTHOMEADMINPASSWORD = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None) #no default must be read in
+    
     self.objectStore = createObjectStoreInstance(self)
     if GetTenant(self,masterTenantName) is None:
       CreateMasterTenant(self)
