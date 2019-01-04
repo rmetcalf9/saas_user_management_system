@@ -1,0 +1,54 @@
+FROM nginx:1.13.12-alpine
+
+MAINTAINER Robert Metcalf
+
+##https://vladikk.com/2013/09/12/serving-flask-with-nginx-on-ubuntu/
+
+ENV APP_DIR /app
+##APIAPP_FRONTEND is also configured in nginx conf
+ENV APIAPP_FRONTEND /frontend
+
+
+ENV APIAPP_APIURL http://localhost:80/api
+ENV APIAPP_APIDOCSURL http://localhost:80/apidocs
+ENV APIAPP_FRONTENDURL http://localhost:80/frontend
+ENV APIAPP_APIACCESSSECURITY '[]'
+
+# APIAPP_MODE is not definable here as it is hardcoded to DOCKER in the shell script
+# APIAPP_VERSION is not definable here as it is read from the VERSION file inside the image
+
+EXPOSE 8098
+## Also need to update nginx config when port is changed and healthcheck
+
+RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pcre-dev && \
+    python3 -m ensurepip && \
+    rm -r /usr/lib/python*/ensurepip && \
+    pip3 install --upgrade pip setuptools && \
+    rm -r /root/.cache && \
+    pip3 install --upgrade pip && \
+    mkdir ${APP_DIR} && \
+    mkdir ${APIAPP_FRONTEND} && \
+    mkdir /var/log/uwsgi && \
+    pip3 install uwsgi
+
+COPY ./src ${APP_DIR}
+RUN pip3 install -r ${APP_DIR}/requirements.txt
+
+COPY ./VERSION /VERSION
+COPY ./run_app_docker.sh /run_app_docker.sh
+COPY ./nginx_default.conf /etc/nginx/conf.d/default.conf
+COPY ./uwsgi.ini /uwsgi.ini
+
+STOPSIGNAL SIGTERM
+
+
+CMD ["/run_app_docker.sh"]
+
+# Regular checks. Docker won't send traffic to container until it is healthy
+#  and when it first starts it won't check the health until the interval so I can't have
+#  a higher value without increasing the startup time
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://127.0.0.1:8098/api/serverinfo/?healthcheck=true || exit 1
+
+##dockerBuildAndTag.sh
+##docker run --network pythontestingnetwork --name rb_reservation -p 8098:8098 -e APIAPP_APIURL="${EXTURL}:${EXTPORT}/api" -e APIAPP_APIDOCSURL="${EXTURL}:${EXTPORT}/apidocs" -d metcarob/rb_reservation:latest
