@@ -2,3 +2,5 @@
 
 masterTenantName="usersystem"
 masterTenantDefaultDescription="Master Tenant for User Management System"
+masterTenantDefaultAuthProviderMenuText="aa"
+masterTenantDefaultAuthProviderMenuIconLink="aa"

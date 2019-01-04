@@ -5,12 +5,19 @@
 
 # Class that will store objects in memory only
 class objectStoreMemoryClass():
-  objectData = dict()
-  def saveJSONObject(self, appObj, objectKey, JSONString):
-    self.objectData[objectKey] = JSONString
-  def getObjectJSON(self, appObj, objectKey):
-    if objectKey in self.objectData:
-      return self.objectData[objectKey]
+  objectData = None
+  def __init__(self):
+    self.objectData = dict()
+  def getDictForObjectType(self, objectType):
+    if objectType not in self.objectData:
+      self.objectData[objectType] = dict()
+    return self.objectData[objectType]
+  def saveJSONObject(self, appObj, objectType, objectKey, JSONString):
+    self.getDictForObjectType(objectType)[objectKey] = JSONString
+  def getObjectJSON(self, appObj, objectType, objectKey):
+    objectTypeDict = self.getDictForObjectType(objectType)
+    if objectKey in objectTypeDict:
+      return objectTypeDict[objectKey]
     return None
 
     
