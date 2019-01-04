@@ -90,7 +90,7 @@ Roles
 
 Users
  - UserID (Unique key)
- - Roles (List of role names)
+ - TenantRoles (List of tenant name and roles exactly how it appears in the JWT token)
 
 UserAuths
  - UserID
