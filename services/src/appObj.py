@@ -11,10 +11,22 @@ from flask_restplus import fields
 import time
 import datetime
 from serverInfoAPI import registerAPI as registerMainApi, resetData as resetMainApi
+from loginAPI import registerAPI as registerLoginApi
 
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName
 from objectStores_base import createObjectStoreInstance
+import bcrypt
+
+
+#Encryption operations make unit tests run slow
+# if app is in testing more this dummy class
+# skips the hashing stages (dosen't matter for unit tests)
+class testOnlybcrypt():
+  def gensalt():
+    return b'$2b$12$lXti32XD6LkwYUnLw.1vh.'
+  def hashpw(combo_password, salt):
+    return combo_password
 
 class appObjClass(parAppObj):
   curDateTimeOverrideForTesting = None
@@ -24,8 +36,14 @@ class appObjClass(parAppObj):
   APIAPP_MASTERPASSWORDFORPASSHASH = None
   APIAPP_DEFAULTHOMEADMINUSERNAME = None
   APIAPP_DEFAULTHOMEADMINPASSWORD = None
+  bcrypt = bcrypt
+
 
   def init(self, env, serverStartTime, testingMode = False):
+    if testingMode:
+      print("Warning testing mode active - proper encryption is not being used")
+      self.bcrypt = testOnlybcrypt
+    
     self.curDateTimeOverrideForTesting = None
     self.serverStartTime = serverStartTime
     self.version = readFromEnviroment(env, 'APIAPP_VERSION', None, None)
@@ -43,6 +61,7 @@ class appObjClass(parAppObj):
   def initOnce(self):
     super(appObjClass, self).initOnce()
     registerMainApi(self)
+    registerLoginApi(self)
     self.flastRestPlusAPIObject.title = "Reservation API"
     self.flastRestPlusAPIObject.description = "API for managing reservation system"
 

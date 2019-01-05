@@ -12,7 +12,7 @@ class test_tenants(testHelperAPIClient):
     self.checkGotRightException(context,failedToCreateTenantException)
 
 
-  def test_Master_Tenant_exists(self):
+  def test_MasterTenantExists(self):
     masterTenant = GetTenant(appObj,masterTenantName)
     self.assertFalse(masterTenant is None, msg="Master Tenant was not created")
     self.assertEquals(masterTenant['Name'], masterTenantName, msg="Master tenant name is wrong")
