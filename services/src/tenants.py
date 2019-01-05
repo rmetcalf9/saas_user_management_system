@@ -2,6 +2,7 @@
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 import uuid
 from authProviders import authProviderFactory
+from tenantObj import tenantClass
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 tenantNotFoundException = Exception('Tenant Not Found')
@@ -58,7 +59,10 @@ def _createTenant(appObj, tenantName, description, allowUserCreation):
   })
 
 def GetTenant(appObj, tenantName):
-  return appObj.objectStore.getObjectJSON(appObj,"tenants",tenantName)
+  a = appObj.objectStore.getObjectJSON(appObj,"tenants",tenantName)
+  if a is None:
+    return a
+  return tenantClass(a)
   
 def CreateUser(appObj, UserID):
   appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
@@ -81,9 +85,7 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
   tenant = GetTenant(appObj, tenantName)
   if tenant is None:
     raise tenantNotFoundException
-  if authProviderGUID not in tenant["AuthProviders"]:
-    raise authProviderNotFoundException
-  AuthProvider = authProviderFactory(tenant["AuthProviders"][authProviderGUID]["Type"],tenant["AuthProviders"][authProviderGUID]["ConfigJSON"])
+  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID)["Type"],tenant.getAuthProvider(authProviderGUID)["ConfigJSON"])
   if AuthProvider is None:
     print("Can't find " + tenant["AuthProviders"][authProviderGUID]["Type"])
     raise authProviderTypeNotFoundException

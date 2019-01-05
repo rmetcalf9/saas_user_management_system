@@ -15,9 +15,9 @@ class test_tenants(testHelperAPIClient):
   def test_MasterTenantExists(self):
     masterTenant = GetTenant(appObj,masterTenantName)
     self.assertFalse(masterTenant is None, msg="Master Tenant was not created")
-    self.assertEquals(masterTenant['Name'], masterTenantName, msg="Master tenant name is wrong")
-    self.assertEquals(masterTenant['Description'], masterTenantDefaultDescription, msg="Master tenant default description wrong")
-    self.assertFalse(masterTenant['AllowUserCreation'], msg="Master tenant defaults to allowing user creation")
+    self.assertEquals(masterTenant.getJSONRepresenation()['Name'], masterTenantName, msg="Master tenant name is wrong")
+    self.assertEquals(masterTenant.getJSONRepresenation()['Description'], masterTenantDefaultDescription, msg="Master tenant default description wrong")
+    self.assertFalse(masterTenant.getJSONRepresenation()['AllowUserCreation'], msg="Master tenant defaults to allowing user creation")
 
     #Check AuthProvider is correct
     expectedAuthProviderJSON = {
@@ -30,13 +30,12 @@ class test_tenants(testHelperAPIClient):
         "userSufix": "@internalDataStore"
       }
     }
-    self.assertEqual(len(masterTenant['AuthProviders']),1, msg="No internal Auth Providers found")
+    self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
     singleAuthProvGUID = ""
-    for key in masterTenant['AuthProviders']:
-      singleAuthProvGUID = key
-      masterTenant['AuthProviders'][singleAuthProvGUID]['guid'] = "ignored"
+    for guid in masterTenant.getAuthProviderGUIDList():
+      singleAuthProvGUID=guid
 
-    self.assertJSONStringsEqual(masterTenant['AuthProviders'][singleAuthProvGUID], expectedAuthProviderJSON, msg="Internal Auth Provider default data incorrect")
+    self.assertJSONStringsEqualWithIgnoredKeys(masterTenant.getAuthProvider(singleAuthProvGUID), expectedAuthProviderJSON, ['guid'], msg="Internal Auth Provider default data incorrect")
 
     #Check initial user has been created and we could log in
     UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {

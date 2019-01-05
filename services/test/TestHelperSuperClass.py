@@ -47,6 +47,15 @@ class testHelperSuperClass(unittest.TestCase):
     print("--")
     print(b)
     self.assertTrue(False, msg=msg)
+    
+  #provide a list of ignored keys
+  def assertJSONStringsEqualWithIgnoredKeys(self, str1, str2, ignoredKeys, msg=''):
+    cleaned1 = str1.copy()
+    cleaned2 = str2.copy()
+    for key_to_ignore in ignoredKeys:
+      cleaned1[key_to_ignore] = 'ignored'
+      cleaned2[key_to_ignore] = 'ignored'
+    return self.assertJSONStringsEqual(cleaned1, cleaned2, msg)
 
   def assertTimeCloseToCurrent(self, time, msg='Creation time is more than 3 seconds adrift'):
     if (isinstance(time, str)):
