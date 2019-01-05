@@ -18,9 +18,15 @@ def getAPIModel(appObj):
   })  
 
 
+def getValidTenantObj(appObj, tenant):
+  tenant = GetTenant(appObj, tenant)
+  if tenant is None:
+    raise BadRequest('Tenant not found')
+  return tenant
+
 def registerAPI(appObj):
 
-  nsLogin = appObj.flastRestPlusAPIObject.namespace('loginapi', description='Public API for displaying login pages.')
+  nsLogin = appObj.flastRestPlusAPIObject.namespace('login', description='Public API for displaying login pages.')
   @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):
   
@@ -31,9 +37,7 @@ def registerAPI(appObj):
     @nsLogin.response(400, 'Bad Request')
     def get(self, tenant):
      '''Get list of auth providers supported by this service'''
-     tenant = GetTenant(appObj, tenant)
-     if tenant is None:
-      raise BadRequest('Tenant not found')
+     tenantObj = getValidTenantObj(appObj, tenant)
      return {}
      
     

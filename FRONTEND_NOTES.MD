@@ -19,15 +19,15 @@ Depending on authprovider configuration will display a page prompting the user f
 
 ## Login Service Endpoints (public)
 
-### GET /vx/public/loginapi/$$tenant$$/authproviders
+### GET /vx/public/api/login/$$tenant$$/authproviders
 
 Get a list of the auth providers for this tenant
 
-### GET /vx/public/loginapi/$$tenant$$/authproviders/__authprovidername__
+### GET /vx/public/api/login/$$tenant$$/authproviders/__authprovidername__
 
 Get info for a particular authprovider
 
-### POST /vx/public/loginapi/$$tenant$$/authproviders/__authprovidername__
+### POST /vx/public/api/login/$$tenant$$/authproviders/__authprovidername__
 
 Login to a particular auth provider - will return the JWT token or an error
 
