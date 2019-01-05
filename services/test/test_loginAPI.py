@@ -5,7 +5,7 @@ from appObj import appObj
 import pytz
 import datetime
 
-from constants import masterTenantName
+from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
 
 invalidTenantName="invalidtenantname"
 
@@ -22,6 +22,22 @@ class test_api(testHelperAPIClient):
     result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-    self.assertJSONStringsEqual(resultJSON, {"message": "Tenant not found"})
+    
+    
+    expectedResult = {
+      "Name": masterTenantName,
+      "Description": masterTenantDefaultDescription, 
+      "AllowUserCreation": False, 
+      "AuthProviders": [{
+        "guid": "1199545b-58f4-4f6e-885a-376dad1a68e9",
+        "Type": "internal", 
+        "MenuText": masterTenantDefaultAuthProviderMenuText, 
+        "IconLink": masterTenantDefaultAuthProviderMenuIconLink, 
+        "AllowUserCreation": False, 
+        "ConfigJSON": "{'userSufix': '@internalDataStore'}"
+      }] 
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders' ])
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON[ 'AuthProviders' ][0], expectedResult[ 'AuthProviders' ][0], [ 'guid' ], msg="Master tenant auth provider wrong")
 
 

@@ -11,34 +11,19 @@ from tenants import GetTenant
 
 def getTenantModel(appObj):
   AuthProviderModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
-    'Version': fields.String(default='DEFAULT', description='Version of container running on server')
+    'guid': fields.String(default='abc', description='Unique identifier of AuthProvider'),
+    'Type': fields.String(default='internal', description='Authorization provider type'),
+    'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND Tenant level to work)'),   
+    'MenuText': fields.String(default='click here', description='Item text used in login method selection screen'),
+    'IconLink': fields.String(default=None, description='Image link used in login method selection screen'),
+    'ConfigJSON': fields.String(default=None, description='Extra configuration required per auth type')
   })
   return appObj.flastRestPlusAPIObject.model('TenantInfo', {
     'Name': fields.String(default='DEFAULT', description='Name and unique identifier of tenant'),
     'Description': fields.String(default='DEFAULT', description='Description of tenant'),
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
-    'AuthProviders': fields.Nested(AuthProviderModel)
+    'AuthProviders': fields.List(fields.Nested(AuthProviderModel))
   })  
-
-'''
-{
-  "Name": "usersystem",
-  "Description": "Master Tenant for User Management System", 
-  "AllowUserCreation": false, 
-  "AuthProviders": {
-    "a209bf4f-0761-49b1-9032-a79b31f7ad73": {
-      "guid": "a209bf4f-0761-49b1-9032-a79b31f7ad73"
-      "AllowUserCreation": false, 
-      "IconLink": "aa", 
-      "MenuText": "aa", 
-      "Type": "internal",
-      "ConfigJSON": {
-        "userSufix": "@internalDataStore"
-      }
-    }
-  }
-}
-'''
 
 def getValidTenantObj(appObj, tenant):
   tenant = GetTenant(appObj, tenant)
@@ -60,6 +45,6 @@ def registerAPI(appObj):
     def get(self, tenant):
      '''Get list of auth providers supported by this service'''
      tenantObj = getValidTenantObj(appObj, tenant)
-     return tenantObj
+     return tenantObj.getJSONRepresenation()
      
     
