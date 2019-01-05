@@ -5,6 +5,9 @@ from flask_restplus import Resource, fields
 import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
+from werkzeug.exceptions import BadRequest
+
+from tenants import GetTenant
 
 def getAPIModel(appObj):
   serverInfoServerModel = appObj.flastRestPlusAPIObject.model('mainAPI', {
@@ -14,19 +17,23 @@ def getAPIModel(appObj):
     'Server': fields.Nested(serverInfoServerModel)
   })  
 
-  
+
 def registerAPI(appObj):
 
-  nsServerinfo = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
-  @nsServerinfo.route('/')
+  nsLogin = appObj.flastRestPlusAPIObject.namespace('loginapi', description='Public API for displaying login pages.')
+  @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):
   
-    '''General Server Operations'''
-    @nsServerinfo.doc('getserverinfo')
-    @nsServerinfo.marshal_with(getAPIModel(appObj))
-    @nsServerinfo.response(200, 'Success')
-    def get(self):
-     '''Get general information about the server'''
-     curDatetime = datetime.datetime.now(pytz.utc)
+    '''Login'''
+    @nsLogin.doc('login')
+    @nsLogin.marshal_with(getAPIModel(appObj))
+    @nsLogin.response(200, 'Success', model=getAPIModel(appObj))
+    @nsLogin.response(400, 'Bad Request')
+    def get(self, tenant):
+     '''Get list of auth providers supported by this service'''
+     tenant = GetTenant(appObj, tenant)
+     if tenant is None:
+      raise BadRequest('Tenant not found')
      return {}
+     
     

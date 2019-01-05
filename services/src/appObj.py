@@ -62,8 +62,8 @@ class appObjClass(parAppObj):
     super(appObjClass, self).initOnce()
     registerMainApi(self)
     registerLoginApi(self)
-    self.flastRestPlusAPIObject.title = "Reservation API"
-    self.flastRestPlusAPIObject.description = "API for managing reservation system"
+    self.flastRestPlusAPIObject.title = "SAAS User Management"
+    self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
 
   def setTestingDateTime(self, val):
     self.curDateTimeOverrideForTesting = val
