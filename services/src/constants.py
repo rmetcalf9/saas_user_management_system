@@ -2,8 +2,8 @@
 
 masterTenantName="usersystem"
 masterTenantDefaultDescription="Master Tenant for User Management System"
-masterTenantDefaultAuthProviderMenuText="aa"
-masterTenantDefaultAuthProviderMenuIconLink="aa"
+masterTenantDefaultAuthProviderMenuText="Website account login"
+masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
 DefaultHasAccountRole="hasaccount"
 
