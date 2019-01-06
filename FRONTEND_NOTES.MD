@@ -23,10 +23,6 @@ Depending on authprovider configuration will display a page prompting the user f
 
 Get a list of the auth providers for this tenant
 
-### GET /vx/public/api/login/$$tenant$$/authproviders/__authprovidername__
-
-Get info for a particular authprovider
-
 ### POST /vx/public/api/login/$$tenant$$/authproviders/__authprovidername__
 
 Login to a particular auth provider - will return the JWT token or an error
