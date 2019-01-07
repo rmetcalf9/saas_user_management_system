@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <div class="fixed-center">
     <div>
       <div class="row">
         <div class="col">
@@ -12,7 +12,7 @@
         </div>
       </div>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <style>

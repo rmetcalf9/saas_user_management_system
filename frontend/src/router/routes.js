@@ -17,12 +17,9 @@ function commonPreLoad (to, from, next) {
 
 const routes = [
   {
-    path: '/',
-    component: () => import('layouts/MyLayout.vue'),
-    beforeEnter: commonPreLoad,
-    children: [
-      { path: '', component: () => import('pages/Index.vue') }
-    ]
+    path: '/:tenantName',
+    component: () => import('pages/Index.vue'),
+    beforeEnter: commonPreLoad
   }
 ]
 
