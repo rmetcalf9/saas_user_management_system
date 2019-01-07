@@ -1,25 +1,7 @@
-
-/*
- * commonPreLoad called before each page load
- * We need to load the auth providers and display invalid config if it failed
- */
-function commonPreLoad (to, from, next) {
-//   if ((globalStore.getters.datastoreState === 'LOGGED_IN') || (globalStore.getters.datastoreState === 'LOGGED_IN_SERVERDATA_LOADED')) {
-//     next()
-//     return
-//   }
-//   next({
-//     path: '/login',
-//     query: { redirect: to.fullPath }
-//   })
-  next()
-}
-
 const routes = [
   {
     path: '/:tenantName',
-    component: () => import('pages/Index.vue'),
-    beforeEnter: commonPreLoad
+    component: () => import('pages/CheckTenant.vue')
   }
 ]
 

@@ -29,6 +29,11 @@ export default {
         { k: 'c', text: 'Login with XX' }
       ]
     }
+  },
+  methods: {
+    clickHandler1 () {
+      console.log('TODO')
+    }
   }
 }
 </script>
