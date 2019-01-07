@@ -9,7 +9,8 @@ function ensurePassedTenantIsLoaded (to, from, next) {
   }
   console.log('Loaded store differs from param, redirecting')
   next({
-    path: '/' + to.params.tenantName
+    path: '/' + to.params.tenantName,
+    query: { usersystem_redirect: to.fullPath }
   })
 }
 
@@ -21,6 +22,11 @@ const routes = [
   {
     path: '/:tenantName/selectAuth',
     component: () => import('pages/SelectAuth.vue'),
+    beforeEnter: ensurePassedTenantIsLoaded
+  },
+  {
+    path: '/:tenantName/AuthProvider/internal',
+    component: () => import('pages/AuthProvider_internal.vue'),
     beforeEnter: ensurePassedTenantIsLoaded
   }
 ]

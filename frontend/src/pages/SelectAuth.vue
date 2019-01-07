@@ -8,7 +8,7 @@
       </div>
       <div class="row">
         <div v-for="curVal in tenantInfo.AuthProviders" :key=curVal.guid>
-          <q-btn class="col q-ma-sm" :label="curVal.MenuText" @click="clickHandler1"/>
+          <q-btn class="col q-ma-sm" :label="curVal.MenuText" @click="clickHandler1(curVal)"/>
         </div>
       </div>
     </div>
@@ -31,8 +31,8 @@ export default {
     }
   },
   methods: {
-    clickHandler1 () {
-      console.log('TODO')
+    clickHandler1 (authProvider) {
+      this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/AuthProvider/' + authProvider.Type)
     }
   }
 }
