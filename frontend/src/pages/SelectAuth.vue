@@ -7,8 +7,8 @@
         </div>
       </div>
       <div class="row">
-        <div v-for="curVal in authMethod" :key=curVal.k>
-          <q-btn class="col q-ma-sm" :label="curVal.text" @click="clickHandler1"/>
+        <div v-for="curVal in tenantInfo.AuthProviders" :key=curVal.guid>
+          <q-btn class="col q-ma-sm" :label="curVal.MenuText" @click="clickHandler1"/>
         </div>
       </div>
     </div>
@@ -23,11 +23,11 @@ export default {
   name: 'SelectAuth',
   data () {
     return {
-      authMethod: [
-        { k: 'a', text: 'Login with website account' },
-        { k: 'b', text: 'Login with google' },
-        { k: 'c', text: 'Login with XX' }
-      ]
+    }
+  },
+  computed: {
+    tenantInfo () {
+      return this.$store.state.globalDataStore.tenantInfo
     }
   },
   methods: {

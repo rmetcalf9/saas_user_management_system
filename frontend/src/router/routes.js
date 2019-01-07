@@ -1,9 +1,11 @@
 import stores from '../store/index.js'
 
 function ensurePassedTenantIsLoaded (to, from, next) {
-  if (stores().state.globalDataStore.tenant === to.params.tenantName) {
-    next()
-    return
+  if (stores().state.globalDataStore.tenantInfo !== null) {
+    if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {
+      next()
+      return
+    }
   }
   console.log('Loaded store differs from param, redirecting')
   next({

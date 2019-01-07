@@ -17,7 +17,6 @@ function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) 
   axios(config).then(
     (response) => {
       commit('updateUrlToReachPublicAPI', toTry)
-      commit('updateTenant', tenantName)
       callback.ok(response)
     },
     (response) => {
@@ -41,7 +40,7 @@ export const checkAuthProviders = ({ dispatch, commit }, params) => {
 
   var callback = {
     ok: function (response) {
-      commit('updateauthProviders', response.data)
+      commit('updateTenantInfo', response.data)
       params.callback.ok(response)
     },
     error: params.callback.error

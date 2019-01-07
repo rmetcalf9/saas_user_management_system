@@ -23,8 +23,8 @@ export default {
     var callback = {
       ok: function (response) {
         Loading.hide()
-        if (TTT.$store.state.globalDataStore.tenant === TTT.$route.params.tenantName) {
-          TTT.$router.replace('/' + TTT.$store.state.globalDataStore.tenant + '/selectAuth')
+        if (TTT.$store.state.globalDataStore.tenantInfo.Name === TTT.$route.params.tenantName) {
+          TTT.$router.replace('/' + TTT.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
         } else {
           console.log('Returned tenantName mismatch')
           /// go to root, this will give us a 404

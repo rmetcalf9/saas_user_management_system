@@ -1,5 +1,5 @@
 export default {
   urlToReachPublicAPI: null,
-  authProviders: null,
+  tenantInfo: null,
   tenant: null
 }
