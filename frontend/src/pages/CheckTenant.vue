@@ -22,6 +22,7 @@ export default {
     var TTT = this
     var callback = {
       ok: function (response) {
+        console.log(response)
         console.log('TODO')
       },
       error: function (response) {
@@ -36,7 +37,11 @@ export default {
       TTT.$router.replace('/')
       return
     }
-    this.$store.dispatch('globalDataStore/checkAuthProviders', {tenantName: this.$route.params.tenantName, callback: callback})
+    this.$store.dispatch('globalDataStore/checkAuthProviders', {
+      tenantName: this.$route.params.tenantName,
+      callback: callback,
+      currentRoute: this.$route
+    })
   }
 }
 </script>
