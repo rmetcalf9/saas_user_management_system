@@ -22,8 +22,14 @@ export default {
     var TTT = this
     var callback = {
       ok: function (response) {
-        console.log(response)
-        console.log('TODO')
+        Loading.hide()
+        if (TTT.$store.state.globalDataStore.tenant === TTT.$route.params.tenantName) {
+          TTT.$router.replace('/' + TTT.$store.state.globalDataStore.tenant + '/selectAuth')
+        } else {
+          console.log('Returned tenantName mismatch')
+          /// go to root, this will give us a 404
+          TTT.$router.replace('/')
+        }
       },
       error: function (response) {
         Loading.hide()

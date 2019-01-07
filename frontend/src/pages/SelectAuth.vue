@@ -20,7 +20,7 @@
 
 <script>
 export default {
-  name: 'PageIndex',
+  name: 'SelectAuth',
   data () {
     return {
       authMethod: [
