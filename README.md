@@ -92,10 +92,17 @@ Users
  - UserID (Unique key)
  - TenantRoles (List of tenant name and roles exactly how it appears in the JWT token)
 
+Implements a many to many relationship between Users and Auths, so one auth can be used for many users.
+Identities
+ - IdentityID
+ - UserID (UserID and IdentityID TOGETHER are the primary key)
+ - Name
+ - Description
+
 UserAuths
  - AuthUserKey (Unique Key)
  - AuthProviderType (Unique Key)
- - UserID (Must be unique)
+ - IdentityID
  - AuthProviderJSON
 
 ### Bootstrap
@@ -105,6 +112,7 @@ The user management system admin API uses the login endpoints for auth. To enabl
 A tennant called "usersystem" is created with a single auth provider "internal", allowuser creation is false at both levels.
 A user is setup in this tenant with the roles "hasaccount" and "systemadmin". 
 A userauth is setup for this userID against the "usersystem" tenant with username=APIAPP_DEFAULTHOMEADMINUSERNAME password=APIAPP_DEFAULTHOMEADMINPASSWORD.
+An identity Name=description="standard" is setup connecting the newly created auth with the user.
 
 The User Management master admin API's will only work with users of the "usersystem" tenant with the role "systemadmin" granted.
 
