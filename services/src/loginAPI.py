@@ -5,9 +5,10 @@ from flask_restplus import Resource, fields
 import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
+from constants import authProviderNotFoundException, authFailedException
 
-from tenants import GetTenant
+from tenants import GetTenant, Login
 
 def getTenantModel(appObj):
   AuthProviderModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
@@ -24,6 +25,13 @@ def getTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
     'AuthProviders': fields.List(fields.Nested(AuthProviderModel))
   })  
+
+def getLoginPostDataModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('LoginPostData', {
+  'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
+  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth PRovider type', required=True),
+  'identityGUID': fields.String(default='DEFAULT', description='Identity to use to log in with')
+  })
 
 def getValidTenantObj(appObj, tenant):
   tenant = GetTenant(appObj, tenant)
@@ -47,4 +55,30 @@ def registerAPI(appObj):
      tenantObj = getValidTenantObj(appObj, tenant)
      return tenantObj.getJSONRepresenation()
      
-    
+    '''Login'''
+    @nsLogin.doc('login')
+    @nsLogin.expect(getLoginPostDataModel(appObj), validate=True)
+    @nsLogin.marshal_with(getTenantModel(appObj))
+    @nsLogin.response(200, 'Success', model=getTenantModel(appObj))
+    @nsLogin.response(400, 'Bad Request')
+    def post(self, tenant):
+     '''Login and recieve JWT token'''
+     tenantObj = getValidTenantObj(appObj, tenant)
+     if 'authProviderGUID' not in request.get_json():
+       raise BadRequest('No authProviderGUID provided')
+     authProviderGUID = request.get_json()['authProviderGUID']
+     identityGUID = None
+     if 'identityGUID' in request.get_json():
+       identityGUID = request.get_json()['identityGUID']
+     
+     try:
+       userInfo = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
+     except authProviderNotFoundException as err:
+       raise BadRequest('authProviderNotFoundException')
+     except authFailedException as err:
+       raise Unauthorized('authFailedException')
+     except:
+       raise InternalServerError
+     print(userInfo)
+     return {'TODO'}
+

@@ -1,4 +1,5 @@
 # Description of Tenant Object
+from constants import authProviderNotFoundException
 
 #designed as immutable object
 class tenantClass():

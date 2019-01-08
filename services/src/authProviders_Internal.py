@@ -1,6 +1,6 @@
 #Provides auth provider functions
-from authProviders_base import authProvider, authFailedException
-from constants import uniqueKeyCombinator, masterInternalAuthTypePassword
+from authProviders_base import authProvider
+from constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
 
 class authProviderInternal(authProvider):
   def _makeKey(self, username):

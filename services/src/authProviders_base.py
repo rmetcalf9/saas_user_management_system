@@ -2,7 +2,7 @@
 # An auth has mutiple identities
 #  an identity has one user
 tryingToCreateDuplicateAuthException = Exception('Trying To Create Duplicate Auth (Matching username)')
-authFailedException = Exception('AuthFailed')
+from constants import authFailedException
 
 
 class authProvider():

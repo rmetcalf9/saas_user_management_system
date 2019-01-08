@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
+from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException
 import uuid
 from authProviders import authProviderFactory
 from tenantObj import tenantClass
@@ -8,8 +8,6 @@ import uuid
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 tenantNotFoundException = Exception('Tenant Not Found')
-authProviderNotFoundException = Exception('Auth Provider Not Found')
-authProviderTypeNotFoundException = Exception('Auth Provider Type Not Found')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
 UnknownIdentityException = Exception('Unknown Identity')

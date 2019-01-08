@@ -10,3 +10,9 @@ DefaultHasAccountRole="hasaccount"
 uniqueKeyCombinator="_`@\/'"
 
 masterInternalAuthTypePassword="dsF4F.D32654.....3D5g"
+
+class authProviderNotFoundException(Exception):
+  pass
+
+class authFailedException(Exception):
+  pass

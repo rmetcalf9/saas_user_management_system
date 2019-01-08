@@ -99,6 +99,8 @@ Identities
  - Name
  - Description
 
+
+
 UserAuths
  - AuthUserKey (Unique Key - includes provider type based on makeKey)
  - AuthProviderType
@@ -110,7 +112,7 @@ The user management system admin API uses the login endpoints for auth. To enabl
 
 A tennant called "usersystem" is created with a single auth provider "internal", allowuser creation is false at both levels.
 A user is setup in this tenant with the roles "hasaccount" and "systemadmin". 
-A userauth is setup for this userID against the "usersystem" tenant with username=APIAPP_DEFAULTHOMEADMINUSERNAME password=APIAPP_DEFAULTHOMEADMINPASSWORD.
+A userauth is setup for against the "usersystem" tenant with username=APIAPP_DEFAULTHOMEADMINUSERNAME password=APIAPP_DEFAULTHOMEADMINPASSWORD.
 An identity Name=description="standard" is setup connecting the newly created auth with the user.
 
 The User Management master admin API's will only work with users of the "usersystem" tenant with the role "systemadmin" granted.
