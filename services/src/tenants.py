@@ -3,11 +3,15 @@ from constants import masterTenantName, masterTenantDefaultDescription, masterTe
 import uuid
 from authProviders import authProviderFactory
 from tenantObj import tenantClass
+from identityObj import createNewIdentity, associateIdentityWithAuth, getListOfIdentitiesForAuth
+import uuid
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 tenantNotFoundException = Exception('Tenant Not Found')
 authProviderNotFoundException = Exception('Auth Provider Not Found')
 authProviderTypeNotFoundException = Exception('Auth Provider Type Not Found')
+UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
+UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
 
 
 #only called on intial setup Creates a master tenant with single internal auth provider
@@ -23,13 +27,24 @@ def CreateMasterTenant(appObj):
         "userSufix": "@internalDataStore"
       }
   })
-  CreateUser(appObj, appObj.APIAPP_DEFAULTHOMEADMINUSERNAME)
-  AddUserRole(appObj, appObj.APIAPP_DEFAULTHOMEADMINUSERNAME, masterTenantName, masterTenantDefaultSystemAdminRole)
-  AddUserRole(appObj, appObj.APIAPP_DEFAULTHOMEADMINUSERNAME, masterTenantName, DefaultHasAccountRole)
-  AddAuthForUser(appObj, appObj.APIAPP_DEFAULTHOMEADMINUSERNAME, masterTenantName, masterTenantInternalAuthProviderGUID, {
-    "username": appObj.APIAPP_DEFAULTHOMEADMINUSERNAME, 
+  userID = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
+  InternalAuthUsername = userID
+  
+  #User spercific creation
+  CreateUser(appObj, userID)
+  AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
+  AddUserRole(appObj, userID, masterTenantName, DefaultHasAccountRole)
+  mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
+  
+  authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProviderGUID, {
+    "username": InternalAuthUsername, 
     "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
   })
+  
+  #mainUserIdentity with authData
+  associateIdentityWithAuth(appObj, mainUserIdentity['guid'], authData['AuthUserKey'])
+
+
 
 #Called from API call
 def CreateTenant(appObj, tenantName):
@@ -70,7 +85,7 @@ def CreateUser(appObj, UserID):
     "TenantRoles": {}
   })
 
-def AddUserRole(appObj, UserID, tennantName, roleName):
+def AddUserRole(appObj, userID, tennantName, roleName):
   def updUser(obj):
     if obj is None:
       raise userNotFoundException
@@ -79,7 +94,8 @@ def AddUserRole(appObj, UserID, tennantName, roleName):
     else:
       obj["TenantRoles"][tennantName].append(roleName)
     return obj
-  appObj.objectStore.updateJSONObject(appObj,"users", UserID, updUser)
+  appObj.objectStore.updateJSONObject(appObj,"users", userID, updUser)
+
 
 def _getAuthProvider(appObj, tenantName, authProviderGUID):
   tenant = GetTenant(appObj, tenantName)
@@ -91,15 +107,27 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
     raise authProviderTypeNotFoundException
   return AuthProvider
     
-def AddAuthForUser(appObj, UserID, tenantName, authProviderGUID, StoredUserInfoJSON):
-  _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuthForUser(appObj, UserID, StoredUserInfoJSON)
+def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, StoredUserInfoJSON)
+  return auth
   
-# Login function will return a list of roles
-def Login(appObj, tenantName, authProviderGUID, credentialJSON):
-  UserID = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
-  UserJSON = appObj.objectStore.getObjectJSON(appObj,"users", UserID)
-  if UserJSON is None:
+# Login function will return an identityGUID
+def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='not_valid_guid'):
+  authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
+  if authUserObj is None:
     raise Exception
-  return UserJSON
+  
+  #We have authed with a single authMethod, we need to get a list of identities for that provider
+  possibleIdentities = getListOfIdentitiesForAuth(appObj, authUserObj['AuthUserKey'])
+  if identityGUID == "not_valid_guid":
+    if len(possibleIdentities)==1:
+      for key in possibleIdentities.keys():
+        identityGUID = key
+    else:
+      return possibleIdentities
+  if possibleIdentities[identityGUID] is None:
+    raise Exception
+
+  return appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
 
 

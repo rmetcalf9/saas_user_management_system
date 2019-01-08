@@ -2,6 +2,7 @@ from TestHelperSuperClass import testHelperAPIClient, env
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
+from authProviders_base import authFailedException
 
 class test_tenants(testHelperAPIClient):
 #Actual tests below
@@ -51,3 +52,31 @@ class test_tenants(testHelperAPIClient):
     }
     self.assertJSONStringsEqual(UserIDandRoles, expectedRoles, msg="Returned roles incorrect")
     
+  def test_StandardUserInvalidPassword(self):
+    masterTenant = GetTenant(appObj,masterTenantName)
+    self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
+    singleAuthProvGUID = ""
+    for guid in masterTenant.getAuthProviderGUIDList():
+      singleAuthProvGUID=guid
+
+    with self.assertRaises(Exception) as context:
+      UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
+        'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+        'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD'] + 'Extra bit to make password wrong'
+      })
+    self.checkGotRightException(context,authFailedException)
+
+  def test_StandardUserInvalidUsername(self):
+    masterTenant = GetTenant(appObj,masterTenantName)
+    self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
+    singleAuthProvGUID = ""
+    for guid in masterTenant.getAuthProviderGUIDList():
+      singleAuthProvGUID=guid
+
+    with self.assertRaises(Exception) as context:
+      UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
+        'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'] + 'Extra bit to make username wrong',
+        'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+      })
+    self.checkGotRightException(context,authFailedException)
+

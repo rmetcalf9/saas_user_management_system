@@ -94,15 +94,14 @@ Users
 
 Implements a many to many relationship between Users and Auths, so one auth can be used for many users.
 Identities
- - IdentityID
+ - guid (Unique key)
  - UserID (UserID and IdentityID TOGETHER are the primary key)
  - Name
  - Description
 
 UserAuths
- - AuthUserKey (Unique Key)
- - AuthProviderType (Unique Key)
- - IdentityID
+ - AuthUserKey (Unique Key - includes provider type based on makeKey)
+ - AuthProviderType
  - AuthProviderJSON
 
 ### Bootstrap
