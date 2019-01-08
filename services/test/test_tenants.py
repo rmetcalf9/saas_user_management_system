@@ -2,7 +2,7 @@ from TestHelperSuperClass import testHelperAPIClient, env
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
-from authProviders_base import authFailedException
+from constants import authFailedException
 
 class test_tenants(testHelperAPIClient):
 #Actual tests below

@@ -40,4 +40,33 @@ class test_api(testHelperAPIClient):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders' ])
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON[ 'AuthProviders' ][0], expectedResult[ 'AuthProviders' ][0], [ 'guid' ], msg="Master tenant auth provider wrong")
 
+  def test_sucessfulLoginAsDefaultUser(self):
+    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    
+    loginJSON = {
+      ##"identityGUID": "string",
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+       }
+    }
+    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    result2JSON = json.loads(result2.get_data(as_text=True))
 
+    expectedResult = {
+      'UserID': 'AdminTestSet', 
+      'TenantRoles': {
+        'usersystem': ['systemadmin', 'hasaccount']
+      },
+      'JWTToken': 'abc123'
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtToken' ])
+
+    #TODO Check JWT token JSON is correct
+
+    self.assertTrue(False)

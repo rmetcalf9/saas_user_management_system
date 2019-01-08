@@ -11,8 +11,12 @@ uniqueKeyCombinator="_`@\/'"
 
 masterInternalAuthTypePassword="dsF4F.D32654.....3D5g"
 
-class authProviderNotFoundException(Exception):
-  pass
+class customExceptionClass(Exception):
+  id = None
+  text = None
+  def __init__(self, text):
+    self.id = text
+    self.text = text
 
-class authFailedException(Exception):
-  pass
+authProviderNotFoundException = customExceptionClass('authProviderNotFoundException')
+authFailedException = customExceptionClass('authFailedException')

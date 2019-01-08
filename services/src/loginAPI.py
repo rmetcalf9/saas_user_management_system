@@ -6,7 +6,7 @@ import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
-from constants import authProviderNotFoundException, authFailedException
+from constants import customExceptionClass
 
 from tenants import GetTenant, Login
 
@@ -61,6 +61,7 @@ def registerAPI(appObj):
     @nsLogin.marshal_with(getTenantModel(appObj))
     @nsLogin.response(200, 'Success', model=getTenantModel(appObj))
     @nsLogin.response(400, 'Bad Request')
+    @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
      '''Login and recieve JWT token'''
      tenantObj = getValidTenantObj(appObj, tenant)
@@ -73,12 +74,13 @@ def registerAPI(appObj):
      
      try:
        userInfo = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
-     except authProviderNotFoundException as err:
-       raise BadRequest('authProviderNotFoundException')
-     except authFailedException as err:
-       raise Unauthorized('authFailedException')
+     except customExceptionClass as err:
+       if (err.id=='authFailedException'):
+         raise Unauthorized('authFailedException')
+       if (err.id=='authProviderNotFoundException'):
+         raise BadRequest('authProviderNotFoundException')
+       raise ('InternalServerError')
      except:
        raise InternalServerError
-     print(userInfo)
-     return {'TODO'}
+     return userInfo
 
