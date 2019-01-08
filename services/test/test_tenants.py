@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient, env
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
 from authProviders_base import authFailedException
@@ -79,4 +79,18 @@ class test_tenants(testHelperAPIClient):
         'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
       })
     self.checkGotRightException(context,authFailedException)
+
+  def test_StandardUserLoginToInvalidIdentity(self):
+    masterTenant = GetTenant(appObj,masterTenantName)
+    self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
+    singleAuthProvGUID = ""
+    for guid in masterTenant.getAuthProviderGUIDList():
+      singleAuthProvGUID=guid
+
+    with self.assertRaises(Exception) as context:
+      UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
+        'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+        'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+      }, 'invalid_identity_guid')
+    self.checkGotRightException(context,UnknownIdentityException)
 

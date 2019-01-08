@@ -12,6 +12,7 @@ authProviderNotFoundException = Exception('Auth Provider Not Found')
 authProviderTypeNotFoundException = Exception('Auth Provider Type Not Found')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
+UnknownIdentityException = Exception('Unknown Identity')
 
 
 #only called on intial setup Creates a master tenant with single internal auth provider
@@ -111,7 +112,12 @@ def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, StoredUserInfoJSON)
   return auth
   
-# Login function will return an identityGUID
+# Login function will
+# - raise an exception if auth fails
+# - raise an exception is user identityGUID is missing or not allowed for this object
+# - if no identityGUID is specified and the user only has one identity then the user and role info for the selected identity is returned
+# - if no identityGUID is specified and the user has mutiple identities a list of possible identities is returned
+# - if an identityGUID is specified and correct then the user and role info
 def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='not_valid_guid'):
   authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
   if authUserObj is None:
@@ -125,9 +131,10 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
         identityGUID = key
     else:
       return possibleIdentities
+  if identityGUID not in possibleIdentities:
+    raise UnknownIdentityException
   if possibleIdentities[identityGUID] is None:
     raise Exception
 
   return appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
-
 
