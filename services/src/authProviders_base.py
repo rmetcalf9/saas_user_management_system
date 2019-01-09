@@ -21,7 +21,7 @@ class authProvider():
   def Auth(self, appObj, credentialJSON):
     raise NotOverriddenException
 
-  def AddAuth(self, appObj, userInfoToStoreDict):
+  def AddAuth(self, appObj, userInfoToStoreDict, personGUID):
     key = self._makeKey(userInfoToStoreDict['username'])
     obj = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
     if obj is not None:
@@ -30,7 +30,8 @@ class authProvider():
     mainObjToStore = {
       "AuthUserKey": key,
       "AuthProviderType": self.authProviderType,
-      "AuthProviderJSON": self._getAuthData(appObj, userInfoToStoreDict)
+      "AuthProviderJSON": self._getAuthData(appObj, userInfoToStoreDict),
+      "personGUID": personGUID
     }
     appObj.objectStore.saveJSONObject(appObj,"userAuths",  self._makeKey(userInfoToStoreDict['username']), mainObjToStore)
     

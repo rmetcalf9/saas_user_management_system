@@ -1,11 +1,12 @@
 # Code to handle tenant objects
-from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException
+from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException
 import uuid
 from authProviders import authProviderFactory
 from tenantObj import tenantClass
-from identityObj import createNewIdentity, associateIdentityWithAuth, getListOfIdentitiesForAuth
+from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson
 import uuid
 import jwt
+from person import CreatePerson, associatePersonWithAuth
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 tenantNotFoundException = Exception('Tenant Not Found')
@@ -36,13 +37,18 @@ def CreateMasterTenant(appObj):
   AddUserRole(appObj, userID, masterTenantName, DefaultHasAccountRole)
   mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   
+  person = CreatePerson(appObj)
   authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProviderGUID, {
     "username": InternalAuthUsername, 
     "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
-  })
+  },
+  person['guid'])
+  associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
+
   
   #mainUserIdentity with authData
-  associateIdentityWithAuth(appObj, mainUserIdentity['guid'], authData['AuthUserKey'])
+  
+  associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
 
 
 
@@ -107,8 +113,8 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
     raise authProviderTypeNotFoundException
   return AuthProvider
     
-def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, StoredUserInfoJSON)
+def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON, personGUID):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, StoredUserInfoJSON, personGUID)
   return auth
   
 # Login function will
@@ -123,7 +129,9 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception
   
   #We have authed with a single authMethod, we need to get a list of identities for that provider
-  possibleIdentities = getListOfIdentitiesForAuth(appObj, authUserObj['AuthUserKey'])
+  possibleIdentities = getListOfIdentitiesForPerson(appObj, authUserObj['personGUID'])
+  if len(possibleIdentities)==0:
+    raise PersonHasNoAccessToAnyIdentitiesException
   if identityGUID == "not_valid_guid":
     if len(possibleIdentities)==1:
       for key in possibleIdentities.keys():
@@ -136,24 +144,26 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception
     
   jwtToken = dict()
-  if appObj.globalParamObject.LOGINEP_KONG_ADMINAPI_URL == '':
-    jwtToken['key'] = 'KongNotConfigured'
-    random_secret_str = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(32))
-    jwtToken['secret'] = b64encode(random_secret_str.encode("utf-8"))
-  else:
-    kongusername = appObj.globalParamObject.LOGINEP_LDAP_CONSUMERCLIENTID_PREFIX + username
-    appObj.kongObj.ensureUserExistsWithACL(kongusername, ldapResult['Groups'])
-    jwtToken = appObj.kongObj.getJWTToken(kongusername)
+  #if appObj.globalParamObject.LOGINEP_KONG_ADMINAPI_URL == '':
+  #  jwtToken['key'] = 'KongNotConfigured'
+  #  random_secret_str = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(32))
+  #  jwtToken['secret'] = b64encode(random_secret_str.encode("utf-8"))
+  #else:
+  #  kongusername = appObj.globalParamObject.LOGINEP_LDAP_CONSUMERCLIENTID_PREFIX + username
+  #  appObj.kongObj.ensureUserExistsWithACL(kongusername, ldapResult['Groups'])
+  #  jwtToken = appObj.kongObj.getJWTToken(kongusername)
 
-  expiryTime = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=int(appObj.globalParamObject.LOGINEP_JWT_TOKEN_TIMEOUT))
-  encodedJWT = jwt.encode({
-    'iss': jwtToken['key'],
-    'exp': expiryTime,
-    'username': username,
-    'groups': ldapResult['Groups']
-  }, b64decode(jwtToken['secret']), algorithm='HS256')
-  return Response(json.dumps({'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }), status=200, mimetype='application/json')
-    
-
-  return appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
+  #expiryTime = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=int(appObj.globalParamObject.LOGINEP_JWT_TOKEN_TIMEOUT))
+  #encodedJWT = jwt.encode({
+  #  'iss': jwtToken['key'],
+  #  'exp': expiryTime,
+  #  'username': username,
+  #  'groups': ldapResult['Groups']
+  #}, b64decode(jwtToken['secret']), algorithm='HS256')
+  #return Response(json.dumps({'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }), status=200, mimetype='application/json')
+  
+  userDict = appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
+  if userDict is None:
+    raise Exception('Error userID found in identity was never created')
+  return userDict
 

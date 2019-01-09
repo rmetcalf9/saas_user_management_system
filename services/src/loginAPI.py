@@ -77,6 +77,8 @@ def registerAPI(appObj):
      except customExceptionClass as err:
        if (err.id=='authFailedException'):
          raise Unauthorized('authFailedException')
+       if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
+         raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
        if (err.id=='authProviderNotFoundException'):
          raise BadRequest('authProviderNotFoundException')
        raise ('InternalServerError')

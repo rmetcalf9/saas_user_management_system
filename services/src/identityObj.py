@@ -22,22 +22,25 @@ def createNewIdentity(appObj, name, description, userID):
 #  _associate(appObj, userID, AuthUserKey, guid)
   return identityDict
   
-def associateIdentityWithAuth(appObj, identityGUID, AuthUserKey):
+def associateIdentityWithPerson(appObj, personGUID, AuthUserKey):
   def upd(idfea):
     if idfea is None:
       idfea = []
-    if identityGUID in idfea:
+    if personGUID in idfea:
       raise IdentityAlreadyHasThisAuthException
-    idfea.append(identityGUID)
+    idfea.append(personGUID)
     return idfea
-  appObj.objectStore.updateJSONObject(appObj,"IdentitiesForEachAuth", AuthUserKey, upd)
+  appObj.objectStore.updateJSONObject(appObj,"IdentitiesForEachPerson", AuthUserKey, upd)
 
-def getIdentityDict(appObj, identityGUID):
-  return appObj.objectStore.getObjectJSON(appObj,"Identities", identityGUID)
+def getIdentityDict(appObj, personGUID):
+  return appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
 
-def getListOfIdentitiesForAuth(appObj, AuthUserKey):
+def getListOfIdentitiesForPerson(appObj, personGUID):
   res = {}
-  for ite in appObj.objectStore.getObjectJSON(appObj,"IdentitiesForEachAuth", AuthUserKey):
+  identitiesThisPerson = appObj.objectStore.getObjectJSON(appObj,"IdentitiesForEachPerson", personGUID)
+  if identitiesThisPerson is None:
+    return {}
+  for ite in identitiesThisPerson:
     res[ite] = getIdentityDict(appObj,ite)
   return res
 
