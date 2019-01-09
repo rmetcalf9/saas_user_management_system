@@ -70,50 +70,16 @@ userid is the unique identifier for each user. Since a single user can have muti
 
 TODO - decide if this should be extended to contain more user information of if this should be implemented in a seperate microservice.
 
-
-### Internal data structures
-
-Tenants
- - Name (Unique key)
- - Description
- - AllowUserCreation (if true signing up for the first time with a new id allows creation - if auth provider allows)
- - AuthProviders
-   - GUID
-   - MenuText
-   - IconLink
-   - Type (Internal, Google, etc)
-   - AllowUserCreation (user creation only allowed if both tennat and authprovider have true)
-   - ConfigJSON
-
-Roles
- - Name (Unique key)
-
-Users
- - UserID (Unique key)
- - TenantRoles (List of tenant name and roles exactly how it appears in the JWT token)
-
-Implements a many to many relationship between Users and Auths, so one auth can be used for many users.
-Identities
- - guid (Unique key)
- - UserID (UserID and IdentityID TOGETHER are the primary key)
- - Name
- - Description
-
-
-
-UserAuths
- - AuthUserKey (Unique Key - includes provider type based on makeKey)
- - AuthProviderType
- - AuthProviderJSON
-
 ### Bootstrap
 
 The user management system admin API uses the login endpoints for auth. To enable this to work the following process is run on startup if there is no tenant called "usersystem" in the tenant datastore.
 
 A tennant called "usersystem" is created with a single auth provider "internal", allowuser creation is false at both levels.
-A user is setup in this tenant with the roles "hasaccount" and "systemadmin". 
+A user is setup in this tenant with the roles "hasaccount" and "systemadmin".
+An identity is setup for this user with Name=Description="standard"
+A Person is setup and assigned this identity
 A userauth is setup for against the "usersystem" tenant with username=APIAPP_DEFAULTHOMEADMINUSERNAME password=APIAPP_DEFAULTHOMEADMINPASSWORD.
-An identity Name=description="standard" is setup connecting the newly created auth with the user.
+
 
 The User Management master admin API's will only work with users of the "usersystem" tenant with the role "systemadmin" granted.
 
