@@ -19,7 +19,8 @@ env = {
   'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
   'APIAPP_MASTERPASSWORDFORPASSHASH': 'TestPPP',
   'APIAPP_DEFAULTHOMEADMINUSERNAME': 'AdminTestSet',
-  'APIAPP_DEFAULTHOMEADMINPASSWORD': 'sadfdsfdsf4325g...ds'
+  'APIAPP_DEFAULTHOMEADMINPASSWORD': 'sadfdsfdsf4325g...ds',
+  'APIAPP_JWT_TOKEN_TIMEOUT': '60'
 }
 
 class testHelperSuperClass(unittest.TestCase):

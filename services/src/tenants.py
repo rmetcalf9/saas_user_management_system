@@ -6,6 +6,7 @@ from tenantObj import tenantClass
 from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson
 import jwt
 from person import CreatePerson, associatePersonWithAuth
+from jwtTokenGeneration import generateJWTToken
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 tenantNotFoundException = Exception('Tenant Not Found')
@@ -147,26 +148,6 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
-  jwtSecret = appObj.gateway.CheckUserInitAndReturnJWTSecret(userDict)
-  
-  #jwtToken = dict()
-  #if appObj.globalParamObject.LOGINEP_KONG_ADMINAPI_URL == '':
-  #  jwtToken['key'] = 'KongNotConfigured'
-  #  random_secret_str = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(32))
-  #  jwtToken['secret'] = b64encode(random_secret_str.encode("utf-8"))
-  #else:
-  #  kongusername = appObj.globalParamObject.LOGINEP_LDAP_CONSUMERCLIENTID_PREFIX + username
-  #  appObj.kongObj.ensureUserExistsWithACL(kongusername, ldapResult['Groups'])
-  #  jwtToken = appObj.kongObj.getJWTToken(kongusername)
-
-  #expiryTime = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=int(appObj.globalParamObject.LOGINEP_JWT_TOKEN_TIMEOUT))
-  #encodedJWT = jwt.encode({
-  #  'iss': jwtToken['key'],
-  #  'exp': expiryTime,
-  #  'username': username,
-  #  'groups': ldapResult['Groups']
-  #}, b64decode(jwtToken['secret']), algorithm='HS256')
-  #return Response(json.dumps({'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }), status=200, mimetype='application/json')
-  
-  return userDict
+  jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict)
+  return generateJWTToken(appObj.APIAPP_JWT_TOKEN_TIMEOUT, userDict, jwtSecretAndKey)
 

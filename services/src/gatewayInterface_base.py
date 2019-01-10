@@ -11,8 +11,8 @@ class gatewayInterfaceBaseClass():
   def _setup(self, config):
     raise Exception('Not Overridden')
 
-  def CheckUserInitAndReturnJWTSecret(self, userDict):
-    return self._CheckUserInitAndReturnJWTSecret(userDict)
+  def CheckUserInitAndReturnJWTSecretAndKey(self, userDict):
+    return self._CheckUserInitAndReturnJWTSecretAndKey(userDict)
   
-  def _CheckUserInitAndReturnJWTSecret(self, userDict):
+  def _CheckUserInitAndReturnJWTSecretAndKey(self, userDict):
     raise Exception('Not Overridden')
