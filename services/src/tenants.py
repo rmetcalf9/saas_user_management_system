@@ -142,7 +142,14 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
   if possibleIdentities[identityGUID] is None:
     raise Exception
     
-  jwtToken = dict()
+
+  userDict = appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
+  if userDict is None:
+    raise Exception('Error userID found in identity was never created')
+
+  jwtSecret = appObj.gateway.CheckUserInitAndReturnJWTSecret(userDict)
+  
+  #jwtToken = dict()
   #if appObj.globalParamObject.LOGINEP_KONG_ADMINAPI_URL == '':
   #  jwtToken['key'] = 'KongNotConfigured'
   #  random_secret_str = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(32))
@@ -161,8 +168,5 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
   #}, b64decode(jwtToken['secret']), algorithm='HS256')
   #return Response(json.dumps({'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }), status=200, mimetype='application/json')
   
-  userDict = appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
-  if userDict is None:
-    raise Exception('Error userID found in identity was never created')
   return userDict
 

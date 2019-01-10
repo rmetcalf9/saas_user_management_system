@@ -17,6 +17,7 @@ from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName
 from objectStores_base import createObjectStoreInstance
 import bcrypt
+from gatewayInterface import getGatewayInterface
 
 
 #Encryption operations make unit tests run slow
@@ -37,7 +38,7 @@ class appObjClass(parAppObj):
   APIAPP_DEFAULTHOMEADMINUSERNAME = None
   APIAPP_DEFAULTHOMEADMINPASSWORD = None
   bcrypt = bcrypt
-
+  gateway = None
 
   def init(self, env, serverStartTime, testingMode = False):
     if testingMode:
@@ -57,6 +58,8 @@ class appObjClass(parAppObj):
     self.objectStore = createObjectStoreInstance(self)
     if GetTenant(self,masterTenantName) is None:
       CreateMasterTenant(self)
+    
+    self.gateway = getGatewayInterface(env)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
