@@ -46,12 +46,12 @@ class test_tenants(testHelperAPIClient):
     })
     #An exception is raised if the login fails
     expectedRoles = {
-      "UserID": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      "UserID": 'somerandomguid',
       "TenantRoles": {
         "usersystem": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
        }
     }
-    self.assertJSONStringsEqual(UserIDandRoles, expectedRoles, msg="Returned roles incorrect")
+    self.assertJSONStringsEqualWithIgnoredKeys(UserIDandRoles, expectedRoles, ['UserID'], msg="Returned roles incorrect")
     
   def test_StandardUserInvalidPassword(self):
     masterTenant = GetTenant(appObj,masterTenantName)

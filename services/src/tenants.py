@@ -4,7 +4,6 @@ import uuid
 from authProviders import authProviderFactory
 from tenantObj import tenantClass
 from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson
-import uuid
 import jwt
 from person import CreatePerson, associatePersonWithAuth
 
@@ -28,8 +27,8 @@ def CreateMasterTenant(appObj):
         "userSufix": "@internalDataStore"
       }
   })
-  userID = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
-  InternalAuthUsername = userID
+  userID = str(uuid.uuid4())
+  InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
   
   #User spercific creation
   CreateUser(appObj, userID)
