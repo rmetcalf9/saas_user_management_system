@@ -124,6 +124,10 @@ def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON, personGUID
 # - if no identityGUID is specified and the user has mutiple identities a list of possible identities is returned
 # - if an identityGUID is specified and correct then the user and role info
 def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='not_valid_guid'):
+  resDict = {
+    'possibleIdentities': None,
+    'jwtData': None
+  }
   authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
   if authUserObj is None:
     raise Exception
@@ -137,7 +141,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
       for key in possibleIdentities.keys():
         identityGUID = key
     else:
-      return possibleIdentities
+      resDict['possibleIdentities'] = possibleIdentities
+      return resDict
   if identityGUID not in possibleIdentities:
     raise UnknownIdentityException
   if possibleIdentities[identityGUID] is None:
@@ -149,5 +154,6 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception('Error userID found in identity was never created')
 
   jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict)
-  return generateJWTToken(appObj.APIAPP_JWT_TOKEN_TIMEOUT, userDict, jwtSecretAndKey)
+  resDict['jwtData'] = generateJWTToken(appObj.APIAPP_JWT_TOKEN_TIMEOUT, userDict, jwtSecretAndKey)
+  return resDict
 

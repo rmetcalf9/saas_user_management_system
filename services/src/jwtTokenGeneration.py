@@ -11,6 +11,6 @@ def generateJWTToken(jwtTokenTimeoutDuration, userDict, jwtSecretAndKey):
   
   JWTDict = copy.deepcopy(userDict)
   JWTDict['iss'] = jwtSecretAndKey['key']
-  JWTDict['exp'] = jwtSecretAndKey['key']
+  JWTDict['exp'] = expiryTime
   encodedJWT = jwt.encode(JWTDict, b64decode(jwtSecretAndKey['secret']), algorithm='HS256')
   return {'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }

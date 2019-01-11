@@ -20,7 +20,9 @@ env = {
   'APIAPP_MASTERPASSWORDFORPASSHASH': 'TestPPP',
   'APIAPP_DEFAULTHOMEADMINUSERNAME': 'AdminTestSet',
   'APIAPP_DEFAULTHOMEADMINPASSWORD': 'sadfdsfdsf4325g...ds',
-  'APIAPP_JWT_TOKEN_TIMEOUT': '60'
+  'APIAPP_JWT_TOKEN_TIMEOUT': '60',
+  'APIAPP_GATEWAYINTERFACETYPE': 'none',
+  'APIAPP_GATEWAYINTERFACECONFIG': '{"jwtSecret":"some_secretxx"}'
 }
 
 class testHelperSuperClass(unittest.TestCase):
