@@ -146,3 +146,37 @@ class test_api(testHelperAPIClient):
     self.assertTrue(id1Found, msg="Identity 1 not in response")
     self.assertTrue(id2Found, msg="Identity 2 not in response")
     
+  def test_attemptToLoginWithoutProvidingCredentials(self):
+    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    
+    loginJSON = {
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+       }
+    }
+    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 401)
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    expectedResult = {'message': 'Invalid credentials provided'}
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
+
+  def test_attemptToLoginProvidingValidUserWithNoPassword(self):
+    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    
+    loginJSON = {
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
+       }
+    }
+    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 401)
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    expectedResult = {'message': 'Invalid credentials provided'}
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")

@@ -2,8 +2,9 @@
 # An auth has mutiple identities
 #  an identity has one user
 tryingToCreateDuplicateAuthException = Exception('Trying To Create Duplicate Auth (Matching username)')
-from constants import authFailedException
+from constants import authFailedException, customExceptionClass
 
+InvalidAuthConfigException = customExceptionClass('Invalid Auth Config')
 
 class authProvider():
   authProviderType = None
@@ -11,18 +12,23 @@ class authProvider():
   def __init__(self, authProviderType, configJSON):
     self.authProviderType = authProviderType
     self.configJSON = configJSON
+    self._authSpercificInit()
 
-  def _makeKey(self, username):
+  #Return the unique identifier for a particular auth
+  def _makeKey(self, authTypeConfigDict):
     raise NotOverriddenException
 
-  def _AddAuthForIdentity(self, username):
+  def _AddAuthForIdentity(self, authTypeConfigDict):
     raise NotOverriddenException
 
-  def Auth(self, appObj, credentialJSON):
+  def _auth(self, appObj, credentialJSON):
     raise NotOverriddenException
 
-  def AddAuth(self, appObj, userInfoToStoreDict, personGUID):
-    key = self._makeKey(userInfoToStoreDict['username'])
+  def _authSpercificInit(self):
+    raise NotOverriddenException
+
+  def AddAuth(self, appObj, authTypeConfigDict, personGUID):
+    key = self._makeKey(authTypeConfigDict)
     obj = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
     if obj is not None:
       raise tryingToCreateDuplicateAuthException
@@ -30,17 +36,17 @@ class authProvider():
     mainObjToStore = {
       "AuthUserKey": key,
       "AuthProviderType": self.authProviderType,
-      "AuthProviderJSON": self._getAuthData(appObj, userInfoToStoreDict),
+      "AuthProviderJSON": self._getAuthData(appObj, authTypeConfigDict),
       "personGUID": personGUID
     }
-    appObj.objectStore.saveJSONObject(appObj,"userAuths",  self._makeKey(userInfoToStoreDict['username']), mainObjToStore)
+    appObj.objectStore.saveJSONObject(appObj,"userAuths",  key, mainObjToStore)
     
     return mainObjToStore
 
-  def Auth(self, appObj, credentialJSON):
-    obj = appObj.objectStore.getObjectJSON(appObj,"userAuths", self._makeKey(credentialJSON['username']))
+  def Auth(self, appObj, authTypeConfigDict):
+    obj = appObj.objectStore.getObjectJSON(appObj,"userAuths", self._makeKey(authTypeConfigDict))
     if obj is None:
       raise authFailedException
-    self._auth(appObj, obj, credentialJSON)
+    self._auth(appObj, obj, authTypeConfigDict)
     return obj
 
