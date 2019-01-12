@@ -21,6 +21,10 @@
 </style>
 
 <script>
+import {
+  Notify
+} from 'quasar'
+
 export default {
   name: 'AuthProvider_internal',
   data () {
@@ -38,7 +42,26 @@ export default {
   },
   methods: {
     usernamePassLogin () {
-      console.log('TODO')
+      var callback = {
+        ok: function (response) {
+          console.log(response)
+          // TODO Decide if we got a JWTToken back or an identity selection list
+          //   either forward to the JWTToken setting page or
+          //   the identity selection page
+        },
+        error: function (response) {
+          Notify.create('Login Failed')
+        }
+      }
+      this.$store.dispatch('globalDataStore/callLoginAPI', {
+        method: 'POST',
+        path: '/authproviders',
+        callback: callback,
+        postdata: {
+          credentialJSON: this.usernamePass,
+          authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
+        }
+      })
     }
   }
 }

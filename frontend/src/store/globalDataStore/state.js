@@ -1,5 +1,6 @@
 export default {
   urlToReachPublicAPI: null,
   tenantInfo: null,
-  tenant: null
+  tenant: null,
+  selectedAuthProvGUID: null
 }

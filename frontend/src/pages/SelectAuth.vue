@@ -32,6 +32,7 @@ export default {
   },
   methods: {
     clickHandler1 (authProvider) {
+      this.$store.commit('globalDataStore/updateSelectedAuthProvGUID', authProvider.guid)
       this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/AuthProvider/' + authProvider.Type)
     }
   }

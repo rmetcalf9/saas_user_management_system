@@ -30,7 +30,7 @@ function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) 
   )
 }
 
-export const checkAuthProviders = ({ dispatch, commit }, params) => {
+export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
   // TODO how do we know what vx should be?
   var possiblePublicApiLocations = [
     '/vx/public/',
@@ -38,6 +38,7 @@ export const checkAuthProviders = ({ dispatch, commit }, params) => {
     'http://somefunnyhostname.com:5098/',
     'http://127.0.0.1:8098/'
   ]
+  commit('updateTenant', params.tenantName)
 
   var callback = {
     ok: function (response) {
@@ -50,4 +51,22 @@ export const checkAuthProviders = ({ dispatch, commit }, params) => {
   TryToConnectToPublicAPI(possiblePublicApiLocations.reverse(), callback, commit, params.tenantName)
 
   // state.drawerState = opened
+}
+
+// LoginAPI requires no auth at all
+export const callLoginAPI = ({ dispatch, commit, state }, params) => {
+  var config = {
+    method: params['method'],
+    url: state.urlToReachPublicAPI + 'api/login/' + state.tenant + params['path'],
+    data: params['postdata']
+  }
+
+  axios(config).then(
+    (response) => {
+      params.callback.ok(response)
+    },
+    (response) => {
+      callbackHelper.webserviceError(params.callback, response)
+    }
+  )
 }
