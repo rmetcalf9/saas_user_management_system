@@ -35,7 +35,10 @@ def getLoginPostDataModel(appObj):
 
 def getLoginResponseModel(appObj):
   possibleIdentityModel = appObj.flastRestPlusAPIObject.model('possibleIdentity', {
-    'aa': fields.String(description='JWTToken')
+    'guid': fields.String(description='Unique identifier for this identity'),
+    'userID': fields.String(description='Application unique ID for the user'),
+    'name': fields.String(description='Name of this identity'),
+    'description': fields.String(description='Description for an identity')
   })
   jwtTokenModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
     'JWTToken': fields.String(description='JWTToken'),
@@ -53,6 +56,24 @@ def getLoginResponseModel(appObj):
 #      "TokenExpiry":"2019-01-12T10:17:23.303187+00:00"
 #   }
 #}
+#{
+#  "possibleIdentities": [
+#    {
+#      "guid": "d48b9284-af95-41cc-9dca-e92339c50a12",
+#      "userID": "TestUser1",
+#      "name": "standard",
+#      "description": "standard"
+#    },
+#    {
+#      "guid": "71e8ba49-52d9-48ff-8d93-7b67a8a26274",
+#      "userID": "TestUser2",
+#      "name": "standard",
+#      "description": "standard"
+#    }
+#  ],
+#  "jwtData": null
+#}
+
 
 def getValidTenantObj(appObj, tenant):
   tenant = GetTenant(appObj, tenant)
@@ -84,27 +105,34 @@ def registerAPI(appObj):
     @nsLogin.response(400, 'Bad Request')
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
-     '''Login and recieve JWT token'''
-     tenantObj = getValidTenantObj(appObj, tenant)
-     if 'authProviderGUID' not in request.get_json():
-       raise BadRequest('No authProviderGUID provided')
-     authProviderGUID = request.get_json()['authProviderGUID']
-     identityGUID = None
-     if 'identityGUID' in request.get_json():
-       identityGUID = request.get_json()['identityGUID']
+      '''Login and recieve JWT token'''
+      tenantObj = getValidTenantObj(appObj, tenant)
+      if 'authProviderGUID' not in request.get_json():
+        raise BadRequest('No authProviderGUID provided')
+      authProviderGUID = request.get_json()['authProviderGUID']
+      identityGUID = None
+      if 'identityGUID' in request.get_json():
+        identityGUID = request.get_json()['identityGUID']
      
-     try:
-       loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
-     except customExceptionClass as err:
-       if (err.id=='authFailedException'):
-         raise Unauthorized('authFailedException')
-       if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
-         raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
-       if (err.id=='authProviderNotFoundException'):
-         raise BadRequest('authProviderNotFoundException')
-       raise ('InternalServerError')
-     except:
-       raise InternalServerError
-       
-     return loginResult
+      try:
+        loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
+      except customExceptionClass as err:
+        if (err.id=='authFailedException'):
+          raise Unauthorized('authFailedException')
+        if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
+          raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
+        if (err.id=='authProviderNotFoundException'):
+          raise BadRequest('authProviderNotFoundException')
+        raise ('InternalServerError')
+      except:
+        raise InternalServerError
+
+      returnDict = loginResult.copy()
+      if returnDict['possibleIdentities'] is not None:
+        possibleIdentities = []
+        for pid in returnDict['possibleIdentities'].keys():
+          possibleIdentities.append(returnDict['possibleIdentities'][pid])
+        returnDict['possibleIdentities'] = possibleIdentities
+
+      return returnDict
 

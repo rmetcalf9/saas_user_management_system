@@ -110,18 +110,29 @@ class test_api(testHelperAPIClient):
     self.assertEqual(result2.status_code, 200)
     result2JSON = json.loads(result2.get_data(as_text=True))
 
-    expectedResult = {
-      'UserID': 'AdminTestSet', 
-      'TenantRoles': {
-        'usersystem': ['systemadmin', 'hasaccount']
-      },
-      'JWTToken': 'abc123'
+    identity1ExcpectedResult = {
+      "description": "standard",
+      "userID": userID1,
+      "name": "standard",
+      "guid": "69633841-9609-4990-ae7f-b38ea6431f4b"
     }
-    print(result2JSON)
+    identity2ExcpectedResult = {
+      "description": "standard",
+      "userID": userID2,
+      "name": "standard",
+      "guid": "69633841-9609-4990-ae7f-b38ea6431f4b"
+    }
+    id1Found = False
+    id2Found = False
+
+    for resultIdentity in result2JSON['possibleIdentities']:
+      if resultIdentity['userID'] == userID1:
+        id1Found = True
+        self.assertJSONStringsEqualWithIgnoredKeys(resultIdentity, identity1ExcpectedResult, [ 'guid' ], msg="Identity 1 result mismatch")
+      if resultIdentity['userID'] == userID2:
+        id2Found = True
+        self.assertJSONStringsEqualWithIgnoredKeys(resultIdentity, identity2ExcpectedResult, [ 'guid' ], msg="Identity 1 result mismatch")
     
-    #self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtToken' ])
-
-    #TODO Check JWT token JSON is correct
-
-    self.assertTrue(False)
-
+    self.assertTrue(id1Found, msg="Identity 1 not in response")
+    self.assertTrue(id2Found, msg="Identity 2 not in response")
+    
