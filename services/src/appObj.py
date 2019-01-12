@@ -18,7 +18,7 @@ from constants import masterTenantName
 from objectStores_base import createObjectStoreInstance
 import bcrypt
 from gatewayInterface import getGatewayInterface
-
+import uuid
 
 #Encryption operations make unit tests run slow
 # if app is in testing more this dummy class
@@ -40,11 +40,14 @@ class appObjClass(parAppObj):
   APIAPP_JWT_TOKEN_TIMEOUT = None
   bcrypt = bcrypt
   gateway = None
+  defaultUserGUID = None
 
   def init(self, env, serverStartTime, testingMode = False):
+    self.defaultUserGUID = str(uuid.uuid4())
     if testingMode:
       print("Warning testing mode active - proper encryption is not being used")
       self.bcrypt = testOnlybcrypt
+      self.defaultUserGUID = 'FORCED-CONSTANT-TESTING-GUID'
     
     self.curDateTimeOverrideForTesting = None
     self.serverStartTime = serverStartTime

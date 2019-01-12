@@ -28,7 +28,7 @@ def CreateMasterTenant(appObj):
         "userSufix": "@internalDataStore"
       }
   })
-  userID = str(uuid.uuid4())
+  userID = appObj.defaultUserGUID
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
   
   #User spercific creation

@@ -33,6 +33,27 @@ def getLoginPostDataModel(appObj):
   'identityGUID': fields.String(default='DEFAULT', description='Identity to use to log in with')
   })
 
+def getLoginResponseModel(appObj):
+  possibleIdentityModel = appObj.flastRestPlusAPIObject.model('possibleIdentity', {
+    'aa': fields.String(description='JWTToken')
+  })
+  jwtTokenModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
+    'JWTToken': fields.String(description='JWTToken'),
+    'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time jthe JWTToken can be used until')
+  })
+  return appObj.flastRestPlusAPIObject.model('LoginResponseData', {
+  'possibleIdentities': fields.Nested(possibleIdentityModel, skip_none=True),
+  'jwtData': fields.Nested(jwtTokenModel, skip_none=True)
+  })
+
+#{  
+#   "possibleIdentities":"None",
+#   "jwtData":{  
+#      "JWTToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJfQ2hlY2tVc2VySW5pdEFuZFJldHVybkpXVFNlY3JldEFuZEtleV9rZXkiLCJleHAiOjE1NDcyODgyNDMsIlRlbmFudFJvbGVzIjp7InVzZXJzeXN0ZW0iOlsic3lzdGVtYWRtaW4iLCJoYXNhY2NvdW50Il19LCJVc2VySUQiOiJjZGY5YmMyOS1iM2U1LTQ3ZjctYTc4Yi05N2I2YTAwNmYxMjYifQ.-42WuyPYIDDrKHj6ZCIQxWGILbmJ0nDOL4wLOA-rdZU",
+#      "TokenExpiry":"2019-01-12T10:17:23.303187+00:00"
+#   }
+#}
+
 def getValidTenantObj(appObj, tenant):
   tenant = GetTenant(appObj, tenant)
   if tenant is None:
@@ -58,8 +79,8 @@ def registerAPI(appObj):
     '''Login'''
     @nsLogin.doc('login')
     @nsLogin.expect(getLoginPostDataModel(appObj), validate=True)
-    @nsLogin.marshal_with(getTenantModel(appObj))
-    @nsLogin.response(200, 'Success', model=getTenantModel(appObj))
+    @nsLogin.marshal_with(getLoginResponseModel(appObj), skip_none=True)
+    @nsLogin.response(200, 'Success', model=getLoginResponseModel(appObj), skip_none=True)
     @nsLogin.response(400, 'Bad Request')
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
@@ -73,7 +94,7 @@ def registerAPI(appObj):
        identityGUID = request.get_json()['identityGUID']
      
      try:
-       userInfo = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
+       loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
      except customExceptionClass as err:
        if (err.id=='authFailedException'):
          raise Unauthorized('authFailedException')
@@ -84,5 +105,6 @@ def registerAPI(appObj):
        raise ('InternalServerError')
      except:
        raise InternalServerError
-     return userInfo
+       
+     return loginResult
 

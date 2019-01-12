@@ -4,13 +4,9 @@ from constants import masterTenantName, masterTenantDefaultDescription, masterTe
 from appObj import appObj
 from constants import authFailedException
 from person import CreatePerson, associatePersonWithAuth
-import jwt
-from base64 import b64decode
 import json
 
 class test_tenants(testHelperAPIClient):
-  def decodeToken(self, UserIDandRoles): 
-    return jwt.decode(UserIDandRoles['jwtData']['JWTToken'], b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
     
     
 #Actual tests below
@@ -58,7 +54,7 @@ class test_tenants(testHelperAPIClient):
         "usersystem": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
        }
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles), expectedRoles, ['UserID', 'exp', 'iss'], msg="Returned roles incorrect")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss'], msg="Returned roles incorrect")
     
   def test_StandardUserInvalidPassword(self):
     masterTenant = GetTenant(appObj,masterTenantName)
@@ -102,57 +98,42 @@ class test_tenants(testHelperAPIClient):
       }, 'invalid_identity_guid')
     self.checkGotRightException(context,UnknownIdentityException)
 
-
   # Person can log in and choose to use userA or userB
   def test_oneAuthCanAccessTwoIdentities(self):
-    masterTenant = GetTenant(appObj,masterTenantName)
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     InternalAuthUsername = 'ABC'
-    CreateUser(appObj, userID1)
-    CreateUser(appObj, userID2)
-    identity1 = createNewIdentity(appObj, 'standard','standard', userID1)
-    identity2 = createNewIdentity(appObj, 'standard','standard', userID2)
-    authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
-    person = CreatePerson(appObj)
-    authData = AddAuth(appObj, masterTenantName, authProvGUID, {
-      "username": InternalAuthUsername, 
-      "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
-    },
-    person['guid'])
-    associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
-    associateIdentityWithPerson(appObj, identity1['guid'], person['guid'])
-    associateIdentityWithPerson(appObj, identity2['guid'], person['guid'])
+    res = self.createUserWithTwoIdentititesForOneUser(userID1, userID2, InternalAuthUsername)
     
     #Login and get list of identities
-    UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
+    UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
       'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
     })
     foundIdentity1 = False
     foundIdentity2 = False
     for curIdentity in UserIDandRoles['possibleIdentities'].keys():
-      if identity1['guid'] == UserIDandRoles['possibleIdentities'][curIdentity]['guid']:
+      if res['identity1']['guid'] == UserIDandRoles['possibleIdentities'][curIdentity]['guid']:
         foundIdentity1 = True
-      if identity2['guid'] == UserIDandRoles['possibleIdentities'][curIdentity]['guid']:
+      if res['identity2']['guid'] == UserIDandRoles['possibleIdentities'][curIdentity]['guid']:
         foundIdentity2 = True
     self.assertTrue(foundIdentity1, msg="Identity 1 was not returned when list of login identities to use was given")
     self.assertTrue(foundIdentity2, msg="Identity 2 was not returned when list of login identities to use was given")
     
     #Try and log in using identities
-    UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
+    UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
       'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
-    }, identity1['guid'])
+    }, res['identity1']['guid'])
     expectedJSONResponse = {'TenantRoles': {}, 'UserID': userID1, "exp": "xx", "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key"}
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
     
-    UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
+    UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
       'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
-    }, identity2['guid'])
+    }, res['identity2']['guid'])
     expectedJSONResponse = {'TenantRoles': {}, 'UserID': userID2, "exp": "xx", "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key"}
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
 
 
   #UserA can be shared by many People (Who may or may not have many auths)
@@ -186,11 +167,11 @@ class test_tenants(testHelperAPIClient):
       'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
     })
     expectedJSONResponse = {'TenantRoles': {}, 'UserID': userID, "exp": "xx", "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key"}
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
     
     UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
       'username': InternalAuthUsername2,
       'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
     })
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles), expectedJSONResponse, ['exp'], msg="Failed to login to identity 2")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 2")
 

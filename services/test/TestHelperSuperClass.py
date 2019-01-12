@@ -8,7 +8,12 @@ from appObj import appObj
 import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import from_iso8601
+import jwt
+from base64 import b64decode
 
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, AddAuth, associateIdentityWithPerson
+from constants import masterTenantName
+from person import CreatePerson, associatePersonWithAuth
 
 env = {
   'APIAPP_MODE': 'DOCKER',
@@ -56,8 +61,14 @@ class testHelperSuperClass(unittest.TestCase):
     cleaned1 = str1.copy()
     cleaned2 = str2.copy()
     for key_to_ignore in ignoredKeys:
-      cleaned1[key_to_ignore] = 'ignored'
-      cleaned2[key_to_ignore] = 'ignored'
+      keyPresentInEither = False
+      if key_to_ignore in cleaned1:
+        keyPresentInEither = True
+      if key_to_ignore in cleaned2:
+        keyPresentInEither = True
+      if keyPresentInEither:
+        cleaned1[key_to_ignore] = 'ignored'
+        cleaned2[key_to_ignore] = 'ignored'
     return self.assertJSONStringsEqual(cleaned1, cleaned2, msg)
 
   def assertTimeCloseToCurrent(self, time, msg='Creation time is more than 3 seconds adrift'):
@@ -86,4 +97,30 @@ class testHelperAPIClient(testHelperSuperClass):
     self.testClient.testing = True 
   def tearDown(self):
     self.testClient = None
+
+  def decodeToken(self, JWTToken): 
+    return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
+
+  def createUserWithTwoIdentititesForOneUser(self, userID1, userID2, InternalAuthUsername):
+    masterTenant = GetTenant(appObj,masterTenantName)
+    CreateUser(appObj, userID1)
+    CreateUser(appObj, userID2)
+    identity1 = createNewIdentity(appObj, 'standard','standard', userID1)
+    identity2 = createNewIdentity(appObj, 'standard','standard', userID2)
+    authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
+    person = CreatePerson(appObj)
+    authData = AddAuth(appObj, masterTenantName, authProvGUID, {
+      "username": InternalAuthUsername, 
+      "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+    },
+    person['guid'])
+    associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
+    associateIdentityWithPerson(appObj, identity1['guid'], person['guid'])
+    associateIdentityWithPerson(appObj, identity2['guid'], person['guid'])
+    
+    return {
+      'authProvGUID': authProvGUID,
+      'identity1': identity1,
+      'identity2': identity2
+    }
 
