@@ -24,7 +24,7 @@ export default {
       ok: function (response) {
         Loading.hide()
         if (TTT.$store.state.globalDataStore.tenantInfo.Name === TTT.$route.params.tenantName) {
-          if (TTT.$route.query.usersystem_redirect !== null) {
+          if (typeof (TTT.$route.query.usersystem_redirect) !== 'undefined' && TTT.$route.query.usersystem_redirect !== null) {
             TTT.$router.replace(TTT.$route.query.usersystem_redirect)
           } else {
             TTT.$router.replace('/' + TTT.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')

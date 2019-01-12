@@ -16,6 +16,7 @@ function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) 
   console.log('Tyring to reach API at ' + config.url)
   axios(config).then(
     (response) => {
+      console.log('Success API response recieved')
       commit('updateUrlToReachPublicAPI', toTry)
       callback.ok(response)
     },
