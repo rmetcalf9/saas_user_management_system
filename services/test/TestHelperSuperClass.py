@@ -121,6 +121,7 @@ class testHelperAPIClient(testHelperSuperClass):
     return {
       'authProvGUID': authProvGUID,
       'identity1': identity1,
-      'identity2': identity2
+      'identity2': identity2,
+      'person': person
     }
 

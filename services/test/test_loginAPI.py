@@ -61,16 +61,26 @@ class test_api(testHelperAPIClient):
     result2JSON = json.loads(result2.get_data(as_text=True))
 
     expectedResult = {
+      "userGuid": "FORCED-CONSTANT-TESTING-GUID",
+      "authedPersonGuid": "Ignore"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData' ])
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid' ])
 
     expectedResult = {
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON[ 'jwtData' ], expectedResult, [ 'JWTToken','TokenExpiry' ])
     
     jwtTokenDict = self.decodeToken(result2JSON[ 'jwtData' ]['JWTToken'])
-    expectedTokenDict = {'UserID': 'FORCED-CONSTANT-TESTING-GUID', 'iss': '_CheckUserInitAndReturnJWTSecretAndKey_key', 'TenantRoles': {'usersystem': ['systemadmin', 'hasaccount']}, 'exp': 1547292391}
-    self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp' ])
+    expectedTokenDict = {
+      'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
+      'iss': '_CheckUserInitAndReturnJWTSecretAndKey_key', 
+      'TenantRoles': {
+        'usersystem': ['systemadmin', 'hasaccount']
+      }, 
+      'exp': 1547292391,
+      'authedPersonGuid': 'Ignore'
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp', 'authedPersonGuid' ])
     
     #Make sure passed expiry matches token expiry
     dt = parse(result2JSON['jwtData']['TokenExpiry'])

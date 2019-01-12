@@ -6,10 +6,11 @@ import jwt
 from base64 import b64decode
 import json
 
-def generateJWTToken(jwtTokenTimeoutDuration, userDict, jwtSecretAndKey):
+def generateJWTToken(jwtTokenTimeoutDuration, userDict, jwtSecretAndKey, personGUID):
   expiryTime = datetime.now(pytz.utc) + timedelta(seconds=int(jwtTokenTimeoutDuration))
   
   JWTDict = copy.deepcopy(userDict)
+  JWTDict['authedPersonGuid'] = personGUID
   JWTDict['iss'] = jwtSecretAndKey['key']
   JWTDict['exp'] = expiryTime
   encodedJWT = jwt.encode(JWTDict, b64decode(jwtSecretAndKey['secret']), algorithm='HS256')

@@ -126,7 +126,9 @@ def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON, personGUID
 def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='not_valid_guid'):
   resDict = {
     'possibleIdentities': None,
-    'jwtData': None
+    'jwtData': None,
+    'userGuid': None,
+    'authedPersonGuid': None
   }
   authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
   if authUserObj is None:
@@ -154,6 +156,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception('Error userID found in identity was never created')
 
   jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict)
-  resDict['jwtData'] = generateJWTToken(appObj.APIAPP_JWT_TOKEN_TIMEOUT, userDict, jwtSecretAndKey)
+  resDict['jwtData'] = generateJWTToken(appObj.APIAPP_JWT_TOKEN_TIMEOUT, userDict, jwtSecretAndKey, authUserObj['personGUID'])
+  resDict['userGuid'] = userDict['UserID']
+  resDict['authedPersonGuid'] = authUserObj['personGUID']
   return resDict
 

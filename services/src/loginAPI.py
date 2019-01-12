@@ -45,8 +45,10 @@ def getLoginResponseModel(appObj):
     'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time jthe JWTToken can be used until')
   })
   return appObj.flastRestPlusAPIObject.model('LoginResponseData', {
-  'possibleIdentities': fields.Nested(possibleIdentityModel, skip_none=True),
-  'jwtData': fields.Nested(jwtTokenModel, skip_none=True)
+    'possibleIdentities': fields.Nested(possibleIdentityModel, skip_none=True),
+    'jwtData': fields.Nested(jwtTokenModel, skip_none=True),
+    'userGuid': fields.String(description='Unique identifier of user to be used by the application'),
+    'authedPersonGuid': fields.String(description='Unique identifier of person for use with Auth APIs')
   })
 
 #{  
