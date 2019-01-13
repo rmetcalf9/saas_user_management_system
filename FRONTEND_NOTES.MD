@@ -4,17 +4,17 @@ The frontend is the userinterface for the management system
 
 Endpoints setup in Kong
  - /vx/public
- - /vx/adminapi
+ - /vx/authed    (JWT Tokens verified)
 
 Nginx paths: (In docker container nginx servers on single port)
  - /vx/public/__web__
  - /vx/public/__api__
- - /vx/adminapi/__adminapi__
+ - /vx/authed/__adminapi__
 
 On development machine these must run on different ports:
- - /vx/public/__web__  -> / (8091)
+ - /vx/public/__web__/frontend  -> / (8091)
+ - /vx/public/__web__/adminfrontend  -> / (8092)
  - /vx/public/__api__  -> / (8098)
- - /vx/adminapi/__adminapi__  -> / (8099)
  
 Frontend globalDataSTore action checkAuthProviders has logic to navigate this
  
@@ -45,5 +45,5 @@ Login to a particular auth provider - will return the JWT token or an error
 
 ## Admin Service Endpoints (protected using valid api token)
 
-### /vx/adminapi/$$tenant$$??????
+### /vx/authed/$$tenant$$??????
 
