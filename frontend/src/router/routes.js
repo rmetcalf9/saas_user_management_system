@@ -1,6 +1,15 @@
 import stores from '../store/index.js'
 
+function isValueHeld (a) {
+  if (typeof (a) === 'undefined') return null
+  if (a === null) return false
+  return true
+}
+
 function ensurePassedTenantIsLoaded (to, from, next) {
+  if (isValueHeld(from.query.usersystem_returnaddress)) {
+    stores().commit('globalDataStore/updateUsersystemReturnaddress', from.query.usersystem_returnaddress)
+  }
   if (stores().state.globalDataStore.tenantInfo !== null) {
     if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {
       next()

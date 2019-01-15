@@ -14,3 +14,6 @@ export const updateTenant = (state, tenant) => {
 export const updateSelectedAuthProvGUID = (state, selectedAuthProvGUID) => {
   state.selectedAuthProvGUID = selectedAuthProvGUID
 }
+export const updateUsersystemReturnaddress = (state, usersystemReturnaddress) => {
+  state.usersystemReturnaddress = usersystemReturnaddress
+}

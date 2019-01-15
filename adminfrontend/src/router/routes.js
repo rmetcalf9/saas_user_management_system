@@ -1,3 +1,4 @@
+import { Cookies } from 'quasar'
 
 function getAlteredHost (origHost, hostLookupList) {
   for (var x in hostLookupList) {
@@ -10,14 +11,8 @@ function getAlteredHost (origHost, hostLookupList) {
 }
 
 function checkLoginNeeded (to, from, next) {
-  var loginTokenPresent = false
-  var returningFromLoginSystem = false
-  if (loginTokenPresent) {
-    next()
-    return
-  }
-  if (returningFromLoginSystem) {
-    console.log('Returning from login system not implemented yet')
+  var authCookieSet = Cookies.has('usersystemUserCredentials')
+  if (authCookieSet) {
     next()
     return
   }
@@ -63,9 +58,9 @@ function checkLoginNeeded (to, from, next) {
   }
   var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + thisQuasarPath
 
-  window.location.href = locationToGoTo
+  window.location.href = locationToGoTo + '?usersystem_returnaddress=' + returnAddress
   // console.log('GOTO:' + locationToGoTo)
-  console.log('RET:' + returnAddress)
+  // console.log('RET:' + returnAddress)
   next()
 }
 
