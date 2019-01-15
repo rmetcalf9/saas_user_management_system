@@ -53,6 +53,11 @@
           <q-item-side icon="rss feed" />
           <q-item-main label="Twitter" sublabel="@quasarframework" />
         </q-item>
+        <q-list-header>User</q-list-header>
+        <q-item @click.native="clickLogout">
+          <q-item-side icon="exit_to_app" />
+          <q-item-main label="Logout" />
+        </q-item>
       </q-list>
     </q-layout-drawer>
 
@@ -73,7 +78,11 @@ export default {
     }
   },
   methods: {
-    openURL
+    openURL,
+    clickLogout () {
+      this.$q.cookies.remove('usersystemUserCredentials')
+      this.$router.replace('/' + this.$route.params.tenantName + '/logout')
+    }
   }
 }
 </script>

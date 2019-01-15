@@ -11,8 +11,10 @@ function getAlteredHost (origHost, hostLookupList) {
 }
 
 function checkLoginNeeded (to, from, next) {
+  console.log('Checking to see if login is needed')
   var authCookieSet = Cookies.has('usersystemUserCredentials')
   if (authCookieSet) {
+    console.log('Already logged in')
     next()
     return
   }
@@ -43,18 +45,19 @@ function checkLoginNeeded (to, from, next) {
   if (thisQuasarPath.startsWith('/')) {
     thisQuasarPath = thisQuasarPath.substr(1)
   }
+  var quasarPathForTenenat = '#/' + thisQuasarPath.substr(0, thisQuasarPath.indexOf('/'))
   thisQuasarPath = '#/' + thisQuasarPath
   console.log(thisQuasarPath)
   var locationToGoTo = ''
   if (window.location.pathname.includes('/public/web/adminfrontend/')) {
-    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + thisQuasarPath
+    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat
   } else {
     var hostLookup = [
       {a: 'localhost:8082', b: 'localhost:8081'},
       {a: 'cat-sdts.metcarob-home.com:8082', b: 'cat-sdts.metcarob-home.com:8081'},
       {a: 'somefunnyhostname.com:5082', b: 'somefunnyhostname.com:5081'}
     ]
-    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + thisQuasarPath
+    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + quasarPathForTenenat
   }
   var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + thisQuasarPath
 
@@ -69,11 +72,12 @@ const routes = [
     path: '/', redirect: '/usersystem/'
   },
   {
-    path: '/:tenantName',
+    path: '/:tenantName/',
     component: () => import('layouts/MyLayout.vue'),
     beforeEnter: checkLoginNeeded,
     children: [
-      { path: '', component: () => import('pages/Index.vue') }
+      { path: '', component: () => import('pages/Index.vue') },
+      { path: 'logout', beforeEnter: checkLoginNeeded }
     ]
   }
 ]
