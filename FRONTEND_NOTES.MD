@@ -39,6 +39,11 @@ Get a list of the auth providers for this tenant
 
 Login to a particular auth provider - will return the JWT token or an error
 
+### POST /vx/public/api/login/$$tenant$$/refresh
+
+Login to a particular auth provider - will return the JWT token or an error
+
+
 ## Admin Web Endpoints (public)
 
 ### /vx/public/web/$$tenant$$/admin
