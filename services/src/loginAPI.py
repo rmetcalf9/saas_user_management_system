@@ -145,3 +145,20 @@ def registerAPI(appObj):
 
       return returnDict
 
+  @nsLogin.route('/<string:tenant>/refresh')
+  class refreshAPI(Resource):
+    '''Refresh'''
+    @nsLogin.doc('refresh')
+    @nsLogin.marshal_with(getLoginResponseModel(appObj), skip_none=True)
+    @nsLogin.response(200, 'Success', model=getLoginResponseModel(appObj), skip_none=True)
+    @nsLogin.response(401, 'Unauthorized')
+    def post(self, tenant):
+      '''Get new JWT token with Refresh'''
+      tenantObj = getValidTenantObj(appObj, tenant)
+      refreshedToken = appObj.refreshTokenManager.getRefreshedToken(appObj, request.get_json()['token'])
+      if refreshedToken is None:
+        raise Unauthorized('Refresh token not found, token or session may have timedout')
+
+      return {
+        'A': 'TODO'
+      }

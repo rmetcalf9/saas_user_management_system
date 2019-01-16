@@ -199,13 +199,4 @@ class test_api(testHelperAPIClient):
     expectedResult = {'message': 'Invalid credentials provided'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
-  def test_refreshTokenExpires(self):
-    result2JSON = self.loginAsDefaultUser()
-    print(result2JSON)
-    refreshToken = result2JSON['refresh']['token']
-    dt = parse(result2JSON['refresh']['TokenExpiry'])
-    refreshExpiry = dt.astimezone(pytz.utc)
 
-    appObj.setTestingDateTime(refreshExpiry + timedelta(seconds=int(1)))
-    
-    # self.assertTrue(False, msg="TODO try and use refresh token to get new JWTToken - should fail")

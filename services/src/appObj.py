@@ -20,6 +20,7 @@ import bcrypt
 from gatewayInterface import getGatewayInterface
 import uuid
 from constants import customExceptionClass
+from refreshTokenGeneration import RefreshTokenManager
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
@@ -46,6 +47,7 @@ class appObjClass(parAppObj):
   bcrypt = bcrypt
   gateway = None
   defaultUserGUID = None
+  refreshTokenManager = None
 
   def init(self, env, serverStartTime, testingMode = False):
     self.defaultUserGUID = str(uuid.uuid4())
@@ -79,6 +81,7 @@ class appObjClass(parAppObj):
       CreateMasterTenant(self)
     
     self.gateway = getGatewayInterface(env)
+    self.refreshTokenManager = RefreshTokenManager(self.APIAPP_REFRESH_TOKEN_TIMEOUT, self.APIAPP_REFRESH_SESSION_TIMEOUT)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
