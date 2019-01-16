@@ -99,4 +99,8 @@ APIAPP_DEFAULTHOMEADMINUSERNAME -
 APIAPP_DEFAULTHOMEADMINPASSWORD  -
 APIAPP_GATEWAYINTERFACETYPE
 APIAPP_GATEWAYINTERFACECONFIG
-APIAPP_JWT_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for
+APIAPP_JWT_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for Defaulted to 5 minutes
+APIAPP_REFRESH_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for, must be greater than APIAPP_JWT_TOKEN_TIMEOUT. Defaulted to 10 minutes
+APIAPP_REFRESH_SESSION_TIMEOUT- Number of seconds the refresh tokens are valid for. Once this timout has finished users are forced to resupply credentials. must be greater than APIAPP_REFRESH_TOKEN_TIMEOUT. Defaulted to 2 hours.
+
+

@@ -38,6 +38,8 @@ class appObjClass(parAppObj):
   APIAPP_DEFAULTHOMEADMINUSERNAME = None
   APIAPP_DEFAULTHOMEADMINPASSWORD = None
   APIAPP_JWT_TOKEN_TIMEOUT = None
+  APIAPP_REFRESH_TOKEN_TIMEOUT = None
+  APIAPP_REFRESH_SESSION_TIMEOUT = None
   bcrypt = bcrypt
   gateway = None
   defaultUserGUID = None
@@ -58,7 +60,9 @@ class appObjClass(parAppObj):
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None)
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None)
     self.APIAPP_DEFAULTHOMEADMINPASSWORD = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None) #no default must be read in
-    self.APIAPP_JWT_TOKEN_TIMEOUT = readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 60 * 2, None) #default to two hours
+    self.APIAPP_JWT_TOKEN_TIMEOUT = readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 5, None) #default to five minutes
+    self.APIAPP_REFRESH_TOKEN_TIMEOUT = readFromEnviroment(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 10, None) #default to ten minutes
+    self.APIAPP_REFRESH_SESSION_TIMEOUT = readFromEnviroment(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 2, None) #default to two hours
     
     self.objectStore = createObjectStoreInstance(self)
     if GetTenant(self,masterTenantName) is None:
