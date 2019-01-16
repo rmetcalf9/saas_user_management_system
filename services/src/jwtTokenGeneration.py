@@ -1,13 +1,12 @@
 # Generate the JWT token to be returned
-from datetime import datetime, timedelta
-import pytz
+from datetime import timedelta
 import copy
 import jwt
 from base64 import b64decode
 import json
 
-def generateJWTToken(jwtTokenTimeoutDuration, userDict, jwtSecretAndKey, personGUID):
-  expiryTime = datetime.now(pytz.utc) + timedelta(seconds=int(jwtTokenTimeoutDuration))
+def generateJWTToken(appObj, jwtTokenTimeoutDuration, userDict, jwtSecretAndKey, personGUID):
+  expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(jwtTokenTimeoutDuration))
   
   JWTDict = copy.deepcopy(userDict)
   JWTDict['authedPersonGuid'] = personGUID

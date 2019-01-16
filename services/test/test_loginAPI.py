@@ -3,7 +3,7 @@ import unittest
 import json
 from appObj import appObj
 import pytz
-import datetime
+from datetime import timedelta, datetime
 from dateutil.parser import parse
 
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
@@ -13,6 +13,22 @@ from constants import masterTenantName, masterTenantDefaultDescription, masterTe
 invalidTenantName="invalidtenantname"
 
 class test_api(testHelperAPIClient):
+  def loginAsDefaultUser(self):
+    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    
+    loginJSON = {
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+       }
+    }
+    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    return json.loads(result2.get_data(as_text=True))
 
   def test_loginInvalidTenantFails(self):
     result = self.testClient.get('/api/login/' + invalidTenantName + '/authproviders')
@@ -44,6 +60,8 @@ class test_api(testHelperAPIClient):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON[ 'AuthProviders' ][0], expectedResult[ 'AuthProviders' ][0], [ 'guid' ], msg="Master tenant auth provider wrong")
 
   def test_sucessfulLoginAsDefaultUser(self):
+    result2JSON = self.loginAsDefaultUser()
+    
     result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
@@ -64,7 +82,7 @@ class test_api(testHelperAPIClient):
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid' ])
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
 
     expectedResult = {
     }
@@ -86,12 +104,12 @@ class test_api(testHelperAPIClient):
     dt = parse(result2JSON['jwtData']['TokenExpiry'])
     dateTimeObjFromJSON = dt.astimezone(pytz.utc)
 
-    dateTimeObjFromToken = datetime.datetime.fromtimestamp(jwtTokenDict['exp'],pytz.utc)
+    dateTimeObjFromToken = datetime.fromtimestamp(jwtTokenDict['exp'],pytz.utc)
     time_diff = (dateTimeObjFromToken - dateTimeObjFromJSON).total_seconds()
     self.assertTrue(abs(time_diff) < 1,msg="More than 1 second difference between reported expiry time and actual expiry time in token")
     
     #Make sure expiry is in the future
-    expectedExpiry = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=int(env['APIAPP_JWT_TOKEN_TIMEOUT']))
+    expectedExpiry = datetime.now(pytz.utc) + timedelta(seconds=int(env['APIAPP_JWT_TOKEN_TIMEOUT']))
 
     time_diff = (expectedExpiry - dateTimeObjFromJSON).total_seconds()
     self.assertTrue(abs(time_diff) < 1,msg="Token expiry not in correct range")
@@ -180,3 +198,14 @@ class test_api(testHelperAPIClient):
     result2JSON = json.loads(result2.get_data(as_text=True))
     expectedResult = {'message': 'Invalid credentials provided'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
+
+  def test_refreshTokenExpires(self):
+    result2JSON = self.loginAsDefaultUser()
+    print(result2JSON)
+    refreshToken = result2JSON['refresh']['token']
+    dt = parse(result2JSON['refresh']['TokenExpiry'])
+    refreshExpiry = dt.astimezone(pytz.utc)
+
+    appObj.setTestingDateTime(refreshExpiry + timedelta(seconds=int(1)))
+    
+    self.assertTrue(False, msg="TODO try and use refresh token to get new JWTToken - should fail")
