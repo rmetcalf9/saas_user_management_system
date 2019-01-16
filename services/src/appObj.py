@@ -19,6 +19,9 @@ from objectStores_base import createObjectStoreInstance
 import bcrypt
 from gatewayInterface import getGatewayInterface
 import uuid
+from constants import customExceptionClass
+
+invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
 #Encryption operations make unit tests run slow
 # if app is in testing more this dummy class
@@ -60,9 +63,16 @@ class appObjClass(parAppObj):
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None)
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None)
     self.APIAPP_DEFAULTHOMEADMINPASSWORD = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None) #no default must be read in
-    self.APIAPP_JWT_TOKEN_TIMEOUT = readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 5, None) #default to five minutes
-    self.APIAPP_REFRESH_TOKEN_TIMEOUT = readFromEnviroment(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 10, None) #default to ten minutes
-    self.APIAPP_REFRESH_SESSION_TIMEOUT = readFromEnviroment(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 2, None) #default to two hours
+    self.APIAPP_JWT_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 5, None)) #default to five minutes
+    self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 10, None)) #default to ten minutes
+    self.APIAPP_REFRESH_SESSION_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 2, None)) #default to two hours
+    
+    if self.APIAPP_REFRESH_TOKEN_TIMEOUT < self.APIAPP_JWT_TOKEN_TIMEOUT:
+      print("ERROR - APIAPP_REFRESH_TOKEN_TIMEOUT should never be less than APIAPP_JWT_TOKEN_TIMEOUT")
+      raise invalidConfigurationException
+    if self.APIAPP_REFRESH_SESSION_TIMEOUT < self.APIAPP_REFRESH_TOKEN_TIMEOUT:
+      print("ERROR - APIAPP_REFRESH_SESSION_TIMEOUT should never be less than APIAPP_REFRESH_SESSION_TIMEOUT")
+      raise invalidConfigurationException
     
     self.objectStore = createObjectStoreInstance(self)
     if GetTenant(self,masterTenantName) is None:
