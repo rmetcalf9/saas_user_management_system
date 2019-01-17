@@ -1,4 +1,5 @@
 from test_loginAPI import test_api as parent_test_api
+from TestHelperSuperClass import env
 from dateutil.parser import parse
 import pytz
 from appObj import appObj
@@ -27,6 +28,7 @@ class test_api(parent_test_api):
     refreshToken = OrigLoginResult['refresh']['token']
     dt = parse(OrigLoginResult['refresh']['TokenExpiry'])
     refreshExpiry = dt.astimezone(pytz.utc)
+    
     RefreshedLogin = self.testClient.post('/api/login/' + masterTenantName + '/refresh', data=json.dumps({'token': refreshToken}), content_type='application/json')
     self.assertEqual(RefreshedLogin.status_code, 200)
     refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
@@ -40,9 +42,41 @@ class test_api(parent_test_api):
     # Check refresh is as expected
     self.assertNotEqual(OrigLoginResult['refresh']['token'],refreshedLoginInfo['refresh']['token'],msg="New and old refresh tokens match")
     self.assertNotEqual(OrigLoginResult['refresh']['TokenExpiry'],refreshedLoginInfo['refresh']['TokenExpiry'],msg="New and old refresh tokens have the same expiry")
-    
 
-  #TODO can't use same refresh token twice
-  #TODO refresh token expires after refresh timout
+  def test_cantUseSameRefreshTokenTwice(self):
+    OrigLoginResult = self.loginAsDefaultUser()
+    RefreshedLogin = self.testClient.post('/api/login/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json')
+    self.assertEqual(RefreshedLogin.status_code, 200)
+    RefreshedLogin = self.testClient.post('/api/login/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json')
+    self.assertEqual(RefreshedLogin.status_code, 401)
+
+  def test_repeatadlyUseRefreshTokensUntilSessionTimesout(self):
+    curTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(curTime)
+    OrigLoginResult = self.loginAsDefaultUser()
+    timeRefreshSessionShouldEnd = curTime + timedelta(seconds=int(env['APIAPP_REFRESH_SESSION_TIMEOUT']))
+
+    secondsToWaitBeforeTryingRefresh = int(env['APIAPP_REFRESH_TOKEN_TIMEOUT']) - 2
+    refreshToken = OrigLoginResult['refresh']['token']
+    
+    times = 0
+    running = True
+    while running:
+      times = times + 1
+      self.assertTrue(times < 999, msg='Went through loop too many times')
+
+      curTime = curTime + timedelta(seconds=secondsToWaitBeforeTryingRefresh)
+      appObj.setTestingDateTime(curTime)
+      
+      RefreshedLogin = self.testClient.post('/api/login/' + masterTenantName + '/refresh', data=json.dumps({'token': refreshToken}), content_type='application/json')
+      if curTime > timeRefreshSessionShouldEnd:
+        self.assertEqual(RefreshedLogin.status_code, 401, msg="Got a sucessful refresh beyond the time that the refresh session should have timed out")
+        running = False
+      else:
+        self.assertEqual(RefreshedLogin.status_code, 200)
+        refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
+        refreshToken = refreshedLoginInfo['refresh']['token']
+
+    
+    
   #TODO new refresh token extends expiry time sucessfully
-  #TODO repeatadly getting refresh token until session timeout stops when session times out

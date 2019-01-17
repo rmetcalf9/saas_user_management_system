@@ -11,8 +11,8 @@ def generateRandomRefreshToken(appObj):
 class RefreshTokenManager():
   refreshTokenDict = None
   
-  def __init__(self, appObj, APIAPP_REFRESH_TOKEN_TIMEOUT, APIAPP_REFRESH_SESSION_TIMEOUT):
-    self.refreshTokenDict = expiringdictClass(APIAPP_REFRESH_TOKEN_TIMEOUT, appObj.scheduler, appObj.getCurDateTime)
+  def __init__(self, appObj):
+    self.refreshTokenDict = expiringdictClass(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT, appObj.scheduler, appObj.getCurDateTime)
 
   
     
@@ -22,7 +22,8 @@ class RefreshTokenManager():
       'userAuthInformationWithoutJWTorRefreshToken': copy.deepcopy(userAuthInformationWithoutJWTorRefreshToken),
       'userDict': userDict, 
       'jwtSecretAndKey': jwtSecretAndKey, 
-      'personGUID': personGUID
+      'personGUID': personGUID,
+      'refreshSessionExpiry': appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_SESSION_TIMEOUT))
     }
     self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, dataToStoreWithRefreshToken)
   
@@ -33,12 +34,13 @@ class RefreshTokenManager():
       'TokenExpiry': expiryTime
     }
 
-    
-    
   def getRefreshedAuthDetails(self, appObj, existingToken):
     try:
       val = self.refreshTokenDict.popValue(appObj.getCurDateTime(), existingToken)
     except KeyError:
+      return None
+    
+    if val['refreshSessionExpiry'] < appObj.getCurDateTime():
       return None
     
     token = generateRandomRefreshToken(appObj)
