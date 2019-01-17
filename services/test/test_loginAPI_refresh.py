@@ -78,5 +78,26 @@ class test_api(parent_test_api):
         refreshToken = refreshedLoginInfo['refresh']['token']
 
     
+  def test_newRefreshTokenHasExtendedExpiryTime(self):
+    curTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(curTime)
+    OrigLoginResult = self.loginAsDefaultUser()
     
-  #TODO new refresh token extends expiry time sucessfully
+    dt = parse(OrigLoginResult['refresh']['TokenExpiry'])
+    firstRefreshExpiry = dt.astimezone(pytz.utc)
+
+    secondsToWaitBeforeTryingRefresh = int(env['APIAPP_REFRESH_TOKEN_TIMEOUT']) - 2
+    curTime = curTime + timedelta(seconds=secondsToWaitBeforeTryingRefresh)
+    appObj.setTestingDateTime(curTime)
+    
+    RefreshedLogin = self.testClient.post('/api/login/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json')
+    refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
+    dt = parse(refreshedLoginInfo['refresh']['TokenExpiry'])
+    secondRefreshExpiry = dt.astimezone(pytz.utc)
+    
+    secondsExtendedBy = (secondRefreshExpiry-firstRefreshExpiry).total_seconds()
+    print(int(env['APIAPP_REFRESH_TOKEN_TIMEOUT']))
+    print(secondsExtendedBy)
+    
+    self.assertTrue(secondsExtendedBy > 0, msg="New tokens refresh time isn't later than origional")
+    self.assertTrue(secondsExtendedBy < int(env['APIAPP_REFRESH_TOKEN_TIMEOUT']), msg="Refresh time was extended by more than a signle time out")
