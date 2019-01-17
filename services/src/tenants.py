@@ -3,6 +3,7 @@ from constants import masterTenantName, masterTenantDefaultDescription, masterTe
 import uuid
 from authProviders import authProviderFactory
 from authProviders_base import getNewAuthProviderJSON
+from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
 from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson
 import jwt
@@ -20,7 +21,7 @@ UnknownIdentityException = Exception('Unknown Identity')
 def CreateMasterTenant(appObj):
   print("Creating master tenant")
   _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False)
-  masterTenantInternalAuthProviderGUID = AddAuthProvider(
+  masterTenantInternalAuthProvider = AddAuthProvider(
     appObj, 
     masterTenantName, 
     masterTenantDefaultAuthProviderMenuText, 
@@ -45,9 +46,11 @@ def CreateMasterTenant(appObj):
   mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   
   person = CreatePerson(appObj)
-  authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProviderGUID, {
+  authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProvider['guid'], {
     "username": InternalAuthUsername, 
-    "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+    "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+      appObj, InternalAuthUsername, appObj.APIAPP_DEFAULTHOMEADMINPASSWORD, masterTenantInternalAuthProvider['saltForPasswordHashing']
+     )
   },
   person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
@@ -66,14 +69,14 @@ def CreateTenant(appObj, tenantName):
   _createTenant(appObj, tenantName)
   
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
-  authProviderJSON = getNewAuthProviderJSON(menuText, iconLink, Type, AllowUserCreation, configJSON)
+  authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
   def updTenant(tenant):
     if tenant is None:
       raise tenantNotFoundException
     tenant["AuthProviders"][authProviderJSON['guid']] = authProviderJSON
     return tenant
   appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant)
-  return authProviderJSON['guid']
+  return authProviderJSON
   
 # called locally
 def _createTenant(appObj, tenantName, description, allowUserCreation):

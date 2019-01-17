@@ -5,9 +5,9 @@ from appObj import appObj
 from constants import authFailedException
 from person import CreatePerson, associatePersonWithAuth
 import json
+from base64 import b64decode
 
 class test_tenants(testHelperAPIClient):
-    
     
 #Actual tests below
 
@@ -40,12 +40,12 @@ class test_tenants(testHelperAPIClient):
     for guid in masterTenant.getAuthProviderGUIDList():
       singleAuthProvGUID=guid
 
-    self.assertJSONStringsEqualWithIgnoredKeys(masterTenant.getAuthProvider(singleAuthProvGUID), expectedAuthProviderJSON, ['guid'], msg="Internal Auth Provider default data incorrect")
+    self.assertJSONStringsEqualWithIgnoredKeys(masterTenant.getAuthProvider(singleAuthProvGUID), expectedAuthProviderJSON, ['guid','saltForPasswordHashing'], msg="Internal Auth Provider default data incorrect")
 
     #Check initial user has been created and we could log in
     UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
       'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-      'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+      'password': self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing'])
     })
     #An exception is raised if the login fails
     expectedRoles = {
@@ -91,11 +91,12 @@ class test_tenants(testHelperAPIClient):
     singleAuthProvGUID = ""
     for guid in masterTenant.getAuthProviderGUIDList():
       singleAuthProvGUID=guid
+      
 
     with self.assertRaises(Exception) as context:
       UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
         'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-        'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+        'password': self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing'])
       }, 'invalid_identity_guid')
     self.checkGotRightException(context,UnknownIdentityException)
 

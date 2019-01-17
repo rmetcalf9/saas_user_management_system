@@ -4,17 +4,19 @@
 tryingToCreateDuplicateAuthException = Exception('Trying To Create Duplicate Auth (Matching username)')
 from constants import authFailedException, customExceptionClass
 from uuid import uuid4
+from base64 import b64encode
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config')
 
-def getNewAuthProviderJSON(menuText, iconLink, Type, AllowUserCreation, configJSON):
+def getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON):
   return {
     "guid": str(uuid4()),
     "MenuText": menuText,
     "IconLink": iconLink,
     "Type":  Type,
     "AllowUserCreation": AllowUserCreation,
-    "ConfigJSON": configJSON
+    "ConfigJSON": configJSON,
+    "saltForPasswordHashing": str(b64encode(appObj.bcrypt.gensalt()),'utf-8')
   }
 
 class authProvider():

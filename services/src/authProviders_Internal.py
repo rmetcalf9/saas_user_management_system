@@ -1,7 +1,11 @@
 #Provides auth provider functions
 from authProviders_base import authProvider, InvalidAuthConfigException
 from constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
+from base64 import b64decode
 
+def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, username, password, tenantAuthProvSalt):
+  masterSecretKey = (username + ":" + password + ":AG44")
+  return appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
 
 class authProviderInternal(authProvider):
   def _authSpercificInit(self):

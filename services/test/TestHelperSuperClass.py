@@ -127,3 +127,9 @@ class testHelperAPIClient(testHelperSuperClass):
       'person': person
     }
 
+  def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, username, password, tenantAuthProvSalt):
+    masterSecretKey = (username + ":" + password + ":AG44")
+    return appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
+  def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
+    return self.getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
+
