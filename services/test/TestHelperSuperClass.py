@@ -15,6 +15,7 @@ from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Logi
 from constants import masterTenantName
 from person import CreatePerson, associatePersonWithAuth
 
+
 env = {
   'APIAPP_MODE': 'DOCKER',
   'APIAPP_VERSION': 'TEST-3.3.3',
@@ -31,6 +32,11 @@ env = {
   'APIAPP_GATEWAYINTERFACETYPE': 'none',
   'APIAPP_GATEWAYINTERFACECONFIG': '{"jwtSecret":"some_secretxx"}'
 }
+
+def get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes():
+  #bytes(password, 'utf-8')
+  return bytes(env['APIAPP_DEFAULTHOMEADMINPASSWORD'], 'utf-8')
+
 
 class testHelperSuperClass(unittest.TestCase):
   def checkGotRightException(self, context, ExpectedException):
@@ -113,7 +119,7 @@ class testHelperAPIClient(testHelperSuperClass):
     person = CreatePerson(appObj)
     authData = AddAuth(appObj, masterTenantName, authProvGUID, {
       "username": InternalAuthUsername, 
-      "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     },
     person['guid'])
     associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
@@ -129,7 +135,8 @@ class testHelperAPIClient(testHelperSuperClass):
 
   def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, username, password, tenantAuthProvSalt):
     masterSecretKey = (username + ":" + password + ":AG44")
-    return appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
+    ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
+    return ret
   def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
     return self.getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
 

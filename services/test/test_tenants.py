@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, env
+from TestHelperSuperClass import testHelperAPIClient, env, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, AddAuth, associateIdentityWithPerson
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
@@ -8,7 +8,7 @@ import json
 from base64 import b64decode
 
 class test_tenants(testHelperAPIClient):
-    
+
 #Actual tests below
 
   def test_cantCreateTenantWithSameNameAsMaster(self):
@@ -45,7 +45,7 @@ class test_tenants(testHelperAPIClient):
     #Check initial user has been created and we could log in
     UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
       'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-      'password': self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing'])
+      'password': bytes(self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing']),'utf-8')
     })
     #An exception is raised if the login fails
     expectedRoles = {
@@ -67,7 +67,7 @@ class test_tenants(testHelperAPIClient):
     with self.assertRaises(Exception) as context:
       UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
         'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-        'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD'] + 'Extra bit to make password wrong'
+        'password': bytes(env['APIAPP_DEFAULTHOMEADMINPASSWORD'] + 'Extra bit to make password wrong','utf-8')
       })
     self.checkGotRightException(context,authFailedException)
 
@@ -81,7 +81,7 @@ class test_tenants(testHelperAPIClient):
     with self.assertRaises(Exception) as context:
       UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
         'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'] + 'Extra bit to make username wrong',
-        'password': env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+        'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
       })
     self.checkGotRightException(context,authFailedException)
 
@@ -96,7 +96,7 @@ class test_tenants(testHelperAPIClient):
     with self.assertRaises(Exception) as context:
       UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
         'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-        'password': self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing'])
+        'password': bytes(self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing']),'utf-8')
       }, 'invalid_identity_guid')
     self.checkGotRightException(context,UnknownIdentityException)
 
@@ -110,7 +110,7 @@ class test_tenants(testHelperAPIClient):
     #Login and get list of identities
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
-      'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     })
     foundIdentity1 = False
     foundIdentity2 = False
@@ -125,7 +125,7 @@ class test_tenants(testHelperAPIClient):
     #Try and log in using identities
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
-      'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     }, res['identity1']['guid'])
     expectedJSONResponse = {
       'TenantRoles': {}, 
@@ -138,7 +138,7 @@ class test_tenants(testHelperAPIClient):
     
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
-      'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     }, res['identity2']['guid'])
     expectedJSONResponse = {
       'TenantRoles': {}, 
@@ -164,12 +164,12 @@ class test_tenants(testHelperAPIClient):
     InternalAuthUsername2 = 'SomeLogin2'
     authData1 = AddAuth(appObj, masterTenantName, authProvGUID, {
       "username": InternalAuthUsername1, 
-      "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     },
     person1['guid'])
     authData2 = AddAuth(appObj, masterTenantName, authProvGUID, {
       "username": InternalAuthUsername2, 
-      "password": appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     },
     person2['guid'])
     associateIdentityWithPerson(appObj, identity['guid'], person1['guid'])
@@ -178,7 +178,7 @@ class test_tenants(testHelperAPIClient):
     #Try and log in and make sure both people get access to the user
     UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
       'username': InternalAuthUsername1,
-      'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     })
     expectedJSONResponse = {
       'TenantRoles': {}, 
@@ -191,7 +191,7 @@ class test_tenants(testHelperAPIClient):
     
     UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
       'username': InternalAuthUsername2,
-      'password': appObj.APIAPP_DEFAULTHOMEADMINPASSWORD
+      'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     })
     expectedJSONResponse['authedPersonGuid'] = person2['guid']
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 2")
