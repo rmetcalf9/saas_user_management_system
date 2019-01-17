@@ -1,15 +1,17 @@
 from datetime import timedelta
 
-# When using this class it may be nessecary to run the cleanupprocess in a background thread
-#  this can be done by calling cleanUpProcessWhichMayBeRunInSeperateThread from https://apscheduler.readthedocs.io/en/v3.5.3/userguide.html
+# This class uses https://pypi.org/project/APScheduler/ to launch a clean up thread
+#  a valid apschedule (in memory) should be passed
 
 class expiringdictClass():
   durationToKeepItemInSeconds = None
   dataDict = None
   
-  def __init__(self, durationToKeepItemInSeconds):
+  def __init__(self, durationToKeepItemInSeconds, apSchedularInstance=None, curTimeFn=None):
     self.durationToKeepItemInSeconds = durationToKeepItemInSeconds
     self.dataDict = dict()
+    if apSchedularInstance is not None:
+      apSchedularInstance.add_job(self._cleanUpProcessWhichMayBeRunInSeperateThread, 'interval', minutes=10, id='my_job_id', args=[curTimeFn])
 
   def addOrReplaceKey(self, curTime,key,val):
     expiryTime = curTime + timedelta(seconds=int(self.durationToKeepItemInSeconds))
@@ -22,7 +24,8 @@ class expiringdictClass():
       raise KeyError
     return ite[0]
 
-  def cleanUpProcessWhichMayBeRunInSeperateThread(self, curTime):
+  def _cleanUpProcessWhichMayBeRunInSeperateThread(self, curTimeFn):
+    curTime = curTimeFn()
     keysThatHaveExpired = []
     for key in self.dataDict.keys():
       ite = self.dataDict[key]

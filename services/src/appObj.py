@@ -85,7 +85,7 @@ class appObjClass(parAppObj):
       CreateMasterTenant(self)
     
     self.gateway = getGatewayInterface(env)
-    self.refreshTokenManager = RefreshTokenManager(self.APIAPP_REFRESH_TOKEN_TIMEOUT, self.APIAPP_REFRESH_SESSION_TIMEOUT)
+    self.refreshTokenManager = RefreshTokenManager(self, self.APIAPP_REFRESH_TOKEN_TIMEOUT, self.APIAPP_REFRESH_SESSION_TIMEOUT)
     
     self.scheduler.start()
 

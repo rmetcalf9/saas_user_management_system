@@ -3,6 +3,13 @@ from datetime import datetime, timedelta
 import pytz
 from expiringdict import expiringdictClass
 
+class turnAValueIntoAFunction():
+  val = None
+  def __init__(self, val):
+    self.val = val
+  def createdFunction(self):
+    return self.val
+
 class testExpiringDictClass(unittest.TestCase):
   def ensureKeyDoesntExist(self, expirintDictObj, time, key):
     foundKeyError = False
@@ -68,7 +75,8 @@ class testExpiringDictClass(unittest.TestCase):
     res = objectUnderTest.getValue(timeToCheckForExistanceOfBothKeys,keyWhichShouldNotBeDeleted)
 
     #Run clean up process
-    objectUnderTest.cleanUpProcessWhichMayBeRunInSeperateThread(timeToRunCleanUpAt)
+    timeToRunCleanUpAtFN = turnAValueIntoAFunction(timeToRunCleanUpAt)
+    objectUnderTest._cleanUpProcessWhichMayBeRunInSeperateThread(timeToRunCleanUpAtFN.createdFunction)
 
     #Next operation goes backwards in time - not a normal operaiton but it is a way we can
     # use to check what the clenaupprocess has done without triggering the automatic deletion
