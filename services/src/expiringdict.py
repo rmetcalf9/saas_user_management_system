@@ -36,4 +36,10 @@ class expiringdictClass():
       try:
         del self.dataDict[key]
       except KeyError:
-        pass #key was deleted elsewhere maybe by attempted access
+        pass #key may have been deleted elsewhere maybe by attempted access
+      except Exception as e:
+        #Also ignoring any other error. we will try again in the next run
+        # but outputting to log
+        print(e)
+        print(str(e))
+        print(e.args)
