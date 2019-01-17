@@ -18,3 +18,16 @@ class expiringdictClass():
       del self.dataDict[key]
       raise KeyError
     return ite[0]
+
+  def cleanUpProcessWhichMayBeRunInSeperateThread(self, curTime):
+    keysThatHaveExpired = []
+    for key in self.dataDict.keys():
+      ite = self.dataDict[key]
+      if ite[1] < curTime:
+        keysThatHaveExpired.append(key)
+
+    for key in keysThatHaveExpired:
+      try:
+        del self.dataDict[key]
+      except KeyError:
+        pass #key was deleted elsewhere maybe by attempted access

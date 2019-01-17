@@ -4,7 +4,14 @@ import pytz
 from expiringdict import expiringdictClass
 
 class testExpiringDictClass(unittest.TestCase):
-  
+  def ensureKeyDoesntExist(self, expirintDictObj, time, key):
+    foundKeyError = False
+    try:
+      val = expirintDictObj.getValue(time,key)
+    except KeyError:
+      foundKeyError = True
+    self.assertTrue(foundKeyError, msg="Found key " + key + " which should not be present")
+
   def test_storeAndRetrieve(self):
     durationToKeepItemInSeconds = 20
     a = expiringdictClass(durationToKeepItemInSeconds)
@@ -17,12 +24,7 @@ class testExpiringDictClass(unittest.TestCase):
     durationToKeepItemInSeconds = 20
     a = expiringdictClass(durationToKeepItemInSeconds)
     curTime = datetime.now(pytz.timezone("UTC"))
-    foundKeyError = False
-    try:
-      val = a.getValue(curTime,'key')
-    except KeyError:
-      foundKeyError = True
-    self.assertTrue(foundKeyError, msg="ERROR key error not raised")
+    self.ensureKeyDoesntExist(a, curTime,'key')
 
   def test_retriveExpiredValueGivesKeyError(self):
     durationToKeepItemInSeconds = 20
@@ -36,3 +38,40 @@ class testExpiringDictClass(unittest.TestCase):
     except KeyError:
       foundKeyError = True
     self.assertTrue(foundKeyError, msg="ERROR key error not raised")
+
+  def test_secondCleanUpThread(self):
+    # class has a function designed to be run in a seperate thread to clean up
+    # expired entries and prevent the dict growing eternaly. This test puts some 
+    # data into the dict, goes forward in time, runs the clean up process
+    # then goes back in time and makes sure the required keys are deleted
+
+    durationToKeepItemInSeconds = 200
+    keyWhichShouldBeDeleted = 'key_to_delete'
+    keyWhichShouldNotBeDeleted = 'key_not_to_delete'
+    
+    curTime = datetime.now(pytz.timezone("UTC"))
+    timeToCreateKeyWhichShouldBeDeleted = curTime
+    timeToCreateKeyWhichShouldNotBeDeleted = curTime + timedelta(seconds=int(100))
+    timeKeyForDeletionWillExpire = timeToCreateKeyWhichShouldBeDeleted +  timedelta(seconds=int(durationToKeepItemInSeconds))
+    timeToRunCleanUpAt = timeKeyForDeletionWillExpire +  timedelta(seconds=int(10))
+
+    timeToCheckForExistanceOfBothKeys = timeToCreateKeyWhichShouldNotBeDeleted + timedelta(seconds=int(10))
+
+    objectUnderTest = expiringdictClass(durationToKeepItemInSeconds)
+
+    #Create Keys
+    objectUnderTest.addOrReplaceKey(timeToCreateKeyWhichShouldBeDeleted,keyWhichShouldBeDeleted,'val')
+    objectUnderTest.addOrReplaceKey(timeToCreateKeyWhichShouldNotBeDeleted,keyWhichShouldNotBeDeleted,'val')
+
+    #Make sure both exist (Will rasie an exception if they do not)
+    res = objectUnderTest.getValue(timeToCheckForExistanceOfBothKeys,keyWhichShouldBeDeleted)
+    res = objectUnderTest.getValue(timeToCheckForExistanceOfBothKeys,keyWhichShouldNotBeDeleted)
+
+    #Run clean up process
+    objectUnderTest.cleanUpProcessWhichMayBeRunInSeperateThread(timeToRunCleanUpAt)
+
+    #Next operation goes backwards in time - not a normal operaiton but it is a way we can
+    # use to check what the clenaupprocess has done without triggering the automatic deletion
+    # in the getValue procedure
+    self.ensureKeyDoesntExist(objectUnderTest, timeToCheckForExistanceOfBothKeys,keyWhichShouldBeDeleted)
+    res = objectUnderTest.getValue(timeToCheckForExistanceOfBothKeys,keyWhichShouldNotBeDeleted)
