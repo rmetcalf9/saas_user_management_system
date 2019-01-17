@@ -7,7 +7,6 @@ from identityObj import createNewIdentity, associateIdentityWithPerson, getListO
 import jwt
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
-from refreshTokenGeneration import generateRefreshToken
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 tenantNotFoundException = Exception('Tenant Not Found')
@@ -158,9 +157,17 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception('Error userID found in identity was never created')
 
   jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict)
-  resDict['jwtData'] = generateJWTToken(appObj, appObj.APIAPP_JWT_TOKEN_TIMEOUT, userDict, jwtSecretAndKey, authUserObj['personGUID'])
-  resDict['refresh'] = generateRefreshToken(appObj, appObj.APIAPP_REFRESH_TOKEN_TIMEOUT)
   resDict['userGuid'] = userDict['UserID']
   resDict['authedPersonGuid'] = authUserObj['personGUID']
+  
+  tokenWithoutJWTorRefresh = {
+    'possibleIdentities': resDict['possibleIdentities'],
+    'userGuid': resDict['userGuid'],
+    'authedPersonGuid': resDict['authedPersonGuid']
+  }
+
+  resDict['jwtData'] = generateJWTToken(appObj, userDict, jwtSecretAndKey, authUserObj['personGUID'])
+  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, jwtSecretAndKey, authUserObj['personGUID'])
+
   return resDict
 

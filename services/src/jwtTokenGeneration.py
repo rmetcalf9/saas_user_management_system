@@ -5,8 +5,8 @@ import jwt
 from base64 import b64decode
 import json
 
-def generateJWTToken(appObj, jwtTokenTimeoutDuration, userDict, jwtSecretAndKey, personGUID):
-  expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(jwtTokenTimeoutDuration))
+def generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID):
+  expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_JWT_TOKEN_TIMEOUT))
   
   JWTDict = copy.deepcopy(userDict)
   JWTDict['authedPersonGuid'] = personGUID

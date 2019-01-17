@@ -32,6 +32,10 @@ def getLoginPostDataModel(appObj):
   'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth PRovider type', required=True),
   'identityGUID': fields.String(default='DEFAULT', description='Identity to use to log in with')
   })
+def getRefreshPostDataModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('RefreshPostData', {
+    'token': fields.String(description='Refresh Token that was provided to client')
+  })
 
 def getLoginResponseModel(appObj):
   possibleIdentityModel = appObj.flastRestPlusAPIObject.model('possibleIdentity', {
@@ -149,16 +153,15 @@ def registerAPI(appObj):
   class refreshAPI(Resource):
     '''Refresh'''
     @nsLogin.doc('refresh')
+    @nsLogin.expect(getRefreshPostDataModel(appObj), validate=True)
     @nsLogin.marshal_with(getLoginResponseModel(appObj), skip_none=True)
     @nsLogin.response(200, 'Success', model=getLoginResponseModel(appObj), skip_none=True)
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Get new JWT token with Refresh'''
       tenantObj = getValidTenantObj(appObj, tenant)
-      refreshedToken = appObj.refreshTokenManager.getRefreshedToken(appObj, request.get_json()['token'])
-      if refreshedToken is None:
+      refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
+      if refreshedAuthDetails is None:
         raise Unauthorized('Refresh token not found, token or session may have timedout')
 
-      return {
-        'A': 'TODO'
-      }
+      return refreshedAuthDetails

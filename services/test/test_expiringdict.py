@@ -83,3 +83,14 @@ class testExpiringDictClass(unittest.TestCase):
     # in the getValue procedure
     self.ensureKeyDoesntExist(objectUnderTest, timeToCheckForExistanceOfBothKeys,keyWhichShouldBeDeleted)
     res = objectUnderTest.getValue(timeToCheckForExistanceOfBothKeys,keyWhichShouldNotBeDeleted)
+
+  def test_popValue(self):
+    durationToKeepItemInSeconds = 20
+    a = expiringdictClass(durationToKeepItemInSeconds)
+    curTime = datetime.now(pytz.timezone("UTC"))
+    a.addOrReplaceKey(curTime,'key','val')
+    val = a.getValue(curTime,'key')
+    self.assertEqual(val, 'val')
+    val = a.popValue(curTime,'key')
+    self.ensureKeyDoesntExist(a, curTime,'key')
+    

@@ -23,6 +23,11 @@ class expiringdictClass():
       del self.dataDict[key]
       raise KeyError
     return ite[0]
+    
+  def popValue(self, curTime,key):
+    val = self.getValue(curTime,key)
+    del self.dataDict[key]
+    return val
 
   def _cleanUpProcessWhichMayBeRunInSeperateThread(self, curTimeFn):
     curTime = curTimeFn()

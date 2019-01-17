@@ -1,15 +1,11 @@
 from datetime import timedelta
 from expiringdict import expiringdictClass
+import secrets
+import copy
+from jwtTokenGeneration import generateJWTToken
 
-
-def generateRefreshToken(appObj, refreshTokenTimeout):
-  expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(refreshTokenTimeout))
-
-  return {
-    'token': 'b',
-    'TokenExpiry': expiryTime
-  }
-
+def generateRandomRefreshToken(appObj):
+  return secrets.token_urlsafe()
 
 # Class to hold all the refresh data in memory
 class RefreshTokenManager():
@@ -18,9 +14,45 @@ class RefreshTokenManager():
   def __init__(self, appObj, APIAPP_REFRESH_TOKEN_TIMEOUT, APIAPP_REFRESH_SESSION_TIMEOUT):
     self.refreshTokenDict = expiringdictClass(APIAPP_REFRESH_TOKEN_TIMEOUT, appObj.scheduler, appObj.getCurDateTime)
 
+  
     
-  def getRefreshedToken(self, appObj, existingToken):
-    return None
+  def generateRefreshTokenFirstTime(self, appObj, userAuthInformationWithoutJWTorRefreshToken, userDict, jwtSecretAndKey, personGUID):
+    token = generateRandomRefreshToken(appObj)
+    dataToStoreWithRefreshToken = {
+      'userAuthInformationWithoutJWTorRefreshToken': copy.deepcopy(userAuthInformationWithoutJWTorRefreshToken),
+      'userDict': userDict, 
+      'jwtSecretAndKey': jwtSecretAndKey, 
+      'personGUID': personGUID
+    }
+    self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, dataToStoreWithRefreshToken)
+  
+    expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT))
+
+    return {
+      'token': token,
+      'TokenExpiry': expiryTime
+    }
+
     
+    
+  def getRefreshedAuthDetails(self, appObj, existingToken):
+    try:
+      val = self.refreshTokenDict.popValue(appObj.getCurDateTime(), existingToken)
+    except KeyError:
+      return None
+    
+    token = generateRandomRefreshToken(appObj)
+    self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, val)
+    expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT))
+    
+    
+    userAuthInfo = copy.deepcopy(val['userAuthInformationWithoutJWTorRefreshToken'])
+    userAuthInfo['jwtData'] = generateJWTToken(appObj, val['userDict'], val['jwtSecretAndKey'], val['personGUID'])
+    userAuthInfo['refresh'] = {
+      'token': token,
+      'TokenExpiry': expiryTime
+    }
+    
+    return userAuthInfo
   
   

@@ -5,6 +5,12 @@ import os
 import datetime
 import pytz
 
+if sys.version_info[0] < 3:
+  raise Exception("Must be using Python 3.6")
+if sys.version_info[0] == 3:
+  if sys.version_info[1] < 6:
+    raise Exception("Must be using at least Python 3.6")
+
 curDatetime = datetime.datetime.now(pytz.utc)
 appObj.init(os.environ, curDatetime)
 
