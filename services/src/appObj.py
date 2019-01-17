@@ -22,6 +22,8 @@ import uuid
 from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
 #Encryption operations make unit tests run slow
@@ -48,8 +50,10 @@ class appObjClass(parAppObj):
   gateway = None
   defaultUserGUID = None
   refreshTokenManager = None
+  scheduler = None
 
   def init(self, env, serverStartTime, testingMode = False):
+    self.scheduler = BackgroundScheduler()
     self.defaultUserGUID = str(uuid.uuid4())
     if testingMode:
       print("Warning testing mode active - proper encryption is not being used")
@@ -82,6 +86,8 @@ class appObjClass(parAppObj):
     
     self.gateway = getGatewayInterface(env)
     self.refreshTokenManager = RefreshTokenManager(self.APIAPP_REFRESH_TOKEN_TIMEOUT, self.APIAPP_REFRESH_SESSION_TIMEOUT)
+    
+    self.scheduler.start()
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
@@ -97,5 +103,13 @@ class appObjClass(parAppObj):
       return datetime.datetime.now(pytz.timezone("UTC"))
     return self.curDateTimeOverrideForTesting
 
+  def stopThread(self):
+    ##print("stopThread Called")
+    self.scheduler.shutdown()
+
+  #override exit gracefully to stop worker thread
+  def exit_gracefully(self, signum, frame):
+    self.stopThread()
+    super(appObjClass, self).exit_gracefully(signum, frame)
 
 appObj = appObjClass()

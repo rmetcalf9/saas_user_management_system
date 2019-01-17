@@ -1,5 +1,8 @@
 from datetime import timedelta
 
+# When using this class it may be nessecary to run the cleanupprocess in a background thread
+#  this can be done by calling cleanUpProcessWhichMayBeRunInSeperateThread from https://apscheduler.readthedocs.io/en/v3.5.3/userguide.html
+
 class expiringdictClass():
   durationToKeepItemInSeconds = None
   dataDict = None
