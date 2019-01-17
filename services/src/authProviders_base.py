@@ -3,8 +3,19 @@
 #  an identity has one user
 tryingToCreateDuplicateAuthException = Exception('Trying To Create Duplicate Auth (Matching username)')
 from constants import authFailedException, customExceptionClass
+from uuid import uuid4
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config')
+
+def getNewAuthProviderJSON(menuText, iconLink, Type, AllowUserCreation, configJSON):
+  return {
+    "guid": str(uuid4()),
+    "MenuText": menuText,
+    "IconLink": iconLink,
+    "Type":  Type,
+    "AllowUserCreation": AllowUserCreation,
+    "ConfigJSON": configJSON
+  }
 
 class authProvider():
   authProviderType = None
