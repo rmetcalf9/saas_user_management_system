@@ -6,13 +6,13 @@ function isValueHeld (a) {
   return true
 }
 
-function ensurePassedTenantIsLoaded (to, from, next) {
+function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
   if (isValueHeld(from.query.usersystem_returnaddress)) {
     stores().commit('globalDataStore/updateUsersystemReturnaddress', from.query.usersystem_returnaddress)
   }
   if (stores().state.globalDataStore.tenantInfo !== null) {
     if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {
-      next()
+      successCallback(to, from, next)
       return
     }
   }
@@ -20,6 +20,22 @@ function ensurePassedTenantIsLoaded (to, from, next) {
   next({
     path: '/' + to.params.tenantName,
     query: { usersystem_redirect: to.fullPath }
+  })
+}
+
+function ensurePassedTenantIsLoaded (to, from, next) {
+  _ensurePassedTenenatIsLoaded(to, from, next, function (to, from, next) { next() })
+}
+
+function selectAuthBeforeEnter (to, from, next) {
+  _ensurePassedTenenatIsLoaded(to, from, next, function (to, from, next) {
+    if (stores().state.globalDataStore.tenantInfo.AuthProviders.length === 1) {
+      stores().commit('globalDataStore/updateSelectedAuthProvGUID', stores().state.globalDataStore.tenantInfo.AuthProviders[0].guid)
+      next({
+        path: '/' + to.params.tenantName + '/AuthProvider/' + stores().state.globalDataStore.tenantInfo.AuthProviders[0].Type
+      })
+    }
+    next()
   })
 }
 
@@ -31,7 +47,7 @@ const routes = [
   {
     path: '/:tenantName/selectAuth',
     component: () => import('pages/SelectAuth.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
+    beforeEnter: selectAuthBeforeEnter
   },
   {
     path: '/:tenantName/AuthProvider/internal',

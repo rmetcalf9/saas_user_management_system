@@ -1,9 +1,9 @@
 <template>
   <div class="fixed-center">
     <div>
-      <q-input v-model="usernamePass.username" placeholder="Username" />
+      <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
       <br>
-      <q-input type="password" v-model="usernamePass.password" placeholder="Password" />
+      <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
       <p class="text-center group">
         <q-btn
           color="primary"
@@ -89,9 +89,7 @@ export default {
       var masterSecretKey = 'admin:admin:AG44'
       var base64encodedSalt = this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID).saltForPasswordHashing
       var salt = atob(base64encodedSalt)
-
       var passwordhash = bcrypt.hashSync(masterSecretKey, salt)
-
       this.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'POST',
         path: '/authproviders',
@@ -105,6 +103,12 @@ export default {
         }
       })
     }
+  },
+  mounted: function () {
+    var TTT = this
+    this.$nextTick(function () {
+      TTT.$refs.userNameInput.focus()
+    })
   }
 }
 </script>
