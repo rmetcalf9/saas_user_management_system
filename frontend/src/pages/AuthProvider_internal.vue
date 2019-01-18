@@ -25,6 +25,7 @@ import {
   Notify,
   Loading
 } from 'quasar'
+import bcrypt from 'bcryptjs'
 
 export default {
   name: 'AuthProvider_internal',
@@ -85,12 +86,21 @@ export default {
         }
       }
       Loading.show()
+      var masterSecretKey = 'admin:admin:AG44'
+      var base64encodedSalt = this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID).saltForPasswordHashing
+      var salt = atob(base64encodedSalt)
+
+      var passwordhash = bcrypt.hashSync(masterSecretKey, salt)
+
       this.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'POST',
         path: '/authproviders',
         callback: callback,
         postdata: {
-          credentialJSON: this.usernamePass,
+          credentialJSON: {
+            username: this.usernamePass.username,
+            password: passwordhash
+          },
           authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
         }
       })
