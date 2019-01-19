@@ -5,6 +5,7 @@ import os
 import datetime
 import pytz
 
+
 if sys.version_info[0] < 3:
   raise Exception("Must be using Python 3.6")
 if sys.version_info[0] == 3:

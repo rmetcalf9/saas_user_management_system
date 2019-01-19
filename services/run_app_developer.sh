@@ -1,5 +1,21 @@
 #!/bin/bash
 
+PYTHON_CMD=python3
+if [ E${EXTPYTHONCMD} != "E" ]; then
+  PYTHON_CMD=${EXTPYTHONCMD}
+fi
+
+PYTHONVERSIONCHECKSCRIPT="import sys\nprint(\"Python version \" + str(sys.version_info))\nif sys.version_info[0] < 3:\n  exit(1)\nif sys.version_info[0] == 3:\n  if sys.version_info[1] < 6:\n    exit(1)\nexit(0)\n"
+printf "${PYTHONVERSIONCHECKSCRIPT}" | ${PYTHON_CMD}
+RES=$?
+if [ ${RES} -ne 0 ]; then
+  echo "Wrong python version - this version won't have all the required libraries"
+  echo "Using command ${PYTHON_CMD}"
+  echo "you can set enviroment variable EXTPYTHONCMD to make this script use a different python command"
+  echo ""
+  exit 1
+fi
+
 if [ E${EXTURL} = "E" ]; then
   echo "EXTURL not set"
   exit 1
@@ -40,4 +56,4 @@ fi
 
 
 #Python app reads parameters from environment variables
-python3 ./src/app.py
+${PYTHON_CMD} ./src/app.py
