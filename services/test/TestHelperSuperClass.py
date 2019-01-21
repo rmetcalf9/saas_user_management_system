@@ -14,6 +14,7 @@ from base64 import b64decode
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, AddAuth, associateIdentityWithPerson
 from constants import masterTenantName
 from person import CreatePerson, associatePersonWithAuth
+from jwtTokenGeneration import generateJWTToken
 
 
 env = {
@@ -150,3 +151,11 @@ class testHelperAPIClient(testHelperSuperClass):
   def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
     return self.getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
 
+  def generateJWTToken(self, userDict):
+    jwtSecretAndKey = {
+      'secret': appObj.gateway.GetJWTTokenSecret(userDict['UserID']),
+      'key': userDict['UserID']
+    }
+    personGUID = '123ABC'
+    return generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID)['JWTToken']
+    

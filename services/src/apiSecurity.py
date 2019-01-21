@@ -8,14 +8,14 @@ from constants import DefaultHasAccountRole
 
 def verifyAPIAccessUserLoginRequired(appObj, tenantFromPath, jwttoken, rolesToCheck = []):
   if jwttoken is None:
-    return False
+    return False, None
   decodedToken = DecodedTokenClass(appObj, jwttoken)
   if not decodedToken.hasRole(tenantFromPath, DefaultHasAccountRole):
-    return False
+    return False, None
   for k in rolesToCheck:
     if not decodedToken.hasRole(tenantFromPath, k):
-      return False
-  return True
+      return False, None
+  return True, decodedToken
 
 class DecodedTokenClass():
   tokenData = None

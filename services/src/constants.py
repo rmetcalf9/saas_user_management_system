@@ -21,3 +21,6 @@ class customExceptionClass(Exception):
 authProviderNotFoundException = customExceptionClass('authProviderNotFoundException')
 authFailedException = customExceptionClass('authFailedException')
 PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
+
+jwtHeaderName="jwt-auth-cookie"
+jwtCookieName="jwt-auth-cookie"
