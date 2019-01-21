@@ -5,24 +5,32 @@ from constants import DefaultHasAccountRole
 
 # hasaccount role must always be present for the tenant for access to be verified
 
-def verifyJWTTokenAndReturnAssertions(appObj, jwttoken):
-  if (appObj.gateway.ShouldJWTTokensBeVerified()):
-    UserID = decodeJWTToken(jwttoken, None, False)['iss']
-    jwtSecret = appObj.gateway.GetJWTTokenSecret(UserID)
-    return decodeJWTToken(jwttoken, jwtSecret, True)
-  else:
-    return decodeJWTToken(jwttoken, None, False)
 
 def verifyAPIAccessUserLoginRequired(appObj, tenantFromPath, jwttoken, rolesToCheck = []):
   if jwttoken is None:
     return False
-  jwtData = verifyJWTTokenAndReturnAssertions(appObj, jwttoken)
-  if tenantFromPath not in jwtData['TenantRoles']:
-    return False
-  if DefaultHasAccountRole not in jwtData['TenantRoles'][tenantFromPath]:
+  decodedToken = DecodedTokenClass(appObj, jwttoken)
+  if not decodedToken.hasRole(tenantFromPath, DefaultHasAccountRole):
     return False
   for k in rolesToCheck:
-    if k not in jwtData['TenantRoles'][tenantFromPath]:
+    if not decodedToken.hasRole(tenantFromPath, k):
       return False
   return True
 
+class DecodedTokenClass():
+  tokenData = None
+  
+  def __init__(self, appObj, jwttoken):
+    if (appObj.gateway.ShouldJWTTokensBeVerified()):
+      UserID = decodeJWTToken(jwttoken, None, False)['iss']
+      jwtSecret = appObj.gateway.GetJWTTokenSecret(UserID)
+      self.tokenData = decodeJWTToken(jwttoken, jwtSecret, True)
+    else:
+      self.tokenData = decodeJWTToken(jwttoken, None, False)
+
+  def hasRole(self, tenant, role):
+    if tenant not in self.tokenData['TenantRoles']:
+      return False
+    if role not in self.tokenData['TenantRoles'][tenant]:
+      return False
+    return True

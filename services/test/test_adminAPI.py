@@ -1,4 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient, env
 
 class test_api(testHelperAPIClient):
-  pass
+  def test_getTenantWithDefaultData(self):
+    pass

@@ -50,5 +50,7 @@ Login to a particular auth provider - will return the JWT token or an error
 
 ## Admin Service Endpoints (protected using valid api token)
 
-### /vx/authed/$$tenant$$??????
+### GET /vx/authed/api/admin/$$tenant$$/tenants
+
+Get a list of tenants
 
