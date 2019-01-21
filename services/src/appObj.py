@@ -17,7 +17,7 @@ from adminAPI import registerAPI as registerAdminApi
 
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName
-from objectStores_base import createObjectStoreInstance
+from objectStores import createObjectStoreInstance
 import bcrypt
 from gatewayInterface import getGatewayInterface
 import uuid
