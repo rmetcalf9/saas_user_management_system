@@ -10,8 +10,10 @@ from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppOb
 from flask_restplus import fields
 import time
 import datetime
+
 from serverInfoAPI import registerAPI as registerMainApi, resetData as resetMainApi
 from loginAPI import registerAPI as registerLoginApi
+from adminAPI import registerAPI as registerAdminApi
 
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName
@@ -93,6 +95,7 @@ class appObjClass(parAppObj):
     super(appObjClass, self).initOnce()
     registerMainApi(self)
     registerLoginApi(self)
+    registerAdminApi(self)
     self.flastRestPlusAPIObject.title = "SAAS User Management"
     self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
 

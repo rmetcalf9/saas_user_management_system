@@ -1,0 +1,4 @@
+
+
+def registerAPI(appObj):
+  pass
