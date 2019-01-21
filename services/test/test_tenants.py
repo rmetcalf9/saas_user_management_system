@@ -128,7 +128,7 @@ class test_tenants(testHelperAPIClient):
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     }, res['identity1']['guid'])
     expectedJSONResponse = {
-      'TenantRoles': {}, 
+      'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID1, 
       "exp": "xx", 
       "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key",
@@ -141,7 +141,7 @@ class test_tenants(testHelperAPIClient):
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     }, res['identity2']['guid'])
     expectedJSONResponse = {
-      'TenantRoles': {}, 
+      'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID2, 
       "exp": "xx", 
       "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key",
@@ -154,7 +154,7 @@ class test_tenants(testHelperAPIClient):
   def test_oneUserCanBeAccessedByTwoAuths(self):
     masterTenant = GetTenant(appObj,masterTenantName)
     userID = 'TestUser'
-    CreateUser(appObj, userID)
+    CreateUser(appObj, userID, masterTenantName)
     identity = createNewIdentity(appObj, 'standard','standard', userID)
 
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
@@ -181,7 +181,7 @@ class test_tenants(testHelperAPIClient):
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     })
     expectedJSONResponse = {
-      'TenantRoles': {}, 
+      'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID, 
       "exp": "xx", 
       "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key",

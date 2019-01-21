@@ -40,9 +40,8 @@ def CreateMasterTenant(appObj):
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
   
   #User spercific creation
-  CreateUser(appObj, userID)
+  CreateUser(appObj, userID, masterTenantName)
   AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
-  AddUserRole(appObj, userID, masterTenantName, DefaultHasAccountRole)
   mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   
   person = CreatePerson(appObj)
@@ -93,11 +92,13 @@ def GetTenant(appObj, tenantName):
     return a
   return tenantClass(a)
   
-def CreateUser(appObj, UserID):
+def CreateUser(appObj, UserID, mainTenant):
   appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
     "UserID": UserID,
     "TenantRoles": {}
   })
+  AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
+
 
 def AddUserRole(appObj, userID, tennantName, roleName):
   def updUser(obj):
