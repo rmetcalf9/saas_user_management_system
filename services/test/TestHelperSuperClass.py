@@ -48,7 +48,17 @@ class testHelperSuperClass(unittest.TestCase):
         raise context.exception
     self.assertTrue(ExpectedException == context.exception)
 
+  def sortListsInDict(self, dictToCheck):
+    for k in dictToCheck.keys():
+      if isinstance(dictToCheck[k],dict):
+        self.sortListsInDict(dictToCheck[k])
+      if isinstance(dictToCheck[k],list):
+        dictToCheck[k].sort()
+    return
+    
   def areJSONStringsEqual(self, str1, str2):
+    self.sortListsInDict(str1)
+    self.sortListsInDict(str2)
     a = json.dumps(str1, sort_keys=True)
     b = json.dumps(str2, sort_keys=True)
     return (a == b)
@@ -111,8 +121,8 @@ class testHelperAPIClient(testHelperSuperClass):
 
   def createUserWithTwoIdentititesForOneUser(self, userID1, userID2, InternalAuthUsername):
     masterTenant = GetTenant(appObj,masterTenantName)
-    CreateUser(appObj, userID1)
-    CreateUser(appObj, userID2)
+    CreateUser(appObj, userID1, masterTenantName)
+    CreateUser(appObj, userID2, masterTenantName)
     identity1 = createNewIdentity(appObj, 'standard','standard', userID1)
     identity2 = createNewIdentity(appObj, 'standard','standard', userID2)
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
