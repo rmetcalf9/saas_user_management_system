@@ -46,23 +46,13 @@ TODO
 Example token:
 ```
 {
-  "iss": "saas_user_management_system_jwtkey",
-  "exp": 1546520660,
-  "userid": "xxx@yyy.com",
-  "tennant_info": [
-    {
-     "name": "tennant1",
-     "roles": [
-      "role1", "role2", "role3"
-     ]
-    },
-    {
-     "name": "tennant2",
-     "roles": [
-      "role1", "role2", "role3"
-     ]
-    }
-  ]
+	'UserID': 'abc123',
+	'TenantRoles': {
+		'tennantName': ['roleName']
+	},
+	'authedPersonGuid': '123ABC',
+	'iss': 'abc123',
+	'exp': 1548076970
 }
 ```
 
