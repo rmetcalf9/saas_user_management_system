@@ -23,8 +23,6 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
   if not verified:
     raise Unauthorized()
   
-  print(decodedToken)
-
 def getPaginatedParamValues(request):
   pagesizemax = 500
   offset = request.args.get('offset')
@@ -46,7 +44,7 @@ def getPaginatedParamValues(request):
     'offset': offset,
     'pagesize': pagesize,
     'query': query,
-    'sort': sort
+    'sort': sort,
   }
 
 def registerAPI(appObj):
@@ -64,34 +62,38 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of tenants'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      ##print(getPaginatedParamValues(request))
+      def defOutput(item):
+        return 'AA'
 
+      outputFN = defOutput
+      filterFN = None
+      return appObj.objectStore.getPaginatedResult(appObj, "tenants", getPaginatedParamValues(request), request, outputFN, filterFN)
 
-      def output(item):
-        return item
-        #return appObj.appData['jobsData'].jobs[item]._caculatedDict(appObj)
-      def filter(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
-        #if whereClauseText.find('=') == -1:
-        #  if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
-        #    return True
-        #  if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
-        #    return True
-        #  return False
-        ##only supports a single search param
-        #sp = whereClauseText.split("=")
-        #if sp[0]=="PINNED":
-        #  if sp[1]=="TRUE":
-        #     return appObj.appData['jobsData'].jobs[item].pinned
-        #  if sp[1]=="FALSE":
-        #     return not appObj.appData['jobsData'].jobs[item].pinned
-        #  return False
-        #return False
-        return True
-      return appObj.getPaginatedResult(
-        [], #appObj.appData['jobsData'].jobs_name_lookup,
-        output,
-        request,
-        filter
-      )
+#      def output(item):
+#        return item
+#        #return appObj.appData['jobsData'].jobs[item]._caculatedDict(appObj)
+#      def filter(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
+#        #if whereClauseText.find('=') == -1:
+#        #  if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
+#        #    return True
+#        #  if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
+#        #    return True
+#        #  return False
+#        ##only supports a single search param
+#        #sp = whereClauseText.split("=")
+#        #if sp[0]=="PINNED":
+#        #  if sp[1]=="TRUE":
+#        #     return appObj.appData['jobsData'].jobs[item].pinned
+#        #  if sp[1]=="FALSE":
+#        #     return not appObj.appData['jobsData'].jobs[item].pinned
+#        #  return False
+#        #return False
+#        return True
+#      return appObj.getPaginatedResult(
+#        [], #appObj.appData['jobsData'].jobs_name_lookup,
+#        output,
+#        request,
+#        filter
+#      )
 
 

@@ -1,5 +1,6 @@
 from TestHelperSuperClass import testHelperAPIClient, env
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
+import json
 
 class test_api(testHelperAPIClient):
   def makeJWTTokenWithMasterTenantRoles(self, roles):
@@ -29,11 +30,6 @@ class test_api(testHelperAPIClient):
     result = self.testClient.get('/api/admin/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
     self.assertEqual(result.status_code, 401)
 
-  def test_jwtWorksAsHeader(self): 
-    jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
-    result = self.testClient.get('/api/admin/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 200)
-
   def test_jwtWorksAsCookie(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
     self.testClient.set_cookie('localhost', jwtCookieName, jwtToken)
@@ -44,4 +40,13 @@ class test_api(testHelperAPIClient):
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
     result = self.testClient.get('/api/admin/' + masterTenantName + 'xx/tenants', headers={ jwtHeaderName: jwtToken})
     self.assertEqual(result.status_code, 401)
+
+  def test_jwtWorksAsHeader(self): 
+    jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
+    result = self.testClient.get('/api/admin/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+
+    self.assertJSONStringsEqual(resultJSON, {"message": "Tenant not found"})
+
 

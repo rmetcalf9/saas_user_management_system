@@ -19,11 +19,24 @@ class ObjectStore():
   def getObjectJSON(self, appObj, objectType, objectKey):
     return self._getObjectJSON(appObj, objectType, objectKey)
   
+  def getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN=None, filterFN=None):
+    def defOutput(item):
+      return item
+    def defFilter(item, whereClauseText):
+      return True
+    if outputFN is None:
+      outputFN = defOutput
+    if filterFN is None:
+      filterFN = defFilter
+    return self._getPaginatedResult(appObj, objectType, paginatedParamValues, request, outputFN, filterFN)
+  
   def _saveJSONObject(self, appObj, objectType, objectKey, JSONString):
-    raise Exception('Not Implemented')
+    raise Exception('Not Overridden')
   def _removeJSONObject(self, appObj, objectType, objectKey):
-    raise Exception('Not Implemented')
+    raise Exception('Not Overridden')
   def _updateJSONObject(self, appObj, objectType, objectKey, updateFn):
-    raise Exception('Not Implemented')
+    raise Exception('Not Overridden')
   def _getObjectJSON(self, appObj, objectType, objectKey):
-    raise Exception('Not Implemented')
+    raise Exception('Not Overridden')
+  def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN, filterFN):
+    raise Exception('Not Overridden')

@@ -34,7 +34,6 @@ class test_api(testHelperAPIClient):
     result = self.testClient.get('/api/login/' + invalidTenantName + '/authproviders')
     self.assertEqual(result.status_code, 400)
     resultJSON = json.loads(result.get_data(as_text=True))
-    print(resultJSON)
     self.assertJSONStringsEqual(resultJSON, {"message": "Tenant not found"})
 
   def test_loginReturnsDefaultTenantAndAuthInfo(self):
