@@ -91,7 +91,7 @@ class test_api(testHelperAPIClient):
     jwtTokenDict = self.decodeToken(result2JSON[ 'jwtData' ]['JWTToken'])
     expectedTokenDict = {
       'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
-      'iss': '_CheckUserInitAndReturnJWTSecretAndKey_key', 
+      'iss': 'FORCED-CONSTANT-TESTING-GUID', 
       'TenantRoles': {
         'usersystem': ['systemadmin', 'hasaccount']
       }, 

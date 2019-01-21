@@ -131,7 +131,7 @@ class test_tenants(testHelperAPIClient):
       'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID1, 
       "exp": "xx", 
-      "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key",
+      "iss": userID1,
       "authedPersonGuid": res['person']['guid']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
@@ -144,7 +144,7 @@ class test_tenants(testHelperAPIClient):
       'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID2, 
       "exp": "xx", 
-      "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key",
+      "iss": userID2,
       "authedPersonGuid": res['person']['guid']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
@@ -184,7 +184,7 @@ class test_tenants(testHelperAPIClient):
       'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID, 
       "exp": "xx", 
-      "iss": "_CheckUserInitAndReturnJWTSecretAndKey_key",
+      "iss": userID,
       "authedPersonGuid": person1['guid']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")

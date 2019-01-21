@@ -14,3 +14,8 @@ def generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID):
   JWTDict['exp'] = expiryTime
   encodedJWT = jwt.encode(JWTDict, b64decode(jwtSecretAndKey['secret']), algorithm='HS256')
   return {'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }
+
+def decodeJWTToken(token, secret, verify):
+  if verify:
+    return jwt.decode(token, b64decode(secret), algorithms=['HS256'])
+  return jwt.decode(token, verify=False)

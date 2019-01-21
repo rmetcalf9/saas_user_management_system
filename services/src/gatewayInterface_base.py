@@ -11,8 +11,20 @@ class gatewayInterfaceBaseClass():
   def _setup(self, config):
     raise Exception('Not Overridden')
 
-  def CheckUserInitAndReturnJWTSecretAndKey(self, userDict):
-    return self._CheckUserInitAndReturnJWTSecretAndKey(userDict)
+  def CheckUserInitAndReturnJWTSecretAndKey(self, UserID):
+    return self._CheckUserInitAndReturnJWTSecretAndKey(UserID)
   
-  def _CheckUserInitAndReturnJWTSecretAndKey(self, userDict):
+  def _CheckUserInitAndReturnJWTSecretAndKey(self, UserID):
     raise Exception('Not Overridden')
+
+  def ShouldJWTTokensBeVerified(self):
+    return self._ShouldJWTTokensBeVerified
+
+  def _ShouldJWTTokensBeVerified(self):
+    raise Exception('Not Overridden')
+
+  def GetJWTTokenSecret(self, UserID):
+    return self._GetJWTTokenSecret(UserID)
+
+  def _GetJWTTokenSecret(self, UserID):
+    raise Exception('_GetJWTTokenSecret Not Overridden')

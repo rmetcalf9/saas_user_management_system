@@ -165,7 +165,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
-  jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict)
+  jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict['UserID'])
   resDict['userGuid'] = userDict['UserID']
   resDict['authedPersonGuid'] = authUserObj['personGUID']
   

@@ -13,5 +13,11 @@ class gatewayInterfaceClass(base):
     else:
       self.jwtSecret = config['jwtSecret']
 
-  def _CheckUserInitAndReturnJWTSecretAndKey(self, userDict):
-    return { 'key': '_CheckUserInitAndReturnJWTSecretAndKey_key', 'secret': self.jwtSecret }
+  def _CheckUserInitAndReturnJWTSecretAndKey(self, UserID):
+    return { 'key': UserID, 'secret': self.jwtSecret }
+    
+  def _ShouldJWTTokensBeVerified(self):
+    return True
+
+  def _GetJWTTokenSecret(self, UserID):
+    return self.jwtSecret
