@@ -4,6 +4,7 @@ from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized
 from apiSecurity import verifyAPIAccessUserLoginRequired
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName
+from apiSharedModels import getTenantModel
 
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
@@ -24,8 +25,29 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
   
   print(decodedToken)
 
-
-
+def getPaginatedParamValues(request):
+  pagesizemax = 500
+  offset = request.args.get('offset')
+  if offset is None:
+    offset = 0
+  else:
+    offset = int(offset)
+  pagesize = request.args.get('pagesize')
+  if pagesize is None:
+    pagesize = 100
+  else:
+    pagesize = int(pagesize)
+  if pagesize > pagesizemax:
+    pagesize = pagesizemax
+  
+  sort = request.args.get('sort')
+  query = request.args.get('query')
+  return {
+    'offset': offset,
+    'pagesize': pagesize,
+    'query': query,
+    'sort': sort
+  }
 
 def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('admin', description='API for accessing admin functions.')
@@ -35,14 +57,41 @@ def registerAPI(appObj):
   
     '''Admin'''
     @nsAdmin.doc('admin')
-    #@nsAdmin.marshal_with(getTenantModel(appObj))
-    #@nsAdmin.response(200, 'Success', model=getTenantModel(appObj))
-    #@nsAdmin.response(400, 'Bad Request')
+    #@nsJobs.marshal_with(appObj.getResultModel(getTenantModel(appObj)))
+    #@nsAdmin.response(200, 'Success', model=appObj.getResultModel(getTenantModel(appObj)))
     @nsAdmin.response(401, 'Unauthorized')
+    @appObj.addStandardSortParams(nsAdmin)
     def get(self, tenant):
-     '''Get list of tenants'''
-     verifySecurityOfAdminAPICall(appObj, request, tenant)
+      '''Get list of tenants'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      ##print(getPaginatedParamValues(request))
 
-     return None
 
-  
+      def output(item):
+        return item
+        #return appObj.appData['jobsData'].jobs[item]._caculatedDict(appObj)
+      def filter(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
+        #if whereClauseText.find('=') == -1:
+        #  if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
+        #    return True
+        #  if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
+        #    return True
+        #  return False
+        ##only supports a single search param
+        #sp = whereClauseText.split("=")
+        #if sp[0]=="PINNED":
+        #  if sp[1]=="TRUE":
+        #     return appObj.appData['jobsData'].jobs[item].pinned
+        #  if sp[1]=="FALSE":
+        #     return not appObj.appData['jobsData'].jobs[item].pinned
+        #  return False
+        #return False
+        return True
+      return appObj.getPaginatedResult(
+        [], #appObj.appData['jobsData'].jobs_name_lookup,
+        output,
+        request,
+        filter
+      )
+
+
