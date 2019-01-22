@@ -8,7 +8,9 @@ function isValueHeld (a) {
 
 function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
   if (isValueHeld(from.query.usersystem_returnaddress)) {
-    stores().commit('globalDataStore/updateUsersystemReturnaddress', from.query.usersystem_returnaddress)
+    var decoded = decodeURIComponent(from.query.usersystem_returnaddress)
+    // console.log('Frontend router got return address:', decoded)
+    stores().commit('globalDataStore/updateUsersystemReturnaddress', decoded)
   }
   if (stores().state.globalDataStore.tenantInfo !== null) {
     if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {

@@ -17,7 +17,7 @@
         </q-btn>
 
         <q-toolbar-title>
-          Quasar App
+          SAAS User System - {{ pageTitle }}
           <div slot="subtitle">Running on Quasar v{{ $q.version }}</div>
         </q-toolbar-title>
       </q-toolbar>
@@ -32,35 +32,18 @@
         link
         inset-delimiter
       >
-        <q-list-header>Essential Links</q-list-header>
-        <q-item @click.native="openURL('http://quasar-framework.org')">
-          <q-item-side icon="school" />
-          <q-item-main label="Docs" sublabel="quasar-framework.org" />
+        <q-list-header>Functions</q-list-header>
+        <q-item :to='"/" + this.$route.params.tenantName + "/tenants"'>
+          <q-item-side icon="business" />
+          <q-item-main label="Tenants" sublabel="" />
         </q-item>
-        <q-item @click.native="openURL('https://github.com/quasarframework/')">
-          <q-item-side icon="code" />
-          <q-item-main label="GitHub" sublabel="github.com/quasarframework" />
-        </q-item>
-        <q-item @click.native="openURL('https://discord.gg/5TDhbDg')">
-          <q-item-side icon="chat" />
-          <q-item-main label="Discord Chat Channel" sublabel="https://discord.gg/5TDhbDg" />
-        </q-item>
-        <q-item @click.native="openURL('http://forum.quasar-framework.org')">
-          <q-item-side icon="record_voice_over" />
-          <q-item-main label="Forum" sublabel="forum.quasar-framework.org" />
-        </q-item>
-        <q-item @click.native="openURL('https://twitter.com/quasarframework')">
-          <q-item-side icon="rss feed" />
-          <q-item-main label="Twitter" sublabel="@quasarframework" />
-        </q-item>
-        <q-list-header>User</q-list-header>
+        <q-list-header>User Options</q-list-header>
         <q-item @click.native="clickLogout">
           <q-item-side icon="exit_to_app" />
           <q-item-main label="Logout" />
         </q-item>
       </q-list>
     </q-layout-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -77,9 +60,15 @@ export default {
       leftDrawerOpen: this.$q.platform.is.desktop
     }
   },
+  computed: {
+    pageTitle () {
+      return this.$store.state.globalDataStore.pageTitle
+    }
+  },
   methods: {
     openURL,
     clickLogout () {
+      this.$store.commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', this.$router.currentRoute.path)
       this.$q.cookies.remove('usersystemUserCredentials')
       this.$router.replace('/' + this.$route.params.tenantName + '/logout')
     }

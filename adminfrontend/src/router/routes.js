@@ -1,3 +1,4 @@
+import stores from '../store/index.js'
 import { Cookies } from 'quasar'
 
 function getAlteredHost (origHost, hostLookupList) {
@@ -14,10 +15,24 @@ function checkLoginNeeded (to, from, next) {
   console.log('Checking to see if login is needed')
   var authCookieSet = Cookies.has('usersystemUserCredentials')
   if (authCookieSet) {
-    console.log('Already logged in')
+    // console.log('Already logged in')
     next()
     return
   }
+  var thisQuasarPath = to.path
+  var logoutClickCurRoute = stores().state.globalDataStore.logoutClickCurRoute
+  if (typeof (logoutClickCurRoute) !== 'undefined') {
+    if (logoutClickCurRoute !== null) {
+      thisQuasarPath = logoutClickCurRoute
+    }
+  }
+  if (thisQuasarPath.startsWith('/')) {
+    thisQuasarPath = thisQuasarPath.substr(1)
+  }
+  var quasarPathForTenenat = '#/' + thisQuasarPath.substr(0, thisQuasarPath.indexOf('/'))
+  thisQuasarPath = '#/' + thisQuasarPath
+
+  stores().commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', null)
   // ##console.log(this.$route.query.page)
   // ##console.log(to.query)
 
@@ -41,13 +56,6 @@ function checkLoginNeeded (to, from, next) {
   // #/usersystem/selectAuth
   // console.log(window.location.hash)
 
-  var thisQuasarPath = to.path
-  if (thisQuasarPath.startsWith('/')) {
-    thisQuasarPath = thisQuasarPath.substr(1)
-  }
-  var quasarPathForTenenat = '#/' + thisQuasarPath.substr(0, thisQuasarPath.indexOf('/'))
-  thisQuasarPath = '#/' + thisQuasarPath
-  console.log(thisQuasarPath)
   var locationToGoTo = ''
   if (window.location.pathname.includes('/public/web/adminfrontend/')) {
     locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat
@@ -61,10 +69,16 @@ function checkLoginNeeded (to, from, next) {
   }
   var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + thisQuasarPath
 
-  window.location.href = locationToGoTo + '?usersystem_returnaddress=' + returnAddress
+  window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress)
   // console.log('GOTO:' + locationToGoTo)
   // console.log('RET:' + returnAddress)
   next()
+}
+
+function beforeEnterMainIndexChildPage (to, from, next, pageTitle) {
+  // console.log('beforeEnterMainIndexChildPage')
+  stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
+  return checkLoginNeeded(to, from, next)
 }
 
 const routes = [
@@ -77,7 +91,8 @@ const routes = [
     beforeEnter: checkLoginNeeded,
     children: [
       { path: '', component: () => import('pages/Index.vue') },
-      { path: 'logout', beforeEnter: checkLoginNeeded }
+      { path: 'tenants', component: () => import('pages/Tenants.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Tenants') } },
+      { path: 'logout', beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Logout') } }
     ]
   }
 ]
