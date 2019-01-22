@@ -5,6 +5,7 @@ export function someAction (context) {
 
 import callbackHelper from '../../callbackHelper'
 import axios from 'axios'
+import shared from '../../sharedFns.js'
 
 function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) {
   var toTry = locationsToTry.pop()
@@ -31,13 +32,7 @@ function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) 
 }
 
 export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
-  // TODO how do we know what vx should be?
-  var possiblePublicApiLocations = [
-    '/vx/public/',
-    'http://somefunnyhostname.com:8098/',
-    'http://somefunnyhostname.com:5098/',
-    'http://127.0.0.1:8098/'
-  ]
+  var possiblePublicApiLocations = shared.getURLsToTryForAPI()
   commit('updateTenant', params.tenantName)
 
   var callback = {
