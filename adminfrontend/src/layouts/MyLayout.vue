@@ -37,6 +37,10 @@
           <q-item-side icon="business" />
           <q-item-main label="Tenants" sublabel="" />
         </q-item>
+        <q-item :to='"/" + this.$route.params.tenantName + "/users"'>
+          <q-item-side icon="person" />
+          <q-item-main label="Users" sublabel="" />
+        </q-item>
         <q-list-header>User Options</q-list-header>
         <q-item @click.native="clickLogout">
           <q-item-side icon="exit_to_app" />
