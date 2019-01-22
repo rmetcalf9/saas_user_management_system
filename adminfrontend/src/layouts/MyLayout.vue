@@ -22,7 +22,6 @@
         </q-toolbar-title>
       </q-toolbar>
     </q-layout-header>
-
     <q-layout-drawer
       v-model="leftDrawerOpen"
       :content-class="$q.theme === 'mat' ? 'bg-grey-2' : null"
@@ -51,6 +50,20 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-layout-footer>
+      <q-toolbar
+          color="primary"
+          :glossy="$q.theme === 'mat'"
+          :inverted="$q.theme === 'ios'"
+        >
+          <a v-if="! (serverInfo.apidocsurl === '_')" v-bind:href="serverInfo.apidocsurl" target="_blank">APIdocs</a>
+          <a href="https://github.com/rmetcalf9/saas_user_management_system" target="_blank">GitHub</a>
+          <div class="col"></div> <!-- eat up all the free space -->
+          Version: {{serverInfo.version}}
+      </q-toolbar>
+    </q-layout-footer>
+
   </q-layout>
 </template>
 
@@ -67,6 +80,9 @@ export default {
   computed: {
     pageTitle () {
       return this.$store.state.globalDataStore.pageTitle
+    },
+    serverInfo () {
+      return this.$store.state.globalDataStore.serverInfo
     }
   },
   methods: {
