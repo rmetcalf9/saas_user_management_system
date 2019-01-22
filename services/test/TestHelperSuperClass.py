@@ -50,6 +50,9 @@ class testHelperSuperClass(unittest.TestCase):
     self.assertTrue(ExpectedException == context.exception)
 
   def sortListsInDict(self, dictToCheck):
+    if isinstance(dictToCheck,list):
+      dictToCheck.sort()
+      return
     for k in dictToCheck.keys():
       if isinstance(dictToCheck[k],dict):
         self.sortListsInDict(dictToCheck[k])

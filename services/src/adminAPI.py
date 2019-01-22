@@ -63,7 +63,7 @@ def registerAPI(appObj):
       '''Get list of tenants'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return 'AA'
+        return item
 
       outputFN = defOutput
       filterFN = None

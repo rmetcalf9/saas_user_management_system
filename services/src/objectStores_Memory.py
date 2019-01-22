@@ -34,7 +34,7 @@ class ObjectStore_Memory(ObjectStore):
 
   def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN, filterFN):
     return appObj.getPaginatedResult(
-      self.objectData,
+      self.objectData[objectType],
       outputFN,
       request,
       filterFN
