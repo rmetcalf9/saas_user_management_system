@@ -3,8 +3,10 @@ from flask import request
 from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized
 from apiSecurity import verifyAPIAccessUserLoginRequired
-from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName
+from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName
 from apiSharedModels import getTenantModel
+from urllib.parse import unquote
+import json
 
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
@@ -16,6 +18,13 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
     jwtToken = request.headers.get(jwtHeaderName)
   elif jwtCookieName in request.cookies:
     jwtToken = request.cookies.get(jwtCookieName)
+  elif loginCookieName in request.cookies:
+    a = request.cookies.get(loginCookieName)
+    a = unquote(a)
+    a = json.loads(a)
+    if 'jwtData' in a.keys():
+      if 'JWTToken' in a['jwtData']:
+        jwtToken = a['jwtData']['JWTToken']
   if jwtToken is None:
     raise Unauthorized()
 

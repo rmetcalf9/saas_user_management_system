@@ -24,3 +24,7 @@ PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAcc
 
 jwtHeaderName="jwt-auth-cookie"
 jwtCookieName="jwt-auth-cookie"
+
+#Also try for the cookie the login page sets this allows swagger to work
+##but no renewal here
+loginCookieName="usersystemUserCredentials"

@@ -27,5 +27,5 @@ export const readServerInfo = ({ dispatch, commit, state }, params) => {
 export const callAdminAPI = ({ dispatch, commit, state }, params) => {
   var cookie = Cookies.get('usersystemUserCredentials')
 
-  shared.callAPI(state.apiPrefix, false, '/admin/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback, cookie.jwtData, cookie.refresh)
+  shared.callAPI(state.apiPrefix, true, '/admin/' + state.tenantName + params['path'], params['method'], params['postdata'], params.callback, cookie.jwtData, cookie.refresh)
 }
