@@ -4,8 +4,6 @@ export function someAction (context) {
 }
 */
 
-import callbackHelper from '../../callbackHelper'
-import axios from 'axios'
 import shared from '../../sharedFns.js'
 
 export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
@@ -25,20 +23,6 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
   // state.drawerState = opened
 }
 
-// LoginAPI requires no auth at all
 export const callLoginAPI = ({ dispatch, commit, state }, params) => {
-  var config = {
-    method: params['method'],
-    url: shared.getAPIPathToCall(state.apiPrefix, false, '/login/' + state.tenant + params['path']),
-    data: params['postdata']
-  }
-
-  axios(config).then(
-    (response) => {
-      params.callback.ok(response)
-    },
-    (response) => {
-      callbackHelper.webserviceError(params.callback, response)
-    }
-  )
+  shared.callAPI(state.apiPrefix, false, '/login/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback)
 }

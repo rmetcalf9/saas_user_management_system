@@ -60,7 +60,30 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
+function callAPI (apiPrefix, authed, path, method, data, callback, jwtToken) {
+  if (authed) {
+    if (jwtToken === null) {
+      callbackHelper.callbackWithSimpleError(callback, 'Missing JWTToken Data in callAPI')
+    }
+  }
+  var config = {
+    method: method,
+    url: getAPIPathToCall(apiPrefix, authed, path),
+    data: data
+  }
+
+  axios(config).then(
+    (response) => {
+      callback.ok(response)
+    },
+    (response) => {
+      callbackHelper.webserviceError(callback, response)
+    }
+  )
+}
+
 export default {
   TryToConnectToAPI: TryToConnectToAPI,
-  getAPIPathToCall: getAPIPathToCall
+  getAPIPathToCall: getAPIPathToCall,
+  callAPI: callAPI
 }
