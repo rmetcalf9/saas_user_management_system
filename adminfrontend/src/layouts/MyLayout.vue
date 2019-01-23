@@ -57,7 +57,7 @@
           :glossy="$q.theme === 'mat'"
           :inverted="$q.theme === 'ios'"
         >
-          <a v-if="! (serverInfo.Server.APIDocsUrl === '_')" v-bind:href="serverInfo.Server.APIDocsUrl" target="_blank">APIdocs</a>
+          <a v-if="! (serverInfo.Server.APIAPP_APIDOCSURL === '_')" v-bind:href="serverInfo.Server.APIAPP_APIDOCSURL" target="_blank">APIdocs</a>
           <div>&nbsp;</div>
           <a href="https://github.com/rmetcalf9/saas_user_management_system" target="_blank">GitHub</a>
           <div class="col"></div> <!-- eat up all the free space -->

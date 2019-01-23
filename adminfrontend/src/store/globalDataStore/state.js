@@ -7,7 +7,7 @@ export default {
   serverInfo: {
     Server: {
       Version: 'NotRead',
-      APIDocsUrl: '_'
+      APIAPP_APIDOCSURL: '_'
     }
   }
 }
