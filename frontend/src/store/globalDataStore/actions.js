@@ -14,13 +14,13 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
   var callback = {
     ok: function (response) {
       console.log('Success API response recieved')
-      commit('updateUrlToReachPublicAPI', response.sucessfulURL)
+      commit('updateApiPrefix', response.sucessfulApiPrefix)
       commit('updateTenantInfo', response.origResponse.data)
       params.callback.ok(response.origResponse)
     },
     error: params.callback.error
   }
-  shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, 'api/login/' + params.tenantName + '/authproviders')
+  shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, '/login/' + params.tenantName + '/authproviders')
 
   // state.drawerState = opened
 }
@@ -29,7 +29,7 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
 export const callLoginAPI = ({ dispatch, commit, state }, params) => {
   var config = {
     method: params['method'],
-    url: state.urlToReachPublicAPI + 'api/login/' + state.tenant + params['path'],
+    url: shared.getAPIPathToCall(state.apiPrefix, false, '/login/' + state.tenant + params['path']),
     data: params['postdata']
   }
 

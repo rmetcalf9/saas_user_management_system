@@ -1,6 +1,6 @@
 // Frontend GlobalStore State
 export default {
-  urlToReachPublicAPI: null,
+  apiPrefix: null,
   tenantInfo: null,
   tenant: null,
   selectedAuthProvGUID: null,

@@ -23,46 +23,40 @@ On development machine these must run on different ports, accessed by root on al
  
 Frontend globalDataSTore action checkAuthProviders has logic to navigate this
 
-## Server Info Endpoint
+## Example Public Web Access
 
-External Through Kong: https://somefunnyhostname.com/vx/public/api/serverinfo/
-Internal Through nginx: /public/api/serverinfo/
-Dev External: http://somefunnyhostname.com:8098/public/api/serverinfo/
+External Through Kong: https://somefunnyhostname.com/vx/public/web/***
+***
 
+## Example Public API Access
 
-## Login Web Endpoints (public)
+External Through Kong: https://somefunnyhostname.com/vx/public/api/login/serverinfo
+Direct on Server: http://somefunnyhostname.com:5098/api/public/login/serverinfo
 
-### /vx/public/web/$$tenant$$/login
+## Example Authed API Access
 
-If there is only one auth provider configured will go direct to that authprovider, otherwise it will display a menu.
-
-### /vx/public/web/$$tenant$$/login/__authprovidername__
-
-Depending on authprovider configuration will display a page prompting the user for credentials.
+External Through Kong: https://somefunnyhostname.com/vx/authed/api/admin/tenantname/tenants
+Direct on Server: http://somefunnyhostname.com:5098/api/authed/admin/tenantname/tenants
 
 
-## Login Service Endpoints (public)
+## For webapps calling service
 
-### GET /vx/public/api/login/$$tenant$$/authproviders
+API Prefix possibilities are:
+/vx/
+http://somefunnyhostname.com:8098/
+http://somefunnyhostname.com:5098/
+http://127.0.0.1:8098/
 
-Get a list of the auth providers for this tenant
+To call an API two paramas are needed, authed and api
+authed is true or false
+api is "/admin/tenantname/tenants" or "/login/serverinfo"
 
-### POST /vx/public/api/login/$$tenant$$/authproviders
-
-Login to a particular auth provider - will return the JWT token or an error
-
-### POST /vx/public/api/login/$$tenant$$/refresh
-
-Login to a particular auth provider - will return the JWT token or an error
+If Authed this maps to:
+apiPrefix + '/authed/api' + api
+Not Authed:
+apiPrefix + '/public/api' + api
 
 
-## Admin Web Endpoints (public)
 
-### /vx/public/web/$$tenant$$/admin
 
-## Admin Service Endpoints (protected using valid api token)
-
-### GET /vx/authed/api/admin/$$tenant$$/tenants
-
-Get a list of tenants
 
