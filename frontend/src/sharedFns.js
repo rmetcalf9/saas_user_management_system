@@ -9,6 +9,7 @@ import axios from 'axios'
 function getURLsToTryForAPI (currentURL, tenantName) {
   // TODO how do we know what vx should be?
   console.log('TODO Work out on prod vx based on current url and tenantName: ', currentURL, tenantName)
+  // Note: Always on the public API
   return [
     '/vx/public/',
     'http://somefunnyhostname.com:8098/',

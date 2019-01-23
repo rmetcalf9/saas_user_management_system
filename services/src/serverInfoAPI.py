@@ -4,7 +4,7 @@ import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 
-def getAPIModel(appObj):
+def getServerInfoModel(appObj):
   serverInfoServerModel = appObj.flastRestPlusAPIObject.model('mainAPI', {
     'Version': fields.String(default='DEFAULT', description='Version of container running on server')
   })
@@ -12,34 +12,19 @@ def getAPIModel(appObj):
     'Server': fields.Nested(serverInfoServerModel)
   })  
 
-class ServerInfoClass:
-  appObj = None
-  def resetData(self, appObj):
-    self.appObj = appObj
-  def getJSON(self):
-    return { 
-      'Server': { 'Version': self.appObj.version },
-     }
+def registerServerInfoAPIFn(appObj, namespacePassed):
 
-    
-serverInfoClass = ServerInfoClass()
-
-def resetData(appObj):
-  serverInfoClass.resetData(appObj)
-  
-def registerAPI(appObj):
-  serverInfoClass.resetData(appObj)
-
-  nsServerinfo = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
-  @nsServerinfo.route('/')
+  @namespacePassed.route('/serverinfo')
   class servceInfo(Resource):
   
     '''General Server Operations'''
-    @nsServerinfo.doc('getserverinfo')
-    @nsServerinfo.marshal_with(getAPIModel(appObj))
-    @nsServerinfo.response(200, 'Success')
+    @namespacePassed.doc('getserverinfo')
+    @namespacePassed.marshal_with(getServerInfoModel(appObj))
+    @namespacePassed.response(200, 'Success')
     def get(self):
      '''Get general information about the server'''
      curDatetime = datetime.datetime.now(pytz.utc)
-     return serverInfoClass.getJSON()
+     return { 
+      'Server': { 'Version': appObj.version },
+     }
     

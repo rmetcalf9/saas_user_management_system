@@ -11,7 +11,6 @@ from flask_restplus import fields
 import time
 import datetime
 
-from serverInfoAPI import registerAPI as registerMainApi, resetData as resetMainApi
 from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
 
@@ -66,7 +65,6 @@ class appObjClass(parAppObj):
     self.serverStartTime = serverStartTime
     self.version = readFromEnviroment(env, 'APIAPP_VERSION', None, None)
     super(appObjClass, self).init(env)
-    resetMainApi(self)
     
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None)
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None)
@@ -93,7 +91,6 @@ class appObjClass(parAppObj):
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
-    registerMainApi(self)
     registerLoginApi(self)
     registerAdminApi(self)
     self.flastRestPlusAPIObject.title = "SAAS User Management"
