@@ -4,6 +4,7 @@ export function someAction (context) {
 }
 */
 import shared from '../../sharedFns.js'
+import { Cookies } from 'quasar'
 
 export const readServerInfo = ({ dispatch, commit, state }, params) => {
   if (state.apiPrefix !== null) {
@@ -21,4 +22,10 @@ export const readServerInfo = ({ dispatch, commit, state }, params) => {
     error: params.callback.error
   }
   shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, '/login/serverinfo')
+}
+
+export const callAdminAPI = ({ dispatch, commit, state }, params) => {
+  var cookie = Cookies.get('usersystemUserCredentials')
+
+  shared.callAPI(state.apiPrefix, false, '/admin/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback, cookie.jwtData, cookie.refresh)
 }

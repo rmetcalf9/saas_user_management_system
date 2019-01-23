@@ -60,10 +60,10 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
-function callAPI (apiPrefix, authed, path, method, data, callback, jwtToken) {
+function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData) {
   if (authed) {
-    if (jwtToken === null) {
-      callbackHelper.callbackWithSimpleError(callback, 'Missing JWTToken Data in callAPI')
+    if (jwtTokenData === null) {
+      callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
     }
   }
   var config = {

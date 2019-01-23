@@ -16,6 +16,12 @@ function checkLoginNeeded (to, from, next) {
   var authCookieSet = Cookies.has('usersystemUserCredentials')
   if (authCookieSet) {
     // console.log('Already logged in')
+    // var cookie = Cookies.get('usersystemUserCredentials')
+    // var jwtTokenData = cookie.jwtData
+    // var refreshTokenData = cookie.refresh
+    // console.log('Cookie Val:', cookie)
+    // console.log('JWT Val:', jwtTokenData)
+    // console.log('refresh Val:', refreshTokenData)
     next()
     return
   }

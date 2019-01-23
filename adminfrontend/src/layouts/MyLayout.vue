@@ -105,7 +105,6 @@ export default {
     var callback = {
       ok: function (response) {
         Loading.hide()
-        console.log('TODO SUC')
       },
       error: function (response) {
         Loading.hide()
