@@ -1,3 +1,4 @@
+// Frontend GlobalStore State
 export default {
   urlToReachPublicAPI: null,
   tenantInfo: null,

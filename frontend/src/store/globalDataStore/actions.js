@@ -1,3 +1,4 @@
+// Frontend GlobalStore Actions
 /*
 export function someAction (context) {
 }
@@ -7,32 +8,7 @@ import callbackHelper from '../../callbackHelper'
 import axios from 'axios'
 import shared from '../../sharedFns.js'
 
-function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) {
-  var toTry = locationsToTry.pop()
-
-  var config = {
-    method: 'GET',
-    url: toTry + 'api/login/' + tenantName + '/authproviders'
-  }
-  console.log('Tyring to reach API at ' + config.url)
-  axios(config).then(
-    (response) => {
-      console.log('Success API response recieved')
-      commit('updateUrlToReachPublicAPI', toTry)
-      callback.ok(response)
-    },
-    (response) => {
-      if (locationsToTry.length > 0) {
-        TryToConnectToPublicAPI(locationsToTry, callback, commit, tenantName)
-      } else {
-        callbackHelper.callbackWithSimpleError(callback, 'Failed to connect to public login API')
-      }
-    }
-  )
-}
-
 export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
-  var possiblePublicApiLocations = shared.getURLsToTryForAPI(params.currentHREF)
   commit('updateTenant', params.tenantName)
 
   var callback = {
@@ -42,7 +18,7 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
     },
     error: params.callback.error
   }
-  TryToConnectToPublicAPI(possiblePublicApiLocations.reverse(), callback, commit, params.tenantName)
+  shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, commit, 'api/login/' + params.tenantName + '/authproviders')
 
   // state.drawerState = opened
 }
