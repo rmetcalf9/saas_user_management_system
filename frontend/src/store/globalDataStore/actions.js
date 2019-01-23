@@ -32,7 +32,7 @@ function TryToConnectToPublicAPI (locationsToTry, callback, commit, tenantName) 
 }
 
 export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
-  var possiblePublicApiLocations = shared.getURLsToTryForAPI()
+  var possiblePublicApiLocations = shared.getURLsToTryForAPI(params.currentHREF)
   commit('updateTenant', params.tenantName)
 
   var callback = {
@@ -42,7 +42,6 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
     },
     error: params.callback.error
   }
-
   TryToConnectToPublicAPI(possiblePublicApiLocations.reverse(), callback, commit, params.tenantName)
 
   // state.drawerState = opened

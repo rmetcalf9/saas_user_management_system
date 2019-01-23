@@ -4,8 +4,9 @@ Functions shared between frontend and adminfrontend
 (This and callbackHelper)
 */
 
-function getURLsToTryForAPI () {
+function getURLsToTryForAPI (currentURL) {
   // TODO how do we know what vx should be?
+  console.log('TODO Work out on prod vx based on current url: ', currentURL)
   return [
     '/vx/public/',
     'http://somefunnyhostname.com:8098/',

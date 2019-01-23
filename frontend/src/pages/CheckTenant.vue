@@ -50,7 +50,7 @@ export default {
     this.$store.dispatch('globalDataStore/checkAuthProviders', {
       tenantName: this.$route.params.tenantName,
       callback: callback,
-      currentRoute: this.$route
+      currentHREF: window.location.href
     })
   }
 }
