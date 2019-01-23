@@ -80,7 +80,7 @@ def getValidTenantObj(appObj, tenant):
 
 def registerAPI(appObj):
 
-  nsLogin = appObj.flastRestPlusAPIObject.namespace('login', description='Public API for displaying login pages.')
+  nsLogin = appObj.flastRestPlusAPIObject.namespace('public/login', description='Public API for displaying login pages.')
   registerServerInfoAPIFn(appObj, nsLogin)
   
   

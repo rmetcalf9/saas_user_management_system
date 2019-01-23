@@ -16,7 +16,6 @@ from constants import masterTenantName
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
 
-
 env = {
   'APIAPP_MODE': 'DOCKER',
   'APIAPP_VERSION': 'TEST-3.3.3',
@@ -111,6 +110,10 @@ class testHelperAPIClient(testHelperSuperClass):
   testClient = None
   standardStartupTime = pytz.timezone('Europe/London').localize(datetime.datetime(2018,1,1,13,46,0,0))
 
+  loginAPIPrefix = '/api/public/login'
+  adminAPIPrefix = '/api/authed/admin'
+
+  
   def setUp(self):
     # curDatetime = datetime.datetime.now(pytz.utc)
     # for testing always pretend the server started at a set datetime

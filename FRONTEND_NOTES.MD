@@ -9,11 +9,14 @@ Endpoints setup in Kong
  | /vx/authed | /authed | Verifies JWT Tokens |
 
 Nginx paths: (In docker container nginx servers on single port)
- - /vx/public/__web__
- - /vx/public/__api__
- - /vx/authed/__adminapi__
+ | Nginx External Path | Mapped to |
+ |---|---|
+ | /public/web/frontend | frontend dist folder |
+ | /public/web/adminfrontend | adminfrontend dist folder |
+ | /public/api | /api/public |
+ | /authed/api | /api/authed |
 
-On development machine these must run on different ports:
+On development machine these must run on different ports, accessed by root on all:
  - /vx/public/__web__/frontend  -> / (8091)
  - /vx/public/__web__/adminfrontend  -> / (8092)
  - /vx/public/__api__  -> / (8098)

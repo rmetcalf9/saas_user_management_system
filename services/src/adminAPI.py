@@ -48,7 +48,7 @@ def getPaginatedParamValues(request):
   }
 
 def registerAPI(appObj):
-  nsAdmin = appObj.flastRestPlusAPIObject.namespace('admin', description='API for accessing admin functions.')
+  nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
 
   @nsAdmin.route('/<string:tenant>/tenants')
   class tenantInfo(Resource):

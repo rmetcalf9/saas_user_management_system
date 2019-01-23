@@ -15,7 +15,7 @@ serverInfo = {
 class test_api(testHelperAPIClient):
 
   def test_getServerInfo(self):
-    result = self.testClient.get('/api/login/serverinfo')
+    result = self.testClient.get(self.loginAPIPrefix + '/serverinfo')
     self.assertEqual(result.status_code, 200, msg="Wrong response when calling /api/login/serverinfo")
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertJSONStringsEqual(resultJSON, serverInfo)

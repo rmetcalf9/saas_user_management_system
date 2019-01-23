@@ -14,7 +14,7 @@ invalidTenantName="invalidtenantname"
 
 class test_api(testHelperAPIClient):
   def loginAsDefaultUser(self):
-    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -26,18 +26,18 @@ class test_api(testHelperAPIClient):
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
        }
     }
-    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 200)
     return json.loads(result2.get_data(as_text=True))
 
   def test_loginInvalidTenantFails(self):
-    result = self.testClient.get('/api/login/' + invalidTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + invalidTenantName + '/authproviders')
     self.assertEqual(result.status_code, 400)
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertJSONStringsEqual(resultJSON, {"message": "Tenant not found"})
 
   def test_loginReturnsDefaultTenantAndAuthInfo(self):
-    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     
@@ -61,7 +61,7 @@ class test_api(testHelperAPIClient):
   def test_sucessfulLoginAsDefaultUser(self):
     result2JSON = self.loginAsDefaultUser()
     
-    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -73,7 +73,7 @@ class test_api(testHelperAPIClient):
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
        }
     }
-    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 200)
     result2JSON = json.loads(result2.get_data(as_text=True))
 
@@ -120,7 +120,7 @@ class test_api(testHelperAPIClient):
     res = self.createUserWithTwoIdentititesForOneUser(userID1, userID2, InternalAuthUsername)
     
     
-    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -133,7 +133,7 @@ class test_api(testHelperAPIClient):
         "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
        }
     }
-    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 200)
     result2JSON = json.loads(result2.get_data(as_text=True))
 
@@ -164,7 +164,7 @@ class test_api(testHelperAPIClient):
     self.assertTrue(id2Found, msg="Identity 2 not in response")
     
   def test_attemptToLoginWithoutProvidingCredentials(self):
-    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -174,14 +174,14 @@ class test_api(testHelperAPIClient):
       "credentialJSON": { 
        }
     }
-    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 401)
     result2JSON = json.loads(result2.get_data(as_text=True))
     expectedResult = {'message': 'Invalid credentials provided'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
   def test_attemptToLoginProvidingValidUserWithNoPassword(self):
-    result = self.testClient.get('/api/login/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -192,7 +192,7 @@ class test_api(testHelperAPIClient):
         "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
        }
     }
-    result2 = self.testClient.post('/api/login/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 401)
     result2JSON = json.loads(result2.get_data(as_text=True))
     expectedResult = {'message': 'Invalid credentials provided'}
