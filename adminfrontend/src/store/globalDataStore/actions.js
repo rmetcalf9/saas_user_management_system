@@ -3,14 +3,22 @@
 export function someAction (context) {
 }
 */
+import shared from '../../sharedFns.js'
 
-/*
-Called only once
-*/
 export const readServerInfo = ({ dispatch, commit, state }, params) => {
-  if (state.urlToReachAPI === null) {
-    console.log('WARNING - trying to read server info when it is already read')
+  if (state.apiPrefix !== null) {
+    params.callback.ok(null)
     return
   }
-  console.log('TODO')
+  commit('updateTenantName', params.tenantName)
+  var callback = {
+    ok: function (response) {
+      console.log('Success API response recieved')
+      commit('updateApiPrefix', response.sucessfulApiPrefix)
+      commit('updateServerInfo', response.origResponse.data)
+      params.callback.ok(response.origResponse)
+    },
+    error: params.callback.error
+  }
+  shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, '/login/serverinfo')
 }

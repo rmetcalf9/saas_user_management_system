@@ -7,7 +7,8 @@ import datetime
 
 serverInfo = {
       'Server': {
-        'Version': env['APIAPP_VERSION']
+        'Version': env['APIAPP_VERSION'],
+        "APIAPP_APIDOCSURL": "_"
       }
 }
 

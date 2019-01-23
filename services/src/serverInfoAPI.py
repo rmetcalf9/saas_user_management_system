@@ -6,7 +6,8 @@ from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 
 def getServerInfoModel(appObj):
   serverInfoServerModel = appObj.flastRestPlusAPIObject.model('mainAPI', {
-    'Version': fields.String(default='DEFAULT', description='Version of container running on server')
+    'Version': fields.String(default='DEFAULT', description='Version of container running on server'),
+    'APIAPP_APIDOCSURL': fields.String(default='',description='Base endpoint for EBO docs')
   })
   return appObj.flastRestPlusAPIObject.model('ServerInfo', {
     'Server': fields.Nested(serverInfoServerModel)
@@ -25,6 +26,9 @@ def registerServerInfoAPIFn(appObj, namespacePassed):
      '''Get general information about the server'''
      curDatetime = datetime.datetime.now(pytz.utc)
      return { 
-      'Server': { 'Version': appObj.version },
+      'Server': { 
+        'Version': appObj.version ,
+        'APIAPP_APIDOCSURL': appObj.globalParamObject.apidocsurl
+      }
      }
     

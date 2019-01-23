@@ -1,3 +1,4 @@
+// Frontend GlobalStore Mutations
 /*
 export function someMutation (state) {
 }

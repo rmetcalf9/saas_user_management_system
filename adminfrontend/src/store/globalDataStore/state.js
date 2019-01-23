@@ -1,10 +1,13 @@
 // Adminfrontend GlobalStore State
 export default {
+  apiPrefix: null,
+  tenantName: null,
   pageTitle: 'Default Page Title',
   logoutClickCurRoute: null,
   serverInfo: {
-    apidocsurl: '_',
-    version: 'Unknown'
-  },
-  urlToReachAPI: null
+    Server: {
+      Version: 'NotRead',
+      APIDocsUrl: '_'
+    }
+  }
 }

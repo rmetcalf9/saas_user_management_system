@@ -57,10 +57,11 @@
           :glossy="$q.theme === 'mat'"
           :inverted="$q.theme === 'ios'"
         >
-          <a v-if="! (serverInfo.apidocsurl === '_')" v-bind:href="serverInfo.apidocsurl" target="_blank">APIdocs</a>
+          <a v-if="! (serverInfo.Server.APIDocsUrl === '_')" v-bind:href="serverInfo.Server.APIDocsUrl" target="_blank">APIdocs</a>
+          <div>&nbsp;</div>
           <a href="https://github.com/rmetcalf9/saas_user_management_system" target="_blank">GitHub</a>
           <div class="col"></div> <!-- eat up all the free space -->
-          Version: {{serverInfo.version}}
+          Version: {{serverInfo.Server.Version}}
       </q-toolbar>
     </q-layout-footer>
 
@@ -68,7 +69,7 @@
 </template>
 
 <script>
-import { openURL } from 'quasar'
+import { openURL, Loading } from 'quasar'
 
 export default {
   name: 'MyLayout',
@@ -92,6 +93,30 @@ export default {
       this.$q.cookies.remove('usersystemUserCredentials')
       this.$router.replace('/' + this.$route.params.tenantName + '/logout')
     }
+  },
+  created () {
+    if (this.$route.params.tenantName === '') {
+      /// go to root, this will give us a 404
+      console.log('ERROR bad tenant Name')
+      return
+    }
+    Loading.show()
+    // var TTT = this
+    var callback = {
+      ok: function (response) {
+        Loading.hide()
+        console.log('TODO SUC')
+      },
+      error: function (response) {
+        Loading.hide()
+        console.log('TODO Fail')
+      }
+    }
+    this.$store.dispatch('globalDataStore/readServerInfo', {
+      tenantName: this.$route.params.tenantName,
+      callback: callback,
+      currentHREF: window.location.href
+    })
   }
 }
 </script>
