@@ -13,12 +13,14 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
 
   var callback = {
     ok: function (response) {
-      commit('updateTenantInfo', response.data)
-      params.callback.ok(response)
+      console.log('Success API response recieved')
+      commit('updateUrlToReachPublicAPI', response.sucessfulURL)
+      commit('updateTenantInfo', response.origResponse.data)
+      params.callback.ok(response.origResponse)
     },
     error: params.callback.error
   }
-  shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, commit, 'api/login/' + params.tenantName + '/authproviders')
+  shared.TryToConnectToAPI(params.currentHREF, params.tenantName, callback, 'api/login/' + params.tenantName + '/authproviders')
 
   // state.drawerState = opened
 }

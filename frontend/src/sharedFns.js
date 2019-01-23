@@ -17,7 +17,7 @@ function getURLsToTryForAPI (currentURL, tenantName) {
   ]
 }
 
-function TryToConnectToAPIRecurring (locationsToTry, callback, commit, apiPath) {
+function TryToConnectToAPIRecurring (locationsToTry, callback, apiPath) {
   var toTry = locationsToTry.pop()
 
   var config = {
@@ -27,13 +27,14 @@ function TryToConnectToAPIRecurring (locationsToTry, callback, commit, apiPath) 
   console.log('Tyring to reach API at ' + config.url)
   axios(config).then(
     (response) => {
-      console.log('Success API response recieved')
-      commit('updateUrlToReachPublicAPI', toTry)
-      callback.ok(response)
+      callback.ok({
+        origResponse: response,
+        sucessfulURL: toTry
+      })
     },
     (response) => {
       if (locationsToTry.length > 0) {
-        TryToConnectToAPIRecurring(locationsToTry, callback, commit, apiPath)
+        TryToConnectToAPIRecurring(locationsToTry, callback, apiPath)
       } else {
         callbackHelper.callbackWithSimpleError(callback, 'Failed to connect to public login API')
       }
@@ -41,9 +42,9 @@ function TryToConnectToAPIRecurring (locationsToTry, callback, commit, apiPath) 
   )
 }
 
-function TryToConnectToAPI (currentHREF, tenantName, callback, commit, apiPath) {
+function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   var possiblePublicApiLocations = getURLsToTryForAPI(currentHREF, tenantName)
-  TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, commit, apiPath)
+  TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
 export default {
