@@ -1,5 +1,6 @@
 // Adminfrontend GlobalStore State
 export default {
+  readServerInfoInProgress: false,
   apiPrefix: null,
   tenantName: null,
   pageTitle: 'Default Page Title',

@@ -12,7 +12,9 @@ function getAlteredHost (origHost, hostLookupList) {
 }
 
 function checkLoginNeeded (to, from, next) {
-  console.log('Checking to see if login is needed')
+  stores().commit('globalDataStore/updateTenantName', to.params.tenantName)
+
+  // console.log('Checking to see if login is needed')
   var authCookieSet = Cookies.has('usersystemUserCredentials')
   if (authCookieSet) {
     // console.log('Already logged in')

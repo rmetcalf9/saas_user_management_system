@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import { openURL, Loading } from 'quasar'
+import { openURL } from 'quasar'
 
 export default {
   name: 'MyLayout',
@@ -100,6 +100,11 @@ export default {
       console.log('ERROR bad tenant Name')
       return
     }
+    var a = 1
+    if (a === 2) {
+      console.log('NEVE')
+    }
+    /*
     Loading.show()
     // var TTT = this
     var callback = {
@@ -116,6 +121,7 @@ export default {
       callback: callback,
       currentHREF: window.location.href
     })
+    */
   }
 }
 </script>

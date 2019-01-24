@@ -37,6 +37,19 @@ function webserviceError (callback, response) {
   callbackWithError(callback, rjmmsg, response)
 }
 
+function getResponseStatusIfItHasOneOtherwiseNegativeOne (response) {
+  if (typeof (response) === 'undefined') {
+    return -1
+  }
+  if (typeof (response.response) !== 'undefined') {
+    response = response.response
+  }
+  if (typeof (response.status) === 'undefined') {
+    return -1
+  }
+  return response.status
+}
+
 function getDoNothingCallback () {
   var callback = {
     ok: function (response) {
@@ -69,5 +82,6 @@ export default {
   callbackWithNotImplemented: callbackWithNotImplemented,
   webserviceError: webserviceError,
   getDoNothingCallback: getDoNothingCallback,
-  getErrorFromResponse: getErrorFromResponse
+  getErrorFromResponse: getErrorFromResponse,
+  getResponseStatusIfItHasOneOtherwiseNegativeOne: getResponseStatusIfItHasOneOtherwiseNegativeOne
 }

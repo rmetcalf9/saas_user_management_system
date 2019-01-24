@@ -21,3 +21,10 @@ export function SET_PAGE_TITLE (state, newTitle) {
 export function SET_LOGOUT_CLICK_CUR_ROUTE (state, curRoute) {
   state.logoutClickCurRoute = curRoute
 }
+
+export function START_READ_SERVER_INFO (state) {
+  state.readServerInfoInProgress = true
+}
+export function END_READ_SERVER_INFO (state) {
+  state.readServerInfoInProgress = false
+}

@@ -1,6 +1,8 @@
 /*
 Functions shared between frontend and adminfrontend
 
+MUST EDIT THE ADMINFRONTEND version and use process to copy across
+
 (This and callbackHelper)
 */
 import callbackHelper from './callbackHelper'
@@ -66,10 +68,14 @@ function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData,
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
     }
   }
+
   var config = {
     method: method,
     url: getAPIPathToCall(apiPrefix, authed, path),
     data: data
+  }
+  if (authed) {
+    console.log('TODO Add access credentials')
   }
 
   axios(config).then(
@@ -77,7 +83,15 @@ function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData,
       callback.ok(response)
     },
     (response) => {
-      callbackHelper.webserviceError(callback, response)
+      if (authed === false) {
+        callbackHelper.webserviceError(callback, response)
+        return
+      }
+      if (callbackHelper.getResponseStatusIfItHasOneOtherwiseNegativeOne(response) !== 401) {
+        callbackHelper.webserviceError(callback, response)
+        return
+      }
+      callbackHelper.callbackWithSimpleError(callback, 'TODO - try refresh token')
     }
   )
 }
