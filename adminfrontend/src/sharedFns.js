@@ -75,7 +75,8 @@ function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData,
     data: data
   }
   if (authed) {
-    console.log('TODO Add access credentials')
+    // Possible optiomzation - check if jwt token has expired and go direct to refresh call
+    config.headers = {'jwt-auth-token': jwtTokenData.JWTToken}
   }
 
   axios(config).then(

@@ -22,8 +22,8 @@ authProviderNotFoundException = customExceptionClass('authProviderNotFoundExcept
 authFailedException = customExceptionClass('authFailedException')
 PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
 
-jwtHeaderName="jwt-auth-cookie"
-jwtCookieName="jwt-auth-cookie"
+jwtHeaderName="jwt-auth-token"
+jwtCookieName="jwt-auth-token"
 
 #Also try for the cookie the login page sets this allows swagger to work
 ##but no renewal here
