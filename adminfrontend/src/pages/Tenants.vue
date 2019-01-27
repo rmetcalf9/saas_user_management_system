@@ -31,9 +31,9 @@ export default {
       tableLoading: false,
       tableData: [],
       tableColumns: [
-        { name: 'Name', required: true, label: 'Tenant Name', align: 'left', field: 'name', sortable: false, filter: false },
-        { name: 'Description', required: true, label: 'Description', align: 'left', field: 'name', sortable: false, filter: false },
-        { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'name', sortable: false, filter: false }
+        { name: 'Name', required: true, label: 'Tenant Name', align: 'left', field: 'Name', sortable: false, filter: false },
+        { name: 'Description', required: true, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
+        { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false }
       ]
     }
   },
