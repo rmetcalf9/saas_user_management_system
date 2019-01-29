@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException
+from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException
 import uuid
 from authProviders import authProviderFactory
 from authProviders_base import getNewAuthProviderJSON
@@ -62,10 +62,10 @@ def CreateMasterTenant(appObj):
 
 
 #Called from API call
-def CreateTenant(appObj, tenantName):
+def CreateTenant(appObj, tenantName, description="", allowUserCreation=False):
   if tenantName == masterTenantName:
     raise failedToCreateTenantException
-  _createTenant(appObj, tenantName)
+  return _createTenant(appObj, tenantName, description, allowUserCreation)
   
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
@@ -79,12 +79,17 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
   
 # called locally
 def _createTenant(appObj, tenantName, description, allowUserCreation):
-  appObj.objectStore.saveJSONObject(appObj,"tenants", tenantName, {
+  tenantWithSameName =  appObj.objectStore.getObjectJSON(appObj,"tenants", tenantName)
+  if tenantWithSameName is not None:
+    raise tenantAlreadtExistsException
+  jsonForTenant = {
     "Name": tenantName,
     "Description": description,
     "AllowUserCreation": allowUserCreation,
     "AuthProviders": {}
-  })
+  }
+  appObj.objectStore.saveJSONObject(appObj,"tenants", tenantName, jsonForTenant)
+  return tenantClass(jsonForTenant)
 
 def GetTenant(appObj, tenantName):
   a = appObj.objectStore.getObjectJSON(appObj,"tenants",tenantName)

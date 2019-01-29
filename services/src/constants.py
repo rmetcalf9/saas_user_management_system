@@ -14,13 +14,17 @@ masterInternalAuthTypePassword="dsF4F.D32654.....3D5g"
 class customExceptionClass(Exception):
   id = None
   text = None
-  def __init__(self, text):
-    self.id = text
+  def __init__(self, text, iid=None):
+    if iid is None:
+      self.id = text
+    else:
+      self.id = iid
     self.text = text
 
 authProviderNotFoundException = customExceptionClass('authProviderNotFoundException')
 authFailedException = customExceptionClass('authFailedException')
 PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
+tenantAlreadtExistsException = customExceptionClass('Tenant Already Exists','tenantAlreadtExistsException')
 
 jwtHeaderName="jwt-auth-token"
 jwtCookieName="jwt-auth-token"

@@ -2,6 +2,14 @@ from TestHelperSuperClass import testHelperAPIClient, env
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 import json
 
+tenantWithNoAuthProviders = {
+  "Name": "NewlyCreatedTenantNoAuth",
+  "Description": "Tenant with no auth providers",
+  "AllowUserCreation": False,
+  "AuthProviders": []
+}
+
+
 class test_api(testHelperAPIClient):
   def makeJWTTokenWithMasterTenantRoles(self, roles):
     UserID = 'abc123'
@@ -64,3 +72,33 @@ class test_funcitonal(test_api):
     for a in resultJSON["result"][0]['AuthProviders'].keys():
       authProvGUID=a
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0]['AuthProviders'][authProvGUID], {"AllowUserCreation": False, "ConfigJSON": {"userSufix": "@internalDataStore"}, "IconLink": None, "MenuText": "Website account login", "Type": "internal"}, ['guid', "saltForPasswordHashing"])
+
+  def test_createTenant(self):
+    jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 
+      headers={ jwtHeaderName: jwtToken}, 
+      data=json.dumps(tenantWithNoAuthProviders), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='JSON of created Tenant is not the same')
+
+  def test_createTenantWithDuplicateNameFails(self):
+    jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 
+      headers={ jwtHeaderName: jwtToken}, 
+      data=json.dumps(tenantWithNoAuthProviders), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 
+      headers={ jwtHeaderName: jwtToken}, 
+      data=json.dumps(tenantWithNoAuthProviders), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg='Shouldn\'t be able to create a two tenants with the same name')

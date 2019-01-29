@@ -1,13 +1,14 @@
 #Admin API
 from flask import request
 from flask_restplus import Resource, fields
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, BadRequest
 from apiSecurity import verifyAPIAccessUserLoginRequired
-from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName
+from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
 from apiSharedModels import getTenantModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError
+from tenants import CreateTenant
 
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
@@ -109,4 +110,23 @@ def registerAPI(appObj):
 #        filter
 #      )
 
+    @nsAdmin.doc('post Tenant')
+    @nsAdmin.expect(getTenantModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(200, 'Success')
+    @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant created', skip_none=True)
+    def post(self, tenant):
+      '''Create Tenant'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      try:
+        tenantObj = CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'])
+      except customExceptionClass as err:
+        if (err.id=='tenantAlreadtExistsException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+      
+      return tenantObj.getJSONRepresenation()
 

@@ -16,6 +16,7 @@ class ObjectStore():
   def updateJSONObject(self, appObj, objectType, objectKey, updateFn):
     return self._updateJSONObject(appObj, objectType, objectKey, updateFn)
   
+  #Return None if object isn't in store
   def getObjectJSON(self, appObj, objectType, objectKey):
     return self._getObjectJSON(appObj, objectType, objectKey)
   
