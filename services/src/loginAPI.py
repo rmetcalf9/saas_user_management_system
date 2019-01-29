@@ -123,7 +123,7 @@ def registerAPI(appObj):
           raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
         if (err.id=='authProviderNotFoundException'):
           raise BadRequest('authProviderNotFoundException')
-        if (err.id=='Invalid Auth Config'):
+        if (err.id=='InvalidAuthConfigException'):
           raise Unauthorized('Invalid credentials provided')
         raise Exception('InternalServerError')
       except:

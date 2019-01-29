@@ -1,14 +1,22 @@
 #Admin API
 from flask import request
 from flask_restplus import Resource, fields
-from werkzeug.exceptions import Unauthorized, BadRequest
+from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
 from apiSecurity import verifyAPIAccessUserLoginRequired
-from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
+from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException
 from apiSharedModels import getTenantModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError
-from tenants import CreateTenant
+from tenants import CreateTenant, UpdateTenant
+from tenantObj import tenantClass
+
+def getCreateTenantModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('CreateTenantInfo', {
+    'Name': fields.String(default='DEFAULT', description='Name and unique identifier of tenant'),
+    'Description': fields.String(default='DEFAULT', description='Description of tenant'),
+    'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)')
+  })
 
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
@@ -65,7 +73,7 @@ def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
 
   @nsAdmin.route('/<string:tenant>/tenants')
-  class tenantInfo(Resource):
+  class tenantsInfo(Resource):
   
     '''Admin'''
     @nsAdmin.doc('admin')
@@ -77,7 +85,7 @@ def registerAPI(appObj):
       '''Get list of tenants'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return item
+        return tenantClass(item).getJSONRepresenation()
 
       outputFN = defOutput
       filterFN = None
@@ -111,9 +119,9 @@ def registerAPI(appObj):
 #      )
 
     @nsAdmin.doc('post Tenant')
-    @nsAdmin.expect(getTenantModel(appObj), validate=True)
+    @nsAdmin.expect(getCreateTenantModel(appObj), validate=True)
     @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
-    @appObj.flastRestPlusAPIObject.response(200, 'Success')
+    @appObj.flastRestPlusAPIObject.response(201, 'Created')
     @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant created', skip_none=True)
     def post(self, tenant):
       '''Create Tenant'''
@@ -128,5 +136,34 @@ def registerAPI(appObj):
       except:
         raise InternalServerError
       
-      return tenantObj.getJSONRepresenation()
+      return tenantObj.getJSONRepresenation(), 201
 
+  @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>')
+  class tenantInfo(Resource):
+
+    @nsAdmin.doc('update Tenant')
+    @nsAdmin.expect(getTenantModel, validate=True)
+    @nsAdmin.response(200, 'Tenant Updated')
+    @nsAdmin.response(400, 'Validation Error')
+    @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant updated')
+    def put(self, tenant, tenantName):
+      '''Update Tenant'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      
+      try:
+        tenantObj = UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'])
+      except customExceptionClass as err:
+        if (err.id=='tenantDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='ShouldNotSupplySaltWhenCreatingAuthProvException'):
+          raise BadRequest(err.text)
+        if (err.id=='authProviderNotFoundException'):
+          raise BadRequest(err.text)
+        if (err.id=='cantUpdateExistingAuthProvException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+      
+      return tenantObj.getJSONRepresenation()

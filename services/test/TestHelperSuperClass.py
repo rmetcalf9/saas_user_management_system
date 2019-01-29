@@ -48,6 +48,17 @@ class testHelperSuperClass(unittest.TestCase):
         raise context.exception
     self.assertTrue(ExpectedException == context.exception)
 
+  #if the type of object in the list
+  def sortListsOfObjects(self, listToSort):
+    if len(listToSort)<2:
+      return
+    if isinstance(listToSort[0],dict):
+      def getKeyFn(item):
+        return json.dumps(item)
+      listToSort.sort(key=getKeyFn)
+      return
+    listToSort.sort()
+
   def sortListsInDict(self, dictToCheck):
     if isinstance(dictToCheck,list):
       dictToCheck.sort()
@@ -56,7 +67,7 @@ class testHelperSuperClass(unittest.TestCase):
       if isinstance(dictToCheck[k],dict):
         self.sortListsInDict(dictToCheck[k])
       if isinstance(dictToCheck[k],list):
-        dictToCheck[k].sort()
+        self.sortListsOfObjects(dictToCheck[k])
     return
     
   def areJSONStringsEqual(self, str1, str2):

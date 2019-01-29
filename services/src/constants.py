@@ -21,10 +21,13 @@ class customExceptionClass(Exception):
       self.id = iid
     self.text = text
 
-authProviderNotFoundException = customExceptionClass('authProviderNotFoundException')
+authProviderNotFoundException = customExceptionClass('authProviderNotFoundException','authProviderNotFoundException')
 authFailedException = customExceptionClass('authFailedException')
 PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
 tenantAlreadtExistsException = customExceptionClass('Tenant Already Exists','tenantAlreadtExistsException')
+tenantDosentExistException = customExceptionClass('Tenant Dosen\'t Exist','tenantDosentExistException')
+ShouldNotSupplySaltWhenCreatingAuthProvException = customExceptionClass('Should not supply salt when creating new auth prov', 'ShouldNotSupplySaltWhenCreatingAuthProvException')
+cantUpdateExistingAuthProvException = customExceptionClass('can\'t Update Existing Auth Prov', 'cantUpdateExistingAuthProvException')
 
 jwtHeaderName="jwt-auth-token"
 jwtCookieName="jwt-auth-token"
