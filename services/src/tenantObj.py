@@ -29,3 +29,5 @@ class tenantClass():
   def getAuthProviderGUIDList(self):
     return self._mainDict["AuthProviders"].keys()
 
+  def getName(self):
+    return self._mainDict["Name"]

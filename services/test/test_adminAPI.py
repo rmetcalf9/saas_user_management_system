@@ -2,6 +2,8 @@ from TestHelperSuperClass import testHelperAPIClient, env
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 import json
 import copy
+from tenants import AddAuth, CreatePerson
+from appObj import appObj
 
 tenantWithNoAuthProviders = {
   "Name": "NewlyCreatedTenantNoAuth",
@@ -11,11 +13,11 @@ tenantWithNoAuthProviders = {
 }
 sampleInternalAuthProv001_CREATE = {
   "guid": None,
-  "Type": "Internal",
+  "Type": "internal",
   "AllowUserCreation": False,
-  "MenuText": "string",
+  "MenuText": "Default Menu Text",
   "IconLink": "string",
-  "ConfigJSON": "{}",
+  "ConfigJSON": {'userSufix': '@internalDataStore'},
   "saltForPasswordHashing": None
 } 
 
@@ -91,10 +93,13 @@ class test_funcitonal(test_api):
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='JSON of created Tenant is not the same')
     
-  def createTenantForTestingWithSingleAuthProvider(self, tenantDICT, AuthProv_CREATE):
+  def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
     self.createTenantForTesting(tenantDICT)
     tenantWithSingleAuthProvider = copy.deepcopy(tenantDICT)
-    tenantWithSingleAuthProvider['AuthProviders'] = [copy.deepcopy(AuthProv_CREATE)]
+    a = []
+    for b in authProvDictList:
+      a.append(copy.deepcopy(b))
+    tenantWithSingleAuthProvider['AuthProviders'] = a
 
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
@@ -272,7 +277,7 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, [], msg='Tenant wasnt changed in get result')
   
   def test_addSecondAuthProvider(self):
-    resultJSON = self.createTenantForTestingWithSingleAuthProvider(tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE)
+    resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
 
     #Now add secondAuth provider as an update
     existingAuthProv = resultJSON['AuthProviders'][0]
@@ -300,7 +305,7 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, [], msg='Tenant wasnt changed in get result')
 
   def test_updateAuthProviderSaltIsNoneFails(self):
-    resultJSON = self.createTenantForTestingWithSingleAuthProvider(tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE)
+    resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
     existingAuthProv = resultJSON['AuthProviders'][0]
 
     existingAuthProvWithSaltAsNone = copy.deepcopy(existingAuthProv)
@@ -318,7 +323,7 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 400)
 
   def test_updateAuthProviderDifferentSaltFails(self):
-    resultJSON = self.createTenantForTestingWithSingleAuthProvider(tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE)
+    resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
     existingAuthProv = resultJSON['AuthProviders'][0]
 
     existingAuthProvWithSaltAsNone = copy.deepcopy(existingAuthProv)
@@ -335,14 +340,83 @@ class test_funcitonal(test_api):
     )
     self.assertEqual(result.status_code, 400)
 
-  #def test_updateAuthProviderWhenTenantHasTwoAuthProviders(self):
+  def test_updateAuthProviderWhenTenantHasTwoAuthProviders(self):
+    resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
   
-  #def test_updateTenantDescription_TenantHasMutipleAuthProvsWhichShouldBeUnchanged(self):
-  # TODO Make sure salts are not changed
+    newMenuTextToUse = 'Changed Menu Text'
+    guidOfAuthProvToChange = resultJSON['AuthProviders'][0]['guid']
+    tenantDictBeforeChange = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    expectedDictAfterChange = copy.deepcopy(tenantDictBeforeChange)
+    for a in expectedDictAfterChange['AuthProviders']:
+      if a['guid']==guidOfAuthProvToChange:
+        a['MenuText'] = newMenuTextToUse
+
+    changedAuthProvs = [resultJSON['AuthProviders'][0],resultJSON['AuthProviders'][1]]
+    changedAuthProvs[0]['MenuText'] = newMenuTextToUse
+    changedTenantDICT = copy.deepcopy(tenantWithNoAuthProviders)
+    changedTenantDICT['AuthProviders'] = changedAuthProvs
+    
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithNoAuthProviders['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)    
+    
+    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, expectedDictAfterChange, [], msg='New Tenant JSON isn\'t the expected value')
   
-  #def test_deleteOnlyAuthProvider(self):
+  def test_updateTenantDescription_TenantHasMutipleAuthProvsWhichShouldBeUnchanged(self):
+    #Must make sure salts are not changed
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
+    
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['Description'] = 'Changed description'
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)    
+
+    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+  
+  def test_deleteOnlyAuthProvider(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
+    authProvGUID = origTenantDict['AuthProviders'][0]['guid']
+
+    #Also create some auth data for the single auth
+    person = CreatePerson(appObj)
+    authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
+      "username": 'AA', 
+      "password": 'BB'
+      },
+      person['guid']
+    )
+    
+    
+    
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['AuthProviders'] = []
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200) 
+    
+    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    
+    self.assertTrue(False,msg='Error userAuths for auth provider not removed')
+    
+    
   #def test_deleteTwoAuthProvidersTogether(self):
-  #def test_deleteSecondAuthProvider(self):
+  #def test_deleteOneOfThreeAuthProviders(self):
   
   
   

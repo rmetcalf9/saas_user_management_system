@@ -150,7 +150,7 @@ def registerAPI(appObj):
       '''Update Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
-      
+
       try:
         tenantObj = UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'])
       except customExceptionClass as err:

@@ -1,8 +1,7 @@
 # Code to handle tenant objects
-from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException
+from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException
 import uuid
-from authProviders import authProviderFactory
-from authProviders_base import getNewAuthProviderJSON, getExistingAuthProviderJSON
+from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
 from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson
@@ -14,6 +13,7 @@ failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
 UnknownIdentityException = Exception('Unknown Identity')
+authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not found', 'authProviderTypeNotFoundException')
 
 
 #only called on intial setup Creates a master tenant with single internal auth provider
@@ -27,9 +27,7 @@ def CreateMasterTenant(appObj):
     masterTenantDefaultAuthProviderMenuIconLink, 
     "internal", 
     False, 
-    {
-      "userSufix": "@internalDataStore"
-    }
+    {'userSufix': '@internalDataStore'}
   )
   
   userID = appObj.defaultUserGUID
@@ -45,9 +43,10 @@ def CreateMasterTenant(appObj):
     "username": InternalAuthUsername, 
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       appObj, InternalAuthUsername, appObj.APIAPP_DEFAULTHOMEADMINPASSWORD, masterTenantInternalAuthProvider['saltForPasswordHashing']
-     )
-  },
-  person['guid'])
+    )
+    },
+    person['guid']
+  )
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
 
   #mainUserIdentity with authData
@@ -153,7 +152,7 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
     raise tenantDosentExistException
   AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID)["Type"],tenant.getAuthProvider(authProviderGUID)["ConfigJSON"])
   if AuthProvider is None:
-    print("Can't find " + tenant["AuthProviders"][authProviderGUID]["Type"])
+    print("Can't find auth provider with type \"" + tenant.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenant.getName())
     raise authProviderTypeNotFoundException
   return AuthProvider
     
