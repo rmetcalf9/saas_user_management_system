@@ -3,15 +3,15 @@ from authProviders_Internal import authProviderInternal
 from uuid import uuid4
 from base64 import b64encode
 
-def authProviderFactory(type, configJSON):
+def authProviderFactory(type, configJSON, guid):
   if type=='internal':
-    return authProviderInternal('internal', configJSON)
+    return authProviderInternal('internal', configJSON, guid)
   return None
   
 def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, configJSON):
   if not isinstance(configJSON,dict):
     raise Exception('ERROR ConfigJSON must be a dict')
-  createdAuthProvObject = authProviderFactory(Type, configJSON) #Check we can create an auth provider
+  createdAuthProvObject = authProviderFactory(Type, configJSON, 'invalidGUID') #Check we can create an auth provider
   return {
     "guid": guid,
     "MenuText": menuText,
@@ -23,7 +23,7 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
   }
 
 def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON):
-  createdAuthProvObject = authProviderFactory(Type, configJSON) #Check we can create an auth provider
+  createdAuthProvObject = authProviderFactory(Type, configJSON, 'invalidGUID') #Check we can create an auth provider
   return _getAuthProviderJSON(
     appObj, 
     existingJSON['guid'], 

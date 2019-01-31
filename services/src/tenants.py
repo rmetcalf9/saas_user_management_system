@@ -27,7 +27,7 @@ def CreateMasterTenant(appObj):
     masterTenantDefaultAuthProviderMenuIconLink, 
     "internal", 
     False, 
-    {'userSufix': '@internalDataStore'}
+    {"userSufix": "@internalDataStore"}
   )
   
   userID = appObj.defaultUserGUID
@@ -82,6 +82,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       existingAuthProv = tenantObj.getAuthProvider(authProv['guid'])
       if authProv['saltForPasswordHashing'] != existingAuthProv['saltForPasswordHashing']:
         raise cantUpdateExistingAuthProvException
+      #print("UpdateTenant:authProb'congigJSON':",authProv['ConfigJSON']," - ", type(authProv['ConfigJSON']))
       newAuthDICT = getExistingAuthProviderJSON(appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], authProv['AllowUserCreation'], authProv['ConfigJSON'])
     else:
       if authProv['saltForPasswordHashing'] is not None:
@@ -150,7 +151,7 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
   tenant = GetTenant(appObj, tenantName)
   if tenant is None:
     raise tenantDosentExistException
-  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID)["Type"],tenant.getAuthProvider(authProviderGUID)["ConfigJSON"])
+  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID)["Type"],tenant.getAuthProvider(authProviderGUID)["ConfigJSON"],authProviderGUID)
   if AuthProvider is None:
     print("Can't find auth provider with type \"" + tenant.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenant.getName())
     raise authProviderTypeNotFoundException

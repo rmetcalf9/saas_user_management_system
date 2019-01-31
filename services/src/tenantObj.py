@@ -1,5 +1,7 @@
 # Description of Tenant Object
 from constants import authProviderNotFoundException
+import json
+import copy
 
 #designed as immutable object
 class tenantClass():
@@ -14,7 +16,12 @@ class tenantClass():
       self._jsonRepersentation = self._mainDict.copy()
       ap = []
       for guid in self._mainDict["AuthProviders"].keys():
-        ap.append(self.getAuthProvider(guid))
+        #ConfigJSON is held as a string according to the swaggerAPI
+        # so flask restplus won't convert it from a dict to a valid json format
+        # so we do it here
+        tmp = copy.deepcopy(self.getAuthProvider(guid))
+        tmp['ConfigJSON'] = json.dumps(tmp['ConfigJSON'])
+        ap.append(tmp)
       self._jsonRepersentation['AuthProviders'] = ap
     return self._jsonRepersentation
 

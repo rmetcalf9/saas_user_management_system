@@ -11,6 +11,15 @@ from jwt.exceptions import InvalidSignatureError
 from tenants import CreateTenant, UpdateTenant
 from tenantObj import tenantClass
 
+def updateContentConvertingInputStringsToDictsWhereRequired(content):
+  if 'AuthProviders' in content:
+    for curAuthProvider in content['AuthProviders']:
+      if 'ConfigJSON' in curAuthProvider:
+        if not isinstance(curAuthProvider['ConfigJSON'],dict):
+          curAuthProvider['ConfigJSON'] = json.loads(curAuthProvider['ConfigJSON'])
+          #print("updateContentConvertingInputStringsToDictsWhereRequired:",curAuthProvider['ConfigJSON'])
+  return content
+
 def getCreateTenantModel(appObj):
   return appObj.flastRestPlusAPIObject.model('CreateTenantInfo', {
     'Name': fields.String(default='DEFAULT', description='Name and unique identifier of tenant'),
@@ -152,6 +161,7 @@ def registerAPI(appObj):
       content = request.get_json()
 
       try:
+        content = updateContentConvertingInputStringsToDictsWhereRequired(content)
         tenantObj = UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'])
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):

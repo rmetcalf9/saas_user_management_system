@@ -41,7 +41,6 @@ class test_api(testHelperAPIClient):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     
-    
     expectedResult = {
       "Name": masterTenantName,
       "Description": masterTenantDefaultDescription, 
@@ -52,7 +51,7 @@ class test_api(testHelperAPIClient):
         "MenuText": masterTenantDefaultAuthProviderMenuText, 
         "IconLink": masterTenantDefaultAuthProviderMenuIconLink, 
         "AllowUserCreation": False, 
-        "ConfigJSON": "{'userSufix': '@internalDataStore'}"
+        "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}"
       }] 
     }
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders' ])

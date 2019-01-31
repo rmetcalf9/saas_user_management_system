@@ -16,6 +16,7 @@ class authProviderInternal(authProvider):
   def _makeKey(self, authTypeConfigDict):
     if 'username' not in authTypeConfigDict:
       raise InvalidAuthConfigException
+    #print(self.configJSON['userSufix'])
     return authTypeConfigDict['username'] + self.configJSON['userSufix'] + uniqueKeyCombinator + self.authProviderType
 
   def hashPassword(self, appObj, password, salt):

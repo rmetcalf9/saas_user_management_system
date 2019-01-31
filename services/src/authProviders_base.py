@@ -6,13 +6,19 @@ from constants import authFailedException, customExceptionClass
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 
+def getAuthRecord(appObj, key):
+  return appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+
+
 class authProvider():
   authProviderType = None
   configJSON = None
-  def __init__(self, authProviderType, configJSON):
+  guid = None
+  def __init__(self, authProviderType, configJSON, guid):
     self.authProviderType = authProviderType
     self.configJSON = configJSON
     self._authSpercificInit()
+    self.guid = guid
 
   #Return the unique identifier for a particular auth
   def _makeKey(self, authTypeConfigDict):
@@ -44,7 +50,7 @@ class authProvider():
     return mainObjToStore
 
   def Auth(self, appObj, authTypeConfigDict):
-    obj = appObj.objectStore.getObjectJSON(appObj,"userAuths", self._makeKey(authTypeConfigDict))
+    obj = getAuthRecord(appObj, self._makeKey(authTypeConfigDict))
     if obj is None:
       raise authFailedException
     self._auth(appObj, obj, authTypeConfigDict)

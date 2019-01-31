@@ -2,8 +2,10 @@ from TestHelperSuperClass import testHelperAPIClient, env
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 import json
 import copy
-from tenants import AddAuth, CreatePerson
+from tenants import AddAuth, CreatePerson, GetTenant
 from appObj import appObj
+from authProviders import authProviderFactory
+from authProviders_base import getAuthRecord
 
 tenantWithNoAuthProviders = {
   "Name": "NewlyCreatedTenantNoAuth",
@@ -17,7 +19,7 @@ sampleInternalAuthProv001_CREATE = {
   "AllowUserCreation": False,
   "MenuText": "Default Menu Text",
   "IconLink": "string",
-  "ConfigJSON": {'userSufix': '@internalDataStore'},
+  "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
   "saltForPasswordHashing": None
 } 
 
@@ -119,7 +121,7 @@ class test_funcitonal(test_api):
     self.assertEqual(len(resultJSON["result"]),1,msg="Only 1 result should be returned")
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], {"AllowUserCreation": False, "AuthProviders": "ignored", "Description": "Master Tenant for User Management System", "Name": "usersystem"}, ['AuthProviders'])
     self.assertEqual(len(resultJSON["result"][0]['AuthProviders']),1,msg="Wrong number of auth providers")
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0]['AuthProviders'][0], {"AllowUserCreation": False, "ConfigJSON": {"userSufix": "@internalDataStore"}, "IconLink": None, "MenuText": "Website account login", "Type": "internal"}, ['guid', "saltForPasswordHashing"])
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0]['AuthProviders'][0], {"AllowUserCreation": False, "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}", "IconLink": None, "MenuText": "Website account login", "Type": "internal"}, ['guid', "saltForPasswordHashing"])
 
   def test_createTenant(self):
     result = self.testClient.post(
@@ -370,7 +372,6 @@ class test_funcitonal(test_api):
   def test_updateTenantDescription_TenantHasMutipleAuthProvsWhichShouldBeUnchanged(self):
     #Must make sure salts are not changed
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
-    
     changedTenantDict = copy.deepcopy(origTenantDict)
     changedTenantDict['Description'] = 'Changed description'
     result = self.testClient.put(
@@ -392,12 +393,23 @@ class test_funcitonal(test_api):
     person = CreatePerson(appObj)
     authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
       "username": 'AA', 
-      "password": 'BB'
+      "password": b'BB'
       },
       person['guid']
     )
-    
-    
+
+    #Before we delete the auth provider we must get the key it used to create the userAuth
+    AuthProvider = authProviderFactory(
+      sampleInternalAuthProv001_CREATE["Type"],
+      json.loads(sampleInternalAuthProv001_CREATE["ConfigJSON"]),
+      authProvGUID
+    )
+    authTypeConfigDict = {'username': 'AA'}
+    authRecordKey = AuthProvider._makeKey(authTypeConfigDict)
+    #Use the key the first time to make sure auth record exists
+    authRecord = getAuthRecord(appObj, authRecordKey)
+    #print("print Auth Record is:",authRecord)
+
     
     changedTenantDict = copy.deepcopy(origTenantDict)
     changedTenantDict['AuthProviders'] = []
@@ -412,7 +424,9 @@ class test_funcitonal(test_api):
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
     self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
     
-    self.assertTrue(False,msg='Error userAuths for auth provider not removed')
+    #Check auth record has been removed
+    authRecord2 = getAuthRecord(appObj, authRecordKey)
+    self.assertTrue(authRecord2 is None,msg='Error userAuths for auth provider not removed')
     
     
   #def test_deleteTwoAuthProvidersTogether(self):
