@@ -135,6 +135,15 @@ class test_funcitonal(test_api):
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='JSON of created Tenant is not the same')
 
+  def test_createTenantInvalidJSON(self):
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps({}), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400)
+
   def test_createTenantWithDuplicateNameFails(self):
     result = self.testClient.post(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 

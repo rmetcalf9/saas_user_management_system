@@ -94,7 +94,32 @@ export default {
       })
     },
     openCreateTenantModalDialog () {
-      console.log('TODO')
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', detail: 'Tenant creation Request Sent'})
+          // this.refreshJobData() No point doing this immediately
+        },
+        error: function (error) {
+          Notify.create('Request failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      this.$q.dialog({
+        title: 'Create new Tenant',
+        message: 'Name for Tenant',
+        prompt: {
+          model: '',
+          type: 'text' // optional
+        },
+        cancel: true,
+        color: 'secondary'
+      }).then(data => {
+        this.$store.dispatch('globalDataStore/callAdminAPI', {
+          path: '/tenants',
+          method: 'post',
+          postdata: {},
+          callback: callback
+        })
+      })
     }
   },
   computed: {

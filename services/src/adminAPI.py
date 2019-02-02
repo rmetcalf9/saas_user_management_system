@@ -27,6 +27,11 @@ def getCreateTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)')
   })
 
+def requiredInPayload(content, fieldList):
+  for a in fieldList:
+    if a not in content:
+      raise BadRequest(a + ' not in payload')
+
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
   if tenant != masterTenantName:
@@ -138,6 +143,7 @@ def registerAPI(appObj):
       '''Create Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
+      requiredInPayload(content, ['Name','Description','AllowUserCreation'])
       try:
         tenantObj = CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'])
       except customExceptionClass as err:
@@ -161,6 +167,7 @@ def registerAPI(appObj):
       '''Update Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
+      requiredInPayload(content, ['Name','Description','AllowUserCreation','AuthProviders'])
 
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)

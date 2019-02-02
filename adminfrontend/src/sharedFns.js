@@ -93,6 +93,7 @@ function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData,
         return
       }
       callbackHelper.callbackWithSimpleError(callback, 'TODO - try refresh token')
+      // If refresh fails goto login screen and display a message 'Logged out due to inactivity'
     }
   )
 }
