@@ -6,6 +6,7 @@ from constants import masterTenantName, DefaultHasAccountRole, masterTenantDefau
 
 from constants import masterTenantName
 
+
 class test_apiSecurity(testHelperAPIClient):
 
   def test_returnsSuccessWithNoTokenFails(self):
@@ -46,3 +47,4 @@ class test_apiSecurity(testHelperAPIClient):
     }
     jwtToken = self.generateJWTToken(userDict)
     self.assertTrue(verifyAPIAccessUserLoginRequired(appObj, masterTenantName, jwtToken, [masterTenantDefaultSystemAdminRole])[0])
+

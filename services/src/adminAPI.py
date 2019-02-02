@@ -7,7 +7,7 @@ from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtH
 from apiSharedModels import getTenantModel
 from urllib.parse import unquote
 import json
-from jwt.exceptions import InvalidSignatureError
+from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant
 from tenantObj import tenantClass
 
@@ -50,6 +50,8 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
   try:
     (verified, decodedToken) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
   except InvalidSignatureError:
+    raise Unauthorized()
+  except ExpiredSignatureError:
     raise Unauthorized()
   if not verified:
     raise Unauthorized()
