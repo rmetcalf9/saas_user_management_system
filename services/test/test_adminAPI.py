@@ -424,10 +424,11 @@ class test_funcitonal(test_api):
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
     self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
     
-    #Check auth record has been removed
+    #Check auth record has been NOT been removed
+    # auth records will not be removed with the tenant as auth records
+    # are independant of tenant. Any clean up will be done when the person is deleted
     authRecord2 = getAuthRecord(appObj, authRecordKey)
-    self.assertTrue(authRecord2 is None,msg='Error userAuths for auth provider not removed')
-    
+    self.assertJSONStringsEqualWithIgnoredKeys(authRecord, authRecord2, [], msg='Error userAuths should not have changed')
     
   #def test_deleteTwoAuthProvidersTogether(self):
   #def test_deleteOneOfThreeAuthProviders(self):

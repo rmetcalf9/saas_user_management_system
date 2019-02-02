@@ -69,10 +69,25 @@ class testHelperSuperClass(unittest.TestCase):
       if isinstance(dictToCheck[k],list):
         self.sortListsOfObjects(dictToCheck[k])
     return
+
+  def convertAnyByteValueToString(self, val):
+    if isinstance(val,list):
+      for a in val:
+        self.convertAnyByteValueToString(a)
+    if isinstance(val,dict):
+      for a in val:
+        if isinstance(val[a],bytes):
+          #print("CHANGING TO UTF:", val[a])
+          val[a] = val[a].decode("utf-8")
+        self.convertAnyByteValueToString(val[a])
+    else:
+      pass
     
   def areJSONStringsEqual(self, str1, str2):
     self.sortListsInDict(str1)
     self.sortListsInDict(str2)
+    self.convertAnyByteValueToString(str1)
+    self.convertAnyByteValueToString(str2)
     a = json.dumps(str1, sort_keys=True)
     b = json.dumps(str2, sort_keys=True)
     return (a == b)
