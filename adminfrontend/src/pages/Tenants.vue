@@ -12,6 +12,13 @@
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"
   >
+      <template slot="top-left" slot-scope="props">
+        <q-btn
+          color="primary"
+          push
+          @click="openCreateTenantModalDialog"
+        >Add Tenant</q-btn>
+      </template>
   </q-table>
 </template>
 
@@ -85,6 +92,9 @@ export default {
         postdata: null,
         callback: callback
       })
+    },
+    openCreateTenantModalDialog () {
+      console.log('TODO')
     }
   },
   computed: {
