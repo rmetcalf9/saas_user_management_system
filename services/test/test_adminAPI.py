@@ -423,6 +423,7 @@ class test_funcitonal(test_api):
     
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
     self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(len(changedResultJSON['AuthProviders']),0,msg='Wrong number of remaining auth providers')
     
     #Check auth record has been NOT been removed
     # auth records will not be removed with the tenant as auth records
@@ -430,8 +431,38 @@ class test_funcitonal(test_api):
     authRecord2 = getAuthRecord(appObj, authRecordKey)
     self.assertJSONStringsEqualWithIgnoredKeys(authRecord, authRecord2, [], msg='Error userAuths should not have changed')
     
-  #def test_deleteTwoAuthProvidersTogether(self):
-  #def test_deleteOneOfThreeAuthProviders(self):
+  def test_deleteTwoAuthProvidersTogether(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
+    
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['AuthProviders'] = []
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200) 
+
+    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(len(changedResultJSON['AuthProviders']),0,msg='Wrong number of remaining auth providers')
+
+  def test_deleteOneOfThreeAuthProviders(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
   
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['AuthProviders'] = [origTenantDict['AuthProviders'][0],origTenantDict['AuthProviders'][1]]
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200) 
+
+    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(len(changedResultJSON['AuthProviders']),2,msg='Wrong number of remaining auth providers')
   
   
