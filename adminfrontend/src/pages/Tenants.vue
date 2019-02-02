@@ -94,10 +94,13 @@ export default {
       })
     },
     openCreateTenantModalDialog () {
+      var TTT = this
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Tenant creation Request Sent'})
-          // this.refreshJobData() No point doing this immediately
+          Notify.create({color: 'positive', detail: 'Tenant created'})
+          setTimeout(function () {
+            TTT.refresh()
+          }, 400)
         },
         error: function (error) {
           Notify.create('Request failed - ' + callbackHelper.getErrorFromResponse(error))
@@ -116,9 +119,19 @@ export default {
         this.$store.dispatch('globalDataStore/callAdminAPI', {
           path: '/tenants',
           method: 'post',
-          postdata: {},
+          postdata: {
+            'Name': data,
+            'Description': '',
+            'AllowUserCreation': false
+          },
           callback: callback
         })
+      })
+    },
+    refresh () {
+      this.request({
+        pagination: this.tablePersistSettings.serverPagination,
+        filter: this.tablePersistSettings.filter
       })
     }
   },
@@ -140,10 +153,7 @@ export default {
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
-    this.request({
-      pagination: this.tablePersistSettings.serverPagination,
-      filter: this.tablePersistSettings.filter
-    })
+    this.refresh()
   }
 }
 </script>
