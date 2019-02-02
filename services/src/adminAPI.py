@@ -8,7 +8,7 @@ from apiSharedModels import getTenantModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError
-from tenants import CreateTenant, UpdateTenant
+from tenants import CreateTenant, UpdateTenant, DeleteTenant
 from tenantObj import tenantClass
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
@@ -177,3 +177,22 @@ def registerAPI(appObj):
         raise InternalServerError
       
       return tenantObj.getJSONRepresenation()
+
+    @nsAdmin.doc('delete Tenant')
+    @nsAdmin.response(200, 'Tenant Deleted')
+    @nsAdmin.response(400, 'Error')
+    @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant updated')
+    def delete(self, tenant, tenantName):
+      '''Delete Tenant'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      try:
+        tenantObj = DeleteTenant(appObj, tenantName)
+        return tenantObj.getJSONRepresenation()
+      except customExceptionClass as err:
+        if (err.id=='tenantDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='cantDeleteMasterTenantException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError        

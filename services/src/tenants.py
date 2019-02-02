@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException
+from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException
 import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
@@ -96,6 +96,15 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
     return jsonForTenant
   appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant)
   return GetTenant(appObj, tenantName)
+  
+def DeleteTenant(appObj, tenantName):
+  if tenantName == masterTenantName:
+    raise cantDeleteMasterTenantException
+  tenantObj = GetTenant(appObj, tenantName)
+  if tenantObj is None:
+    raise tenantDosentExistException
+  appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName)
+  return tenantObj
   
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)

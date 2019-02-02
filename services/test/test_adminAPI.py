@@ -465,4 +465,31 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
     self.assertEqual(len(changedResultJSON['AuthProviders']),2,msg='Wrong number of remaining auth providers')
   
-  
+  def test_deleteTenant(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + origTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 200) 
+    
+    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+    self.assertTrue(changedResultJSON is None, msg="Deleted tenant still exists")
+
+  def test_cantDeleteMasterTenant(self):
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + masterTenantName, 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 400) 
+    
+    changedResultJSON = self.getTenantDICT(masterTenantName)
+    self.assertTrue(changedResultJSON is not None, msg="Managed to delete Master Tenant")
+
+  def test_deleteTenantBadName(self):
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + "someNonExistingTenantName", 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 400) 
+
