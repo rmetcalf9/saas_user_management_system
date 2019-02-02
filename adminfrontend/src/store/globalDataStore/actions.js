@@ -37,7 +37,7 @@ function readServerInfo (state, commit, currentHREF, callback) {
 function _callAdminAPI (state, path, method, postdata, callback) {
   var cookie = Cookies.get('usersystemUserCredentials')
 
-  shared.callAPI(state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh)
+  shared.callAPI(state.tenantName, state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh)
 }
 
 export const callAdminAPI = ({ dispatch, commit, state }, params) => {

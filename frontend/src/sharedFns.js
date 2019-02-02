@@ -1,6 +1,8 @@
 /*
 Functions shared between frontend and adminfrontend
 
+MUST EDIT THE ADMINFRONTEND version and use process to copy across
+
 (This and callbackHelper)
 */
 import callbackHelper from './callbackHelper'
@@ -11,6 +13,7 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
   console.log('TODO Work out on prod vx based on current url and tenantName: ', currentURL, tenantName)
   return [
     { prefix: '/vx/', kong: true },
+    { prefix: 'http://localhost:8082/', kong: false },
     { prefix: 'http://somefunnyhostname.com:8098/', kong: false },
     { prefix: 'http://somefunnyhostname.com:5098/', kong: false },
     { prefix: 'http://127.0.0.1:8098/', kong: false }
@@ -60,16 +63,31 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
-function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData) {
+function updateCookieWithRefreshToken (callback, apiPrefix, tenantName) {
+  var config = {
+    method: 'POST',
+    url: getAPIPathToCall(apiPrefix, false, '/' + tenantName + '/refresh'),
+    data: 'TODO'
+  }
+  console.log(config)
+  callbackHelper.callbackWithSimpleError(callback, 'TODO - try to get refresh token')
+}
+
+function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData, refreshAlreadyTried = false) {
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
     }
   }
+
   var config = {
     method: method,
     url: getAPIPathToCall(apiPrefix, authed, path),
     data: data
+  }
+  if (authed) {
+    // Possible optiomzation - check if jwt token has expired and go direct to refresh call
+    config.headers = {'jwt-auth-token': jwtTokenData.JWTToken}
   }
 
   axios(config).then(
@@ -77,7 +95,25 @@ function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData,
       callback.ok(response)
     },
     (response) => {
-      callbackHelper.webserviceError(callback, response)
+      if (authed === false) {
+        callbackHelper.webserviceError(callback, response)
+        return
+      }
+      if (callbackHelper.getResponseStatusIfItHasOneOtherwiseNegativeOne(response) !== 401) {
+        callbackHelper.webserviceError(callback, response)
+        return
+      }
+      if (!refreshAlreadyTried) {
+        var callback2 = {
+          ok: function (response) {
+            callbackHelper.callbackWithSimpleError(callback, 'TODO - try again with refreshed cookie')
+          },
+          error: callback.error
+        }
+        updateCookieWithRefreshToken(callback2, apiPrefix, tenantName)
+      } else {
+        callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
+      }
     }
   )
 }

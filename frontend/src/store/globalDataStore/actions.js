@@ -24,5 +24,5 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
 }
 
 export const callLoginAPI = ({ dispatch, commit, state }, params) => {
-  shared.callAPI(state.apiPrefix, false, '/login/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback)
+  shared.callAPI(state.tenant, state.apiPrefix, false, '/login/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback)
 }

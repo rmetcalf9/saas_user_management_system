@@ -63,7 +63,29 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
-function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData) {
+function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtTokenData, refreshTokenData) {
+  var config = {
+    method: 'POST',
+    url: getAPIPathToCall(apiPrefix, false, '/login/' + tenantName + '/refresh'),
+    data: {'token': refreshTokenData.token}
+  }
+  console.log(config)
+  console.log(refreshTokenData)
+
+  axios(config).then(
+    (response) => {
+      // TODO Save new token data to cookie
+      // callback ok
+      console.log(response)
+      callbackHelper.callbackWithSimpleError(callback, 'TODO - sucessfully used refresh - callAPI again')
+    },
+    (response) => {
+      callback.error(response)
+    }
+  )
+}
+
+function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData, refreshAlreadyTried = false) {
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
@@ -93,8 +115,20 @@ function callAPI (apiPrefix, authed, path, method, data, callback, jwtTokenData,
         callbackHelper.webserviceError(callback, response)
         return
       }
-      callbackHelper.callbackWithSimpleError(callback, 'TODO - try refresh token')
-      // If refresh fails goto login screen and display a message 'Logged out due to inactivity'
+      if (!refreshAlreadyTried) {
+        var callback2 = {
+          ok: function (response) {
+            // TODO callAPI with new jwtTokenData value and refresh value
+            callbackHelper.callbackWithSimpleError(callback, 'TODO - try again with refreshed cookie')
+          },
+          error: function (response) {
+            callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
+          }
+        }
+        updateCookieWithRefreshToken(callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
+      } else {
+        callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
+      }
     }
   )
 }
