@@ -7,6 +7,7 @@ MUST EDIT THE ADMINFRONTEND version and use process to copy across
 */
 import callbackHelper from './callbackHelper'
 import axios from 'axios'
+import { Cookies } from 'quasar'
 
 function getAPIPrefixPossibilities (currentURL, tenantName) {
   // TODO how do we know what vx should be?
@@ -74,10 +75,11 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
 
   axios(config).then(
     (response) => {
-      // TODO Save new token data to cookie
+      // Save new token data to cookie (expires in 1 day)
+      Cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+
       // callback ok
-      console.log(response)
-      callbackHelper.callbackWithSimpleError(callback, 'TODO - sucessfully used refresh - callAPI again')
+      callback.ok(response)
     },
     (response) => {
       callback.error(response)
@@ -118,8 +120,9 @@ function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, j
       if (!refreshAlreadyTried) {
         var callback2 = {
           ok: function (response) {
-            // TODO callAPI with new jwtTokenData value and refresh value
-            callbackHelper.callbackWithSimpleError(callback, 'TODO - try again with refreshed cookie')
+            // callAPI with new jwtTokenData value and refresh value - ignore response
+            var cookie = Cookies.get('usersystemUserCredentials')
+            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true)
           },
           error: function (response) {
             callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')

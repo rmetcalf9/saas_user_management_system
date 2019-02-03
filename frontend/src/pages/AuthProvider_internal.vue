@@ -73,6 +73,7 @@ export default {
               Notify.create('Error - Webapplication failed to provide return address (undefined string)')
               return
             }
+            // Expires in one day
             TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
             console.log('Redirecting back to main site:', TTT.$store.state.globalDataStore.usersystemReturnaddress)
             window.location.href = TTT.$store.state.globalDataStore.usersystemReturnaddress
