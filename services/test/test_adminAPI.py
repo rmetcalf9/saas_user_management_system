@@ -502,3 +502,19 @@ class test_funcitonal(test_api):
     )
     self.assertEqual(result.status_code, 400) 
 
+  def test_getTenant(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [])
+    result = self.testClient.get(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithNoAuthProviders['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 200) 
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='Incorrect response')
+
+  def test_getTenantBadName(self):
+    result = self.testClient.get(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + 'InvalidTenantName', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 404) 

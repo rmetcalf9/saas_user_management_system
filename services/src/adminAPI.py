@@ -1,14 +1,14 @@
 #Admin API
 from flask import request
 from flask_restplus import Resource, fields
-from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError
+from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError, NotFound
 from apiSecurity import verifyAPIAccessUserLoginRequired
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException
 from apiSharedModels import getTenantModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
-from tenants import CreateTenant, UpdateTenant, DeleteTenant
+from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
 from tenantObj import tenantClass
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
@@ -93,8 +93,8 @@ def registerAPI(appObj):
   
     '''Admin'''
     @nsAdmin.doc('admin')
-    #@nsJobs.marshal_with(appObj.getResultModel(getTenantModel(appObj)))
-    #@nsAdmin.response(200, 'Success', model=appObj.getResultModel(getTenantModel(appObj)))
+    @nsAdmin.marshal_with(appObj.getResultModel(getTenantModel(appObj)))
+    @nsAdmin.response(200, 'Success', model=appObj.getResultModel(getTenantModel(appObj)))
     @nsAdmin.response(401, 'Unauthorized')
     @appObj.addStandardSortParams(nsAdmin)
     def get(self, tenant):
@@ -157,6 +157,20 @@ def registerAPI(appObj):
 
   @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>')
   class tenantInfo(Resource):
+
+    '''Admin'''
+    @nsAdmin.doc('get Tenant')
+    @nsAdmin.marshal_with(getTenantModel(appObj))
+    @nsAdmin.response(200, 'Success', model=getTenantModel(appObj))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(404, 'Tenant Not Found')
+    def get(self, tenant, tenantName):
+      '''Get tenant information'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      a = GetTenant(appObj, tenantName)
+      if a is None:
+        raise NotFound('Tenant Not Found')
+      return a.getJSONRepresenation()
 
     @nsAdmin.doc('update Tenant')
     @nsAdmin.expect(getTenantModel, validate=True)
