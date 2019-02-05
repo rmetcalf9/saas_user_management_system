@@ -47,11 +47,11 @@ export default {
   methods: {
     request ({ pagination, filter }) {
       var TTT = this
-      TTT.loading = true
+      TTT.tableLoading = true
       var callback = {
         ok: function (response) {
           // console.log(response.data.guid)
-          TTT.loading = false
+          TTT.tableLoading = false
           // updating pagination to reflect in the UI
           TTT.tablePersistSettings.serverPagination = pagination
           // we also set (or update) rowsNumber
@@ -63,7 +63,7 @@ export default {
           TTT.tableData = response.data.result
         },
         error: function (error) {
-          TTT.loading = false
+          TTT.tableLoading = false
           Notify.create('Job query failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
