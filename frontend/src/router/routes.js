@@ -12,6 +12,10 @@ function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
     // console.log('Frontend router got return address:', decoded)
     stores().commit('globalDataStore/updateUsersystemReturnaddress', decoded)
   }
+  if (isValueHeld(from.query.usersystem_message)) {
+    var decoded2 = decodeURIComponent(from.query.usersystem_message)
+    stores().commit('globalDataStore/setMessageToDisplay', decoded2)
+  }
   if (stores().state.globalDataStore.tenantInfo !== null) {
     if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {
       successCallback(to, from, next)

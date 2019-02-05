@@ -107,6 +107,10 @@ export default {
     }
   },
   mounted: function () {
+    if (this.$store.state.globalDataStore.messagePendingDisplay !== null) {
+      Notify.create({color: 'negative', detail: this.$store.state.globalDataStore.messagePendingDisplay})
+      this.$store.commit('globalDataStore/setMessageDisplayed')
+    }
     var TTT = this
     this.$nextTick(function () {
       TTT.$refs.userNameInput.focus()

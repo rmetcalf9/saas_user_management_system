@@ -87,7 +87,7 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
   )
 }
 
-function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData, refreshAlreadyTried = false) {
+function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData, refreshAlreadyTried = false, curPath = undefined) {
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
@@ -125,19 +125,60 @@ function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, j
             callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true)
           },
           error: function (response) {
-            callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
+            moveToLoginService(curPath, 'Session refresh failed')
+            // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
           }
         }
         updateCookieWithRefreshToken(callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
       } else {
-        callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
+        moveToLoginService(curPath, 'Logged out due to inactivity')
+        // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
       }
     }
   )
 }
 
+function getAlteredHost (origHost, hostLookupList) {
+  for (var x in hostLookupList) {
+    if (origHost.includes(hostLookupList[x].a)) {
+      return hostLookupList[x].b
+    }
+  }
+  console.log('Failed to lookup ' + origHost + ' - don\'t know how to login')
+  return 'UNKNOWN'
+}
+
+function moveToLoginService (thisQuasarPath, message = undefined) {
+  if (thisQuasarPath.startsWith('/')) {
+    thisQuasarPath = thisQuasarPath.substr(1)
+  }
+
+  var quasarPathForTenenat = '#/' + thisQuasarPath.substr(0, thisQuasarPath.indexOf('/'))
+  thisQuasarPath = '#/' + thisQuasarPath
+
+  var locationToGoTo = ''
+  if (window.location.pathname.includes('/public/web/adminfrontend/')) {
+    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat
+  } else {
+    var hostLookup = [
+      {a: 'localhost:8082', b: 'localhost:8081'},
+      {a: 'cat-sdts.metcarob-home.com:8082', b: 'cat-sdts.metcarob-home.com:8081'},
+      {a: 'somefunnyhostname.com:5082', b: 'somefunnyhostname.com:5081'}
+    ]
+    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + quasarPathForTenenat
+  }
+  var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + thisQuasarPath
+
+  if (typeof (message) !== 'undefined') {
+    window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress) + '&usersystem_message=' + encodeURIComponent(message)
+  } else {
+    window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress)
+  }
+}
+
 export default {
   TryToConnectToAPI: TryToConnectToAPI,
   getAPIPathToCall: getAPIPathToCall,
-  callAPI: callAPI
+  callAPI: callAPI,
+  moveToLoginService: moveToLoginService
 }

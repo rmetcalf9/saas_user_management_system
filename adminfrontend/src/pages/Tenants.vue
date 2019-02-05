@@ -90,7 +90,8 @@ export default {
         path: queryString,
         method: 'get',
         postdata: null,
-        callback: callback
+        callback: callback,
+        curPath: this.$router.history.current.path
       })
     },
     openCreateTenantModalDialog () {
@@ -116,15 +117,17 @@ export default {
         cancel: true,
         color: 'secondary'
       }).then(data => {
+        var postdata = {
+          'Name': data,
+          'Description': '',
+          'AllowUserCreation': false
+        }
         this.$store.dispatch('globalDataStore/callAdminAPI', {
           path: '/tenants',
           method: 'post',
-          postdata: {
-            'Name': data,
-            'Description': '',
-            'AllowUserCreation': false
-          },
-          callback: callback
+          postdata: postdata,
+          callback: callback,
+          curPath: this.$router.history.current.path
         })
       })
     },

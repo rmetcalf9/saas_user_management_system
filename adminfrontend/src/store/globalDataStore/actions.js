@@ -34,17 +34,21 @@ function readServerInfo (state, commit, currentHREF, callback) {
   shared.TryToConnectToAPI(currentHREF, state.tenantName, callback2, '/login/serverinfo')
 }
 
-function _callAdminAPI (state, path, method, postdata, callback) {
+function _callAdminAPI (state, path, method, postdata, callback, curPath) {
   var cookie = Cookies.get('usersystemUserCredentials')
 
-  shared.callAPI(state.tenantName, state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh)
+  shared.callAPI(state.tenantName, state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, true, curPath)
 }
 
 export const callAdminAPI = ({ dispatch, commit, state }, params) => {
+  if (typeof (params.curPath) === 'undefined') {
+    callbackHelper.callbackWithSimpleError(params.callback, 'Bad call no current path')
+    return
+  }
   if (state.apiPrefix === null) {
     var callback = {
       ok: function (response) {
-        _callAdminAPI(state, params['path'], params['method'], params['postdata'], params.callback)
+        _callAdminAPI(state, params['path'], params['method'], params['postdata'], params.callback, params.curPath)
       },
       error: params.callback.error
     }
@@ -52,5 +56,5 @@ export const callAdminAPI = ({ dispatch, commit, state }, params) => {
     return
   }
 
-  _callAdminAPI(state, params['path'], params['method'], params['postdata'], params.callback)
+  _callAdminAPI(state, params['path'], params['method'], params['postdata'], params.callback, params.curPath)
 }

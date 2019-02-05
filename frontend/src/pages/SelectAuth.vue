@@ -19,6 +19,10 @@
 </style>
 
 <script>
+import {
+  Notify
+} from 'quasar'
+
 export default {
   name: 'SelectAuth',
   data () {
@@ -34,6 +38,12 @@ export default {
     clickHandler1 (authProvider) {
       this.$store.commit('globalDataStore/updateSelectedAuthProvGUID', authProvider.guid)
       this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/AuthProvider/' + authProvider.Type)
+    }
+  },
+  mounted () {
+    if (this.$store.state.globalDataStore.messagePendingDisplay !== null) {
+      Notify.create({color: 'negative', detail: this.$store.state.globalDataStore.messagePendingDisplay})
+      this.$store.commit('globalDataStore/setMessageDisplayed')
     }
   }
 }
