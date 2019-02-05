@@ -19,6 +19,14 @@
           @click="openCreateTenantModalDialog"
         >Add Tenant</q-btn>
       </template>
+
+      <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
+        <q-btn flat no-caps dense :label="props.value" @click="$router.push('/' + $route.params.tenantName + '/tenants/' + props.row.Name)" width="100%"/>
+      </q-td>
+
+      <q-td slot="body-cell-..." slot-scope="props" :props="props">
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/tenants/' + props.row.Name)" />
+      </q-td>
   </q-table>
 </template>
 
@@ -40,7 +48,8 @@ export default {
       tableColumns: [
         { name: 'Name', required: true, label: 'Tenant Name', align: 'left', field: 'Name', sortable: false, filter: false },
         { name: 'Description', required: true, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
-        { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false }
+        { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false },
+        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ]
     }
   },

@@ -79,14 +79,18 @@ class appObjClass(parAppObj):
     if self.APIAPP_REFRESH_SESSION_TIMEOUT < self.APIAPP_REFRESH_TOKEN_TIMEOUT:
       print("ERROR - APIAPP_REFRESH_SESSION_TIMEOUT should never be less than APIAPP_REFRESH_SESSION_TIMEOUT")
       raise invalidConfigurationException
-    
+
+    print('APIAPP_JWT_TOKEN_TIMEOUT:'+str(self.APIAPP_JWT_TOKEN_TIMEOUT) + ' seconds')
+    print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
+    print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
+
     self.objectStore = createObjectStoreInstance(self)
     if GetTenant(self,masterTenantName) is None:
       CreateMasterTenant(self)
-    
+
     self.gateway = getGatewayInterface(env)
     self.refreshTokenManager = RefreshTokenManager(self)
-    
+
     self.scheduler.start()
 
   def initOnce(self):
