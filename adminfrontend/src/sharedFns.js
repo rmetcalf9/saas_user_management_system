@@ -87,7 +87,19 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
   )
 }
 
-function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData, refreshAlreadyTried = false, curPath = undefined) {
+function callAPI (
+  tenantName,
+  apiPrefix,
+  authed,
+  path,
+  method,
+  data,
+  callback,
+  jwtTokenData,
+  refreshTokenData,
+  refreshAlreadyTried = false,
+  curPath = undefined
+) {
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
@@ -122,7 +134,7 @@ function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, j
           ok: function (response) {
             // callAPI with new jwtTokenData value and refresh value - ignore response
             var cookie = Cookies.get('usersystemUserCredentials')
-            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true)
+            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath)
           },
           error: function (response) {
             moveToLoginService(curPath, 'Session refresh failed')
