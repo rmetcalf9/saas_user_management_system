@@ -15,6 +15,9 @@
         >
           <q-icon name="menu" />
         </q-btn>
+        <q-btn v-if="backroute !== ''" class="within-iframe-hide" flat @click="$router.replace(backroute)" style="margin-right: 15px">
+          <q-icon name="keyboard_arrow_left" />
+        </q-btn>
 
         <q-toolbar-title>
           SAAS User System - {{ pageTitle }}
@@ -84,6 +87,19 @@ export default {
     },
     serverInfo () {
       return this.$store.state.globalDataStore.serverInfo
+    },
+    backroute () {
+      // console.log(this.$route.path)
+      if (this.$route.path === '/') return ''
+      var x = this.$route.path.split('/')
+      if (x.length < 4) return ''
+      var o = ''
+      for (var y in x) {
+        if (y < (x.length - 1)) o += '/' + x[y]
+      }
+      var newPath = o.substring(1)
+      // console.log('new Path is', newPath)
+      return newPath
     }
   },
   methods: {
