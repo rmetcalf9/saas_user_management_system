@@ -1,4 +1,4 @@
-<template>
+<template><q-page>
 <!-- https://github.com/rmetcalf9/dockJob/blob/master/webfrontend/src/pages/Jobs.vue -->
   <q-table
     title='Tenants'
@@ -28,7 +28,7 @@
         <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/tenants/' + props.row.Name)" />
       </q-td>
   </q-table>
-</template>
+</q-page></template>
 
 <style>
 </style>

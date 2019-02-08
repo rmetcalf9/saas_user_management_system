@@ -1,5 +1,15 @@
 <template>
-  <div>
+  <q-page>
+    <q-page-sticky position="bottom-right" :offset="[50, 50]">
+      <q-btn
+        color="negative"
+        class="fixed"
+        round
+        @click="deleteTenant"
+        icon="delete"
+      ></q-btn>
+    </q-page-sticky>
+
   <q-list >
     <q-item>
       <q-item-main >
@@ -25,7 +35,7 @@
   </q-table>
 
   {{ tenantData }}
-  </div>
+  </q-page>
 </template>
 
 <style>
@@ -47,11 +57,11 @@ export default {
     return {
       tenantData: getEmptyTenantData(),
       tableColumns: [
-        { name: 'guid', required: true, label: 'guid', align: 'left', field: 'guid', sortable: true, filter: false },
         { name: 'Type', required: true, label: 'Type', align: 'left', field: 'Type', sortable: true, filter: false },
         { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: true, filter: false },
         { name: 'MenuText', required: true, label: 'MenuText', align: 'left', field: 'MenuText', sortable: true, filter: false },
         { name: 'IconLink', required: true, label: 'IconLink', align: 'left', field: 'IconLink', sortable: true, filter: false }
+        // guid not in table
         // ConfigJSON not in table
       ]
     }
@@ -76,6 +86,44 @@ export default {
         postdata: null,
         callback: callback,
         curPath: this.$router.history.current.path
+      })
+    },
+    deleteTenant () {
+      var TTT = this
+      var nameOfTenantToDelete = TTT.tenantData.Name
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to delete ' + nameOfTenantToDelete,
+        ok: {
+          push: true,
+          label: 'Yes - delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).then(() => {
+        var callback = {
+          ok: function (response) {
+            Notify.create({color: 'positive', detail: 'Tenant ' + nameOfTenantToDelete + ' deleted'})
+            TTT.$router.push('/' + TTT.$route.params.tenantName + '/tenants/')
+          },
+          error: function (error) {
+            Notify.create('Delete Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+          }
+        }
+        TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+          path: '/tenants/' + nameOfTenantToDelete,
+          method: 'delete',
+          postdata: null,
+          callback: callback,
+          curPath: TTT.$router.history.current.path
+        })
+      }).catch(() => {
+        // Do nothing
       })
     }
   },
