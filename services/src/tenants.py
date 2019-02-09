@@ -113,12 +113,13 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
       raise tenantDosentExistException
     tenant["AuthProviders"][authProviderJSON['guid']] = authProviderJSON
     return tenant
-  appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant)
+  #This update function will not alter the tenant version at all so we can find the latest object version and use that
+  appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant, None)
   return authProviderJSON
   
 # called locally
 def _createTenant(appObj, tenantName, description, allowUserCreation):
-  tenantWithSameName =  appObj.objectStore.getObjectJSON(appObj,"tenants", tenantName)
+  tenantWithSameName, ver =  appObj.objectStore.getObjectJSON(appObj,"tenants", tenantName)
   if tenantWithSameName is not None:
     raise tenantAlreadtExistsException
   jsonForTenant = {
@@ -127,14 +128,14 @@ def _createTenant(appObj, tenantName, description, allowUserCreation):
     "AllowUserCreation": allowUserCreation,
     "AuthProviders": {}
   }
-  appObj.objectStore.saveJSONObject(appObj,"tenants", tenantName, jsonForTenant)
-  return tenantClass(jsonForTenant)
+  createdTenantVer = appObj.objectStore.saveJSONObject(appObj,"tenants", tenantName, jsonForTenant, None)
+  return tenantClass(jsonForTenant, createdTenantVer)
 
 def GetTenant(appObj, tenantName):
-  a = appObj.objectStore.getObjectJSON(appObj,"tenants",tenantName)
+  a, aVer = appObj.objectStore.getObjectJSON(appObj,"tenants",tenantName)
   if a is None:
     return a
-  return tenantClass(a)
+  return tenantClass(a, aVer)
   
 def CreateUser(appObj, UserID, mainTenant):
   appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
@@ -205,7 +206,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception
     
 
-  userDict = appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
+  userDict, userDictVer = appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 

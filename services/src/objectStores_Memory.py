@@ -1,36 +1,69 @@
-from objectStores_base import ObjectStore, StoringNoneObjectAfterUpdateOperationException
+from objectStores_base import ObjectStore, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException
 
 # Class that will store objects in memory only
 class ObjectStore_Memory(ObjectStore):
   objectData = None
-  objectDataAlternativeKeys = None
   def __init__(self):
     self.objectData = dict()
-    self.objectDataAlternativeKeys = dict()
+
   def __getDictForObjectType(self, objectType):
     if objectType not in self.objectData:
       #print("Creating dict for " + objectType)
       self.objectData[objectType] = dict()
     return self.objectData[objectType]
 
-  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString):
-    self.__getDictForObjectType(objectType)[objectKey] = JSONString
-  def _removeJSONObject(self, appObj, objectType, objectKey):
+#  #Check if the object version supplied is the currently stored object
+#  def _checkObjectVersion(self, appObj, objectType, objectKey, curVersion):
+#    if curVersion is None:
+#      return
+#    objectVersionDict = self.__getDictForObjectType(objectType)
+#    if objectKey not in objectVersionDict:
+#      raise WrongObjectVersionException
+#    if objectVersionDict[objectKey][1] != curVersion:
+#      raise WrongObjectVersionException
+
+  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion):
+    dictForObjectType = self.__getDictForObjectType(objectType)
+    newObjectVersion = None
+    if objectKey not in dictForObjectType:
+      newObjectVersion = 1
+      dictForObjectType[objectKey] = (JSONString, newObjectVersion)
+    else:
+      if objectVersion is not None:
+        if objectVersion != dictForObjectType[objectKey][1]:
+          raise WrongObjectVersionException
+      newObjectVersion = objectVersion + 1
+    dictForObjectType[objectKey] = (JSONString, newObjectVersion)
+    return newObjectVersion
+
+  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion):
+    dictForObjectType = self.__getDictForObjectType(objectType)
+    if objectVersion is not None:
+      if objectKey not in dictForObjectType:
+        raise Exception('Deleting something that isn\'t there')
+      if dictForObjectType[objectKey][1] != objectVersion:
+        raise WrongObjectVersionException
     del self.__getDictForObjectType(objectType)[objectKey]
+    return None
 
   # Update the object in single operation. make transaction safe??
-  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn):
-    obj = self.getObjectJSON(appObj, objectType, objectKey)
+  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion):
+    obj, ver = self.getObjectJSON(appObj, objectType, objectKey)
+    if objectVersion is None:
+      #If object version is not supplied then assume update will not cause an error
+      objectVersion = ver 
+    if objectVersion != ver:
+      raise WrongObjectVersionException
     obj = updateFn(obj)
     if obj is None:
       raise StoringNoneObjectAfterUpdateOperationException
-    self.saveJSONObject(appObj, objectType, objectKey, obj)
+    return self.saveJSONObject(appObj, objectType, objectKey, obj, objectVersion)
   
   def _getObjectJSON(self, appObj, objectType, objectKey):
     objectTypeDict = self.__getDictForObjectType(objectType)
     if objectKey in objectTypeDict:
       return objectTypeDict[objectKey]
-    return None
+    return None, None
 
   def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN, filterFN):
     return appObj.getPaginatedResult(

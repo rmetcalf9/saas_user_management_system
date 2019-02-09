@@ -33,11 +33,12 @@ def associateIdentityWithPerson(appObj, personGUID, AuthUserKey):
   appObj.objectStore.updateJSONObject(appObj,"IdentitiesForEachPerson", AuthUserKey, upd)
 
 def getIdentityDict(appObj, personGUID):
-  return appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
+  identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
+  return identifyJSON
 
 def getListOfIdentitiesForPerson(appObj, personGUID):
   res = {}
-  identitiesThisPerson = appObj.objectStore.getObjectJSON(appObj,"IdentitiesForEachPerson", personGUID)
+  identitiesThisPerson, ver = appObj.objectStore.getObjectJSON(appObj,"IdentitiesForEachPerson", personGUID)
   if identitiesThisPerson is None:
     return {}
   for ite in identitiesThisPerson:

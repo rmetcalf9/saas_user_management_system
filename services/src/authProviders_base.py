@@ -7,7 +7,8 @@ from constants import authFailedException, customExceptionClass
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 
 def getAuthRecord(appObj, key):
-  return appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+  authRecord, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+  return authRecord
 
 
 class authProvider():
@@ -35,7 +36,7 @@ class authProvider():
 
   def AddAuth(self, appObj, authTypeConfigDict, personGUID):
     key = self._makeKey(authTypeConfigDict)
-    obj = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+    obj, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
     if obj is not None:
       raise tryingToCreateDuplicateAuthException
 

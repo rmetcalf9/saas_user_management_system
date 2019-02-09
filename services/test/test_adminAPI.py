@@ -93,7 +93,8 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 201)
     resultJSON = json.loads(result.get_data(as_text=True))
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='JSON of created Tenant is not the same')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, ["ObjectVersion"], msg='JSON of created Tenant is not the same')
+    self.assertEqual(resultJSON["ObjectVersion"],"1")
     
   def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
     self.createTenantForTesting(tenantDICT)
@@ -119,7 +120,9 @@ class test_funcitonal(test_api):
 
     self.assertJSONStringsEqual(resultJSON['pagination'], {"offset": 0, "pagesize": 100, "total": 1})
     self.assertEqual(len(resultJSON["result"]),1,msg="Only 1 result should be returned")
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], {"AllowUserCreation": False, "AuthProviders": "ignored", "Description": "Master Tenant for User Management System", "Name": "usersystem"}, ['AuthProviders'])
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], {"AllowUserCreation": False, "AuthProviders": "ignored", "Description": "Master Tenant for User Management System", "Name": "usersystem"}, ['AuthProviders',"ObjectVersion"])
+    self.assertEqual(resultJSON["result"][0]["ObjectVersion"],"2")
+
     self.assertEqual(len(resultJSON["result"][0]['AuthProviders']),1,msg="Wrong number of auth providers")
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0]['AuthProviders'][0], {"AllowUserCreation": False, "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}", "IconLink": None, "MenuText": "Website account login", "Type": "internal"}, ['guid', "saltForPasswordHashing"])
 
@@ -133,7 +136,8 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 201)
     resultJSON = json.loads(result.get_data(as_text=True))
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='JSON of created Tenant is not the same')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, ["ObjectVersion"], msg='JSON of created Tenant is not the same')
+    self.assertEqual(resultJSON["ObjectVersion"],"1")
 
   def test_createTenantInvalidJSON(self):
     result = self.testClient.post(
@@ -175,8 +179,11 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithChangedDescription, [], msg='JSON of updated Tenant is not the same as what it was set to')
-    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithChangedDescription['Name']), tenantWithChangedDescription, [], msg='Tenant wasnt changed in get result')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithChangedDescription, ["ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithChangedDescription['Name']), tenantWithChangedDescription, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
     
   def test_CanNotUpdateTenantName(self):
     self.createTenantForTesting(tenantWithNoAuthProviders)
@@ -207,8 +214,10 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithChangedDescription, [], msg='JSON of updated Tenant is not the same as what it was set to')
-    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithChangedDescription['Name']), tenantWithChangedDescription, [], msg='Tenant wasnt changed in get result')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithChangedDescription, ["ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")    
+
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithChangedDescription['Name']), tenantWithChangedDescription, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
 
 
   def test_addAuthProvider(self):
@@ -225,14 +234,15 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders'], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders',"ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")    
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['AuthProviders'][0], tenantWithSingleAuthProvider['AuthProviders'][0], ['saltForPasswordHashing','guid'], msg='JSON of updated authprov is not the same as what it was set to')
     
     #Copy assigned guid and salt for get test
     tenantWithSingleAuthProvider['AuthProviders'][0]['guid'] = resultJSON['AuthProviders'][0]['guid']
     tenantWithSingleAuthProvider['AuthProviders'][0]['saltForPasswordHashing'] = resultJSON['AuthProviders'][0]['saltForPasswordHashing']
     
-    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, [], msg='Tenant wasnt changed in get result')
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
 
   def test_addAuthProviderSupplyingSaltFails(self):
     self.createTenantForTesting(tenantWithNoAuthProviders)
@@ -277,7 +287,9 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders'], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders',"ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
+
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['AuthProviders'][0], tenantWithSingleAuthProvider['AuthProviders'][0], ['saltForPasswordHashing','guid'], msg='JSON of updated authprov is not the same as what it was set to')
     
     #Copy assigned guid and salt for get test
@@ -285,7 +297,8 @@ class test_funcitonal(test_api):
       tenantWithSingleAuthProvider['AuthProviders'][c]['guid'] = resultJSON['AuthProviders'][c]['guid']
       tenantWithSingleAuthProvider['AuthProviders'][c]['saltForPasswordHashing'] = resultJSON['AuthProviders'][c]['saltForPasswordHashing']
     
-    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, [], msg='Tenant wasnt changed in get result')
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
   
   def test_addSecondAuthProvider(self):
     resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
@@ -305,7 +318,9 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders'], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders',"ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertEqual(resultJSON["ObjectVersion"],"3")
+
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['AuthProviders'][0], tenantWithSingleAuthProvider['AuthProviders'][0], ['saltForPasswordHashing','guid'], msg='JSON of updated authprov is not the same as what it was set to')
     
     #Copy assigned guid and salt for get test
@@ -313,7 +328,7 @@ class test_funcitonal(test_api):
       tenantWithSingleAuthProvider['AuthProviders'][c]['guid'] = resultJSON['AuthProviders'][c]['guid']
       tenantWithSingleAuthProvider['AuthProviders'][c]['saltForPasswordHashing'] = resultJSON['AuthProviders'][c]['saltForPasswordHashing']
     
-    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, [], msg='Tenant wasnt changed in get result')
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
 
   def test_updateAuthProviderSaltIsNoneFails(self):
     resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
@@ -376,7 +391,8 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)    
     
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, expectedDictAfterChange, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, expectedDictAfterChange, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
   
   def test_updateTenantDescription_TenantHasMutipleAuthProvsWhichShouldBeUnchanged(self):
     #Must make sure salts are not changed
@@ -392,7 +408,8 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)    
 
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(changedResultJSON["ObjectVersion"], "3")
   
   def test_deleteOnlyAuthProvider(self):
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
@@ -431,7 +448,9 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200) 
     
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(changedResultJSON["ObjectVersion"],"3")
+
     self.assertEqual(len(changedResultJSON['AuthProviders']),0,msg='Wrong number of remaining auth providers')
     
     #Check auth record has been NOT been removed
@@ -454,7 +473,9 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200) 
 
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(changedResultJSON["ObjectVersion"],"3")
+
     self.assertEqual(len(changedResultJSON['AuthProviders']),0,msg='Wrong number of remaining auth providers')
 
   def test_deleteOneOfThreeAuthProviders(self):
@@ -471,7 +492,9 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200) 
 
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, [], msg='New Tenant JSON isn\'t the expected value')
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+    self.assertEqual(changedResultJSON["ObjectVersion"],"3")
+
     self.assertEqual(len(changedResultJSON['AuthProviders']),2,msg='Wrong number of remaining auth providers')
   
   def test_deleteTenant(self):
@@ -510,8 +533,9 @@ class test_funcitonal(test_api):
     )
     self.assertEqual(result.status_code, 200) 
     resultJSON = json.loads(result.get_data(as_text=True))
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, [], msg='Incorrect response')
-
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, ["ObjectVersion"], msg='Incorrect response')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
+    
   def test_getTenantBadName(self):
     result = self.testClient.get(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + 'InvalidTenantName', 

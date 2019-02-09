@@ -22,4 +22,5 @@ def associatePersonWithAuth(appObj, identityGUID, AuthUserKey):
   appObj.objectStore.updateJSONObject(appObj,"PersonsForEachAuth", AuthUserKey, upd)
 
 def getPerson(appObj, personGUID):
-  return appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
+  personJSON, objVer = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
+  return personJSON

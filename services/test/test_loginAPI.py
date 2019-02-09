@@ -52,7 +52,8 @@ class test_api(testHelperAPIClient):
         "IconLink": masterTenantDefaultAuthProviderMenuIconLink, 
         "AllowUserCreation": False, 
         "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}"
-      }] 
+      }],
+      "ObjectVersion": "2"
     }
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders' ])
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON[ 'AuthProviders' ][0], expectedResult[ 'AuthProviders' ][0], [ 'guid', 'saltForPasswordHashing' ], msg="Master tenant auth provider wrong")

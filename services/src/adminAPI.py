@@ -101,7 +101,7 @@ def registerAPI(appObj):
       '''Get list of tenants'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return tenantClass(item).getJSONRepresenation()
+        return tenantClass(item[0],item[1]).getJSONRepresenation()
 
       outputFN = defOutput
       filterFN = None

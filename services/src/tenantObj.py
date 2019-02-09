@@ -7,8 +7,10 @@ import copy
 class tenantClass():
   _mainDict = None
   _jsonRepersentation = None
-  def __init__(self, JSONRetrievedFromStore):
+  _objectVersion = None
+  def __init__(self, JSONRetrievedFromStore, objectVersion):
     self._mainDict = JSONRetrievedFromStore.copy()
+    self._objectVersion = objectVersion
   
   #Need to convert authPRoviders into a list as in _mainDict it is a dict for indexing
   def getJSONRepresenation(self):
@@ -23,6 +25,7 @@ class tenantClass():
         tmp['ConfigJSON'] = json.dumps(tmp['ConfigJSON'])
         ap.append(tmp)
       self._jsonRepersentation['AuthProviders'] = ap
+      self._jsonRepersentation['ObjectVersion'] = self._objectVersion
     return self._jsonRepersentation
 
   def getAuthProvider(self, guid):
