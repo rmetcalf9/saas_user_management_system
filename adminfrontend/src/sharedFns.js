@@ -98,22 +98,26 @@ function callAPI (
   jwtTokenData,
   refreshTokenData,
   refreshAlreadyTried = false,
-  curPath = undefined
+  curPath = undefined,
+  headers = undefined
 ) {
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
     }
   }
-
+  if (typeof (headers) === 'undefined') {
+    headers = {}
+  }
   var config = {
     method: method,
     url: getAPIPathToCall(apiPrefix, authed, path),
-    data: data
+    data: data,
+    headers: headers
   }
   if (authed) {
     // Possible optiomzation - check if jwt token has expired and go direct to refresh call
-    config.headers = {'jwt-auth-token': jwtTokenData.JWTToken}
+    config.headers['jwt-auth-token'] = jwtTokenData.JWTToken
   }
 
   axios(config).then(
@@ -134,7 +138,7 @@ function callAPI (
           ok: function (response) {
             // callAPI with new jwtTokenData value and refresh value - ignore response
             var cookie = Cookies.get('usersystemUserCredentials')
-            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath)
+            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
           },
           error: function (response) {
             moveToLoginService(curPath, 'Session refresh failed')

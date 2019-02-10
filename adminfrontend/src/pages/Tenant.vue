@@ -85,7 +85,8 @@ export default {
         method: 'get',
         postdata: null,
         callback: callback,
-        curPath: this.$router.history.current.path
+        curPath: this.$router.history.current.path,
+        headers: undefined
       })
     },
     deleteTenant () {
@@ -120,7 +121,8 @@ export default {
           method: 'delete',
           postdata: null,
           callback: callback,
-          curPath: TTT.$router.history.current.path
+          curPath: TTT.$router.history.current.path,
+          headers: {'object-version-id': TTT.tenantData.ObjectVersion}
         })
       }).catch(() => {
         // Do nothing

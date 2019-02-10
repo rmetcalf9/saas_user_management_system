@@ -100,7 +100,8 @@ export default {
         method: 'get',
         postdata: null,
         callback: callback,
-        curPath: this.$router.history.current.path
+        curPath: this.$router.history.current.path,
+        headers: undefined
       })
     },
     openCreateTenantModalDialog () {
@@ -136,7 +137,8 @@ export default {
           method: 'post',
           postdata: postdata,
           callback: callback,
-          curPath: this.$router.history.current.path
+          curPath: this.$router.history.current.path,
+          headers: undefined
         })
       })
     },
