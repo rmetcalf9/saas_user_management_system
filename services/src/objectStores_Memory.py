@@ -30,9 +30,9 @@ class ObjectStore_Memory(ObjectStore):
       dictForObjectType[objectKey] = (JSONString, newObjectVersion)
     else:
       if objectVersion is not None:
-        if objectVersion != dictForObjectType[objectKey][1]:
+        if str(objectVersion) != str(dictForObjectType[objectKey][1]):
           raise WrongObjectVersionException
-      newObjectVersion = objectVersion + 1
+      newObjectVersion = int(objectVersion) + 1
     dictForObjectType[objectKey] = (JSONString, newObjectVersion)
     return newObjectVersion
 
@@ -41,7 +41,7 @@ class ObjectStore_Memory(ObjectStore):
     if objectVersion is not None:
       if objectKey not in dictForObjectType:
         raise Exception('Deleting something that isn\'t there')
-      if dictForObjectType[objectKey][1] != objectVersion:
+      if str(dictForObjectType[objectKey][1]) != str(objectVersion):
         raise WrongObjectVersionException
     del self.__getDictForObjectType(objectType)[objectKey]
     return None
@@ -52,7 +52,7 @@ class ObjectStore_Memory(ObjectStore):
     if objectVersion is None:
       #If object version is not supplied then assume update will not cause an error
       objectVersion = ver 
-    if objectVersion != ver:
+    if str(objectVersion) != str(ver):
       raise WrongObjectVersionException
     obj = updateFn(obj)
     if obj is None:

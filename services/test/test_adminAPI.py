@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient, env
-from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
+from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, objectVersionHeaderName
 import json
 import copy
 from tenants import AddAuth, CreatePerson, GetTenant
@@ -96,18 +96,23 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, ["ObjectVersion"], msg='JSON of created Tenant is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"1")
     
+    return resultJSON
+    
   def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
-    self.createTenantForTesting(tenantDICT)
-    tenantWithSingleAuthProvider = copy.deepcopy(tenantDICT)
+    tenantJSON = self.createTenantForTesting(tenantDICT)
+    tenantWithAuthProviders = copy.deepcopy(tenantDICT)
     a = []
     for b in authProvDictList:
       a.append(copy.deepcopy(b))
-    tenantWithSingleAuthProvider['AuthProviders'] = a
-
+    tenantWithAuthProviders['AuthProviders'] = a
+    tenantWithAuthProviders['ObjectVersion'] = tenantJSON['ObjectVersion']
+    
+    #print("tenantJSON:",tenantJSON)
+    #print("tenantWithAuthProviders:",tenantWithAuthProviders)
     result = self.testClient.put(
-      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithAuthProviders['Name'], 
       headers={ jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantWithSingleAuthProvider), 
+      data=json.dumps(tenantWithAuthProviders), 
       content_type='application/json'
     )
     self.assertEqual(result.status_code, 200)
@@ -165,10 +170,11 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 400, msg='Shouldn\'t be able to create a two tenants with the same name')
 
   def test_updateTenantDescription(self):
-    self.createTenantForTesting(tenantWithNoAuthProviders)
+    tenantJSON = self.createTenantForTesting(tenantWithNoAuthProviders)
     
     tenantWithChangedDescription = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithChangedDescription['Description'] = "Changed Description"
+    tenantWithChangedDescription['ObjectVersion'] = tenantJSON['ObjectVersion']
 
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithChangedDescription['Name'], 
@@ -200,10 +206,11 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 400)
   
   def test_UpdateAllowUserCreation(self):
-    self.createTenantForTesting(tenantWithNoAuthProviders)
+    tenantDICT = self.createTenantForTesting(tenantWithNoAuthProviders)
     
     tenantWithChangedDescription = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithChangedDescription['AllowUserCreation'] = True
+    tenantWithChangedDescription['ObjectVersion'] = tenantDICT['ObjectVersion']
 
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithChangedDescription['Name'], 
@@ -221,9 +228,10 @@ class test_funcitonal(test_api):
 
 
   def test_addAuthProvider(self):
-    self.createTenantForTesting(tenantWithNoAuthProviders)
+    tenantDICT = self.createTenantForTesting(tenantWithNoAuthProviders)
     tenantWithSingleAuthProvider = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithSingleAuthProvider['AuthProviders'] = [copy.deepcopy(sampleInternalAuthProv001_CREATE)]
+    tenantWithSingleAuthProvider['ObjectVersion'] = tenantDICT['ObjectVersion']
 
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
@@ -274,9 +282,10 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 400)
 
   def test_addTwoAuthProvidersTogether(self):
-    self.createTenantForTesting(tenantWithNoAuthProviders)
+    tenantDICT = self.createTenantForTesting(tenantWithNoAuthProviders)
     tenantWithSingleAuthProvider = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithSingleAuthProvider['AuthProviders'] = [copy.deepcopy(sampleInternalAuthProv001_CREATE), copy.deepcopy(sampleInternalAuthProv001_CREATE)]
+    tenantWithSingleAuthProvider['ObjectVersion'] = tenantDICT['ObjectVersion']
 
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
@@ -308,7 +317,8 @@ class test_funcitonal(test_api):
 
     tenantWithSingleAuthProvider = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithSingleAuthProvider['AuthProviders'] = [existingAuthProv, copy.deepcopy(sampleInternalAuthProv001_CREATE)]
-    
+    tenantWithSingleAuthProvider['ObjectVersion'] = resultJSON['ObjectVersion']
+
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
       headers={ jwtHeaderName: self.getNormalJWTToken()}, 
@@ -381,6 +391,7 @@ class test_funcitonal(test_api):
     changedAuthProvs[0]['MenuText'] = newMenuTextToUse
     changedTenantDICT = copy.deepcopy(tenantWithNoAuthProviders)
     changedTenantDICT['AuthProviders'] = changedAuthProvs
+    changedTenantDICT['ObjectVersion'] = resultJSON['ObjectVersion']
     
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithNoAuthProviders['Name'], 
@@ -501,9 +512,9 @@ class test_funcitonal(test_api):
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
     result = self.testClient.delete(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + origTenantDict['Name'], 
-      headers={ jwtHeaderName: self.getNormalJWTToken()}
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: origTenantDict['ObjectVersion']}
     )
-    self.assertEqual(result.status_code, 200) 
+    self.assertEqual(result.status_code, 200, msg="Delete tenant failed - " + result.get_data(as_text=True)) 
     
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
     self.assertTrue(changedResultJSON is None, msg="Deleted tenant still exists")
@@ -543,5 +554,75 @@ class test_funcitonal(test_api):
     )
     self.assertEqual(result.status_code, 404) 
 
-  def test_twoUpdatesResultInOjectVersionClashCauseError(Self):
-    self.assertTrue(False, msg="Test to be written")
+  def test_deleteWIthWRongOjectVersionClashCauseError(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [])
+    result = self.testClient.get(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithNoAuthProviders['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 200) 
+    resultJSON = json.loads(result.get_data(as_text=True))
+
+    firstRecievedObjectVersion = resultJSON["ObjectVersion"]
+    #print("firstRecievedObjectVersion:",firstRecievedObjectVersion)
+    
+    #Change the object to generate new object version
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['Description'] = 'Changed description'
+    result2 = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result2.status_code, 200)    
+    result2JSON = json.loads(result2.get_data(as_text=True))
+
+    secondRecievedObjectVersion = result2JSON["ObjectVersion"]
+    #print("secondRecievedObjectVersion:",secondRecievedObjectVersion)
+
+    result3 = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + origTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: firstRecievedObjectVersion}
+    )
+    self.assertEqual(result3.status_code, 409, msg="Deltion of tenant with old object version didn't fail") 
+
+  def test_twoUpdatesResultInOjectVersionClashCauseError(self):
+    origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [])
+    result = self.testClient.get(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithNoAuthProviders['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 200) 
+    resultJSON = json.loads(result.get_data(as_text=True))
+
+    firstRecievedObjectVersion = resultJSON["ObjectVersion"]
+    print("firstRecievedObjectVersion:",firstRecievedObjectVersion)
+    
+    #Change the object to generate new object version
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['Description'] = 'Changed description'
+    result2 = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(changedTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result2.status_code, 200)    
+    result2JSON = json.loads(result2.get_data(as_text=True))
+
+    secondRecievedObjectVersion = result2JSON["ObjectVersion"]
+    print("secondRecievedObjectVersion:",secondRecievedObjectVersion)
+
+    print("Now sending with object version:", origTenantDict["ObjectVersion"])
+
+    #Update back to first json without changing the object version - should fail
+    changedTenantDict = copy.deepcopy(origTenantDict)
+    changedTenantDict['Description'] = 'Changed description'
+    result3 = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(origTenantDict), 
+      content_type='application/json'
+    )
+    self.assertEqual(result3.status_code, 409)    

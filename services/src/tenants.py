@@ -8,6 +8,7 @@ from identityObj import createNewIdentity, associateIdentityWithPerson, getListO
 import jwt
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
+from objectStores_base import WrongObjectVersionException
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -63,10 +64,12 @@ def CreateTenant(appObj, tenantName, description="", allowUserCreation=False):
     raise failedToCreateTenantException
   return _createTenant(appObj, tenantName, description, allowUserCreation)
   
-def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict):
+def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion):
   tenantObj = GetTenant(appObj, tenantName)
   if tenantObj is None:
     raise tenantDosentExistException
+  if str(tenantObj.getObjectVersion()) != str(objectVersion):
+    raise WrongObjectVersionException
 
   jsonForTenant = {
     "Name": tenantName,
@@ -94,16 +97,17 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
     if tenant is None:
       raise tenantDosentExistException
     return jsonForTenant
-  appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant)
+  appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant, objectVersion)
   return GetTenant(appObj, tenantName)
   
-def DeleteTenant(appObj, tenantName):
+def DeleteTenant(appObj, tenantName, objectVersion):
   if tenantName == masterTenantName:
     raise cantDeleteMasterTenantException
   tenantObj = GetTenant(appObj, tenantName)
   if tenantObj is None:
     raise tenantDosentExistException
-  appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName)
+  print("DeleteTenant objectVersion:", objectVersion)
+  appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
   return tenantObj
   
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):

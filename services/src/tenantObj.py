@@ -41,3 +41,6 @@ class tenantClass():
 
   def getName(self):
     return self._mainDict["Name"]
+
+  def getObjectVersion(self):
+    return self._objectVersion

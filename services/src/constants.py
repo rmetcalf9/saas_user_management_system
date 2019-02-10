@@ -33,6 +33,7 @@ cantDeleteMasterTenantException = customExceptionClass('can\'t delete master ten
 
 jwtHeaderName="jwt-auth-token"
 jwtCookieName="jwt-auth-token"
+objectVersionHeaderName="object-version-id"
 
 #Also try for the cookie the login page sets this allows swagger to work
 ##but no renewal here

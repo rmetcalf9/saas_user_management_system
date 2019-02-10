@@ -2,8 +2,12 @@
 #  Allows abstraction of particular store
 #  This is the baseClass other stores inherit from
 StoringNoneObjectAfterUpdateOperationException = Exception('Storing None Object After Update Operation')
-WrongObjectVersionException = Exception('Wrong object version supplied - Has another change occured since loading?')
 SavedObjectShouldNotContainObjectVersionException = Exception('SavedObjectShouldNotContainObjectVersion')
+
+class WrongObjectVersionExceptionClass(Exception):
+  pass
+WrongObjectVersionException = WrongObjectVersionExceptionClass('Wrong object version supplied - Has another change occured since loading?')
+
 
 #Base class for object store
 class ObjectStore():

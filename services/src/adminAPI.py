@@ -1,15 +1,16 @@
 #Admin API
 from flask import request
 from flask_restplus import Resource, fields
-from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError, NotFound
+from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError, NotFound, Conflict
 from apiSecurity import verifyAPIAccessUserLoginRequired
-from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException
+from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName
 from apiSharedModels import getTenantModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
 from tenantObj import tenantClass
+from objectStores_base import WrongObjectVersionExceptionClass
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
   if 'AuthProviders' in content:
@@ -181,11 +182,11 @@ def registerAPI(appObj):
       '''Update Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
-      requiredInPayload(content, ['Name','Description','AllowUserCreation','AuthProviders'])
+      requiredInPayload(content, ['Name','Description','AllowUserCreation','AuthProviders','ObjectVersion'])
 
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
-        tenantObj = UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'])
+        tenantObj = UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'])
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
           raise BadRequest(err.text)
@@ -196,6 +197,8 @@ def registerAPI(appObj):
         if (err.id=='cantUpdateExistingAuthProvException'):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
+      except WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
       except:
         raise InternalServerError
       
@@ -204,12 +207,18 @@ def registerAPI(appObj):
     @nsAdmin.doc('delete Tenant')
     @nsAdmin.response(200, 'Tenant Deleted')
     @nsAdmin.response(400, 'Error')
+    @nsAdmin.response(409, 'Conflict')
     @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant updated')
     def delete(self, tenant, tenantName):
       '''Delete Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
+      objectVersion = None
+      if objectVersionHeaderName in request.headers:
+        objectVersion = request.headers.get(objectVersionHeaderName)
+      if objectVersion is None:
+        raise BadRequest(objectVersionHeaderName + " header missing")
       try:
-        tenantObj = DeleteTenant(appObj, tenantName)
+        tenantObj = DeleteTenant(appObj, tenantName, objectVersion)
         return tenantObj.getJSONRepresenation()
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
@@ -217,5 +226,7 @@ def registerAPI(appObj):
         if (err.id=='cantDeleteMasterTenantException'):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
+      except WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
       except:
         raise InternalServerError        
