@@ -11,11 +11,12 @@
     </q-page-sticky>
 
   <q-list >
-    <q-item>
+    <q-item highlight @click.native="editTenant">
       <q-item-main >
         <q-item-tile label>Tenant Name: {{ tenantData.Name }}</q-item-tile>
         <q-item-tile sublabel>{{ tenantData.Description }}</q-item-tile>
       </q-item-main>
+      <q-item-side right icon="mode_edit" />
     </q-item>
     <q-item>
       <q-item-main >
@@ -33,6 +34,49 @@
     row-key="name"
   >
   </q-table>
+
+  <EditTenantModal
+    ref="createJobModalDialog"
+  >
+    <q-modal v-model="editTenantModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
+      <q-modal-layout>
+        <q-toolbar slot="header">
+            <q-btn
+            color="primary"
+            flat
+            round
+            dense
+            icon="keyboard_arrow_left"
+            @click="cancelEditTenantDialog"
+          />
+          <q-toolbar-title>
+            Edit Tenant Information
+          </q-toolbar-title>
+        </q-toolbar>
+
+        <div class="layout-padding">
+          <q-field helper="Description of Tenant" label="Descrption" :label-width="3" ref="descriptionInput">
+            <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog"/>
+          </q-field>
+          <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
+            <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
+          </q-field>
+          <div>&nbsp;</div>
+          <q-btn
+            @click="okEditTenantDialog"
+            color="primary"
+            label="Ok"
+            class = "float-right q-ml-xs"
+          />
+          <q-btn
+            @click="cancelEditTenantDialog"
+            label="Cancel"
+            class = "float-right"
+          />
+        </div>
+      </q-modal-layout>
+    </q-modal>
+  </EditTenantModal>
 
   {{ tenantData }}
   </q-page>
@@ -63,10 +107,37 @@ export default {
         { name: 'IconLink', required: true, label: 'IconLink', align: 'left', field: 'IconLink', sortable: true, filter: false }
         // guid not in table
         // ConfigJSON not in table
-      ]
+      ],
+      editTenantModalDialogData: {
+        Description: '',
+        AllowUserCreation: false
+      },
+      editTenantModalDialogVisible: false
     }
   },
   methods: {
+    okEditTenantDialog () {
+      this.editTenantModalDialogVisible = false
+      if (this.editTenantModalDialogData.Description === this.tenantData.Description) {
+        if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
+          return // no change so do nothing
+        }
+      }
+      Notify.create('TODO')
+      Notify.create({color: 'positive', detail: 'Really TODO'})
+    },
+    cancelEditTenantDialog () {
+      this.editTenantModalDialogVisible = false
+    },
+    editTenant () {
+      this.editTenantModalDialogData.Description = this.tenantData.Description
+      this.editTenantModalDialogData.AllowUserCreation = this.tenantData.AllowUserCreation
+
+      this.editTenantModalDialogVisible = true
+
+      // This dosen't seem to be working
+      this.$refs.descriptionInput.focus()
+    },
     refreshTenantData () {
       var jobNameToLoad = this.$route.params.selTenantNAME
       var TTT = this
