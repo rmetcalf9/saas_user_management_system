@@ -33,7 +33,16 @@
     :columns="tableColumns"
     row-key="name"
   >
+    <q-td slot="body-cell-..." slot-scope="props" :props="props">
+      <q-btn flat color="primary" icon="mode_edit" label="" @click="editAuthProv(props.row)" />
+    </q-td>
   </q-table>
+  <q-btn
+    @click="addAuthProv"
+    color="primary"
+    label="Add Auth Provider"
+    class = "float-left q-ma-xs"
+  />
 
     <q-modal v-model="editTenantModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
@@ -73,6 +82,54 @@
         </div>
       </q-modal-layout>
     </q-modal>
+
+    <q-modal v-model="editAuthProvModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
+      <q-modal-layout>
+        <q-toolbar slot="header">
+            <q-btn
+            color="primary"
+            flat
+            round
+            dense
+            icon="keyboard_arrow_left"
+            @click="cancelAuthProvTenantDialog"
+          />
+          <q-toolbar-title v-if="editAuthProvModalDialogData.AddMode">
+            Add Auth Provider for {{ tenantData.Name }}
+          </q-toolbar-title>
+          <q-toolbar-title v-if="!editAuthProvModalDialogData.AddMode">
+            Edit {{ editAuthProvModalDialogData.Type }} Auth Provider for {{ tenantData.Name }}
+          </q-toolbar-title>
+        </q-toolbar>
+
+        <div class="layout-padding">
+          <q-field helper="Type" label="Type" :label-width="3">
+            <q-input v-model="editAuthProvModalDialogData.Type" />
+          </q-field>
+          <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
+            <q-toggle v-model="editAuthProvModalDialogData.AllowUserCreation" />
+          </q-field>
+          <q-field helper="Text to display in select auth dialog" label="Menu Text" :label-width="3">
+            <q-input v-model="editAuthProvModalDialogData.MenuText" />
+          </q-field>
+          <q-field helper="Link to icon to be used in select auth dialog" label="Icon Link" :label-width="3">
+            <q-input v-model="editAuthProvModalDialogData.IconLink" />
+          </q-field>
+          <div>&nbsp;</div>
+          <q-btn
+            @click="okAuthProvTenantDialog"
+            color="primary"
+            label="Ok"
+            class = "float-right q-ml-xs"
+          />
+          <q-btn
+            @click="cancelAuthProvTenantDialog"
+            label="Cancel"
+            class = "float-right"
+          />
+        </div>
+      </q-modal-layout>
+    </q-modal>
   {{ tenantData }}
   </q-page>
 </template>
@@ -99,7 +156,8 @@ export default {
         { name: 'Type', required: true, label: 'Type', align: 'left', field: 'Type', sortable: true, filter: false },
         { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: true, filter: false },
         { name: 'MenuText', required: true, label: 'MenuText', align: 'left', field: 'MenuText', sortable: true, filter: false },
-        { name: 'IconLink', required: true, label: 'IconLink', align: 'left', field: 'IconLink', sortable: true, filter: false }
+        { name: 'IconLink', required: true, label: 'IconLink', align: 'left', field: 'IconLink', sortable: true, filter: false },
+        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
         // guid not in table
         // ConfigJSON not in table
       ],
@@ -107,10 +165,85 @@ export default {
         Description: '',
         AllowUserCreation: false
       },
-      editTenantModalDialogVisible: false
+      editTenantModalDialogVisible: false,
+      editAuthProvModalDialogData: {
+        AddMode: false,
+        Type: 'internal',
+        AllowUserCreation: false,
+        MenuText: '',
+        IconLink: '',
+        guid: ''
+      },
+      editAuthProvModalDialogVisible: false
     }
   },
   methods: {
+    addAuthProv () {
+      this.editAuthProvModalDialogData.AddMode = true
+      this.editAuthProvModalDialogData.Type = 'internal'
+      this.editAuthProvModalDialogData.AllowUserCreation = false
+      this.editAuthProvModalDialogData.MenuText = ''
+      this.editAuthProvModalDialogData.IconLink = ''
+      this.editAuthProvModalDialogData.guid = ''
+
+      this.editAuthProvModalDialogVisible = true
+    },
+    editAuthProv (item) {
+      this.editAuthProvModalDialogData.AddMode = false
+      this.editAuthProvModalDialogData.Type = item.Type
+      this.editAuthProvModalDialogData.AllowUserCreation = item.AllowUserCreation
+      this.editAuthProvModalDialogData.MenuText = item.MenuText
+      this.editAuthProvModalDialogData.IconLink = item.IconLink
+      this.editAuthProvModalDialogData.guid = item.guid
+
+      this.editAuthProvModalDialogVisible = true
+    },
+    okAuthProvTenantDialog () {
+      var TTT = this
+
+      // Shared validation
+      if (this.editAuthProvModalDialogData.MenuText === '') {
+        Notify.create({color: 'negative', detail: 'Menu text must be filled in'})
+        return
+      }
+
+      var newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
+      var newAuthProvJSON = {
+        Type: TTT.editAuthProvModalDialogData.Type,
+        AllowUserCreation: TTT.editAuthProvModalDialogData.AllowUserCreation,
+        MenuText: TTT.editAuthProvModalDialogData.MenuText,
+        IconLink: TTT.editAuthProvModalDialogData.IconLink,
+        guid: TTT.editAuthProvModalDialogData.guid
+      }
+      if (this.editAuthProvModalDialogData.AddMode) {
+        newTenantJSON.AuthProviders.push(newAuthProvJSON)
+      } else {
+        Notify.create('TODO Edit mode')
+      }
+      console.log('newTenantJSON:', newTenantJSON)
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', detail: 'Tenant Updated'})
+          TTT.refreshTenantData()
+        },
+        error: function (error) {
+          Notify.create('Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + newTenantJSON.Name,
+        method: 'put',
+        postdata: newTenantJSON,
+        callback: callback,
+        curPath: TTT.$router.history.current.path,
+        headers: {'object-version-id': newTenantJSON.ObjectVersion}
+      })
+
+      this.editAuthProvModalDialogVisible = false
+    },
+    cancelAuthProvTenantDialog () {
+      this.editAuthProvModalDialogVisible = false
+    },
     okEditTenantDialog () {
       var TTT = this
       this.editTenantModalDialogVisible = false
