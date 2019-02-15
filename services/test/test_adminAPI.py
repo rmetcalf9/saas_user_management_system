@@ -633,6 +633,7 @@ class test_funcitonal(test_api):
     tenantWithSingleAuthProvider['AuthProviders'] = [copy.deepcopy(sampleInternalAuthProv001_CREATE)]
     tenantWithSingleAuthProvider['ObjectVersion'] = tenantDICT['ObjectVersion']
     tenantWithSingleAuthProvider['AuthProviders'][0]['guid'] = ''
+    tenantWithSingleAuthProvider['AuthProviders'][0]['saltForPasswordHashing'] = ''
     
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
