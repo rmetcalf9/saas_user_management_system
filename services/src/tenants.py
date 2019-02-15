@@ -79,6 +79,12 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
   }
   for authProv in authProvDict:
     newAuthDICT = {}
+    
+    #Accept guid as empty string as well as none - both mean a new auth provider needs to be created
+    if authProv['guid'] is not None:
+      if authProv['guid'] == '':
+        authProv['guid'] = None
+
     if authProv['guid'] is not None:
       if authProv['saltForPasswordHashing'] is None:
         raise cantUpdateExistingAuthProvException

@@ -626,3 +626,31 @@ class test_funcitonal(test_api):
       content_type='application/json'
     )
     self.assertEqual(result3.status_code, 409)    
+
+  def test_addAuthProviderWithGUIDIsEmptyString(self):
+    tenantDICT = self.createTenantForTesting(tenantWithNoAuthProviders)
+    tenantWithSingleAuthProvider = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithSingleAuthProvider['AuthProviders'] = [copy.deepcopy(sampleInternalAuthProv001_CREATE)]
+    tenantWithSingleAuthProvider['ObjectVersion'] = tenantDICT['ObjectVersion']
+    tenantWithSingleAuthProvider['AuthProviders'][0]['guid'] = ''
+    
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(tenantWithSingleAuthProvider), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithSingleAuthProvider, ['AuthProviders',"ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['AuthProviders'][0], tenantWithSingleAuthProvider['AuthProviders'][0], ['saltForPasswordHashing','guid'], msg='JSON of updated authprov is not the same as what it was set to')
+    
+    #Copy assigned guid and salt for get test
+    tenantWithSingleAuthProvider['AuthProviders'][0]['guid'] = resultJSON['AuthProviders'][0]['guid']
+    tenantWithSingleAuthProvider['AuthProviders'][0]['saltForPasswordHashing'] = resultJSON['AuthProviders'][0]['saltForPasswordHashing']
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
+
+    
