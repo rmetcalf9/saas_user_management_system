@@ -35,9 +35,6 @@
   >
   </q-table>
 
-  <EditTenantModal
-    ref="createJobModalDialog"
-  >
     <q-modal v-model="editTenantModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
@@ -55,8 +52,8 @@
         </q-toolbar>
 
         <div class="layout-padding">
-          <q-field helper="Description of Tenant" label="Descrption" :label-width="3" ref="descriptionInput">
-            <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog"/>
+          <q-field helper="Description of Tenant" label="Descrption" :label-width="3">
+            <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput"/>
           </q-field>
           <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
             <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
@@ -76,8 +73,6 @@
         </div>
       </q-modal-layout>
     </q-modal>
-  </EditTenantModal>
-
   {{ tenantData }}
   </q-page>
 </template>
@@ -86,7 +81,7 @@
 </style>
 
 <script>
-import { Notify } from 'quasar'
+import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 
 function getEmptyTenantData () {
@@ -117,14 +112,34 @@ export default {
   },
   methods: {
     okEditTenantDialog () {
+      var TTT = this
       this.editTenantModalDialogVisible = false
       if (this.editTenantModalDialogData.Description === this.tenantData.Description) {
         if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
           return // no change so do nothing
         }
       }
-      Notify.create('TODO')
-      Notify.create({color: 'positive', detail: 'Really TODO'})
+      var newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
+      newTenantJSON.Description = this.editTenantModalDialogData.Description
+      newTenantJSON.AllowUserCreation = this.editTenantModalDialogData.AllowUserCreation
+
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', detail: 'Tenant Updated'})
+          TTT.refreshTenantData()
+        },
+        error: function (error) {
+          Notify.create('Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + newTenantJSON.Name,
+        method: 'put',
+        postdata: newTenantJSON,
+        callback: callback,
+        curPath: TTT.$router.history.current.path,
+        headers: {'object-version-id': newTenantJSON.ObjectVersion}
+      })
     },
     cancelEditTenantDialog () {
       this.editTenantModalDialogVisible = false
@@ -135,7 +150,6 @@ export default {
 
       this.editTenantModalDialogVisible = true
 
-      // This dosen't seem to be working
       this.$refs.descriptionInput.focus()
     },
     refreshTenantData () {
@@ -143,14 +157,17 @@ export default {
       var TTT = this
       var callback = {
         ok: function (response) {
+          Loading.hide()
           TTT.tenantData = response.data
           // TTT.stores().commit('globalDataStore/SET_PAGE_TITLE', 'Tenant ' + response.data.Name)
         },
         error: function (error) {
+          Loading.hide()
           Notify.create('Tenant query failed - ' + callbackHelper.getErrorFromResponse(error))
           TTT.tenantData = getEmptyTenantData()
         }
       }
+      Loading.show()
       this.$store.dispatch('globalDataStore/callAdminAPI', {
         path: '/tenants/' + jobNameToLoad,
         method: 'get',
