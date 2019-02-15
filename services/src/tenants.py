@@ -80,6 +80,11 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
   for authProv in authProvDict:
     newAuthDICT = {}
     
+    if 'saltForPasswordHashing' not in authProv:
+      authProv['saltForPasswordHashing'] = None
+    if 'guid' not in authProv:
+      authProv['guid'] = None
+    
     #Accept guid and saltForPasswordHashing as empty string as well as none - both mean a new auth provider needs to be created
     if authProv['guid'] is not None:
       if authProv['guid'] == '':
