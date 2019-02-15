@@ -1,7 +1,7 @@
 #Admin API
 from flask import request
 from flask_restplus import Resource, fields
-from werkzeug.exceptions import Unauthorized, BadRequest, InternalServerError, NotFound, Conflict
+from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest, InternalServerError, NotFound, Conflict
 from apiSecurity import verifyAPIAccessUserLoginRequired
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName
 from apiSharedModels import getTenantModel
@@ -54,7 +54,9 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
     raise Unauthorized()
   
   try:
-    (verified, decodedToken) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
+    (verified, decodedToken, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
+    if (forbidden):
+      raise Forbidden()
   except InvalidSignatureError:
     raise Unauthorized()
   except ExpiredSignatureError:
@@ -97,6 +99,7 @@ def registerAPI(appObj):
     @nsAdmin.marshal_with(appObj.getResultModel(getTenantModel(appObj)))
     @nsAdmin.response(200, 'Success', model=appObj.getResultModel(getTenantModel(appObj)))
     @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @appObj.addStandardSortParams(nsAdmin)
     def get(self, tenant):
       '''Get list of tenants'''
@@ -140,6 +143,7 @@ def registerAPI(appObj):
     @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
     @appObj.flastRestPlusAPIObject.response(201, 'Created')
     @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant created', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     def post(self, tenant):
       '''Create Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
@@ -164,6 +168,7 @@ def registerAPI(appObj):
     @nsAdmin.marshal_with(getTenantModel(appObj))
     @nsAdmin.response(200, 'Success', model=getTenantModel(appObj))
     @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @nsAdmin.response(404, 'Tenant Not Found')
     def get(self, tenant, tenantName):
       '''Get tenant information'''
@@ -209,6 +214,7 @@ def registerAPI(appObj):
     @nsAdmin.doc('delete Tenant')
     @nsAdmin.response(200, 'Tenant Deleted')
     @nsAdmin.response(400, 'Error')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @nsAdmin.response(409, 'Conflict')
     @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant updated')
     def delete(self, tenant, tenantName):

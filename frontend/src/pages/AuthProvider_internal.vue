@@ -13,6 +13,7 @@
           Login
         </q-btn>
       </p>
+      <p v-if='authProvInfo.AllowUserCreation && tenantInfo.AllowUserCreation'>Register for new account</p>
     </div>
   </div>
 </template>
@@ -40,6 +41,9 @@ export default {
   computed: {
     tenantInfo () {
       return this.$store.state.globalDataStore.tenantInfo
+    },
+    authProvInfo () {
+      return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
     }
   },
   methods: {
@@ -89,7 +93,7 @@ export default {
       }
       Loading.show()
       var masterSecretKey = 'admin:admin:AG44'
-      var base64encodedSalt = this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID).saltForPasswordHashing
+      var base64encodedSalt = TTT.authProvInfo.saltForPasswordHashing
       var salt = atob(base64encodedSalt)
       var passwordhash = bcrypt.hashSync(masterSecretKey, salt)
       this.$store.dispatch('globalDataStore/callLoginAPI', {

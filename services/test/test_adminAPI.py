@@ -51,7 +51,7 @@ class test_securityTests(test_api):
   def test_jwtWithOnlyAccountRole(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole])
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 401)
+    self.assertEqual(result.status_code, 403) #Should return Forbidden
 
   def test_jwtWithOnlyAdminRole(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([masterTenantDefaultSystemAdminRole])

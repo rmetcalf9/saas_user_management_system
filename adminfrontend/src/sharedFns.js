@@ -129,10 +129,13 @@ function callAPI (
         callbackHelper.webserviceError(callback, response)
         return
       }
+      // 401 is unauthorized - this means token has expired or isn't present so it makes sense to retry
+      // 403 is forbidden - in this case the user doesn't have the required access role so no point retrying
       if (callbackHelper.getResponseStatusIfItHasOneOtherwiseNegativeOne(response) !== 401) {
         callbackHelper.webserviceError(callback, response)
         return
       }
+      // Only code 401 gets here
       if (!refreshAlreadyTried) {
         var callback2 = {
           ok: function (response) {

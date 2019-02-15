@@ -87,21 +87,37 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
   )
 }
 
-function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, jwtTokenData, refreshTokenData, refreshAlreadyTried = false, curPath = undefined) {
+function callAPI (
+  tenantName,
+  apiPrefix,
+  authed,
+  path,
+  method,
+  data,
+  callback,
+  jwtTokenData,
+  refreshTokenData,
+  refreshAlreadyTried = false,
+  curPath = undefined,
+  headers = undefined
+) {
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
     }
   }
-
+  if (typeof (headers) === 'undefined') {
+    headers = {}
+  }
   var config = {
     method: method,
     url: getAPIPathToCall(apiPrefix, authed, path),
-    data: data
+    data: data,
+    headers: headers
   }
   if (authed) {
     // Possible optiomzation - check if jwt token has expired and go direct to refresh call
-    config.headers = {'jwt-auth-token': jwtTokenData.JWTToken}
+    config.headers['jwt-auth-token'] = jwtTokenData.JWTToken
   }
 
   axios(config).then(
@@ -113,16 +129,19 @@ function callAPI (tenantName, apiPrefix, authed, path, method, data, callback, j
         callbackHelper.webserviceError(callback, response)
         return
       }
+      // 401 is unauthorized - this means token has expired or isn't present so it makes sense to retry
+      // 403 is forbidden - in this case the user doesn't have the required access role so no point retrying
       if (callbackHelper.getResponseStatusIfItHasOneOtherwiseNegativeOne(response) !== 401) {
         callbackHelper.webserviceError(callback, response)
         return
       }
+      // Only code 401 gets here
       if (!refreshAlreadyTried) {
         var callback2 = {
           ok: function (response) {
             // callAPI with new jwtTokenData value and refresh value - ignore response
             var cookie = Cookies.get('usersystemUserCredentials')
-            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true)
+            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
           },
           error: function (response) {
             moveToLoginService(curPath, 'Session refresh failed')
