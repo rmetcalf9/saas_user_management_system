@@ -115,6 +115,9 @@
           <q-field helper="Link to icon to be used in select auth dialog" label="Icon Link" :label-width="3">
             <q-input v-model="editAuthProvModalDialogData.IconLink" />
           </q-field>
+          <q-field helper="Auth Prov Spercific Config" label="ConfigJSON" :label-width="3">
+            <q-input v-model="editAuthProvModalDialogData.ConfigJSON" type="textarea" />
+          </q-field>
           <div>&nbsp;</div>
           <q-btn
             @click="okAuthProvTenantDialog"
@@ -172,7 +175,8 @@ export default {
         AllowUserCreation: false,
         MenuText: '',
         IconLink: '',
-        guid: ''
+        guid: '',
+        ConfigJSON: ''
       },
       editAuthProvModalDialogVisible: false
     }
@@ -185,6 +189,7 @@ export default {
       this.editAuthProvModalDialogData.MenuText = ''
       this.editAuthProvModalDialogData.IconLink = ''
       this.editAuthProvModalDialogData.guid = ''
+      this.editAuthProvModalDialogData.ConfigJSON = ''
 
       this.editAuthProvModalDialogVisible = true
     },
@@ -195,6 +200,7 @@ export default {
       this.editAuthProvModalDialogData.MenuText = item.MenuText
       this.editAuthProvModalDialogData.IconLink = item.IconLink
       this.editAuthProvModalDialogData.guid = item.guid
+      this.editAuthProvModalDialogData.ConfigJSON = item.ConfigJSON
 
       this.editAuthProvModalDialogVisible = true
     },
@@ -213,7 +219,8 @@ export default {
         AllowUserCreation: TTT.editAuthProvModalDialogData.AllowUserCreation,
         MenuText: TTT.editAuthProvModalDialogData.MenuText,
         IconLink: TTT.editAuthProvModalDialogData.IconLink,
-        guid: TTT.editAuthProvModalDialogData.guid
+        guid: TTT.editAuthProvModalDialogData.guid,
+        ConfigJSON: TTT.editAuthProvModalDialogData.ConfigJSON
       }
       if (this.editAuthProvModalDialogData.AddMode) {
         newTenantJSON.AuthProviders.push(newAuthProvJSON)
