@@ -681,4 +681,21 @@ class test_funcitonal(test_api):
     
     self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithSingleAuthProvider['Name']), tenantWithSingleAuthProvider, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
 
+  def test_addAuthProviderWithInvalidAuthConfig(self):
+    tenantDICT = self.createTenantForTesting(tenantWithNoAuthProviders)
+    tenantWithSingleAuthProvider = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithSingleAuthProvider['AuthProviders'] = [copy.deepcopy(sampleInternalAuthProv001_CREATE)]
+    tenantWithSingleAuthProvider['ObjectVersion'] = tenantDICT['ObjectVersion']
+    tenantWithSingleAuthProvider['AuthProviders'][0]['ConfigJSON'] = '{"AA":"BB"}' #Valid JSON but not valid for an internal auth config
+    
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithSingleAuthProvider['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(tenantWithSingleAuthProvider), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultJSON['message'],'Invalid Auth Config',msg='Wrong invalid auth message output')
+
     

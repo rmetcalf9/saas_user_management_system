@@ -93,6 +93,8 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       if authProv['saltForPasswordHashing'] == '':
         authProv['saltForPasswordHashing'] = None
 
+    #If we are updating an existing auth provider the salt for password hashing must be provided
+    # and it must match the existing value!
     if authProv['guid'] is not None:
       if authProv['saltForPasswordHashing'] is None:
         raise cantUpdateExistingAuthProvException

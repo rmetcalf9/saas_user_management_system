@@ -196,6 +196,8 @@ def registerAPI(appObj):
           raise BadRequest(err.text)
         if (err.id=='cantUpdateExistingAuthProvException'):
           raise BadRequest(err.text)
+        if (err.id=='InvalidAuthConfigException'):
+          raise BadRequest(err.text)
         raise Exception('InternalServerError')
       except WrongObjectVersionExceptionClass as err:
         raise Conflict(err)

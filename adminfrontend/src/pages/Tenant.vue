@@ -120,6 +120,14 @@
           </q-field>
           <div>&nbsp;</div>
           <q-btn
+            @click="deleteAuthProvTenantDialog"
+            color="negative"
+            label="Delete"
+            round
+            icon="delete"
+            class = "float-left q-ml-xs"
+          />
+          <q-btn
             @click="okAuthProvTenantDialog"
             color="primary"
             label="Ok"
@@ -133,7 +141,6 @@
         </div>
       </q-modal-layout>
     </q-modal>
-  {{ tenantData }}
   </q-page>
 </template>
 
@@ -171,12 +178,14 @@ export default {
       editTenantModalDialogVisible: false,
       editAuthProvModalDialogData: {
         AddMode: false,
+        DeleteMode: false,
         Type: 'internal',
         AllowUserCreation: false,
         MenuText: '',
         IconLink: '',
         guid: '',
-        ConfigJSON: ''
+        ConfigJSON: '',
+        saltForPasswordHashing: '' // Can never be updated but existing value must always be provided for updates
       },
       editAuthProvModalDialogVisible: false
     }
@@ -184,35 +193,70 @@ export default {
   methods: {
     addAuthProv () {
       this.editAuthProvModalDialogData.AddMode = true
+      this.editAuthProvModalDialogData.DeleteMode = false
       this.editAuthProvModalDialogData.Type = 'internal'
       this.editAuthProvModalDialogData.AllowUserCreation = false
       this.editAuthProvModalDialogData.MenuText = ''
       this.editAuthProvModalDialogData.IconLink = ''
       this.editAuthProvModalDialogData.guid = ''
       this.editAuthProvModalDialogData.ConfigJSON = ''
+      this.editAuthProvModalDialogData.saltForPasswordHashing = ''
 
       this.editAuthProvModalDialogVisible = true
     },
     editAuthProv (item) {
       this.editAuthProvModalDialogData.AddMode = false
+      this.editAuthProvModalDialogData.DeleteMode = false
       this.editAuthProvModalDialogData.Type = item.Type
       this.editAuthProvModalDialogData.AllowUserCreation = item.AllowUserCreation
       this.editAuthProvModalDialogData.MenuText = item.MenuText
       this.editAuthProvModalDialogData.IconLink = item.IconLink
       this.editAuthProvModalDialogData.guid = item.guid
       this.editAuthProvModalDialogData.ConfigJSON = item.ConfigJSON
+      this.editAuthProvModalDialogData.saltForPasswordHashing = item.saltForPasswordHashing
 
       this.editAuthProvModalDialogVisible = true
     },
+    deleteAuthProvTenantDialog () {
+      var TTT = this
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to delete this Auth Provider?',
+        ok: {
+          push: true,
+          label: 'Yes - delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).then(() => {
+        TTT.editAuthProvModalDialogData.DeleteMode = true
+        TTT.okAuthProvTenantDialog()
+      }).catch(() => {
+        // Do nothing
+      })
+    },
     okAuthProvTenantDialog () {
       var TTT = this
+      var isDeleting = TTT.editAuthProvModalDialogData.DeleteMode
+      TTT.editAuthProvModalDialogData.DeleteMode = true
 
       // Shared validation
       if (this.editAuthProvModalDialogData.MenuText === '') {
         Notify.create({color: 'negative', detail: 'Menu text must be filled in'})
         return
       }
-
+      // Check configJSON string is valid JSON
+      try {
+        JSON.parse(TTT.editAuthProvModalDialogData.ConfigJSON)
+      } catch (e) {
+        Notify.create({color: 'negative', detail: 'ConfigJSON is not valid JSON - ' + e.message})
+        return
+      }
       var newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
       var newAuthProvJSON = {
         Type: TTT.editAuthProvModalDialogData.Type,
@@ -220,21 +264,35 @@ export default {
         MenuText: TTT.editAuthProvModalDialogData.MenuText,
         IconLink: TTT.editAuthProvModalDialogData.IconLink,
         guid: TTT.editAuthProvModalDialogData.guid,
-        ConfigJSON: TTT.editAuthProvModalDialogData.ConfigJSON
+        ConfigJSON: TTT.editAuthProvModalDialogData.ConfigJSON,
+        saltForPasswordHashing: TTT.editAuthProvModalDialogData.saltForPasswordHashing
       }
       if (this.editAuthProvModalDialogData.AddMode) {
         newTenantJSON.AuthProviders.push(newAuthProvJSON)
       } else {
-        Notify.create('TODO Edit mode')
+        for (var cur in newTenantJSON.AuthProviders) {
+          if (newTenantJSON.AuthProviders[cur].guid === TTT.editAuthProvModalDialogData.guid) {
+            if (isDeleting) {
+              newTenantJSON.AuthProviders.splice(cur, 1)
+            } else {
+              newTenantJSON.AuthProviders[cur] = newAuthProvJSON
+            }
+          }
+        }
       }
       console.log('newTenantJSON:', newTenantJSON)
       var callback = {
         ok: function (response) {
+          TTT.editAuthProvModalDialogVisible = false
           Notify.create({color: 'positive', detail: 'Tenant Updated'})
           TTT.refreshTenantData()
         },
         error: function (error) {
-          Notify.create('Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+          var verb = 'Update'
+          if (TTT.editAuthProvModalDialogData.AddMode) {
+            verb = 'Add'
+          }
+          Notify.create(verb + ' Auth Provider failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -245,8 +303,6 @@ export default {
         curPath: TTT.$router.history.current.path,
         headers: {'object-version-id': newTenantJSON.ObjectVersion}
       })
-
-      this.editAuthProvModalDialogVisible = false
     },
     cancelAuthProvTenantDialog () {
       this.editAuthProvModalDialogVisible = false
