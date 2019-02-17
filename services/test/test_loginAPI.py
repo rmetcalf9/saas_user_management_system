@@ -1,10 +1,11 @@
-from TestHelperSuperClass import testHelperAPIClient, env
+from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
 import unittest
 import json
 from appObj import appObj
 import pytz
 from datetime import timedelta, datetime
 from dateutil.parser import parse
+import copy
 
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
 
@@ -198,4 +199,14 @@ class test_api(testHelperAPIClient):
     expectedResult = {'message': 'Invalid credentials provided'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
+  def test_registerNewUser(self):
+    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithUserCreation['AllowUserCreation'] = True
+    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    authProvCreateWithUserCreation['AllowUserCreation'] = True
+    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    
+    self.assertTrue(False,msg="TODO - test registerion of new user")
+    
+    pass
 

@@ -4,6 +4,7 @@
 import unittest
 import json
 from appObj import appObj
+import copy
 
 import datetime
 import pytz
@@ -12,9 +13,28 @@ import jwt
 from base64 import b64decode
 
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, AddAuth, associateIdentityWithPerson
-from constants import masterTenantName
+from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
+
+
+tenantWithNoAuthProviders = {
+  "Name": "NewlyCreatedTenantNoAuth",
+  "Description": "Tenant with no auth providers",
+  "AllowUserCreation": False,
+  "AuthProviders": []
+}
+sampleInternalAuthProv001_CREATE = {
+  "guid": None,
+  "Type": "internal",
+  "AllowUserCreation": False,
+  "MenuText": "Default Menu Text",
+  "IconLink": "string",
+  "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
+  "saltForPasswordHashing": None
+} 
+
+
 
 env = {
   'APIAPP_MODE': 'DOCKER',
@@ -183,6 +203,19 @@ class testHelperAPIClient(testHelperSuperClass):
   def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
     return self.getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
 
+  def getNormalJWTToken(self):
+    return self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
+  
+  
+  def makeJWTTokenWithMasterTenantRoles(self, roles):
+    UserID = 'abc123'
+    userDict = {
+      "UserID": UserID,
+      "TenantRoles": { masterTenantName: roles}
+    }
+    return self.generateJWTToken(userDict)
+
+
   def generateJWTToken(self, userDict):
     jwtSecretAndKey = {
       'secret': appObj.gateway.GetJWTTokenSecret(userDict['UserID']),
@@ -191,3 +224,47 @@ class testHelperAPIClient(testHelperSuperClass):
     personGUID = '123ABC'
     return generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID)['JWTToken']
     
+  def getTenantDICT(self, tenantName):
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    for curTenant in resultJSON['result']:
+      if curTenant['Name'] == tenantName:
+        return curTenant
+    return None
+  
+  def createTenantForTesting(self, tenantDICT):
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(tenantDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantDICT, ["ObjectVersion"], msg='JSON of created Tenant is not the same')
+    self.assertEqual(resultJSON["ObjectVersion"],"1")
+    
+    return resultJSON
+    
+  def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
+    tenantJSON = self.createTenantForTesting(tenantDICT)
+    tenantWithAuthProviders = copy.deepcopy(tenantDICT)
+    a = []
+    for b in authProvDictList:
+      a.append(copy.deepcopy(b))
+    tenantWithAuthProviders['AuthProviders'] = a
+    tenantWithAuthProviders['ObjectVersion'] = tenantJSON['ObjectVersion']
+    
+    #print("tenantJSON:",tenantJSON)
+    #print("tenantWithAuthProviders:",tenantWithAuthProviders)
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithAuthProviders['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(tenantWithAuthProviders), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)
+    return json.loads(result.get_data(as_text=True))
