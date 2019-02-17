@@ -175,7 +175,11 @@ class test_api(testHelperAPIClient):
       "credentialJSON": { 
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', 
+      data=json.dumps(loginJSON), 
+      content_type='application/json'
+    )
     self.assertEqual(result2.status_code, 401)
     result2JSON = json.loads(result2.get_data(as_text=True))
     expectedResult = {'message': 'Invalid credentials provided'}
@@ -201,12 +205,55 @@ class test_api(testHelperAPIClient):
 
   def test_registerNewUser(self):
     tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
     tenantWithUserCreation['AllowUserCreation'] = True
     authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
     authProvCreateWithUserCreation['AllowUserCreation'] = True
     tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
-    self.assertTrue(False,msg="TODO - test registerion of new user")
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+
+    loginJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    loginResult = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', 
+      data=json.dumps(loginJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user")
+
+    
+
+    self.assertTrue(False,msg="TODO - test new user can login")
     
     pass
 
+  #TODO Test can't register if tennat dosen't have allowusercreation
+  # 401 Unauthorized response
+
+
+  #TODO Test can't register if authProv dosen't have allowusercreation
+  # 401 Unauthorized response
+
+  #TODO Try and register with invalid credential data
+  # 400 Bad Request response

@@ -15,12 +15,17 @@ from tenants import GetTenant, Login
 def getLoginPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('LoginPostData', {
   'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
-  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth PRovider type', required=True),
+  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
   'identityGUID': fields.String(default='DEFAULT', description='Identity to use to log in with')
   })
 def getRefreshPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('RefreshPostData', {
     'token': fields.String(description='Refresh Token that was provided to client')
+  })
+def getRegisterPostDataModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('RegisterPostData', {
+  'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
+  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True)
   })
 
 def getLoginResponseModel(appObj):
@@ -84,6 +89,19 @@ def registerAPI(appObj):
   registerServerInfoAPIFn(appObj, nsLogin)
   
   
+  @nsLogin.route('/<string:tenant>/register')
+  class register(Resource):
+    '''Register'''
+    @nsLogin.doc('Register')
+    @nsLogin.expect(getRegisterPostDataModel(appObj), validate=True)
+    @nsLogin.marshal_with(getLoginResponseModel(appObj), skip_none=True)
+    @nsLogin.response(201, 'User Registered')
+    @nsLogin.response(400, 'Bad Request')
+    @nsLogin.response(401, 'Unauthorized')
+    def put(self, tenant):
+      '''Register'''
+      return {}, 201
+      
   @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):
   
