@@ -31,6 +31,7 @@ class test_api(testHelperAPIClient):
     self.assertEqual(result2.status_code, 200)
     return json.loads(result2.get_data(as_text=True))
 
+class test_loginapi_norm(test_api):    
   def test_loginInvalidTenantFails(self):
     result = self.testClient.get(self.loginAPIPrefix + '/' + invalidTenantName + '/authproviders')
     self.assertEqual(result.status_code, 400)
