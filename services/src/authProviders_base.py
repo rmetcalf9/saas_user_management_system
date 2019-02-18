@@ -1,10 +1,10 @@
 #Base class for all authProviders
 # An auth has mutiple identities
 #  an identity has one user
-tryingToCreateDuplicateAuthException = Exception('Trying To Create Duplicate Auth (Matching username)')
 from constants import authFailedException, customExceptionClass
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
+tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
 
 def getAuthRecord(appObj, key):
   authRecord, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)

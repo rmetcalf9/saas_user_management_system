@@ -118,6 +118,8 @@ def registerAPI(appObj):
           raise Unauthorized(err.text)
         if (err.id=='InvalidAuthConfigException'):
           raise BadRequest(err.text)
+        if (err.id=='tryingToCreateDuplicateAuthException'):
+          raise BadRequest(err.text)
         if (err.id=='TryingToCreateDuplicateUserException'):
           raise BadRequest(err.text)
           
