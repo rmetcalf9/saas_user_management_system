@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException
+from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException
 import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
@@ -9,6 +9,7 @@ import jwt
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
+from users import CreateUser, AddUserRole, GetUser
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -174,26 +175,6 @@ def GetTenant(appObj, tenantName):
     return a
   return tenantClass(a, aVer)
   
-def CreateUser(appObj, UserID, mainTenant):
-  appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
-    "UserID": UserID,
-    "TenantRoles": {}
-  })
-  AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
-
-
-def AddUserRole(appObj, userID, tennantName, roleName):
-  def updUser(obj):
-    if obj is None:
-      raise userNotFoundException
-    if tennantName not in obj["TenantRoles"]:
-      obj["TenantRoles"][tennantName] = [roleName]
-    else:
-      obj["TenantRoles"][tennantName].append(roleName)
-    return obj
-  appObj.objectStore.updateJSONObject(appObj,"users", userID, updUser)
-
-
 def _getAuthProvider(appObj, tenantName, authProviderGUID):
   tenant = GetTenant(appObj, tenantName)
   if tenant is None:
@@ -240,7 +221,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception
     
 
-  userDict, userDictVer = appObj.objectStore.getObjectJSON(appObj,"users",possibleIdentities[identityGUID]['userID'])
+  userDict, userDictVer = GetUser(appObj,possibleIdentities[identityGUID]['userID'])
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 

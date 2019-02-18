@@ -116,6 +116,11 @@ def registerAPI(appObj):
       except customExceptionClass as err:
         if (err.id=='userCreationNotAllowedException'):
           raise Unauthorized(err.text)
+        if (err.id=='InvalidAuthConfigException'):
+          raise BadRequest(err.text)
+        if (err.id=='TryingToCreateDuplicateUserException'):
+          raise BadRequest(err.text)
+          
         raise Exception('InternalServerError')
       except:
         raise 

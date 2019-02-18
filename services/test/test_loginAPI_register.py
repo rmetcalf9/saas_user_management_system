@@ -11,15 +11,17 @@ from constants import masterTenantName
 #from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
 
 
-class test_loginapi_register(parent_test_api):    
+class test_loginapi_register(parent_test_api):  
+  def setupTenantForTesting(self, tenantBase, tenantUserCreation, AuthUserCreation):
+    tenantWithUserCreation = copy.deepcopy(tenantBase)
+    tenantWithUserCreation['AllowUserCreation'] = tenantUserCreation
+    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    authProvCreateWithUserCreation['AllowUserCreation'] = AuthUserCreation
+    return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
 
   def test_registerNewUser(self):
-    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
-    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
-    tenantWithUserCreation['AllowUserCreation'] = True
-    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
-    authProvCreateWithUserCreation['AllowUserCreation'] = True
-    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+  
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -34,7 +36,7 @@ class test_loginapi_register(parent_test_api):
     }
     
     registerResult = self.testClient.put(
-      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
       data=json.dumps(registerJSON), 
       content_type='application/json'
     )
@@ -48,19 +50,14 @@ class test_loginapi_register(parent_test_api):
        }
     }
     loginResult = self.testClient.post(
-      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/authproviders', 
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/authproviders', 
       data=json.dumps(loginJSON), 
       content_type='application/json'
     )
     self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user - " + loginResult.get_data(as_text=True))
 
   def test_registerNewUserTenantFail(self):
-    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
-    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
-    tenantWithUserCreation['AllowUserCreation'] = False
-    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
-    authProvCreateWithUserCreation['AllowUserCreation'] = True
-    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, False, True)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -75,7 +72,7 @@ class test_loginapi_register(parent_test_api):
     }
     
     registerResult = self.testClient.put(
-      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
       data=json.dumps(registerJSON), 
       content_type='application/json'
     )
@@ -83,12 +80,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
   def test_registerNewUserAuthProvFail(self):
-    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
-    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
-    tenantWithUserCreation['AllowUserCreation'] = True
-    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
-    authProvCreateWithUserCreation['AllowUserCreation'] = False
-    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, False)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -103,15 +95,86 @@ class test_loginapi_register(parent_test_api):
     }
     
     registerResult = self.testClient.put(
-      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
       data=json.dumps(registerJSON), 
       content_type='application/json'
     )
     # 401 Unauthorized response
     self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
-  #TODO Try and register with invalid credential data
-  # 400 Bad Request response
+  def test_registerWithBadCredentialJSON(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "usernameXX": userName, 
+        "passwordYY": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    # 400 Unauthorized response
+    self.assertEqual(registerResult.status_code, 400, msg="Bad credential JSON not rejected")
 
-  #TODO Try and register two users with same username
-  # 400 Bad REquest response with message
+  def test_registerTwoUsersWithSameNameSecondShouldFail(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="First user not created")
+    
+    registerResult2 = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(copy.deepcopy(registerJSON)),
+      content_type='application/json'
+    )
+    resultJSON = json.loads(registerResult2.get_data(as_text=True))
+    self.assertEqual(registerResult2.status_code, 400, msg="Second user with conflicting name should fail")
+    self.assertEqual(resultJSON['message'], "That username is already in use", msg="Incorrect error message")
+
+  def test_registerMutipleUsersWithDifferentNamesWorks(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    for a in range(1,5):
+      aa = copy.deepcopy(registerJSON)
+      aa['credentialJSON']['username'] = 'testUser' + str(a)
+      print("Creating user:",aa['credentialJSON']['username'])
+      registerResult = self.testClient.put(
+        self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+        data=json.dumps(aa),
+        content_type='application/json'
+      )
+      self.assertEqual(registerResult.status_code, 201, msg="User not created")
+    
