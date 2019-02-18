@@ -130,6 +130,8 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
   if not tenantObj.getAllowUserCreation():
     raise userCreationNotAllowedException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID)
+  if not authProvObj.getAllowUserCreation():
+    raise userCreationNotAllowedException
   
   userID = 'TODO_GETFROMAUTHPROV'
   #print('TenantNAme:',tenantObj.getName())

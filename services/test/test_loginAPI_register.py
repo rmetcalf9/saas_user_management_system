@@ -110,9 +110,6 @@ class test_loginapi_register(parent_test_api):
     # 401 Unauthorized response
     self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
-  #TODO Test can't register if authProv dosen't have allowusercreation
-  # 401 Unauthorized response
-
   #TODO Try and register with invalid credential data
   # 400 Bad Request response
 

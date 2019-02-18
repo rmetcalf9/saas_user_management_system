@@ -12,15 +12,15 @@ def getAuthRecord(appObj, key):
 
 
 class authProvider():
-  dataDict = None
-    #ConfigJSON
-    #Type
+  dataDict = None #See checks in init
   guid = None
   def __init__(self, dataDict, guid):
     if not 'ConfigJSON' in dataDict:
       raise Exception("ERROR No ConfigJSON supplied when creating authProvider")
     if not 'Type' in dataDict:
       raise Exception("ERROR No Type supplied when creating authProvider")
+    if not 'AllowUserCreation' in dataDict:
+      dataDict['AllowUserCreation'] = False
     self.dataDict = dataDict
     self._authSpercificInit()
     self.guid = guid
@@ -29,6 +29,8 @@ class authProvider():
     return self.dataDict['Type']
   def getConfig(self):
     return self.dataDict['ConfigJSON']
+  def getAllowUserCreation(self):
+    return self.dataDict['AllowUserCreation']
 
   #Return the unique identifier for a particular auth
   def _makeKey(self, credentialDICT):
