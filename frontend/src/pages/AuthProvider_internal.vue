@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed-center">
-    <div>
+  <div>
+    <div class="fixed-center">
       <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
       <br>
       <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
@@ -12,9 +12,56 @@
         >
           Login
         </q-btn>
+        <q-btn
+          v-if='authProvInfo.AllowUserCreation && tenantInfo.AllowUserCreation'
+          color="secondary"
+          push
+          @click="createAccountClick"
+        >
+          Create Account
+        </q-btn>
       </p>
-      <p v-if='authProvInfo.AllowUserCreation && tenantInfo.AllowUserCreation'>Register for new account</p>
     </div>
+    <q-modal v-model="createAccountDialogModel.visible" :content-css="{minWidth: '40vw', minHeight: '60vh'}">
+      <q-modal-layout>
+        <q-toolbar slot="header">
+            <q-btn
+            color="primary"
+            flat
+            round
+            dense
+            icon="keyboard_arrow_left"
+            @click="cancelCreateAccountDialog"
+          />
+          <q-toolbar-title>
+            Create Account
+          </q-toolbar-title>
+        </q-toolbar>
+
+        <div class="layout-padding">
+          <q-field helper="Username" label="Username" :label-width="3">
+            <q-input v-model="createAccountDialogModel.Username" ref="usernameDialogInput"/>
+          </q-field>
+          <q-field helper="Password" label="Password" :label-width="3" :error="passwordERROR">
+            <q-input type="password" v-model="createAccountDialogModel.Password" />
+          </q-field>
+          <q-field helper="Retype Password" label="Retype" :label-width="3" :error="passwordERROR">
+            <q-input type="password" v-model="createAccountDialogModel.Password2" @keyup.enter="okEditTenantDialog" />
+          </q-field>
+          <q-btn
+            @click="okCreateAccountDialog"
+            color="primary"
+            label="Ok"
+            class = "float-right q-ml-xs"
+          />
+          <q-btn
+            @click="cancelCreateAccountDialog"
+            label="Cancel"
+            class = "float-right"
+          />
+        </div>
+      </q-modal-layout>
+    </q-modal>
   </div>
 </template>
 
@@ -35,6 +82,12 @@ export default {
       usernamePass: {
         username: '',
         password: ''
+      },
+      createAccountDialogModel: {
+        visible: false,
+        Username: '',
+        Password: '',
+        Password2: ''
       }
     }
   },
@@ -44,9 +97,34 @@ export default {
     },
     authProvInfo () {
       return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
+    },
+    passwordERROR () {
+      if (this.createAccountDialogModel.Password !== this.createAccountDialogModel.Password2) {
+        return true
+      }
+      return false
     }
   },
   methods: {
+    createAccountClick () {
+      this.createAccountDialogModel = {
+        visible: true,
+        Username: '',
+        Password: '',
+        Password2: ''
+      }
+      this.$refs.usernameDialogInput.focus()
+    },
+    okCreateAccountDialog () {
+      if (this.passwordERROR) {
+        Notify.create('Invliad Password')
+        return
+      }
+      Notify.create('TODO')
+    },
+    cancelCreateAccountDialog () {
+      this.createAccountDialogModel.visible = false
+    },
     usernamePassLogin () {
       var TTT = this
       if (this.$store.state.globalDataStore.selectedAuthProvGUID === null) {

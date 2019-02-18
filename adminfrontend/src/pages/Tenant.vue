@@ -61,7 +61,7 @@
         </q-toolbar>
 
         <div class="layout-padding">
-          <q-field helper="Description of Tenant" label="Descrption" :label-width="3">
+          <q-field helper="Description of Tenant" label="Description" :label-width="3">
             <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput"/>
           </q-field>
           <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">

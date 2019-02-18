@@ -43,25 +43,35 @@ module.exports = function (ctx) {
       components: [
         'QLayout',
         'QLayoutHeader',
+        
         'QLayoutDrawer',
         'QPageContainer',
         'QPage',
+        
         'QToolbar',
         'QToolbarTitle',
+        
+        
+        
+        
         'QBtn',
         'QIcon',
         'QList',
+        'QInput',
+        'QField',
         'QListHeader',
         'QItem',
         'QItemMain',
         'QItemSide',
+        
+        'QModal',
+        'QModalLayout',
         'QCard',
         'QCardTitle',
         'QCardMain',
         'QCardMedia',
         'QCardSeparator',
-        'QCardActions',
-        'QInput'
+        'QCardActions'
       ],
       directives: [
         'Ripple'
@@ -70,7 +80,8 @@ module.exports = function (ctx) {
       plugins: [
         'Notify',
         'Loading',
-        'Cookies'
+        'Cookies',
+        'Dialog'
       ]
       // iconSet: ctx.theme.mat ? 'material-icons' : 'ionicons'
       // i18n: 'de' // Quasar language
