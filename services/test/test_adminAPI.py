@@ -2,10 +2,14 @@ from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProvi
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, objectVersionHeaderName
 import json
 import copy
-from tenants import AddAuth, CreatePerson, GetTenant
+from tenants import CreatePerson, GetTenant, _getAuthProvider
 from appObj import appObj
 from authProviders import authProviderFactory
 from authProviders_base import getAuthRecord
+
+def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
+  return auth
 
 
 class test_api(testHelperAPIClient):
@@ -365,9 +369,12 @@ class test_funcitonal(test_api):
     )
 
     #Before we delete the auth provider we must get the key it used to create the userAuth
+    authProvDict = {
+      "Type": "internal",
+      "ConfigJSON": json.loads(sampleInternalAuthProv001_CREATE["ConfigJSON"])
+    }
     AuthProvider = authProviderFactory(
-      sampleInternalAuthProv001_CREATE["Type"],
-      json.loads(sampleInternalAuthProv001_CREATE["ConfigJSON"]),
+      authProvDict,
       authProvGUID
     )
     authTypeConfigDict = {'username': 'AA'}

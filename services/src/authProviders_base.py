@@ -12,14 +12,23 @@ def getAuthRecord(appObj, key):
 
 
 class authProvider():
-  authProviderType = None
-  configJSON = None
+  dataDict = None
+    #ConfigJSON
+    #Type
   guid = None
-  def __init__(self, authProviderType, configJSON, guid):
-    self.authProviderType = authProviderType
-    self.configJSON = configJSON
+  def __init__(self, dataDict, guid):
+    if not 'ConfigJSON' in dataDict:
+      raise Exception("ERROR No ConfigJSON supplied when creating authProvider")
+    if not 'Type' in dataDict:
+      raise Exception("ERROR No Type supplied when creating authProvider")
+    self.dataDict = dataDict
     self._authSpercificInit()
     self.guid = guid
+    
+  def getType(self):
+    return self.dataDict['Type']
+  def getConfig(self):
+    return self.dataDict['ConfigJSON']
 
   #Return the unique identifier for a particular auth
   def _makeKey(self, credentialDICT):
@@ -43,7 +52,7 @@ class authProvider():
 
     mainObjToStore = {
       "AuthUserKey": key,
-      "AuthProviderType": self.authProviderType,
+      "AuthProviderType": self.dataDict["Type"],
       "AuthProviderJSON": self._getAuthData(appObj, authTypeConfigDict),
       "personGUID": personGUID
     }

@@ -110,9 +110,15 @@ def registerAPI(appObj):
 
       try:
         #print("credentialJSON:",credentialJSON)
+        #print("loginAPI.py regis - authProviderGUID:",authProviderGUID)
         RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON)
+        
+      except customExceptionClass as err:
+        if (err.id=='userCreationNotAllowedException'):
+          raise Unauthorized(err.text)
+        raise Exception('InternalServerError')
       except:
-        raise InternalServerError
+        raise 
 
       return {}, 201
       
@@ -147,6 +153,7 @@ def registerAPI(appObj):
         identityGUID = request.get_json()['identityGUID']
      
       try:
+        #print("loginAPI.py login - authProviderGUID:",authProviderGUID)
         loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
       except customExceptionClass as err:
         if (err.id=='authFailedException'):

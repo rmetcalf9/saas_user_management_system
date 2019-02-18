@@ -3,27 +3,27 @@ from authProviders_Internal import authProviderInternal
 from uuid import uuid4
 from base64 import b64encode
 
-def authProviderFactory(type, configJSON, guid):
-  if type=='internal':
-    return authProviderInternal('internal', configJSON, guid)
+def authProviderFactory(dataDict, guid):
+  if dataDict["Type"]=='internal':
+    return authProviderInternal(dataDict, guid)
   return None
   
 def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, configJSON):
   if not isinstance(configJSON,dict):
     raise Exception('ERROR ConfigJSON must be a dict')
-  createdAuthProvObject = authProviderFactory(Type, configJSON, 'invalidGUID') #Check we can create an auth provider
-  return {
+  authProvDataDict = {
     "guid": guid,
     "MenuText": menuText,
     "IconLink": iconLink,
     "Type":  Type,
     "AllowUserCreation": AllowUserCreation,
-    "ConfigJSON": configJSON,
+    "ConfigJSON": configJSON,  #Type spercific config
     "saltForPasswordHashing": saltForPasswordHashing
   }
+  createdAuthProvObject = authProviderFactory(authProvDataDict, 'invalidGUID') #Check we can create an auth provider
+  return authProvDataDict
 
 def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON):
-  createdAuthProvObject = authProviderFactory(Type, configJSON, 'invalidGUID') #Check we can create an auth provider
   return _getAuthProviderJSON(
     appObj, 
     existingJSON['guid'], 

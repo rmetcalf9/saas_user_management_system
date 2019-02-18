@@ -1,11 +1,15 @@
 from TestHelperSuperClass import testHelperAPIClient, env, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, AddAuth, associateIdentityWithPerson
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, _getAuthProvider, associateIdentityWithPerson
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
 from constants import authFailedException
 from person import CreatePerson, associatePersonWithAuth
 import json
 from base64 import b64decode
+
+def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
+  return auth
 
 class test_tenants(testHelperAPIClient):
 

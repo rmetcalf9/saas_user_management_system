@@ -10,14 +10,14 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, userna
 
 class authProviderInternal(authProvider):
   def _authSpercificInit(self):
-    if 'userSufix' not in self.configJSON:
+    if 'userSufix' not in self.getConfig():
       raise InvalidAuthConfigException
 
   def _makeKey(self, credentialDICT):
     if 'username' not in credentialDICT:
       raise InvalidAuthConfigException
-    #print(self.configJSON['userSufix'])
-    return credentialDICT['username'] + self.configJSON['userSufix'] + uniqueKeyCombinator + self.authProviderType
+    #print(self.getConfig()['userSufix'])
+    return credentialDICT['username'] + self.getConfig()['userSufix'] + uniqueKeyCombinator + self.getType()
 
   def hashPassword(self, appObj, password, salt):
     masterSecretKey = (masterInternalAuthTypePassword + "f" + appObj.APIAPP_MASTERPASSWORDFORPASSHASH)

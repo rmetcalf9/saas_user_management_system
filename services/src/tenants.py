@@ -15,7 +15,7 @@ UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With T
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
 UnknownIdentityException = Exception('Unknown Identity')
 authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not found', 'authProviderTypeNotFoundException')
-
+userCreationNotAllowedException = customExceptionClass('User Creaiton Not Allowed', 'userCreationNotAllowedException')
 
 #only called on intial setup Creates a master tenant with single internal auth provider
 def CreateMasterTenant(appObj):
@@ -47,7 +47,7 @@ def CreateMasterTenant(appObj):
     )
   }
 
-  authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProvider['guid'], credentialJSON, person['guid'])
+  authData = _getAuthProvider(appObj, masterTenantName, masterTenantInternalAuthProvider['guid']).AddAuth(appObj, credentialJSON, person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
 
   #mainUserIdentity with authData
@@ -126,19 +126,18 @@ def DeleteTenant(appObj, tenantName, objectVersion):
   appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
   return tenantObj
 
-def RegisterUser(appObj, tenantObj, authProvGUID, credentialJSON):
-  #authPRov = tenantObj.getAuthProvider()
-  #TODO Check tenenat accepts auths
-  #TODO Check Auth Prov accepts auths
+def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
+  if not tenantObj.getAllowUserCreation():
+    raise userCreationNotAllowedException
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID)
   
   userID = 'TODO_GETFROMAUTHPROV'
-  print('TenantNAme:',tenantObj.getName())
-  print('USERID:',userID)
+  #print('TenantNAme:',tenantObj.getName())
+  #print('USERID:',userID)
   CreateUser(appObj, userID, tenantObj.getName())
   mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   person = CreatePerson(appObj)
-  print("credentialJSON in registeruser:", credentialJSON)
-  authData = AddAuth(appObj, tenantObj.getName(), authProvGUID, credentialJSON, person['guid'])
+  authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
   associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
   
@@ -197,15 +196,11 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
   tenant = GetTenant(appObj, tenantName)
   if tenant is None:
     raise tenantDosentExistException
-  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID)["Type"],tenant.getAuthProvider(authProviderGUID)["ConfigJSON"],authProviderGUID)
+  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID),authProviderGUID)
   if AuthProvider is None:
     print("Can't find auth provider with type \"" + tenant.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenant.getName())
     raise authProviderTypeNotFoundException
   return AuthProvider
-    
-def AddAuth(appObj, tenantName, authProviderGUID, StoredUserInfoJSON, personGUID):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, StoredUserInfoJSON, personGUID)
-  return auth
   
 # Login function will
 # - raise an exception if auth fails
@@ -221,7 +216,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     'userGuid': None,
     'authedPersonGuid': None
   }
-  print("tenants.py Login credentialJSON:",credentialJSON)
+  #print("tenants.py Login credentialJSON:",credentialJSON)
   authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
   if authUserObj is None:
     raise Exception

@@ -12,11 +12,14 @@ from baseapp_for_restapi_backend_with_swagger import from_iso8601
 import jwt
 from base64 import b64decode
 
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, AddAuth, associateIdentityWithPerson
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, associateIdentityWithPerson, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
 
+def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
+  return auth
 
 tenantWithNoAuthProviders = {
   "Name": "NewlyCreatedTenantNoAuth",

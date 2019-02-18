@@ -48,15 +48,67 @@ class test_loginapi_register(parent_test_api):
        }
     }
     loginResult = self.testClient.post(
-      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', 
+      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/authproviders', 
       data=json.dumps(loginJSON), 
       content_type='application/json'
     )
-    self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user")
+    self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user - " + loginResult.get_data(as_text=True))
 
-  #TODO Test can't register if tennat dosen't have allowusercreation
-  # 401 Unauthorized response
+  def test_registerNewUserTenantFail(self):
+    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
+    tenantWithUserCreation['AllowUserCreation'] = False
+    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    authProvCreateWithUserCreation['AllowUserCreation'] = True
+    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    # 401 Unauthorized response
+    self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
+  def test_registerNewUserAuthProvFail(self):
+    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
+    tenantWithUserCreation['AllowUserCreation'] = True
+    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    authProvCreateWithUserCreation['AllowUserCreation'] = False
+    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    # 401 Unauthorized response
+    self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
   #TODO Test can't register if authProv dosen't have allowusercreation
   # 401 Unauthorized response
