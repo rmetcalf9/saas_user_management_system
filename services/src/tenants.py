@@ -40,14 +40,14 @@ def CreateMasterTenant(appObj):
   mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   
   person = CreatePerson(appObj)
-  authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProvider['guid'], {
+  credentialJSON = {
     "username": InternalAuthUsername, 
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       appObj, InternalAuthUsername, appObj.APIAPP_DEFAULTHOMEADMINPASSWORD, masterTenantInternalAuthProvider['saltForPasswordHashing']
     )
-    },
-    person['guid']
-  )
+  }
+
+  authData = AddAuth(appObj, masterTenantName, masterTenantInternalAuthProvider['guid'], credentialJSON, person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
 
   #mainUserIdentity with authData
@@ -125,6 +125,22 @@ def DeleteTenant(appObj, tenantName, objectVersion):
   print("DeleteTenant objectVersion:", objectVersion)
   appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
   return tenantObj
+
+def RegisterUser(appObj, tenantObj, authProvGUID, credentialJSON):
+  #authPRov = tenantObj.getAuthProvider()
+  #TODO Check tenenat accepts auths
+  #TODO Check Auth Prov accepts auths
+  
+  userID = 'TODO_GETFROMAUTHPROV'
+  print('TenantNAme:',tenantObj.getName())
+  print('USERID:',userID)
+  CreateUser(appObj, userID, tenantObj.getName())
+  mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
+  person = CreatePerson(appObj)
+  print("credentialJSON in registeruser:", credentialJSON)
+  authData = AddAuth(appObj, tenantObj.getName(), authProvGUID, credentialJSON, person['guid'])
+  associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
+  associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
   
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
@@ -205,6 +221,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     'userGuid': None,
     'authedPersonGuid': None
   }
+  print("tenants.py Login credentialJSON:",credentialJSON)
   authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
   if authUserObj is None:
     raise Exception

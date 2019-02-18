@@ -22,29 +22,35 @@ class authProviderInternal(authProvider):
   def hashPassword(self, appObj, password, salt):
     masterSecretKey = (masterInternalAuthTypePassword + "f" + appObj.APIAPP_MASTERPASSWORDFORPASSHASH)
     if (type(password)) is not bytes:
-      print(type(password))
+      #print(type(password))
       raise Exception('Password passed to hashPassword must be bytes')
       #password = bytes(password, 'utf-8')
     combo_password = password + salt + str.encode(masterSecretKey)
     hashed_password = appObj.bcrypt.hashpw(combo_password, salt)
     return hashed_password
   
-  def _getAuthData(self, appObj, userInfoToStoreDict):
+  def _getAuthData(self, appObj, credentialDICT):
+    self.__normalizeCredentialDICT(credentialDICT)
     salt = appObj.bcrypt.gensalt()
     objToStore = {
-      "password": self.hashPassword(appObj, userInfoToStoreDict['password'], salt),
+      "password": self.hashPassword(appObj, credentialDICT['password'], salt),
       "salt": salt
     }
     return objToStore
 
-  def _auth(self, appObj, obj, credentialJSON):
-    if 'password' not in credentialJSON:
+  def __normalizeCredentialDICT(self, credentialDICT):
+    #When we get calls from API the password will be string
+    # when we get calls from internal it is already bytes
+    # this converts it to always be bytes
+    if (type(credentialDICT['password'])) is not bytes:
+      credentialDICT['password'] = bytes(credentialDICT['password'], 'utf-8')
+    
+  def _auth(self, appObj, obj, credentialDICT):
+    if 'password' not in credentialDICT:
       raise InvalidAuthConfigException
-    passwordBytes = credentialJSON['password']
-    if (type(passwordBytes)) is not bytes:
-      passwordBytes = bytes(passwordBytes, 'utf-8')
+    self.__normalizeCredentialDICT(credentialDICT)
 
-    hashedPass = self.hashPassword(appObj, passwordBytes, obj["AuthProviderJSON"]['salt'])
+    hashedPass = self.hashPassword(appObj, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])
     if hashedPass != obj["AuthProviderJSON"]['password']:
       raise authFailedException
 

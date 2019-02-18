@@ -115,6 +115,9 @@ class test_loginapi_norm(test_api):
     time_diff = (expectedExpiry - dateTimeObjFromJSON).total_seconds()
     self.assertTrue(abs(time_diff) < 1,msg="Token expiry not in correct range")
 
+    #Sucessfull login test point
+    #self.assertTrue(False)
+    
   def test_getMutipleIdentityResponseDefaultUser(self):
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'

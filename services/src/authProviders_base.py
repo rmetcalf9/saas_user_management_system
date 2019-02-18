@@ -38,6 +38,7 @@ class authProvider():
     key = self._makeKey(authTypeConfigDict)
     obj, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
     if obj is not None:
+      #print('key:', key)
       raise tryingToCreateDuplicateAuthException
 
     mainObjToStore = {

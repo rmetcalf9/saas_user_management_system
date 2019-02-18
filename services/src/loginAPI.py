@@ -10,7 +10,7 @@ from constants import customExceptionClass
 from apiSharedModels import getTenantModel
 from serverInfoAPI import registerServerInfoAPIFn
 
-from tenants import GetTenant, Login
+from tenants import GetTenant, Login, RegisterUser
 
 def getLoginPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('LoginPostData', {
@@ -100,6 +100,20 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def put(self, tenant):
       '''Register'''
+      tenantObj = getValidTenantObj(appObj, tenant)
+      if 'authProviderGUID' not in request.get_json():
+        raise BadRequest('No authProviderGUID provided')
+      authProviderGUID = request.get_json()['authProviderGUID']
+      if 'credentialJSON' not in request.get_json():
+        raise BadRequest('No credentialJSON provided')
+      credentialJSON = request.get_json()['credentialJSON']
+
+      try:
+        #print("credentialJSON:",credentialJSON)
+        RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON)
+      except:
+        raise InternalServerError
+
       return {}, 201
       
   @nsLogin.route('/<string:tenant>/authproviders')

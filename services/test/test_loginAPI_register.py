@@ -23,10 +23,12 @@ class test_loginapi_register(parent_test_api):
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
+    userName = "testSetUserName"
+    
     registerJSON = {
       "authProviderGUID": createdAuthProvGUID,
       "credentialJSON": { 
-        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "username": userName, 
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
        }
     }
@@ -41,7 +43,7 @@ class test_loginapi_register(parent_test_api):
     loginJSON = {
       "authProviderGUID": createdAuthProvGUID,
       "credentialJSON": { 
-        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "username": userName, 
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
        }
     }
@@ -52,12 +54,6 @@ class test_loginapi_register(parent_test_api):
     )
     self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user")
 
-    
-
-    self.assertTrue(False,msg="TODO - test new user can login")
-    
-    pass
-
   #TODO Test can't register if tennat dosen't have allowusercreation
   # 401 Unauthorized response
 
@@ -67,3 +63,6 @@ class test_loginapi_register(parent_test_api):
 
   #TODO Try and register with invalid credential data
   # 400 Bad Request response
+
+  #TODO Try and register two users with same username
+  # 400 Bad REquest response with message
