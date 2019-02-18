@@ -13,11 +13,11 @@ class authProviderInternal(authProvider):
     if 'userSufix' not in self.configJSON:
       raise InvalidAuthConfigException
 
-  def _makeKey(self, authTypeConfigDict):
-    if 'username' not in authTypeConfigDict:
+  def _makeKey(self, credentialDICT):
+    if 'username' not in credentialDICT:
       raise InvalidAuthConfigException
     #print(self.configJSON['userSufix'])
-    return authTypeConfigDict['username'] + self.configJSON['userSufix'] + uniqueKeyCombinator + self.authProviderType
+    return credentialDICT['username'] + self.configJSON['userSufix'] + uniqueKeyCombinator + self.authProviderType
 
   def hashPassword(self, appObj, password, salt):
     masterSecretKey = (masterInternalAuthTypePassword + "f" + appObj.APIAPP_MASTERPASSWORDFORPASSHASH)

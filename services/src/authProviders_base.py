@@ -22,13 +22,13 @@ class authProvider():
     self.guid = guid
 
   #Return the unique identifier for a particular auth
-  def _makeKey(self, authTypeConfigDict):
+  def _makeKey(self, credentialDICT):
     raise NotOverriddenException
 
   def _AddAuthForIdentity(self, authTypeConfigDict):
     raise NotOverriddenException
 
-  def _auth(self, appObj, credentialJSON):
+  def _auth(self, appObj, credentialDICT):
     raise NotOverriddenException
 
   def _authSpercificInit(self):
