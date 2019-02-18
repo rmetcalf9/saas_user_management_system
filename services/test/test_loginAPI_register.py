@@ -1,0 +1,69 @@
+from test_loginAPI import test_api as parent_test_api
+#from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
+from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env
+import json
+#from appObj import appObj
+#import pytz
+#from datetime import timedelta, datetime
+#from dateutil.parser import parse
+import copy
+from constants import masterTenantName
+#from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
+
+
+class test_loginapi_register(parent_test_api):    
+
+  def test_registerNewUser(self):
+    tenantWithUserCreation = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithUserCreation['Name'] = 'tenantWithAllowUserCreation'
+    tenantWithUserCreation['AllowUserCreation'] = True
+    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    authProvCreateWithUserCreation['AllowUserCreation'] = True
+    tenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithUserCreation['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+
+    loginJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    loginResult = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', 
+      data=json.dumps(loginJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user")
+
+    
+
+    self.assertTrue(False,msg="TODO - test new user can login")
+    
+    pass
+
+  #TODO Test can't register if tennat dosen't have allowusercreation
+  # 401 Unauthorized response
+
+
+  #TODO Test can't register if authProv dosen't have allowusercreation
+  # 401 Unauthorized response
+
+  #TODO Try and register with invalid credential data
+  # 400 Bad Request response
