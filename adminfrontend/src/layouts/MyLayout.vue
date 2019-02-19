@@ -44,6 +44,10 @@
           <q-item-main label="Users" sublabel="" />
         </q-item>
         <q-list-header>User Options</q-list-header>
+        <q-item :to='"/" + this.$route.params.tenantName + "/usersettings"'>
+          <q-item-side icon="settings" />
+          <q-item-main label="User Settings" sublabel="" />
+        </q-item>
         <q-item @click.native="clickLogout">
           <q-item-side icon="exit_to_app" />
           <q-item-main label="Logout" />

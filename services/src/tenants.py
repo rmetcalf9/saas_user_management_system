@@ -195,7 +195,10 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     'jwtData': None,
     'refresh': None,
     'userGuid': None,
-    'authedPersonGuid': None
+    'authedPersonGuid': None,
+    'ThisTenantRoles': None,
+    'known_as': None,
+    'other_data': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
   authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
@@ -223,16 +226,31 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
+    
+  thisTenantRoles = []
+  if tenantName in userDict["TenantRoles"]:
+    #thisTenantRoles = copy.deepcopy(userDict["TenantRoles"][tenantName])
+    for x in userDict["TenantRoles"][tenantName]:
+      thisTenantRoles.append(x)
+
   jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict['UserID'])
   resDict['userGuid'] = userDict['UserID']
   resDict['authedPersonGuid'] = authUserObj['personGUID']
-  
+  resDict['ThisTenantRoles'] = thisTenantRoles #Only roles valid for the current tenant are returned
+  resDict['known_as'] = userDict["known_as"]
+  resDict['other_data'] = userDict["other_data"]
+
+  #This object is stored with the refresh token and the same value is always returned on each refresh
   tokenWithoutJWTorRefresh = {
     'possibleIdentities': resDict['possibleIdentities'],
     'userGuid': resDict['userGuid'],
-    'authedPersonGuid': resDict['authedPersonGuid']
+    'authedPersonGuid': resDict['authedPersonGuid'],
+    "ThisTenantRoles": resDict['ThisTenantRoles'],
+    "known_as":  resDict['known_as'],
+    "other_data":  resDict['other_data']
   }
 
+  #These two sections are rebuilt every refresh
   resDict['jwtData'] = generateJWTToken(appObj, userDict, jwtSecretAndKey, authUserObj['personGUID'])
   resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, jwtSecretAndKey, authUserObj['personGUID'])
 

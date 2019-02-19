@@ -28,6 +28,7 @@ def getRegisterPostDataModel(appObj):
   'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True)
   })
 
+#Used with both login response and refresh response
 def getLoginResponseModel(appObj):
   possibleIdentityModel = appObj.flastRestPlusAPIObject.model('possibleIdentity', {
     'guid': fields.String(description='Unique identifier for this identity'),
@@ -48,7 +49,10 @@ def getLoginResponseModel(appObj):
     'jwtData': fields.Nested(jwtTokenModel, skip_none=True),
     'refresh': fields.Nested(refreshTokenModel, skip_none=True),
     'userGuid': fields.String(description='Unique identifier of user to be used by the application'),
-    'authedPersonGuid': fields.String(description='Unique identifier of person for use with Auth APIs')
+    'authedPersonGuid': fields.String(description='Unique identifier of person for use with Auth APIs'),
+    'ThisTenantRoles': fields.List(fields.String(description='Role the user has been assigned for this tenant')),
+    'known_as': fields.String(description='User friendly identifier for username'),
+    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True)
   })
 
 #{  

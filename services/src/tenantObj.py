@@ -12,7 +12,7 @@ class tenantClass():
     self._mainDict = JSONRetrievedFromStore.copy()
     self._objectVersion = objectVersion
   
-  #Need to convert authPRoviders into a list as in _mainDict it is a dict for indexing
+  #Need to convert authProviders into a list as in _mainDict it is a dict for indexing
   def getJSONRepresenation(self):
     if self._jsonRepersentation is None:
       self._jsonRepersentation = self._mainDict.copy()

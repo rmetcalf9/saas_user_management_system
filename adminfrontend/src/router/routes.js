@@ -50,6 +50,7 @@ const routes = [
       { path: 'tenants', component: () => import('pages/Tenants.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Tenants') } },
       { path: 'tenants/:selTenantNAME', component: () => import('pages/Tenant.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Tenant') } },
       { path: 'users', component: () => import('pages/Users.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Users') } },
+      { path: 'usersettings', component: () => import('pages/UserSettings.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'User Settings') } },
       { path: 'logout', beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Logout') } }
     ]
   }
