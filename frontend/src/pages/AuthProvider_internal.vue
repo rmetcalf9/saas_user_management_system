@@ -116,13 +116,36 @@ export default {
       this.$refs.usernameDialogInput.focus()
     },
     okCreateAccountDialog () {
+      var TTT = this
       if (this.passwordERROR) {
         Notify.create('Invliad Password')
         return
       }
       var callback = {
+        ok: function (response) {
+          Loading.hide()
+          TTT.createAccountDialogModel.visible = false
+          Notify.create({color: 'positive', detail: 'Account created'})
+        },
+        error: function (response) {
+          Loading.hide()
+          var msg = 'unknown'
+          if (typeof (response) !== 'undefined') {
+            if (typeof (response.orig) !== 'undefined') {
+              if (typeof (response.orig.response) !== 'undefined') {
+                if (typeof (response.orig.response.data) !== 'undefined') {
+                  if (typeof (response.orig.response.data.message) !== 'undefined') {
+                    msg = response.orig.response.data.message
+                  }
+                }
+              }
+            }
+          }
+          Notify.create('Login Failed - ' + msg)
+        }
       }
-      var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
+      Loading.show()
+      var passwordhash = bcrypt.hashSync(this.createAccountDialogModel.Username + ':' + this.createAccountDialogModel.Password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
       this.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'PUT',
         path: '/register',
@@ -135,8 +158,6 @@ export default {
           authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
         }
       })
-
-      Notify.create('TODO')
     },
     cancelCreateAccountDialog () {
       this.createAccountDialogModel.visible = false
