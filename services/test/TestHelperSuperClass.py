@@ -21,6 +21,8 @@ def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
   return auth
 
+internalUSerSufix = "@internalDataStore"
+
 tenantWithNoAuthProviders = {
   "Name": "NewlyCreatedTenantNoAuth",
   "Description": "Tenant with no auth providers",
@@ -33,7 +35,7 @@ sampleInternalAuthProv001_CREATE = {
   "AllowUserCreation": False,
   "MenuText": "Default Menu Text",
   "IconLink": "string",
-  "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
+  "ConfigJSON": "{\"userSufix\": \"" + internalUSerSufix + "\"}",
   "saltForPasswordHashing": None
 } 
 
@@ -276,3 +278,11 @@ class testHelperAPIClient(testHelperSuperClass):
     )
     self.assertEqual(result.status_code, 200)
     return json.loads(result.get_data(as_text=True))
+
+  def setupTenantForTesting(self, tenantBase, tenantUserCreation, AuthUserCreation):
+    tenantWithUserCreation = copy.deepcopy(tenantBase)
+    tenantWithUserCreation['AllowUserCreation'] = tenantUserCreation
+    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    authProvCreateWithUserCreation['AllowUserCreation'] = AuthUserCreation
+    return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+

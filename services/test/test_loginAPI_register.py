@@ -12,13 +12,6 @@ from constants import masterTenantName
 
 
 class test_loginapi_register(parent_test_api):  
-  def setupTenantForTesting(self, tenantBase, tenantUserCreation, AuthUserCreation):
-    tenantWithUserCreation = copy.deepcopy(tenantBase)
-    tenantWithUserCreation['AllowUserCreation'] = tenantUserCreation
-    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
-    authProvCreateWithUserCreation['AllowUserCreation'] = AuthUserCreation
-    return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
-
   def test_registerNewUser(self):
     tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
   
