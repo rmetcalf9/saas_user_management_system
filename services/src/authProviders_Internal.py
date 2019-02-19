@@ -54,3 +54,13 @@ class authProviderInternal(authProvider):
     if hashedPass != obj["AuthProviderJSON"]['password']:
       raise authFailedException
 
+  def _getTypicalAuthData(self, credentialDICT):
+    if 'username' not in credentialDICT:
+      raise InvalidAuthConfigException
+    return {
+      "user_unique_identifier": credentialDICT['username'] + self.getConfig()['userSufix'], #used for username - needs to be unique across all auth provs
+      "known_as": credentialDICT['username'], #used to display in UI for the user name
+      "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
+    }
+
+  
