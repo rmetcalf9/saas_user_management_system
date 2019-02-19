@@ -85,6 +85,11 @@ class testHelperSuperClass(unittest.TestCase):
   def sortListsInDict(self, dictToCheck):
     if isinstance(dictToCheck,list):
       dictToCheck.sort()
+      for k in dictToCheck:
+        if isinstance(k,dict):
+          self.sortListsInDict(k)
+        if isinstance(k,list):
+          self.sortListsOfObjects(k)
       return
     for k in dictToCheck.keys():
       if isinstance(dictToCheck[k],dict):

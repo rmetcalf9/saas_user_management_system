@@ -244,6 +244,13 @@ def registerAPI(appObj):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
+        tenantRolesObj = []
+        for a in item[0]['TenantRoles']:
+          tenantRolesObj.append({
+            "TenantName": a,
+            "ThisTenantRoles": item[0]['TenantRoles'][a]
+          })
+          item[0]["TenantRoles"] = tenantRolesObj
         return item[0]
         ##return tenantClass(item[0],item[1]).getJSONRepresenation()
 

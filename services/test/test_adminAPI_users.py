@@ -26,14 +26,10 @@ class test_adminAPIUsers(parent_test_api):
     
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
 
-    print(resultJSON['result'][0]["TenantRoles"][0])
-    
-    #Go through each role
-    for curTenant in resultJSON['result'][0]["TenantRoles"][0]:
-      print(curTenant)
-    
-    expectedTenantRolesResult = {
-    }
+    expectedTenantRolesResult = [{
+      "TenantName": masterTenantName,
+      "ThisTenantRoles": ['systemadmin', 'hasaccount']
+    }]
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
     
