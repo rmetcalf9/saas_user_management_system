@@ -40,13 +40,13 @@
 
         <div class="layout-padding">
           <q-field helper="Username" label="Username" :label-width="3">
-            <q-input v-model="createAccountDialogModel.Username" ref="usernameDialogInput"/>
+            <q-input v-model="createAccountDialogModel.username" ref="usernameDialogInput"/>
           </q-field>
           <q-field helper="Password" label="Password" :label-width="3" :error="passwordERROR">
-            <q-input type="password" v-model="createAccountDialogModel.Password" />
+            <q-input type="password" v-model="createAccountDialogModel.password" />
           </q-field>
           <q-field helper="Retype Password" label="Retype" :label-width="3" :error="passwordERROR">
-            <q-input type="password" v-model="createAccountDialogModel.Password2" @keyup.enter="okEditTenantDialog" />
+            <q-input type="password" v-model="createAccountDialogModel.password2" @keyup.enter="okEditTenantDialog" />
           </q-field>
           <q-btn
             @click="okCreateAccountDialog"
@@ -85,9 +85,9 @@ export default {
       },
       createAccountDialogModel: {
         visible: false,
-        Username: '',
-        Password: '',
-        Password2: ''
+        username: '',
+        password: '',
+        password2: ''
       }
     }
   },
@@ -99,7 +99,7 @@ export default {
       return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
     },
     passwordERROR () {
-      if (this.createAccountDialogModel.Password !== this.createAccountDialogModel.Password2) {
+      if (this.createAccountDialogModel.password !== this.createAccountDialogModel.password2) {
         return true
       }
       return false
@@ -109,9 +109,9 @@ export default {
     createAccountClick () {
       this.createAccountDialogModel = {
         visible: true,
-        Username: '',
-        Password: '',
-        Password2: ''
+        username: '',
+        password: '',
+        password2: ''
       }
       this.$refs.usernameDialogInput.focus()
     },
@@ -145,14 +145,14 @@ export default {
         }
       }
       Loading.show()
-      var passwordhash = bcrypt.hashSync(this.createAccountDialogModel.Username + ':' + this.createAccountDialogModel.Password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
+      var passwordhash = bcrypt.hashSync(this.createAccountDialogModel.username + ':' + this.createAccountDialogModel.password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
       this.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'PUT',
         path: '/register',
         callback: callback,
         postdata: {
           credentialJSON: {
-            username: this.createAccountDialogModel.Username,
+            username: this.createAccountDialogModel.username,
             password: passwordhash
           },
           authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
