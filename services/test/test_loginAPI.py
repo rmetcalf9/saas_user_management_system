@@ -97,7 +97,9 @@ class test_loginapi_norm(test_api):
         'usersystem': ['systemadmin', 'hasaccount']
       }, 
       'exp': 1547292391,
-      'authedPersonGuid': 'Ignore'
+      'authedPersonGuid': 'Ignore',
+      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      "other_data": {}
     }
     self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp', 'authedPersonGuid' ])
     

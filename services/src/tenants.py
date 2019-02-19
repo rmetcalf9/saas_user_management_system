@@ -36,7 +36,7 @@ def CreateMasterTenant(appObj):
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
   
   #User spercific creation
-  CreateUser(appObj, userID, masterTenantName)
+  CreateUser(appObj, {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, masterTenantName)
   AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
   mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   
@@ -134,11 +134,9 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
   if not authProvObj.getAllowUserCreation():
     raise userCreationNotAllowedException
   
-  userID = str(uuid.uuid4())
-  #print('TenantNAme:',tenantObj.getName())
-  #print('USERID:',userID)
-  CreateUser(appObj, userID, tenantObj.getName())
-  mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
+  userData = authProvObj.getTypicalAuthData(credentialDICT)
+  CreateUser(appObj, userData, tenantObj.getName())
+  mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userData['user_unique_identifier'])
   person = CreatePerson(appObj)
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])

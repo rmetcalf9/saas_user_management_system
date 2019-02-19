@@ -2,6 +2,7 @@
 # An auth has mutiple identities
 #  an identity has one user
 from constants import authFailedException, customExceptionClass
+import uuid
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
@@ -36,7 +37,7 @@ class authProvider():
   def _makeKey(self, credentialDICT):
     raise NotOverriddenException
 
-  def _AddAuthForIdentity(self, authTypeConfigDict):
+  def _AddAuthForIdentity(self, credentialDICT):
     raise NotOverriddenException
 
   def _auth(self, appObj, credentialDICT):
@@ -45,8 +46,8 @@ class authProvider():
   def _authSpercificInit(self):
     raise NotOverriddenException
 
-  def AddAuth(self, appObj, authTypeConfigDict, personGUID):
-    key = self._makeKey(authTypeConfigDict)
+  def AddAuth(self, appObj, credentialDICT, personGUID):
+    key = self._makeKey(credentialDICT)
     obj, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
     if obj is not None:
       #print('key:', key)
@@ -55,17 +56,28 @@ class authProvider():
     mainObjToStore = {
       "AuthUserKey": key,
       "AuthProviderType": self.dataDict["Type"],
-      "AuthProviderJSON": self._getAuthData(appObj, authTypeConfigDict),
+      "AuthProviderJSON": self._getAuthData(appObj, credentialDICT),
       "personGUID": personGUID
     }
     appObj.objectStore.saveJSONObject(appObj,"userAuths",  key, mainObjToStore)
     
     return mainObjToStore
 
-  def Auth(self, appObj, authTypeConfigDict):
-    obj = getAuthRecord(appObj, self._makeKey(authTypeConfigDict))
+  def Auth(self, appObj, credentialDICT):
+    obj = getAuthRecord(appObj, self._makeKey(credentialDICT))
     if obj is None:
       raise authFailedException
-    self._auth(appObj, obj, authTypeConfigDict)
+    self._auth(appObj, obj, credentialDICT)
     return obj
 
+  # Normally overridden
+  def _getTypicalAuthData(self, credentialDICT):
+    return {
+      "user_unique_identifier": str(uuid.uuid4()), #used for username - needs to be unique across all auth provs
+      "known_as": 'autoCreatedUser', #used to display in UI for the user name
+      "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
+    }
+
+  def getTypicalAuthData(self, credentialDICT):
+    return self._getTypicalAuthData(credentialDICT)
+    

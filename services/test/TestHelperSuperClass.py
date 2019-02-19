@@ -177,8 +177,8 @@ class testHelperAPIClient(testHelperSuperClass):
 
   def createUserWithTwoIdentititesForOneUser(self, userID1, userID2, InternalAuthUsername):
     masterTenant = GetTenant(appObj,masterTenantName)
-    CreateUser(appObj, userID1, masterTenantName)
-    CreateUser(appObj, userID2, masterTenantName)
+    CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName)
+    CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName)
     identity1 = createNewIdentity(appObj, 'standard','standard', userID1)
     identity2 = createNewIdentity(appObj, 'standard','standard', userID2)
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider

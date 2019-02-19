@@ -3,13 +3,21 @@ from constants import customExceptionClass, DefaultHasAccountRole
 TryingToCreateDuplicateUserException = customExceptionClass('That username is already in use', 'TryingToCreateDuplicateUserException')
 
 
-def CreateUser(appObj, UserID, mainTenant):
+def CreateUser(appObj, userData, mainTenant):
+  UserID = userData['user_unique_identifier']
+  KnownAs = userData['known_as']
+  OtherData = {}
+  if "other_data" in userData:
+    OtherData = userData['other_data']
+    
   (user, objVer) = GetUser(appObj, UserID)
   if user is not None:
     raise TryingToCreateDuplicateUserException
   appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
     "UserID": UserID,
-    "TenantRoles": {}
+    "TenantRoles": {},
+    "known_as": KnownAs,
+    "other_data": OtherData
   })
   AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
 

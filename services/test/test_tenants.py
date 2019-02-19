@@ -57,7 +57,9 @@ class test_tenants(testHelperAPIClient):
       "TenantRoles": {
         "usersystem": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
        },
-       "authedPersonGuid": "Ignore"
+       "authedPersonGuid": "Ignore",
+      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      "other_data": {}
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss', 'authedPersonGuid'], msg="Returned roles incorrect")
     
@@ -136,7 +138,9 @@ class test_tenants(testHelperAPIClient):
       'UserID': userID1, 
       "exp": "xx", 
       "iss": userID1,
-      "authedPersonGuid": res['person']['guid']
+      "authedPersonGuid": res['person']['guid'],
+      "known_as": userID1,
+      "other_data": {}
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
     
@@ -149,7 +153,9 @@ class test_tenants(testHelperAPIClient):
       'UserID': userID2, 
       "exp": "xx", 
       "iss": userID2,
-      "authedPersonGuid": res['person']['guid']
+      "authedPersonGuid": res['person']['guid'],
+      "known_as": userID2,
+      "other_data": {}
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
 
@@ -158,7 +164,7 @@ class test_tenants(testHelperAPIClient):
   def test_oneUserCanBeAccessedByTwoAuths(self):
     masterTenant = GetTenant(appObj,masterTenantName)
     userID = 'TestUser'
-    CreateUser(appObj, userID, masterTenantName)
+    CreateUser(appObj, {"user_unique_identifier": userID, "known_as": userID}, masterTenantName)
     identity = createNewIdentity(appObj, 'standard','standard', userID)
 
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
@@ -189,7 +195,9 @@ class test_tenants(testHelperAPIClient):
       'UserID': userID, 
       "exp": "xx", 
       "iss": userID,
-      "authedPersonGuid": person1['guid']
+      "authedPersonGuid": person1['guid'],
+      "known_as": userID,
+      "other_data": {}
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
     
