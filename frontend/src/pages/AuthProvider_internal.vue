@@ -46,7 +46,7 @@
             <q-input type="password" v-model="createAccountDialogModel.password" />
           </q-field>
           <q-field helper="Retype Password" label="Retype" :label-width="3" :error="passwordERROR">
-            <q-input type="password" v-model="createAccountDialogModel.password2" @keyup.enter="okEditTenantDialog" />
+            <q-input type="password" v-model="createAccountDialogModel.password2" @keyup.enter="okCreateAccountDialog" />
           </q-field>
           <q-btn
             @click="okCreateAccountDialog"

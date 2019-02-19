@@ -35,5 +35,6 @@ def AddUserRole(appObj, userID, tennantName, roleName):
     return obj
   appObj.objectStore.updateJSONObject(appObj,"users", userID, updUser)
 
-
+def GetPaginatedUserData(appObj, request, outputFN, filterFN):
+  return appObj.objectStore.getPaginatedResult(appObj, "users",  appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
 

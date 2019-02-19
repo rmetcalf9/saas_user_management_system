@@ -27,6 +27,31 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
+def getPaginatedParamValues(request):
+  pagesizemax = 500
+  offset = request.args.get('offset')
+  if offset is None:
+    offset = 0
+  else:
+    offset = int(offset)
+  pagesize = request.args.get('pagesize')
+  if pagesize is None:
+    pagesize = 100
+  else:
+    pagesize = int(pagesize)
+  if pagesize > pagesizemax:
+    pagesize = pagesizemax
+  
+  sort = request.args.get('sort')
+  query = request.args.get('query')
+  return {
+    'offset': offset,
+    'pagesize': pagesize,
+    'query': query,
+    'sort': sort,
+  }
+
+
 #Encryption operations make unit tests run slow
 # if app is in testing more this dummy class
 # skips the hashing stages (dosen't matter for unit tests)
@@ -52,8 +77,10 @@ class appObjClass(parAppObj):
   defaultUserGUID = None
   refreshTokenManager = None
   scheduler = None
+  getPaginatedParamValues = None
 
   def init(self, env, serverStartTime, testingMode = False):
+    self.getPaginatedParamValues = getPaginatedParamValues
     self.scheduler = BackgroundScheduler()
     self.defaultUserGUID = str(uuid.uuid4())
     if testingMode:

@@ -9,6 +9,7 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
+from users import GetPaginatedUserData
 from tenantObj import tenantClass
 from objectStores_base import WrongObjectVersionExceptionClass
 
@@ -28,6 +29,20 @@ def getCreateTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)')
   })
 
+def getUserModel(appObj):
+  TenantRoleModel = appObj.flastRestPlusAPIObject.model('TenantRoleModel', {
+    'TenantName': fields.String(default='DEFAULT', description='Tenant Name'),
+    'ThisTenantRoles': fields.List(fields.String(description='Role the user has been assigned for this tenant')),
+  })
+
+  return appObj.flastRestPlusAPIObject.model('UserInfo', {
+    'UserID': fields.String(default='DEFAULT', description='Unique identifier of User'),
+    'known_as': fields.String(description='User friendly identifier for username'),
+    'TenantRoles': fields.List(fields.Nested(TenantRoleModel)),
+    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True)
+  })
+
+  
 def requiredInPayload(content, fieldList):
   for a in fieldList:
     if a not in content:
@@ -64,30 +79,6 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
   if not verified:
     raise Unauthorized()
   
-def getPaginatedParamValues(request):
-  pagesizemax = 500
-  offset = request.args.get('offset')
-  if offset is None:
-    offset = 0
-  else:
-    offset = int(offset)
-  pagesize = request.args.get('pagesize')
-  if pagesize is None:
-    pagesize = 100
-  else:
-    pagesize = int(pagesize)
-  if pagesize > pagesizemax:
-    pagesize = pagesizemax
-  
-  sort = request.args.get('sort')
-  query = request.args.get('query')
-  return {
-    'offset': offset,
-    'pagesize': pagesize,
-    'query': query,
-    'sort': sort,
-  }
-
 def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
 
@@ -109,7 +100,7 @@ def registerAPI(appObj):
 
       outputFN = defOutput
       filterFN = None
-      return appObj.objectStore.getPaginatedResult(appObj, "tenants", getPaginatedParamValues(request), request, outputFN, filterFN)
+      return appObj.objectStore.getPaginatedResult(appObj, "tenants", appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
 
 #      def output(item):
 #        return item
@@ -238,3 +229,24 @@ def registerAPI(appObj):
         raise Conflict(err)
       except:
         raise InternalServerError        
+
+  @nsAdmin.route('/<string:tenant>/users')
+  class userssInfo(Resource):
+  
+    '''Admin'''
+    @nsAdmin.doc('admin')
+    @nsAdmin.marshal_with(appObj.getResultModel(getUserModel(appObj)))
+    @nsAdmin.response(200, 'Success', model=appObj.getResultModel(getUserModel(appObj)))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @appObj.addStandardSortParams(nsAdmin)
+    def get(self, tenant):
+      '''Get list of users'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      def defOutput(item):
+        return item[0]
+        ##return tenantClass(item[0],item[1]).getJSONRepresenation()
+
+      outputFN = defOutput
+      filterFN = None
+      return GetPaginatedUserData(appObj, request, outputFN, filterFN)
