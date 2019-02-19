@@ -22,7 +22,7 @@
         </q-btn>
       </p>
     </div>
-    <q-modal v-model="createAccountDialogModel.visible" :content-css="{minWidth: '40vw', minHeight: '60vh'}">
+    <q-modal v-model="createAccountDialogModel.visible" :content-css="{minWidth: '40vw', minHeight: '30vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
             <q-btn
@@ -120,6 +120,22 @@ export default {
         Notify.create('Invliad Password')
         return
       }
+      var callback = {
+      }
+      var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
+      this.$store.dispatch('globalDataStore/callLoginAPI', {
+        method: 'PUT',
+        path: '/register',
+        callback: callback,
+        postdata: {
+          credentialJSON: {
+            username: this.createAccountDialogModel.Username,
+            password: passwordhash
+          },
+          authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
+        }
+      })
+
       Notify.create('TODO')
     },
     cancelCreateAccountDialog () {
@@ -170,10 +186,7 @@ export default {
         }
       }
       Loading.show()
-      var masterSecretKey = 'admin:admin:AG44'
-      var base64encodedSalt = TTT.authProvInfo.saltForPasswordHashing
-      var salt = atob(base64encodedSalt)
-      var passwordhash = bcrypt.hashSync(masterSecretKey, salt)
+      var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.authProvInfo.saltForPasswordHashing))
       this.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'POST',
         path: '/authproviders',
