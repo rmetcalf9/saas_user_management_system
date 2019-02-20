@@ -7,7 +7,7 @@
     :data="tableData"
     :columns="tableColumns"
     @request="request"
-    row-key="name"
+    row-key="Name"
     :visible-columns="tablePersistSettings.visibleColumns"
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"

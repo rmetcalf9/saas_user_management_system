@@ -12,6 +12,7 @@ from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
 from users import GetPaginatedUserData
 from tenantObj import tenantClass
 from objectStores_base import WrongObjectVersionExceptionClass
+import copy
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
   if 'AuthProviders' in content:
@@ -66,18 +67,18 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
       if 'JWTToken' in a['jwtData']:
         jwtToken = a['jwtData']['JWTToken']
   if jwtToken is None:
-    raise Unauthorized()
+    raise Unauthorized("No JWT Token in header or cookie")
   
   try:
     (verified, decodedToken, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
     if (forbidden):
       raise Forbidden()
   except InvalidSignatureError:
-    raise Unauthorized()
+    raise Unauthorized("InvalidSignatureError")
   except ExpiredSignatureError:
-    raise Unauthorized()
+    raise Unauthorized("ExpiredSignatureError")
   if not verified:
-    raise Unauthorized()
+    raise Unauthorized("not verified")
   
 def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
@@ -98,9 +99,12 @@ def registerAPI(appObj):
       def defOutput(item):
         return tenantClass(item[0],item[1]).getJSONRepresenation()
 
-      outputFN = defOutput
-      filterFN = None
-      return appObj.objectStore.getPaginatedResult(appObj, "tenants", appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
+      try:
+        outputFN = defOutput
+        filterFN = None
+        return appObj.objectStore.getPaginatedResult(appObj, "tenants", appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
+      except:
+        raise InternalServerError   
 
 #      def output(item):
 #        return item
@@ -244,16 +248,23 @@ def registerAPI(appObj):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
+        returnValue = copy.deepcopy(item[0])
         tenantRolesObj = []
-        for a in item[0]['TenantRoles']:
+        for a in returnValue['TenantRoles']:
           tenantRolesObj.append({
             "TenantName": a,
-            "ThisTenantRoles": item[0]['TenantRoles'][a]
+            "ThisTenantRoles": returnValue['TenantRoles'][a]
           })
-          item[0]["TenantRoles"] = tenantRolesObj
-        return item[0]
+          returnValue["TenantRoles"] = tenantRolesObj
+        return returnValue
         ##return tenantClass(item[0],item[1]).getJSONRepresenation()
 
-      outputFN = defOutput
-      filterFN = None
-      return GetPaginatedUserData(appObj, request, outputFN, filterFN)
+      try:
+        outputFN = defOutput
+        filterFN = None
+        return GetPaginatedUserData(appObj, request, outputFN, filterFN)
+      except Exception as e:
+        print(e)
+        print(str(e.args))
+        print(e.args)
+        raise InternalServerError   
