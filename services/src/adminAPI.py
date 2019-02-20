@@ -11,6 +11,7 @@ from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
 from users import GetPaginatedUserData
 from tenantObj import tenantClass
+from userObj import userClass
 from objectStores_base import WrongObjectVersionExceptionClass
 import copy
 
@@ -248,16 +249,7 @@ def registerAPI(appObj):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        returnValue = copy.deepcopy(item[0])
-        tenantRolesObj = []
-        for a in returnValue['TenantRoles']:
-          tenantRolesObj.append({
-            "TenantName": a,
-            "ThisTenantRoles": returnValue['TenantRoles'][a]
-          })
-          returnValue["TenantRoles"] = tenantRolesObj
-        return returnValue
-        ##return tenantClass(item[0],item[1]).getJSONRepresenation()
+        return userClass(item[0],item[1]).getJSONRepresenation()
 
       try:
         outputFN = defOutput

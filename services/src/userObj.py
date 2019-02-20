@@ -16,6 +16,13 @@ class userClass():
   def getJSONRepresenation(self):
     if self._jsonRepersentation is None:
       self._jsonRepersentation = self._mainDict.copy()
+      tenantRolesObj = []
+      for a in self._jsonRepersentation['TenantRoles']:
+        tenantRolesObj.append({
+          "TenantName": a,
+          "ThisTenantRoles": self._jsonRepersentation['TenantRoles'][a]
+        })
+        self._jsonRepersentation["TenantRoles"] = tenantRolesObj
     return self._jsonRepersentation
 
   def getObjectVersion(self):
