@@ -25,7 +25,7 @@
       </q-td>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.Name)" />
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.UserID)" />
       </q-td>
   </q-table>
   </q-page>
