@@ -96,3 +96,25 @@ class test_adminAPIUsers(parent_test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,defaultUserData, ["TenantRoles"], msg="Returned user data")
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["TenantRoles"],defaultUserData["TenantRoles"], [], msg="Returned user data")
     
+  def test_updateUserData(self):
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+    origUserDICT = json.loads(result.get_data(as_text=True))
+    
+    newUserDICT = copy.deepcopy(origUserDICT)
+    newUserDICT['known_as'] = 'ChangedValue'
+    newUserDICT['other_data'] = {
+      'a': "A",
+      'b': "B"
+    }
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    
+    print(origUserDICT)
+    
+    self.assertFalse(True)
+    
+  #TODO Check we can't change userID
+    
