@@ -9,7 +9,7 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from users import GetPaginatedUserData
+from users import GetPaginatedUserData, GetUser
 from tenantObj import tenantClass
 from userObj import userClass
 from objectStores_base import WrongObjectVersionExceptionClass
@@ -260,3 +260,22 @@ def registerAPI(appObj):
         print(str(e.args))
         print(e.args)
         raise InternalServerError   
+
+  @nsAdmin.route('/<string:tenant>/users/<string:userID>')
+  class tenantInfo(Resource):
+
+    '''Admin'''
+    @nsAdmin.doc('get User')
+    @nsAdmin.marshal_with(getUserModel(appObj))
+    @nsAdmin.response(200, 'Success', model=getUserModel(appObj))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @nsAdmin.response(404, 'Tenant Not Found')
+    def get(self, tenant, userID):
+      '''Get tenant information'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      a = GetUser(appObj, userID)
+      if a is None:
+        raise NotFound('User Not Found')
+      return a.getJSONRepresenation()
+
