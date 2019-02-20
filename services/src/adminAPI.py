@@ -9,7 +9,7 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from users import GetPaginatedUserData, GetUser
+from users import GetPaginatedUserData, GetUser, UpdateUser
 from tenantObj import tenantClass
 from userObj import userClass
 from objectStores_base import WrongObjectVersionExceptionClass
@@ -41,7 +41,8 @@ def getUserModel(appObj):
     'UserID': fields.String(default='DEFAULT', description='Unique identifier of User'),
     'known_as': fields.String(description='User friendly identifier for username'),
     'TenantRoles': fields.List(fields.Nested(TenantRoleModel)),
-    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True)
+    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
+    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
   })
 
   
@@ -262,7 +263,7 @@ def registerAPI(appObj):
         raise InternalServerError   
 
   @nsAdmin.route('/<string:tenant>/users/<string:userID>')
-  class tenantInfo(Resource):
+  class userInfo(Resource):
 
     '''Admin'''
     @nsAdmin.doc('get User')
@@ -279,3 +280,37 @@ def registerAPI(appObj):
         raise NotFound('User Not Found')
       return a.getJSONRepresenation()
 
+    @nsAdmin.doc('update User')
+    @nsAdmin.expect(getUserModel, validate=True)
+    @nsAdmin.response(200, 'User Updated')
+    @nsAdmin.response(400, 'Validation Error')
+    @appObj.flastRestPlusAPIObject.marshal_with(getUserModel(appObj), code=200, description='User updated')
+    def put(self, tenant, userID):
+      '''Update User'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ['UserID','TenantRoles','known_as','other_data'])
+      if userID != content['UserID']:
+        raise BadRequest("Inconsistent userID")
+
+      try:
+        userObj = UpdateUser(appObj, content['UserID'], content['TenantRoles'], content['known_as'],  content['other_data'], content['ObjectVersion'])
+      except customExceptionClass as err:
+        if (err.id=='userDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='ShouldNotSupplySaltWhenCreatingAuthProvException'):
+          raise BadRequest(err.text)
+        if (err.id=='authProviderNotFoundException'):
+          raise BadRequest(err.text)
+        if (err.id=='cantUpdateExistingAuthProvException'):
+          raise BadRequest(err.text)
+        if (err.id=='InvalidAuthConfigException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
+      except:
+        raise InternalServerError
+      
+      return userObj.getJSONRepresenation()
+      

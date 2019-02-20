@@ -5,6 +5,7 @@ from appObj import appObj
 from constants import masterTenantName, jwtHeaderName
 from test_adminAPI import test_api as parent_test_api
 import json
+import copy
 
 #Test user functoins of the admin API
 
@@ -15,7 +16,8 @@ defaultUserData = {
     'TenantName': masterTenantName,
     'ThisTenantRoles': ['systemadmin', 'hasaccount']
   }],
-  'other_data': {}
+  'other_data': {},
+  'ObjectVersion': "3"
 }
 
 class test_adminAPIUsers(parent_test_api):
@@ -77,7 +79,8 @@ class test_adminAPIUsers(parent_test_api):
     expectedResult = {
       'UserID': userName + internalUSerSufix,
       'known_as': userName,
-      'other_data': {}
+      'other_data': {},
+      'ObjectVersion': "2"
     }
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles"], msg="User data mismatch")
     self.assertEqual(len(resultJSON['result'][1]["TenantRoles"]),1,msg="Didn't return single tenant")
@@ -100,7 +103,8 @@ class test_adminAPIUsers(parent_test_api):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     origUserDICT = json.loads(result.get_data(as_text=True))
-    
+    #ObjectVersion copied in from result
+
     newUserDICT = copy.deepcopy(origUserDICT)
     newUserDICT['known_as'] = 'ChangedValue'
     newUserDICT['other_data'] = {
@@ -109,12 +113,39 @@ class test_adminAPIUsers(parent_test_api):
     }
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json',
       headers={ jwtHeaderName: self.getNormalJWTToken()}
     )
+    self.assertEqual(result.status_code, 200)
+    newUserDICT['ObjectVersion'] = str(int(newUserDICT['ObjectVersion']) + 1)
     
-    print(origUserDICT)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,newUserDICT, ["TenantRoles"], msg="Returned user data")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["TenantRoles"],newUserDICT["TenantRoles"], [], msg="Returned user data")
+
+
+    result2 = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result2.status_code, 200)
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON,newUserDICT, ["TenantRoles"], msg="Returned user data")
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON["TenantRoles"],newUserDICT["TenantRoles"], [], msg="Returned user data")
+
     
-    self.assertFalse(True)
     
-  #TODO Check we can't change userID
-    
+  def test_updateUserDataTryAndChangeUserID(self):
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+    origUserDICT = json.loads(result.get_data(as_text=True))
+    #ObjectVersion copied in from result
+
+    newUserDICT = copy.deepcopy(origUserDICT)
+    newUserDICT['UserID'] = 'ChangedValue'
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json',
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
+    self.assertEqual(result.status_code, 400, msg=result.get_data(as_text=True))
+   

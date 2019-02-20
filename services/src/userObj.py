@@ -22,7 +22,8 @@ class userClass():
           "TenantName": a,
           "ThisTenantRoles": self._jsonRepersentation['TenantRoles'][a]
         })
-        self._jsonRepersentation["TenantRoles"] = tenantRolesObj
+      self._jsonRepersentation["TenantRoles"] = tenantRolesObj
+      self._jsonRepersentation['ObjectVersion'] = self._objectVersion
     return self._jsonRepersentation
 
   def getObjectVersion(self):
