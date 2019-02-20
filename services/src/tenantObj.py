@@ -9,7 +9,7 @@ class tenantClass():
   _jsonRepersentation = None
   _objectVersion = None
   def __init__(self, JSONRetrievedFromStore, objectVersion):
-    self._mainDict = JSONRetrievedFromStore.copy()
+    self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
     self._objectVersion = objectVersion
   
   #Need to convert authProviders into a list as in _mainDict it is a dict for indexing

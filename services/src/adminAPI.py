@@ -235,7 +235,7 @@ def registerAPI(appObj):
         raise InternalServerError        
 
   @nsAdmin.route('/<string:tenant>/users')
-  class userssInfo(Resource):
+  class usersInfo(Resource):
   
     '''Admin'''
     @nsAdmin.doc('admin')

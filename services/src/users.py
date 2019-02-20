@@ -1,5 +1,7 @@
 from constants import customExceptionClass, DefaultHasAccountRole
 
+from userObj import userClass
+
 TryingToCreateDuplicateUserException = customExceptionClass('That username is already in use', 'TryingToCreateDuplicateUserException')
 
 
@@ -10,8 +12,8 @@ def CreateUser(appObj, userData, mainTenant):
   if "other_data" in userData:
     OtherData = userData['other_data']
     
-  (user, objVer) = GetUser(appObj, UserID)
-  if user is not None:
+  userObj = GetUser(appObj, UserID)
+  if userObj is not None:
     raise TryingToCreateDuplicateUserException
   appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
     "UserID": UserID,
@@ -22,7 +24,10 @@ def CreateUser(appObj, userData, mainTenant):
   AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
 
 def GetUser(appObj, UserID):
-  return appObj.objectStore.getObjectJSON(appObj,"users",UserID)
+  jsonData, objVersion = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
+  if jsonData is None:
+    return None
+  return userClass(jsonData, objVersion)
 
 def AddUserRole(appObj, userID, tennantName, roleName):
   def updUser(obj):

@@ -222,7 +222,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception
     
 
-  userDict, userDictVer = GetUser(appObj,possibleIdentities[identityGUID]['userID'])
+  userDict = GetUser(appObj,possibleIdentities[identityGUID]['userID']).getReadOnlyDict()
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
