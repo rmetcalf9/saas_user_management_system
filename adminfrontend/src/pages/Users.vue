@@ -20,14 +20,14 @@
         >Create User</q-btn>
       </template>
 
-      <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
-        <q-btn flat no-caps dense :label="props.value" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.Name)" width="100%"/>
+      <q-td  slot="body-cell-TenantRoles" slot-scope="props" :props="props">
+        {{ props.row.TenantRoles }}
       </q-td>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
         <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.Name)" />
       </q-td>
-  </q-table>{{ tableData }}
+  </q-table>
   </q-page>
 </template>
 
@@ -47,16 +47,17 @@ export default {
       tableLoading: false,
       tableData: [],
       tableColumns: [
-        { name: 'known_as', required: true, label: 'Known As', align: 'left', field: 'known_as', sortable: false, filter: false },
-        { name: 'TenantRoles', required: true, label: 'TenantRoles', align: 'left', field: 'TenantRoles', sortable: false, filter: false },
-        { name: 'Other Data', required: true, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
+        { name: 'UserID', required: true, label: 'UserID', align: 'left', field: 'UserID', sortable: false, filter: false },
+        { name: 'Known As', required: true, label: 'Known As', align: 'left', field: 'known_as', sortable: false, filter: false },
+        { name: 'TenantRoles', required: true, label: 'Tenant Roles', align: 'left', field: 'TenantRoles', sortable: false, filter: false },
+        { name: 'other_data', required: true, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ]
     }
   },
   methods: {
     createUserButtonClick () {
-      console.log('TODO')
+      Notify.create('TODO')
     },
     request ({ pagination, filter }) {
       var TTT = this
@@ -119,7 +120,7 @@ export default {
     tablePersistSettings () {
       // TODO Arrange this to go into a Store somewhere
       return {
-        visibleColumns: ['Name', 'Description'],
+        visibleColumns: ['known_as', 'TenantRoles'],
         serverPagination: {
           page: 1,
           rowsNumber: 10, // specifying this determines pagination is server-side
