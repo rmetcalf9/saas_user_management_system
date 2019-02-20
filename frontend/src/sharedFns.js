@@ -14,9 +14,9 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
   console.log('TODO Work out on prod vx based on current url and tenantName: ', currentURL, tenantName)
   return [
     { prefix: '/vx/', kong: true },
+    { prefix: 'http://somefunnyhostname.com:5098/', kong: false },
     { prefix: 'http://localhost:8082/', kong: false },
     { prefix: 'http://somefunnyhostname.com:8098/', kong: false },
-    { prefix: 'http://somefunnyhostname.com:5098/', kong: false },
     { prefix: 'http://127.0.0.1:8098/', kong: false }
   ]
 }
