@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
 from appObj import appObj
-from constants import masterTenantName, jwtHeaderName
+from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName
 from test_adminAPI import test_api as parent_test_api
 import json
 import copy
@@ -148,4 +148,41 @@ class test_adminAPIUsers(parent_test_api):
       headers={ jwtHeaderName: self.getNormalJWTToken()}
     )
     self.assertEqual(result.status_code, 400, msg=result.get_data(as_text=True))
-   
+  
+  #delete user test
+  def test_deleteUser(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": "TTT", 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantDict['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed - " + registerResult.get_data(as_text=True))
+    resultJSON = json.loads(registerResult.get_data(as_text=True))
+    createdUserID = resultJSON["UserID"]
+    
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + createdUserID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: tenantDict['ObjectVersion']}
+    )
+    self.assertEqual(result.status_code, 200, msg="Delete user failed - " + result.get_data(as_text=True)) 
+
+    #Try and retrieve the deleted user
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + createdUserID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    #print(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 404, msg="User still in system")
+
+  
+  #make sure we can't delete currently logged in user
+  
+  #delete non existant user fails

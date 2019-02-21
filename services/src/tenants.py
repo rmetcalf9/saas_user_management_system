@@ -142,6 +142,8 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
   associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
   
+  return GetUser(appObj, userData['user_unique_identifier'])
+  
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
   def updTenant(tenant):

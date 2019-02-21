@@ -7,7 +7,7 @@ import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
 from constants import customExceptionClass
-from apiSharedModels import getTenantModel
+from apiSharedModels import getTenantModel, getUserModel
 from serverInfoAPI import registerServerInfoAPIFn
 
 from tenants import GetTenant, Login, RegisterUser
@@ -98,7 +98,7 @@ def registerAPI(appObj):
     '''Register'''
     @nsLogin.doc('Register')
     @nsLogin.expect(getRegisterPostDataModel(appObj), validate=True)
-    @nsLogin.marshal_with(getLoginResponseModel(appObj), skip_none=True)
+    @nsLogin.marshal_with(getUserModel(appObj), skip_none=True)
     @nsLogin.response(201, 'User Registered')
     @nsLogin.response(400, 'Bad Request')
     @nsLogin.response(401, 'Unauthorized')
@@ -115,7 +115,7 @@ def registerAPI(appObj):
       try:
         #print("credentialJSON:",credentialJSON)
         #print("loginAPI.py regis - authProviderGUID:",authProviderGUID)
-        RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON)
+        userObj = RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON)
         
       except customExceptionClass as err:
         if (err.id=='userCreationNotAllowedException'):
@@ -131,7 +131,7 @@ def registerAPI(appObj):
       except:
         raise 
 
-      return {}, 201
+      return userObj.getJSONRepresenation(tenant), 201
       
   @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):

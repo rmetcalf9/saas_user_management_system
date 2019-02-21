@@ -1,6 +1,6 @@
 from test_loginAPI import test_api as parent_test_api
 #from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
-from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env
+from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env, internalUSerSufix
 import json
 #from appObj import appObj
 #import pytz
@@ -27,13 +27,26 @@ class test_loginapi_register(parent_test_api):
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
        }
     }
-    
+
     registerResult = self.testClient.put(
       self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
       data=json.dumps(registerJSON), 
       content_type='application/json'
     )
     self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+    registerResultJSON = json.loads(registerResult.get_data(as_text=True))
+    
+    expectedUserDICT = {
+      "UserID": userName + internalUSerSufix,
+      "known_as": userName,
+      "ObjectVersion": "2",
+      "TenantRoles": [{
+        "TenantName": tenantWithNoAuthProviders['Name'],
+        "ThisTenantRoles": ["hasaccount"]
+      }]
+    }
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, [], msg='Incorrect response from registration')
 
     loginJSON = {
       "authProviderGUID": createdAuthProvGUID,

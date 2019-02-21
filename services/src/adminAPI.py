@@ -4,12 +4,12 @@ from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest, InternalServerError, NotFound, Conflict
 from apiSecurity import verifyAPIAccessUserLoginRequired
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName
-from apiSharedModels import getTenantModel
+from apiSharedModels import getTenantModel, getUserModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from users import GetPaginatedUserData, GetUser, UpdateUser
+from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser
 from tenantObj import tenantClass
 from userObj import userClass
 from objectStores_base import WrongObjectVersionExceptionClass
@@ -31,21 +31,6 @@ def getCreateTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)')
   })
 
-def getUserModel(appObj):
-  TenantRoleModel = appObj.flastRestPlusAPIObject.model('TenantRoleModel', {
-    'TenantName': fields.String(default='DEFAULT', description='Tenant Name'),
-    'ThisTenantRoles': fields.List(fields.String(description='Role the user has been assigned for this tenant')),
-  })
-
-  return appObj.flastRestPlusAPIObject.model('UserInfo', {
-    'UserID': fields.String(default='DEFAULT', description='Unique identifier of User'),
-    'known_as': fields.String(description='User friendly identifier for username'),
-    'TenantRoles': fields.List(fields.Nested(TenantRoleModel)),
-    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
-    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
-  })
-
-  
 def requiredInPayload(content, fieldList):
   for a in fieldList:
     if a not in content:
@@ -213,7 +198,7 @@ def registerAPI(appObj):
     @nsAdmin.response(400, 'Error')
     @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @nsAdmin.response(409, 'Conflict')
-    @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant updated')
+    @appObj.flastRestPlusAPIObject.marshal_with(getTenantModel(appObj), code=200, description='Tenant Deleted')
     def delete(self, tenant, tenantName):
       '''Delete Tenant'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
@@ -314,3 +299,28 @@ def registerAPI(appObj):
       
       return userObj.getJSONRepresenation()
       
+    @nsAdmin.doc('delete User')
+    @nsAdmin.response(200, 'User Deleted')
+    @nsAdmin.response(400, 'Error')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @nsAdmin.response(409, 'Conflict')
+    @appObj.flastRestPlusAPIObject.marshal_with(getUserModel(appObj), code=200, description='User Deleted')
+    def delete(self, tenant, userID):
+      '''Delete Tenant'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      objectVersion = None
+      if objectVersionHeaderName in request.headers:
+        objectVersion = request.headers.get(objectVersionHeaderName)
+      if objectVersion is None:
+        raise BadRequest(objectVersionHeaderName + " header missing")
+      try:
+        userObj = DeleteUser(appObj, userID, objectVersion)
+        return userObj.getJSONRepresenation()
+      except customExceptionClass as err:
+        if (err.id=='userDosentExistException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
+      except:
+        raise InternalServerError  

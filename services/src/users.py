@@ -24,6 +24,13 @@ def CreateUser(appObj, userData, mainTenant):
   })
   AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
 
+def DeleteUser(appObj, UserID, objectVersion):
+  userObj = GetUser(appObj, UserID)
+  if userObj is None:
+    raise userDosentExistException
+  appObj.objectStore.removeJSONObject(appObj, "users", UserID, objectVersion)
+  return userObj
+  
 def GetUser(appObj, UserID):
   jsonData, objVersion = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
   if jsonData is None:
