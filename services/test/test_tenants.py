@@ -62,7 +62,7 @@ class test_tenants(testHelperAPIClient):
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
       "other_data": {}
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss', 'authedPersonGuid'], msg="Returned roles incorrect")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss', 'authedPersonGuid','associatedPersons'], msg="Returned roles incorrect")
     
   def test_StandardUserInvalidPassword(self):
     masterTenant = GetTenant(appObj,masterTenantName)
@@ -99,7 +99,6 @@ class test_tenants(testHelperAPIClient):
     for guid in masterTenant.getAuthProviderGUIDList():
       singleAuthProvGUID=guid
       
-
     with self.assertRaises(Exception) as context:
       UserIDandRoles = Login(appObj, masterTenantName, singleAuthProvGUID, {
         'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
@@ -144,7 +143,7 @@ class test_tenants(testHelperAPIClient):
       "known_as": userID1,
       "other_data": {}
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 1")
     
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
@@ -159,7 +158,7 @@ class test_tenants(testHelperAPIClient):
       "known_as": userID2,
       "other_data": {}
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 2")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
 
 
   #UserA can be shared by many People (Who may or may not have many auths)
@@ -200,12 +199,12 @@ class test_tenants(testHelperAPIClient):
       "known_as": userID,
       "other_data": {}
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp', 'associatedPersons'], msg="Failed to login to identity 1")
     
     UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {
       'username': InternalAuthUsername2,
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     })
     expectedJSONResponse['authedPersonGuid'] = person2['guid']
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 2")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
 

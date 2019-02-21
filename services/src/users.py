@@ -1,6 +1,9 @@
 from constants import customExceptionClass, DefaultHasAccountRole
 
 from userObj import userClass
+import copy
+
+#users_associatedPersons 1-1 with user object, seperated out to stop ObjectVersion getting out of sync when it dosen't need to
 
 TryingToCreateDuplicateUserException = customExceptionClass('That username is already in use', 'TryingToCreateDuplicateUserException')
 userDosentExistException = customExceptionClass('User not found', 'userDosentExistException')
@@ -25,9 +28,18 @@ def CreateUser(appObj, userData, mainTenant):
     "known_as": KnownAs,
     "other_data": OtherData
   })
+  appObj.objectStore.saveJSONObject(appObj,"users_associatedPersons", UserID, [])
   AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
 
 def associateUserWithPerson(appObj, UserID, personGUID):
+  #Add reference from User to person
+  ## No object version checking because read and update is the same operaiton
+  def updUser(user):
+    if 'personGUID' not in user:
+      user.append(personGUID)
+    return user
+  appObj.objectStore.updateJSONObject(appObj,"users_associatedPersons", UserID, updUser)
+
   def upd(idfea):
     if idfea is None:
       idfea = []
@@ -52,12 +64,26 @@ def AddUserRole(appObj, userID, tennantName, roleName):
 
   
 ##END OF CREATION FUNCTIONS
-  
+
+def _removeUserAssociation(appObj, userID, personGUID):
+  def upd(idfea):
+    idfea.remove(userID)
+    return idfea
+  appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
+
 def DeleteUser(appObj, UserID, objectVersion):
   userObj = GetUser(appObj, UserID)
   if userObj is None:
     raise userDosentExistException
+  associatedPersonList, objVersion = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserID)
+    
+  for personGUID in associatedPersonList:
+    print(personGUID)
+    _removeUserAssociation(appObj, UserID, personGUID)
+    
   appObj.objectStore.removeJSONObject(appObj, "users", UserID, objectVersion)
+  appObj.objectStore.removeJSONObject(appObj, "users_associatedPersons", UserID, objectVersion)
+  
   return userObj
   
 def GetUser(appObj, UserID):

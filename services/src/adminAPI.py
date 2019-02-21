@@ -314,8 +314,8 @@ def registerAPI(appObj):
         objectVersion = request.headers.get(objectVersionHeaderName)
       if objectVersion is None:
         raise BadRequest(objectVersionHeaderName + " header missing")
-      print("Token:",decodedTokenObj.getUserID())
-      print("Passed:",userID)
+      #print("Token:",decodedTokenObj.getUserID())
+      #print("Passed:",userID)
       if (decodedTokenObj.getUserID() == userID):
         raise BadRequest("Can't delete logged in user")
       try:

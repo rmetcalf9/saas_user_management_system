@@ -46,7 +46,7 @@ class test_loginapi_register(parent_test_api):
       }]
     }
     
-    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, [], msg='Incorrect response from registration')
+    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersons'], msg='Incorrect response from registration')
 
     loginJSON = {
       "authProviderGUID": createdAuthProvGUID,
