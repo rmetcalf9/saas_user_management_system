@@ -5,7 +5,7 @@
         color="negative"
         class="fixed"
         round
-        @click="deleteTenant"
+        @click="deleteUser"
         icon="delete"
       ></q-btn>
     </q-page-sticky>
@@ -165,12 +165,12 @@ export default {
         headers: undefined
       })
     },
-    deleteTenant () {
+    deleteUser () {
       var TTT = this
-      var nameOfTenantToUser = TTT.userData.Name
+      var userID = TTT.userData.UserID
       TTT.$q.dialog({
         title: 'Confirm',
-        message: 'Are you sure you want to delete ' + nameOfTenantToUser,
+        message: 'Are you sure you want to delete ' + userID,
         ok: {
           push: true,
           label: 'Yes - delete'
@@ -185,20 +185,20 @@ export default {
       }).then(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'Tenant ' + nameOfTenantToUser + ' deleted'})
-            TTT.$router.push('/' + TTT.$route.params.tenantName + '/tenants/')
+            Notify.create({color: 'positive', detail: 'Tenant ' + userID + ' deleted'})
+            TTT.$router.push('/' + TTT.$route.params.tenantName + '/users/')
           },
           error: function (error) {
             Notify.create('Delete Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
           }
         }
         TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-          path: '/users/' + nameOfTenantToUser,
+          path: '/users/' + userID,
           method: 'delete',
           postdata: null,
           callback: callback,
           curPath: TTT.$router.history.current.path,
-          headers: {'object-version-id': TTT.tenantData.ObjectVersion}
+          headers: {'object-version-id': TTT.userData.ObjectVersion}
         })
       }).catch(() => {
         // Do nothing
