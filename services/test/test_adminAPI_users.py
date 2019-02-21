@@ -184,5 +184,22 @@ class test_adminAPIUsers(parent_test_api):
 
   
   #make sure we can't delete currently logged in user
+  def test_tryToDeleteCurrentlyLoggedInUser(self):
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterUserID = resultJSON["UserID"]
+    objectVersion = resultJSON["ObjectVersion"]
+
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: objectVersion}
+    )
+    self.assertEqual(result.status_code, 400, msg="Delete user did not fail") 
   
   #delete non existant user fails
+  def test_tryToDeleteCurrentlyLoggedInUser(self):
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + "nonxsistantUserID", 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: "1"}
+    )
+    self.assertEqual(result.status_code, 400, msg="non existant user deletion did not fail") 

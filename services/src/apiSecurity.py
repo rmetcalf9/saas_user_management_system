@@ -21,19 +21,22 @@ def verifyAPIAccessUserLoginRequired(appObj, tenantFromPath, jwttoken, rolesToCh
   return True, decodedToken, False
 
 class DecodedTokenClass():
-  tokenData = None
+  _tokenData = None
   
   def __init__(self, appObj, jwttoken):
     if (appObj.gateway.ShouldJWTTokensBeVerified()):
       UserID = decodeJWTToken(jwttoken, None, False)['iss']
       jwtSecret = appObj.gateway.GetJWTTokenSecret(UserID)
-      self.tokenData = decodeJWTToken(jwttoken, jwtSecret, True)
+      self._tokenData = decodeJWTToken(jwttoken, jwtSecret, True)
     else:
-      self.tokenData = decodeJWTToken(jwttoken, None, False)
+      self._tokenData = decodeJWTToken(jwttoken, None, False)
 
   def hasRole(self, tenant, role):
-    if tenant not in self.tokenData['TenantRoles']:
+    if tenant not in self._tokenData['TenantRoles']:
       return False
-    if role not in self.tokenData['TenantRoles'][tenant]:
+    if role not in self._tokenData['TenantRoles'][tenant]:
       return False
     return True
+    
+  def getUserID(self):
+    return self._tokenData["UserID"]

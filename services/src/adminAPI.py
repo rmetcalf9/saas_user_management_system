@@ -57,7 +57,7 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
     raise Unauthorized("No JWT Token in header or cookie")
   
   try:
-    (verified, decodedToken, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
+    (verified, decodedTokenObj, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
     if (forbidden):
       raise Forbidden()
   except InvalidSignatureError:
@@ -66,6 +66,7 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
     raise Unauthorized("ExpiredSignatureError")
   if not verified:
     raise Unauthorized("not verified")
+  return decodedTokenObj
   
 def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
@@ -307,12 +308,16 @@ def registerAPI(appObj):
     @appObj.flastRestPlusAPIObject.marshal_with(getUserModel(appObj), code=200, description='User Deleted')
     def delete(self, tenant, userID):
       '''Delete Tenant'''
-      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
       objectVersion = None
       if objectVersionHeaderName in request.headers:
         objectVersion = request.headers.get(objectVersionHeaderName)
       if objectVersion is None:
         raise BadRequest(objectVersionHeaderName + " header missing")
+      print("Token:",decodedTokenObj.getUserID())
+      print("Passed:",userID)
+      if (decodedTokenObj.getUserID() == userID):
+        raise BadRequest("Can't delete logged in user")
       try:
         userObj = DeleteUser(appObj, userID, objectVersion)
         return userObj.getJSONRepresenation()

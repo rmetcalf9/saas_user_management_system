@@ -213,12 +213,13 @@ class testHelperAPIClient(testHelperSuperClass):
   def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
     return self.getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
 
+  #Returns a token with the admin user logged in
   def getNormalJWTToken(self):
-    return self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole])
+    userIDForToken = appObj.defaultUserGUID
+    return self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole], userIDForToken)
   
   
-  def makeJWTTokenWithMasterTenantRoles(self, roles):
-    UserID = 'abc123'
+  def makeJWTTokenWithMasterTenantRoles(self, roles, UserID='abc123'):
     userDict = {
       "UserID": UserID,
       "TenantRoles": { masterTenantName: roles}
