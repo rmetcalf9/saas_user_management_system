@@ -3,7 +3,7 @@ import uuid
 from constants import uniqueKeyCombinator
 
 IdentityNotFoundException = Exception('Identity Not Found')
-IdentityAlreadyHasThisAuthException = Exception('Identity Already Has This Auth')
+IdentityAlreadyHasThisPersonException = Exception('Identity Already Has This Auth')
 IdentityAlreadyHasThisUserException = Exception('Identity Already Has This User')
 
 def createNewIdentity(appObj, name, description, userID):
@@ -27,7 +27,7 @@ def associateIdentityWithPerson(appObj, identityGUID, personGUID):
     if idfea is None:
       idfea = []
     if identityGUID in idfea:
-      raise IdentityAlreadyHasThisAuthException
+      raise IdentityAlreadyHasThisPersonException
     idfea.append(identityGUID)
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"IdentitiesForEachPerson", personGUID, upd)

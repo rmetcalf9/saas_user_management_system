@@ -16,7 +16,7 @@ def associatePersonWithAuth(appObj, personGUID, AuthUserKey):
     if idfea is None:
       idfea = []
     if personGUID in idfea:
-      raise IdentityAlreadyHasThisAuthException
+      raise PersonAlreadyHasThisAuthException
     idfea.append(personGUID)
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"PersonsForEachAuth", AuthUserKey, upd)
