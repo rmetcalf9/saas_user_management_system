@@ -126,7 +126,7 @@ class test_loginapi_norm(test_api):
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     InternalAuthUsername = 'ABC'
-    res = self.createUserWithTwoIdentititesForOneUser(userID1, userID2, InternalAuthUsername)
+    res = self.createUserWithTwoIdentititesForOnePerson(userID1, userID2, InternalAuthUsername)
     
     
     result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
@@ -146,29 +146,35 @@ class test_loginapi_norm(test_api):
     self.assertEqual(result2.status_code, 200)
     result2JSON = json.loads(result2.get_data(as_text=True))
 
-    identity1ExcpectedResult = {
-      "description": "standard",
-      "userID": userID1,
-      "name": "standard",
-      "guid": "69633841-9609-4990-ae7f-b38ea6431f4b"
+    user1ExcpectedResult = {
+      "UserID": userID1,
+      "TenantRoles": [{
+        "TenantName": masterTenantName,
+        "ThisTenantRoles": ["hasaccount"]
+      }],
+      "known_as": userID1,
+      "other_data": {}
     }
-    identity2ExcpectedResult = {
-      "description": "standard",
-      "userID": userID2,
-      "name": "standard",
-      "guid": "69633841-9609-4990-ae7f-b38ea6431f4b"
+    user2ExcpectedResult = {
+      "UserID": userID2,
+      "TenantRoles": [{
+        "TenantName": masterTenantName,
+        "ThisTenantRoles": ["hasaccount"]
+      }],
+      "known_as": userID2,
+      "other_data": {}
     }
     id1Found = False
     id2Found = False
 
-    for resultIdentity in result2JSON['possibleIdentities']:
-      if resultIdentity['userID'] == userID1:
+    for resultUser in result2JSON['possibleUsers']:
+      if resultUser['UserID'] == userID1:
         id1Found = True
-        self.assertJSONStringsEqualWithIgnoredKeys(resultIdentity, identity1ExcpectedResult, [ 'guid' ], msg="Identity 1 result mismatch")
-      if resultIdentity['userID'] == userID2:
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user1ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 1 result mismatch")
+      if resultUser['UserID'] == userID2:
         id2Found = True
-        self.assertJSONStringsEqualWithIgnoredKeys(resultIdentity, identity2ExcpectedResult, [ 'guid' ], msg="Identity 1 result mismatch")
-    
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 2 result mismatch")
+      
     self.assertTrue(id1Found, msg="Identity 1 not in response")
     self.assertTrue(id2Found, msg="Identity 2 not in response")
     

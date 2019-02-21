@@ -16,6 +16,7 @@ from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Logi
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
+from users import associateUserWithPerson
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
@@ -182,7 +183,8 @@ class testHelperAPIClient(testHelperSuperClass):
   def decodeToken(self, JWTToken): 
     return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
-  def createUserWithTwoIdentititesForOneUser(self, userID1, userID2, InternalAuthUsername):
+  #TODO Rework this function without identities
+  def createUserWithTwoIdentititesForOnePerson(self, userID1, userID2, InternalAuthUsername):
     masterTenant = GetTenant(appObj,masterTenantName)
     CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName)
     CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName)
@@ -198,6 +200,8 @@ class testHelperAPIClient(testHelperSuperClass):
     associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
     associateIdentityWithPerson(appObj, identity1['guid'], person['guid'])
     associateIdentityWithPerson(appObj, identity2['guid'], person['guid'])
+    associateUserWithPerson(appObj, userID1, person['guid'])
+    associateUserWithPerson(appObj, userID2, person['guid'])
     
     return {
       'authProvGUID': authProvGUID,

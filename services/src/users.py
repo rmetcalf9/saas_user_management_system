@@ -4,7 +4,7 @@ from userObj import userClass
 
 TryingToCreateDuplicateUserException = customExceptionClass('That username is already in use', 'TryingToCreateDuplicateUserException')
 userDosentExistException = customExceptionClass('User not found', 'userDosentExistException')
-
+UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Already Associated With This Person', 'UserAlreadyAssociatedWithThisPersonException')
 
 ##Creation functions
 ## All the functions that sets up the user, roles and asociates the user with a person
@@ -26,6 +26,17 @@ def CreateUser(appObj, userData, mainTenant):
     "other_data": OtherData
   })
   AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
+
+def associateUserWithPerson(appObj, UserID, personGUID):
+  def upd(idfea):
+    if idfea is None:
+      idfea = []
+    if UserID in idfea:
+      raise UserAlreadyAssociatedWithThisPersonException
+    idfea.append(UserID)
+    return idfea
+  #print('Asociating user ', UserID, ' with ', personGUID)
+  appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
   
 def AddUserRole(appObj, userID, tennantName, roleName):
   def updUser(obj):
@@ -88,3 +99,13 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
 def GetPaginatedUserData(appObj, request, outputFN, filterFN):
   return appObj.objectStore.getPaginatedResult(appObj, "users",  appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
 
+def getIdentityDict(appObj, personGUID):
+  identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
+  return identifyJSON
+
+def getListOfUserIDsForPerson(appObj, personGUID):
+  res = []
+  userIDsThisPerson, ver = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson", personGUID)
+  if userIDsThisPerson is None:
+    return []
+  return userIDsThisPerson

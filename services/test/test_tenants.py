@@ -6,6 +6,7 @@ from constants import authFailedException
 from person import CreatePerson, associatePersonWithAuth
 import json
 from base64 import b64decode
+from users import associateUserWithPerson
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
@@ -111,7 +112,7 @@ class test_tenants(testHelperAPIClient):
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     InternalAuthUsername = 'ABC'
-    res = self.createUserWithTwoIdentititesForOneUser(userID1, userID2, InternalAuthUsername)
+    res = self.createUserWithTwoIdentititesForOnePerson(userID1, userID2, InternalAuthUsername)
     
     #Login and get list of identities
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
@@ -120,10 +121,11 @@ class test_tenants(testHelperAPIClient):
     })
     foundIdentity1 = False
     foundIdentity2 = False
-    for curIdentity in UserIDandRoles['possibleIdentities'].keys():
-      if res['identity1']['guid'] == UserIDandRoles['possibleIdentities'][curIdentity]['guid']:
+    print("test_oneAuthCanAccessTwoIdentities UserIDandRoles:",UserIDandRoles)
+    for curUserID in UserIDandRoles['possibleUserIDs']:
+      if userID1 == curUserID:
         foundIdentity1 = True
-      if res['identity2']['guid'] == UserIDandRoles['possibleIdentities'][curIdentity]['guid']:
+      if userID2 == curUserID:
         foundIdentity2 = True
     self.assertTrue(foundIdentity1, msg="Identity 1 was not returned when list of login identities to use was given")
     self.assertTrue(foundIdentity2, msg="Identity 2 was not returned when list of login identities to use was given")
@@ -132,7 +134,7 @@ class test_tenants(testHelperAPIClient):
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
-    }, res['identity1']['guid'])
+    }, userID1)
     expectedJSONResponse = {
       'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID1, 
@@ -147,7 +149,7 @@ class test_tenants(testHelperAPIClient):
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {
       'username': InternalAuthUsername,
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
-    }, res['identity2']['guid'])
+    }, userID2)
     expectedJSONResponse = {
       'TenantRoles': {"usersystem": ["hasaccount"]}, 
       'UserID': userID2, 
@@ -157,7 +159,7 @@ class test_tenants(testHelperAPIClient):
       "known_as": userID2,
       "other_data": {}
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 1")
+    self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp'], msg="Failed to login to identity 2")
 
 
   #UserA can be shared by many People (Who may or may not have many auths)
@@ -182,8 +184,10 @@ class test_tenants(testHelperAPIClient):
       "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     },
     person2['guid'])
-    associateIdentityWithPerson(appObj, identity['guid'], person1['guid'])
-    associateIdentityWithPerson(appObj, identity['guid'], person2['guid'])
+    associateIdentityWithPerson(appObj, identity['guid'], person1['guid']) #TODO REMOVE
+    associateIdentityWithPerson(appObj, identity['guid'], person2['guid']) #TODO REMOVE
+    associateUserWithPerson(appObj, userID, person1['guid'])
+    associateUserWithPerson(appObj, userID, person2['guid'])
 
     #Try and log in and make sure both people get access to the user
     UserIDandRoles = Login(appObj, masterTenantName, authProvGUID, {

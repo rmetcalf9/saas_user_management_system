@@ -4,12 +4,12 @@ import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
-from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson
+from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson #TODO REMOVE
 import jwt
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
-from users import CreateUser, AddUserRole, GetUser
+from users import CreateUser, AddUserRole, GetUser, associateUserWithPerson, getListOfUserIDsForPerson
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -53,8 +53,8 @@ def CreateMasterTenant(appObj):
 
   #mainUserIdentity with authData
   
-  associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
-
+  associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid']) #TODO REMOVE
+  associateUserWithPerson(appObj, userID, person['guid'])
 
 
 #Called from API call
@@ -123,7 +123,7 @@ def DeleteTenant(appObj, tenantName, objectVersion):
   tenantObj = GetTenant(appObj, tenantName)
   if tenantObj is None:
     raise tenantDosentExistException
-  print("DeleteTenant objectVersion:", objectVersion)
+  ##print("DeleteTenant objectVersion:", objectVersion)
   appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
   return tenantObj
 
@@ -141,6 +141,8 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
   associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
+  associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'])
+
   
   return GetUser(appObj, userData['user_unique_identifier'])
   
@@ -191,9 +193,10 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
 # - if no identityGUID is specified and the user only has one identity then the user and role info for the selected identity is returned
 # - if no identityGUID is specified and the user has mutiple identities a list of possible identities is returned
 # - if an identityGUID is specified and correct then the user and role info
-def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='not_valid_guid'):
+def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID='not_valid_guid'):
   resDict = {
-    'possibleIdentities': None,
+    'possibleUserIDs': None,
+    'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
     'jwtData': None,
     'refresh': None,
     'userGuid': None,
@@ -208,23 +211,21 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
     raise Exception
   
   #We have authed with a single authMethod, we need to get a list of identities for that provider
-  possibleIdentities = getListOfIdentitiesForPerson(appObj, authUserObj['personGUID'])
-  if len(possibleIdentities)==0:
+  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'])
+  ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
+  if len(possibleUserIDs)==0:
     raise PersonHasNoAccessToAnyIdentitiesException
-  if identityGUID == "not_valid_guid":
-    if len(possibleIdentities)==1:
-      for key in possibleIdentities.keys():
-        identityGUID = key
+  if requestedUserID == "not_valid_guid":
+    if len(possibleUserIDs)==1:
+      requestedUserID = possibleUserIDs[0]
     else:
-      resDict['possibleIdentities'] = possibleIdentities
+      #mutiple userids supplied
+      resDict['possibleUserIDs'] = possibleUserIDs
       return resDict
-  if identityGUID not in possibleIdentities:
+  if requestedUserID not in possibleUserIDs:
     raise UnknownIdentityException
-  if possibleIdentities[identityGUID] is None:
-    raise Exception
-    
 
-  userDict = GetUser(appObj,possibleIdentities[identityGUID]['userID']).getReadOnlyDict()
+  userDict = GetUser(appObj,requestedUserID).getReadOnlyDict()
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
@@ -244,7 +245,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, identityGUID='no
 
   #This object is stored with the refresh token and the same value is always returned on each refresh
   tokenWithoutJWTorRefresh = {
-    'possibleIdentities': resDict['possibleIdentities'],
+    'possibleUserIDs': None, #was resDict['possibleUserIDs'], but this will always be none
     'userGuid': resDict['userGuid'],
     'authedPersonGuid': resDict['authedPersonGuid'],
     "ThisTenantRoles": resDict['ThisTenantRoles'],

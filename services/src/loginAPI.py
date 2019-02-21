@@ -9,6 +9,8 @@ from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #h
 from constants import customExceptionClass
 from apiSharedModels import getTenantModel, getUserModel
 from serverInfoAPI import registerServerInfoAPIFn
+import copy
+from users import GetUser
 
 from tenants import GetTenant, Login, RegisterUser
 
@@ -30,12 +32,6 @@ def getRegisterPostDataModel(appObj):
 
 #Used with both login response and refresh response
 def getLoginResponseModel(appObj):
-  possibleIdentityModel = appObj.flastRestPlusAPIObject.model('possibleIdentity', {
-    'guid': fields.String(description='Unique identifier for this identity'),
-    'userID': fields.String(description='Application unique ID for the user'),
-    'name': fields.String(description='Name of this identity'),
-    'description': fields.String(description='Description for an identity')
-  })
   jwtTokenModel = appObj.flastRestPlusAPIObject.model('JWTTokenInfo', {
     'JWTToken': fields.String(description='JWTToken'),
     'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time the JWTToken can be used until')
@@ -45,7 +41,7 @@ def getLoginResponseModel(appObj):
     'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time the Refresh token can be used until')
   })
   return appObj.flastRestPlusAPIObject.model('LoginResponseData', {
-    'possibleIdentities': fields.Nested(possibleIdentityModel, skip_none=True),
+    'possibleUsers': fields.List(fields.Nested(getUserModel(appObj))),
     'jwtData': fields.Nested(jwtTokenModel, skip_none=True),
     'refresh': fields.Nested(refreshTokenModel, skip_none=True),
     'userGuid': fields.String(description='Unique identifier of user to be used by the application'),
@@ -165,7 +161,7 @@ def registerAPI(appObj):
      
       try:
         #print("loginAPI.py login - authProviderGUID:",authProviderGUID)
-        loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], identityGUID='not_valid_guid')
+        loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], requestedUserID='not_valid_guid')
       except customExceptionClass as err:
         if (err.id=='authFailedException'):
           raise Unauthorized('authFailedException')
@@ -179,12 +175,13 @@ def registerAPI(appObj):
       except:
         raise InternalServerError
 
-      returnDict = loginResult.copy()
-      if returnDict['possibleIdentities'] is not None:
-        possibleIdentities = []
-        for pid in returnDict['possibleIdentities'].keys():
-          possibleIdentities.append(returnDict['possibleIdentities'][pid])
-        returnDict['possibleIdentities'] = possibleIdentities
+      returnDict = copy.deepcopy(loginResult)
+      if returnDict['possibleUserIDs'] is not None:
+        #populate possibleUsers from possibleUserIDs
+        possibleUsers = []
+        for userID in returnDict['possibleUserIDs']:
+          possibleUsers.append(GetUser(appObj,userID).getJSONRepresenation(tenant)) #limit roles to only current tenant
+        returnDict['possibleUsers'] = possibleUsers
 
       return returnDict
 
@@ -203,4 +200,5 @@ def registerAPI(appObj):
       if refreshedAuthDetails is None:
         raise Unauthorized('Refresh token not found, token or session may have timedout')
 
+      #possibleUserIDs will always be none
       return refreshedAuthDetails
