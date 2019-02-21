@@ -197,7 +197,7 @@ class test_adminAPIUsers(parent_test_api):
     self.assertEqual(result.status_code, 400, msg="Delete user did not fail") 
   
   #delete non existant user fails
-  def test_tryToDeleteCurrentlyLoggedInUser(self):
+  def test_tryToDeleteNonExistantUser(self):
     result = self.testClient.delete(
       self.adminAPIPrefix + '/' + masterTenantName + '/users/' + "nonxsistantUserID", 
       headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: "1"}

@@ -39,7 +39,7 @@ def requiredInPayload(content, fieldList):
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
   if tenant != masterTenantName:
-    raise Unauthorized()
+    raise Unauthorized("Supplied tenant is not the master tenant")
   
   jwtToken = None
   if jwtHeaderName in request.headers:
@@ -55,11 +55,10 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
         jwtToken = a['jwtData']['JWTToken']
   if jwtToken is None:
     raise Unauthorized("No JWT Token in header or cookie")
-  
   try:
     (verified, decodedTokenObj, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
     if (forbidden):
-      raise Forbidden()
+      raise Forbidden("Forbidden")
   except InvalidSignatureError:
     raise Unauthorized("InvalidSignatureError")
   except ExpiredSignatureError:
