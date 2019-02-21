@@ -22,15 +22,15 @@ def createNewIdentity(appObj, name, description, userID):
 #  _associate(appObj, userID, AuthUserKey, guid)
   return identityDict
   
-def associateIdentityWithPerson(appObj, personGUID, AuthUserKey):
+def associateIdentityWithPerson(appObj, identityGUID, personGUID):
   def upd(idfea):
     if idfea is None:
       idfea = []
-    if personGUID in idfea:
+    if identityGUID in idfea:
       raise IdentityAlreadyHasThisAuthException
-    idfea.append(personGUID)
+    idfea.append(identityGUID)
     return idfea
-  appObj.objectStore.updateJSONObject(appObj,"IdentitiesForEachPerson", AuthUserKey, upd)
+  appObj.objectStore.updateJSONObject(appObj,"IdentitiesForEachPerson", personGUID, upd)
 
 def getIdentityDict(appObj, personGUID):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
