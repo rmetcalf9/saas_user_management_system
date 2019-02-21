@@ -185,11 +185,11 @@ export default {
       }).then(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'Tenant ' + userID + ' deleted'})
+            Notify.create({color: 'positive', detail: 'User ' + userID + ' deleted'})
             TTT.$router.push('/' + TTT.$route.params.tenantName + '/users/')
           },
           error: function (error) {
-            Notify.create('Delete Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+            Notify.create('Delete User failed - ' + callbackHelper.getErrorFromResponse(error))
           }
         }
         TTT.$store.dispatch('globalDataStore/callAdminAPI', {

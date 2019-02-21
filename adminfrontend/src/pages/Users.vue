@@ -11,7 +11,13 @@
     :visible-columns="tablePersistSettings.visibleColumns"
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"
+    selection="multiple"
+    :selected.sync="tableSelected"
   >
+      <template slot="top-selection" slot-scope="props">
+        <q-btn flat round negative delete icon="delete" @click="deleteSelectedUsers" />
+      </template>
+
       <template slot="top-left" slot-scope="props">
         <q-btn
           color="primary"
@@ -52,10 +58,59 @@ export default {
         { name: 'TenantRoles', required: true, label: 'Tenant Roles', align: 'left', field: 'TenantRoles', sortable: false, filter: false },
         { name: 'other_data', required: true, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
-      ]
+      ],
+      tableSelected: [],
+      futureRefreshRequested: false
     }
   },
   methods: {
+    deleteUserNoConfirm (TTT, usr) {
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', detail: 'User ' + usr.UserID + ' deleted'})
+          TTT.futureRefresh()
+        },
+        error: function (error) {
+          Notify.create('Delete User failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/users/' + usr.UserID,
+        method: 'delete',
+        postdata: null,
+        callback: callback,
+        curPath: TTT.$router.history.current.path,
+        headers: {'object-version-id': usr.ObjectVersion}
+      })
+    },
+    deleteSelectedUsers () {
+      var TTT = this
+      var usersToDelete = this.tableSelected.map(function (usr) {
+        return usr
+      })
+      TTT.tableSelected = []
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to delete ' + usersToDelete.length + ' users?',
+        ok: {
+          push: true,
+          label: 'Yes - delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).then(() => {
+        usersToDelete.map(function (usr) {
+          TTT.deleteUserNoConfirm(TTT, usr)
+        })
+      }).catch(() => {
+        // Do nothing
+      })
+    },
     createUserButtonClick () {
       Notify.create('TODO')
     },
@@ -108,6 +163,17 @@ export default {
         curPath: this.$router.history.current.path,
         headers: undefined
       })
+    },
+    futureRefresh () {
+      if (this.futureRefreshRequested) {
+        return
+      }
+      this.futureRefreshRequested = true
+      setTimeout(this.futureRefreshDo, 500)
+    },
+    futureRefreshDo () {
+      this.futureRefreshRequested = false
+      this.refresh()
     },
     refresh () {
       this.request({
