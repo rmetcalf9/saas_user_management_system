@@ -11,13 +11,13 @@ def CreatePerson(appObj):
   appObj.objectStore.saveJSONObject(appObj, "Persons", guid, personDict)
   return personDict
 
-def associatePersonWithAuth(appObj, identityGUID, AuthUserKey):
+def associatePersonWithAuth(appObj, personGUID, AuthUserKey):
   def upd(idfea):
     if idfea is None:
       idfea = []
-    if identityGUID in idfea:
+    if personGUID in idfea:
       raise IdentityAlreadyHasThisAuthException
-    idfea.append(identityGUID)
+    idfea.append(personGUID)
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"PersonsForEachAuth", AuthUserKey, upd)
 
