@@ -4,7 +4,6 @@ import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
-from identityObj import createNewIdentity, associateIdentityWithPerson, getListOfIdentitiesForPerson #TODO REMOVE
 import jwt
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
@@ -38,7 +37,6 @@ def CreateMasterTenant(appObj):
   #User spercific creation
   CreateUser(appObj, {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, masterTenantName)
   AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
-  mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userID)
   
   person = CreatePerson(appObj)
   credentialJSON = {
@@ -53,7 +51,6 @@ def CreateMasterTenant(appObj):
 
   #mainUserIdentity with authData
   
-  associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid']) #TODO REMOVE
   associateUserWithPerson(appObj, userID, person['guid'])
 
 
@@ -136,11 +133,9 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
   
   userData = authProvObj.getTypicalAuthData(credentialDICT)
   CreateUser(appObj, userData, tenantObj.getName())
-  mainUserIdentity = createNewIdentity(appObj, 'standard','standard', userData['user_unique_identifier'])
   person = CreatePerson(appObj)
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
   associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
-  associateIdentityWithPerson(appObj, mainUserIdentity['guid'], person['guid'])
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'])
 
   

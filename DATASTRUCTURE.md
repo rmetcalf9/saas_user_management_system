@@ -1,6 +1,6 @@
 # Internal data structures
 
-User --- Identity >-< Person --< UserAuth
+User >-< Person --< UserAuth
 
 
 Tenants

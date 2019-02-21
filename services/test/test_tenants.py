@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient, env, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, _getAuthProvider, associateIdentityWithPerson
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, _getAuthProvider
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
 from constants import authFailedException
@@ -167,7 +167,6 @@ class test_tenants(testHelperAPIClient):
     masterTenant = GetTenant(appObj,masterTenantName)
     userID = 'TestUser'
     CreateUser(appObj, {"user_unique_identifier": userID, "known_as": userID}, masterTenantName)
-    identity = createNewIdentity(appObj, 'standard','standard', userID)
 
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
     person1 = CreatePerson(appObj)
@@ -184,8 +183,6 @@ class test_tenants(testHelperAPIClient):
       "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     },
     person2['guid'])
-    associateIdentityWithPerson(appObj, identity['guid'], person1['guid']) #TODO REMOVE
-    associateIdentityWithPerson(appObj, identity['guid'], person2['guid']) #TODO REMOVE
     associateUserWithPerson(appObj, userID, person1['guid'])
     associateUserWithPerson(appObj, userID, person2['guid'])
 

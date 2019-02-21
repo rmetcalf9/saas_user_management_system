@@ -12,7 +12,7 @@ from baseapp_for_restapi_backend_with_swagger import from_iso8601
 import jwt
 from base64 import b64decode
 
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, createNewIdentity, associateIdentityWithPerson, _getAuthProvider
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from person import CreatePerson, associatePersonWithAuth
 from jwtTokenGeneration import generateJWTToken
@@ -188,8 +188,6 @@ class testHelperAPIClient(testHelperSuperClass):
     masterTenant = GetTenant(appObj,masterTenantName)
     CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName)
     CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName)
-    identity1 = createNewIdentity(appObj, 'standard','standard', userID1)
-    identity2 = createNewIdentity(appObj, 'standard','standard', userID2)
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
     person = CreatePerson(appObj)
     authData = AddAuth(appObj, masterTenantName, authProvGUID, {
@@ -198,15 +196,11 @@ class testHelperAPIClient(testHelperSuperClass):
     },
     person['guid'])
     associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
-    associateIdentityWithPerson(appObj, identity1['guid'], person['guid'])
-    associateIdentityWithPerson(appObj, identity2['guid'], person['guid'])
     associateUserWithPerson(appObj, userID1, person['guid'])
     associateUserWithPerson(appObj, userID2, person['guid'])
     
     return {
       'authProvGUID': authProvGUID,
-      'identity1': identity1,
-      'identity2': identity2,
       'person': person
     }
 
