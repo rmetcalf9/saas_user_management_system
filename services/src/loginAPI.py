@@ -51,32 +51,6 @@ def getLoginResponseModel(appObj):
     'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True)
   })
 
-#{  
-#   "possibleIdentities":"None",
-#   "jwtData":{  
-#      "JWTToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJfQ2hlY2tVc2VySW5pdEFuZFJldHVybkpXVFNlY3JldEFuZEtleV9rZXkiLCJleHAiOjE1NDcyODgyNDMsIlRlbmFudFJvbGVzIjp7InVzZXJzeXN0ZW0iOlsic3lzdGVtYWRtaW4iLCJoYXNhY2NvdW50Il19LCJVc2VySUQiOiJjZGY5YmMyOS1iM2U1LTQ3ZjctYTc4Yi05N2I2YTAwNmYxMjYifQ.-42WuyPYIDDrKHj6ZCIQxWGILbmJ0nDOL4wLOA-rdZU",
-#      "TokenExpiry":"2019-01-12T10:17:23.303187+00:00"
-#   }
-#}
-#{
-#  "possibleIdentities": [
-#    {
-#      "guid": "d48b9284-af95-41cc-9dca-e92339c50a12",
-#      "userID": "TestUser1",
-#      "name": "standard",
-#      "description": "standard"
-#    },
-#    {
-#      "guid": "71e8ba49-52d9-48ff-8d93-7b67a8a26274",
-#      "userID": "TestUser2",
-#      "name": "standard",
-#      "description": "standard"
-#    }
-#  ],
-#  "jwtData": null
-#}
-
-
 def getValidTenantObj(appObj, tenant):
   tenant = GetTenant(appObj, tenant)
   if tenant is None:
