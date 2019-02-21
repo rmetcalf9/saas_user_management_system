@@ -183,8 +183,7 @@ class testHelperAPIClient(testHelperSuperClass):
   def decodeToken(self, JWTToken): 
     return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
-  #TODO Rework this function without identities
-  def createUserWithTwoIdentititesForOnePerson(self, userID1, userID2, InternalAuthUsername):
+  def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername):
     masterTenant = GetTenant(appObj,masterTenantName)
     CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName)
     CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName)

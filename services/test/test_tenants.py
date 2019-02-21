@@ -112,7 +112,7 @@ class test_tenants(testHelperAPIClient):
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     InternalAuthUsername = 'ABC'
-    res = self.createUserWithTwoIdentititesForOnePerson(userID1, userID2, InternalAuthUsername)
+    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername)
     
     #Login and get list of identities
     UserIDandRoles = Login(appObj, masterTenantName, res['authProvGUID'], {

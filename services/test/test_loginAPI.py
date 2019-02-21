@@ -126,8 +126,7 @@ class test_loginapi_norm(test_api):
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     InternalAuthUsername = 'ABC'
-    res = self.createUserWithTwoIdentititesForOnePerson(userID1, userID2, InternalAuthUsername)
-    
+    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername)
     
     result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
