@@ -219,5 +219,52 @@ class test_loginapi_register(parent_test_api):
     )
     self.assertEqual(registerResult.status_code, 201, msg="creation after delete failed" + registerResult.get_data(as_text=True))
 
-   #TODO Test can't log in with deleted credentials
+  def test_unableToLoginAsDeletedUser(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON),
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="User not created")
+    resultJSON = json.loads(registerResult.get_data(as_text=True))
+    createdUserID = resultJSON["UserID"]
+    
+    loginJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    loginResult = self.testClient.post(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/authproviders', 
+      data=json.dumps(loginJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user - " + loginResult.get_data(as_text=True))
+    
+    deleteresult = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + createdUserID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: resultJSON['ObjectVersion']}
+    )
+    self.assertEqual(deleteresult.status_code, 200, msg="Delete user failed - " + deleteresult.get_data(as_text=True)) 
+
+    loginResult = self.testClient.post(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/authproviders', 
+      data=json.dumps(loginJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(loginResult.status_code, 401, msg="Managed to login as a deleted user")
     
