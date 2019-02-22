@@ -23,7 +23,7 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
   ret = bcrypt.hashpw(masterSecretKey.encode('utf-8'), decodedSalt)
   return ret.decode("utf-8") 
 
-def callService(api, url, method, dataDICT, expectedResponse):
+def callService(api, url, method, dataDICT, expectedResponses):
   result = None
   targetURL = BASE[api] + url
   headers = {}
@@ -32,7 +32,8 @@ def callService(api, url, method, dataDICT, expectedResponse):
     headers[jwtHeaderName] = loginDICT['jwtData']['JWTToken']
   if method=='get':
     result = requests.get(
-      targetURL
+      targetURL,
+      headers=headers
     )
   if method=='post':
     headers['content-type'] = 'application/json'
@@ -48,28 +49,28 @@ def callService(api, url, method, dataDICT, expectedResponse):
       data=json.dumps(dataDICT),
       headers=headers
     )
-  if result.status_code != expectedResponse:
+  if result.status_code not in expectedResponses:
     print("Sending " + method + " to ", targetURL)
     if dataDICT is not None:
       print(" data:", dataDICT)
     print("Got response ",result.status_code)
     print("     ",result.text)
     raise Exception("Did not get expected response")
-  return json.loads(result.text)
+  return json.loads(result.text), result.status_code
   
   
-def callGETService(api,url, expectedResponse):
-  return callService(api,url, "get", None, expectedResponse)
+def callGetService(api,url, expectedResponses):
+  return callService(api,url, "get", None, expectedResponses)
 
-def callpostService(api,url, POSTdict, expectedResponse):
-  return callService(api,url, "post", POSTdict, expectedResponse)
+def callPostService(api,url, POSTdict, expectedResponses):
+  return callService(api,url, "post", POSTdict, expectedResponses)
 
-def callputService(api,url, PUTdict, expectedResponse):
-  return callService(api,url, "put", PUTdict, expectedResponse)
+def callPutService(api,url, PUTdict, expectedResponses):
+  return callService(api,url, "put", PUTdict, expectedResponses)
 
 print("Start of script to insert test data")
 
-AuthProvidersDICT = callGETService(LOGIN, "/" + masterTenantName + "/authproviders", 200)
+AuthProvidersDICT,res = callGetService(LOGIN, "/" + masterTenantName + "/authproviders", [200])
 MainAuthProvider = AuthProvidersDICT['AuthProviders'][0]
 
 loginCallDICT = {
@@ -79,13 +80,16 @@ loginCallDICT = {
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
    }
 }
-loginDICT = callpostService(LOGIN, "/" + masterTenantName + "/authproviders",loginCallDICT,200)
+loginDICT,res = callPostService(LOGIN, "/" + masterTenantName + "/authproviders",loginCallDICT,[200])
 
 tenantCreationDICT = {
   "Name": "testData_Tenant",
   "Description": "Created by insert_test_data.py",
   "AllowUserCreation": True,
-  "AuthProviders": [{
+  "AuthProviders": []
+}
+
+authProvCreationDICT = {
     "guid": None,
     "Type": "internal",
     "AllowUserCreation": True,
@@ -93,14 +97,46 @@ tenantCreationDICT = {
     "IconLink": "string",
     "ConfigJSON": "{\"userSufix\": \"@testUserSufix\"}",
     "saltForPasswordHashing": None
-  }]
 }
 
-CreatedTenants = []
+registeruserDICT = {
+  "authProviderGUID": "TODO",
+  "credentialJSON": { 
+    "username": "testUser_", 
+    "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
+   }
+}
+
+print("Creating allowUserCreation tenants with users created with register method")
 for cur in range(4):
   creationDICT = copy.deepcopy(tenantCreationDICT)
   creationDICT['Name'] = creationDICT['Name'] + str(cur)
-  CreatedTenants.append(callpostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,201))
+  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
+  if (res==400):
+    if (resDICT['message'] == 'Tenant Already Exists'):
+      print('Skipping tenant create as it already exists')
+    else:
+      raise Exception()
+      
+  tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], [200])
+  if len(tenantDICT["AuthProviders"]) == 0:
+    addAuthProvDICT = copy.deepcopy(tenantDICT)
+    addAuthProvDICT["AuthProviders"].append(authProvCreationDICT)
+    tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], addAuthProvDICT, [200])
+    
+  for curUser in range(10):
+    creationDICT = copy.deepcopy(registeruserDICT)
+    creationDICT['authProviderGUID'] = tenantDICT["AuthProviders"][0]['guid']
+    creationDICT['credentialJSON']['username'] = creationDICT['credentialJSON']['username'] + "T" + str(cur) + "_" + str(curUser)
+    creationDICT['credentialJSON']['password'] = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantDICT["AuthProviders"][0]['saltForPasswordHashing'])
+    resDICT, res = callPutService(LOGIN, "/" + tenantDICT['Name'] + "/register", creationDICT,[201,400])
+    if (res==400):
+      if (resDICT['message'] == 'That username is already in use'):
+        print('Ignoring user create error as it already exists')
+      else:
+        raise Exception()
+    
+  
 
 
 print("End")
