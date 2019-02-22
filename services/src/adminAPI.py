@@ -55,14 +55,18 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
         jwtToken = a['jwtData']['JWTToken']
   if jwtToken is None:
     raise Unauthorized("No JWT Token in header or cookie")
+  forbidden = False
   try:
     (verified, decodedTokenObj, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
-    if (forbidden):
-      raise Forbidden("Forbidden")
   except InvalidSignatureError:
     raise Unauthorized("InvalidSignatureError")
   except ExpiredSignatureError:
     raise Unauthorized("ExpiredSignatureError")
+  except Exception:
+    raise Unauthorized("Problem with token")
+    
+  if (forbidden):
+    raise Forbidden("Forbidden")
   if not verified:
     raise Unauthorized("not verified")
   return decodedTokenObj
@@ -131,6 +135,9 @@ def registerAPI(appObj):
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
       requiredInPayload(content, ['Name','Description','AllowUserCreation'])
+      if "AuthProviders" in content:
+        if len(content["AuthProviders"]) != 0:
+          raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
         tenantObj = CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'])
       except customExceptionClass as err:

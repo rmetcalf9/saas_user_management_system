@@ -161,6 +161,12 @@ class testHelperSuperClass(unittest.TestCase):
       return
     print(result.get_data(as_text=True))
     self.assertEqual(result.status_code, expectedResponse, msg)
+
+def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, tenantAuthProvSalt):
+  masterSecretKey = (username + ":" + password + ":AG44")
+  ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
+  return ret
+
     
 #helper class with setup for an APIClient
 class testHelperAPIClient(testHelperSuperClass):
@@ -202,12 +208,8 @@ class testHelperAPIClient(testHelperSuperClass):
       'person': person
     }
 
-  def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, username, password, tenantAuthProvSalt):
-    masterSecretKey = (username + ":" + password + ":AG44")
-    ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
-    return ret
   def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
-    return self.getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
+    return getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
 
   #Returns a token with the admin user logged in
   def getNormalJWTToken(self):
@@ -248,7 +250,7 @@ class testHelperAPIClient(testHelperSuperClass):
       data=json.dumps(tenantDICT), 
       content_type='application/json'
     )
-    self.assertEqual(result.status_code, 201)
+    self.assertEqual(result.status_code, 201, result.get_data(as_text=True))
     resultJSON = json.loads(result.get_data(as_text=True))
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantDICT, ["ObjectVersion"], msg='JSON of created Tenant is not the same')

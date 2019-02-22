@@ -18,22 +18,22 @@ class test_api(testHelperAPIClient):
 class test_securityTests(test_api):
   def test_noTokenSupplied(self):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants')
-    self.assertEqual(result.status_code, 401)
+    self.assertEqual(result.status_code, 401, result.get_data(as_text=True))
   
   def test_jwtWithNoRoles(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([])
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 401)
+    self.assertEqual(result.status_code, 401, result.get_data(as_text=True))
 
   def test_jwtWithOnlyAccountRole(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole])
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 403) #Should return Forbidden
+    self.assertEqual(result.status_code, 403, result.get_data(as_text=True)) #Should return Forbidden
 
   def test_jwtWithOnlyAdminRole(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([masterTenantDefaultSystemAdminRole])
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 401)
+    self.assertEqual(result.status_code, 401, result.get_data(as_text=True))
 
   def test_jwtWorksAsCookie(self): 
     self.testClient.set_cookie('localhost', jwtCookieName, self.getNormalJWTToken())
@@ -42,7 +42,7 @@ class test_securityTests(test_api):
 
   def test_wrongTenantFails(self): 
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + 'xx/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})
-    self.assertEqual(result.status_code, 401)
+    self.assertEqual(result.status_code, 401, result.get_data(as_text=True))
 
   def test_jwtWorksAsHeader(self): 
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})
