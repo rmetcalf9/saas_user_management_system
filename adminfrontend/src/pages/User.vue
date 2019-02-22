@@ -24,7 +24,7 @@
         <q-item-tile sublabel>{{ userData.other_data }}</q-item-tile>
       </q-item-main>
     </q-item>
-    <q-item v-for="curRole in userData.TenantRoles" :key=curRole>
+    <q-item v-for="curRole in userData.TenantRoles" :key=curRole.TenantName>
       <q-item-main >
         <q-item-tile label>Tenant Roles - {{ curRole.TenantName }}</q-item-tile>
         <q-item-tile>
@@ -54,10 +54,10 @@
           <q-field helper="Displayed to user in UI" label="Known As" :label-width="3">
             <q-input v-model="editUserModalDialogData.known_as" @keyup.enter="okEditUserDialog" ref="knownAsInput"/>
           </q-field>
-          <q-field helper="Other information about the user (JSON)" label="Other Data" :label-width="3">
+          <q-field helper="Other information about the user (JSON)" label="Other Data" :label-width="3" :error="isOtherDataInvalid">
             <q-input v-model="editUserModalDialogData.other_data" type="textarea" />
           </q-field>
-          <q-field :helper="'Roles for ' + curRole.TenantName" :label="curRole.TenantName + ' Roles'" :label-width="3" v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole>
+          <q-field :helper="'Roles for ' + curRole.TenantName" :label="curRole.TenantName + ' Roles'" :label-width="3" v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole.TenantName>
              <q-chips-input v-model="curRole.ThisTenantRoles" />
           </q-field>
           <div>&nbsp;</div>
@@ -104,6 +104,16 @@ export default {
       editUserModalDialogVisible: false
     }
   },
+  computed: {
+    isOtherDataInvalid () {
+      try {
+        JSON.parse(this.editUserModalDialogData.other_data)
+      } catch (e) {
+        return true
+      }
+      return false
+    }
+  },
   methods: {
     okEditUserDialog () {
       var TTT = this
@@ -140,7 +150,7 @@ export default {
     },
     editUser () {
       this.editUserModalDialogData.known_as = JSON.parse(JSON.stringify(this.userData.known_as))
-      this.editUserModalDialogData.other_data = JSON.parse(JSON.stringify(this.userData.other_data))
+      this.editUserModalDialogData.other_data = JSON.stringify(this.userData.other_data)
       this.editUserModalDialogData.TenantRoles = JSON.parse(JSON.stringify(this.userData.TenantRoles))
 
       this.editUserModalDialogVisible = true
