@@ -217,4 +217,7 @@ class test_loginapi_register(parent_test_api):
       data=json.dumps(registerJSON),
       content_type='application/json'
     )
-    self.assertEqual(registerResult.status_code, 201, msg="creation after delete failed")
+    self.assertEqual(registerResult.status_code, 201, msg="creation after delete failed" + registerResult.get_data(as_text=True))
+
+   #TODO Test can't log in with deleted credentials
+    

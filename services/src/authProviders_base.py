@@ -3,6 +3,7 @@
 #  an identity has one user
 from constants import authFailedException, customExceptionClass
 import uuid
+from person import associatePersonWithAuthCalledWhenAuthIsCreated
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
@@ -11,7 +12,8 @@ def getAuthRecord(appObj, key):
   authRecord, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
   return authRecord
 
-
+#person.py also uses userAuths
+  
 class authProvider():
   dataDict = None #See checks in init
   guid = None
@@ -60,7 +62,7 @@ class authProvider():
       "personGUID": personGUID
     }
     appObj.objectStore.saveJSONObject(appObj,"userAuths",  key, mainObjToStore)
-    
+    associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key)
     return mainObjToStore
 
   def Auth(self, appObj, credentialDICT):
@@ -80,4 +82,5 @@ class authProvider():
 
   def getTypicalAuthData(self, credentialDICT):
     return self._getTypicalAuthData(credentialDICT)
+   
     

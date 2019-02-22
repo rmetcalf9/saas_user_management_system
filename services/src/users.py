@@ -1,6 +1,7 @@
 from constants import customExceptionClass, DefaultHasAccountRole
 
 from userObj import userClass
+from person import getPerson, deletePerson
 import copy
 
 #users_associatedPersons 1-1 with user object, seperated out to stop ObjectVersion getting out of sync when it dosen't need to
@@ -48,6 +49,7 @@ def associateUserWithPerson(appObj, UserID, personGUID):
     idfea.append(UserID)
     return idfea
   #print('Asociating user ', UserID, ' with ', personGUID)
+  
   appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
   
 def AddUserRole(appObj, userID, tennantName, roleName):
@@ -70,7 +72,14 @@ def _removeUserAssociation(appObj, userID, personGUID):
     idfea.remove(userID)
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
-
+  
+  userListForThisPerson, objectVersion = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson",personGUID)
+  if userListForThisPerson is None:
+    return
+  if len(userListForThisPerson)==0:
+    appObj.objectStore.removeJSONObject(appObj, "UsersForEachPerson", personGUID, objectVersion)
+    deletePerson(appObj, personGUID)
+  
 def DeleteUser(appObj, UserID, objectVersion):
   userObj = GetUser(appObj, UserID)
   if userObj is None:
@@ -78,7 +87,6 @@ def DeleteUser(appObj, UserID, objectVersion):
   associatedPersonList, objVersion = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserID)
     
   for personGUID in associatedPersonList:
-    print(personGUID)
     _removeUserAssociation(appObj, UserID, personGUID)
     
   appObj.objectStore.removeJSONObject(appObj, "users", UserID, objectVersion)

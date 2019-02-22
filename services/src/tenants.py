@@ -5,7 +5,7 @@ from authProviders import authProviderFactory, getNewAuthProviderJSON, getExisti
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
 import jwt
-from person import CreatePerson, associatePersonWithAuth
+from person import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
 from users import CreateUser, AddUserRole, GetUser, associateUserWithPerson, getListOfUserIDsForPerson
@@ -47,7 +47,6 @@ def CreateMasterTenant(appObj):
   }
 
   authData = _getAuthProvider(appObj, masterTenantName, masterTenantInternalAuthProvider['guid']).AddAuth(appObj, credentialJSON, person['guid'])
-  associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
 
   #mainUserIdentity with authData
   
@@ -135,9 +134,7 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
   CreateUser(appObj, userData, tenantObj.getName())
   person = CreatePerson(appObj)
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
-  associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'])
-
   
   return GetUser(appObj, userData['user_unique_identifier'])
   

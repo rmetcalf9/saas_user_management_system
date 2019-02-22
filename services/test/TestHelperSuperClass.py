@@ -14,7 +14,7 @@ from base64 import b64decode
 
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
-from person import CreatePerson, associatePersonWithAuth
+from person import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
 
@@ -194,7 +194,6 @@ class testHelperAPIClient(testHelperSuperClass):
       "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     },
     person['guid'])
-    associatePersonWithAuth(appObj, person['guid'], authData['AuthUserKey'])
     associateUserWithPerson(appObj, userID1, person['guid'])
     associateUserWithPerson(appObj, userID2, person['guid'])
     
