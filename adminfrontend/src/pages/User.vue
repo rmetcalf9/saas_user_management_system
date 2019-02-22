@@ -11,18 +11,12 @@
     </q-page-sticky>
 
   <q-list >
-    <q-item highlight @click.native="editTenant">
+    <q-item highlight @click.native="editUser">
       <q-item-main >
-        <q-item-tile label>{{ userData.known_as }}</q-item-tile>
-        <q-item-tile sublabel>{{ userData.UserID }}</q-item-tile>
+        <q-item-tile label>{{ userData.UserID }}</q-item-tile>
+        <q-item-tile sublabel>Known as {{ userData.known_as }}</q-item-tile>
       </q-item-main>
       <q-item-side right icon="mode_edit" />
-    </q-item>
-    <q-item>
-      <q-item-main >
-        <q-item-tile label>Tenant Roles</q-item-tile>
-        <q-item-tile sublabel>{{ userData.TenantRoles }}</q-item-tile>
-      </q-item-main>
     </q-item>
     <q-item>
       <q-item-main >
@@ -30,9 +24,17 @@
         <q-item-tile sublabel>{{ userData.other_data }}</q-item-tile>
       </q-item-main>
     </q-item>
+    <q-item v-for="curRole in userData.TenantRoles" :key=curRole>
+      <q-item-main >
+        <q-item-tile label>Tenant Roles - {{ curRole.TenantName }}</q-item-tile>
+        <q-item-tile>
+            <q-chips-input readonly hide-underline v-model="curRole.ThisTenantRoles" />
+        </q-item-tile>
+      </q-item-main>
+    </q-item>
   </q-list>
 
-    <q-modal v-model="editTenantModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
+    <q-modal v-model="editUserModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
             <q-btn
@@ -44,20 +46,24 @@
             @click="cancelEditTenantDialog"
           />
           <q-toolbar-title>
-            Edit Tenant Information
+            Edit {{ userData.UserID }} Information
           </q-toolbar-title>
         </q-toolbar>
 
         <div class="layout-padding">
-          <q-field helper="Description of Tenant" label="Description" :label-width="3">
-            <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput"/>
+          <q-field helper="Displayed to user in UI" label="Known As" :label-width="3">
+            <q-input v-model="editUserModalDialogData.known_as" @keyup.enter="okEditUserDialog" ref="knownAsInput"/>
           </q-field>
-          <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
-            <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
+          <q-field helper="Other information about the user (JSON)" label="Other Data" :label-width="3">
+            {{ editUserModalDialogData.other_data }}
+            <q-input v-model="editUserModalDialogData.other_data" type="textarea" />
+          </q-field>
+          <q-field :helper="'Roles for ' + curRole.TenantName" :label="curRole.TenantName + ' Roles'" :label-width="3" v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole>
+             <q-chips-input v-model="curRole.ThisTenantRoles" />
           </q-field>
           <div>&nbsp;</div>
           <q-btn
-            @click="okEditTenantDialog"
+            @click="okEditUserDialog"
             color="primary"
             label="Ok"
             class = "float-right q-ml-xs"
@@ -91,33 +97,34 @@ export default {
   data () {
     return {
       userData: getEmptyUserData(),
-      editTenantModalDialogData: {
-        Description: '',
-        AllowUserCreation: false
+      editUserModalDialogData: {
+        known_as: '',
+        other_data: '',
+        TenantRoles: ''
       },
-      editTenantModalDialogVisible: false
+      editUserModalDialogVisible: false
     }
   },
   methods: {
-    okEditTenantDialog () {
+    okEditUserDialog () {
       var TTT = this
-      this.editTenantModalDialogVisible = false
-      if (this.editTenantModalDialogData.Description === this.userData.Description) {
-        if (this.editTenantModalDialogData.AllowUserCreation === this.userData.AllowUserCreation) {
+      this.editUserModalDialogVisible = false
+      if (this.editUserModalDialogData.Description === this.userData.Description) {
+        if (this.editUserModalDialogData.AllowUserCreation === this.userData.AllowUserCreation) {
           return // no change so do nothing
         }
       }
       var newUserJSON = JSON.parse(JSON.stringify(this.userData))
-      newUserJSON.Description = this.editTenantModalDialogData.Description
-      newUserJSON.AllowUserCreation = this.editTenantModalDialogData.AllowUserCreation
+      newUserJSON.Description = this.editUserModalDialogData.Description
+      newUserJSON.AllowUserCreation = this.editUserModalDialogData.AllowUserCreation
 
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Tenant Updated'})
+          Notify.create({color: 'positive', detail: 'User Updated'})
           TTT.refreshTenantData()
         },
         error: function (error) {
-          Notify.create('Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create('Update User failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -130,15 +137,16 @@ export default {
       })
     },
     cancelEditTenantDialog () {
-      this.editTenantModalDialogVisible = false
+      this.editUserModalDialogVisible = false
     },
-    editTenant () {
-      this.editTenantModalDialogData.Description = this.userData.Description
-      this.editTenantModalDialogData.AllowUserCreation = this.userData.AllowUserCreation
+    editUser () {
+      this.editUserModalDialogData.known_as = JSON.parse(JSON.stringify(this.userData.known_as))
+      this.editUserModalDialogData.other_data = JSON.parse(JSON.stringify(this.userData.other_data))
+      this.editUserModalDialogData.TenantRoles = JSON.parse(JSON.stringify(this.userData.TenantRoles))
 
-      this.editTenantModalDialogVisible = true
+      this.editUserModalDialogVisible = true
 
-      this.$refs.descriptionInput.focus()
+      this.$refs.knownAsInput.focus()
     },
     refreshTenantData () {
       var userIDToLoad = this.$route.params.selUserID
