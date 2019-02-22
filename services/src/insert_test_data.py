@@ -109,6 +109,7 @@ registeruserDICT = {
 
 print("Creating allowUserCreation tenants with users created with register method")
 for cur in range(4):
+  print("Allow User Tenant ", cur)
   creationDICT = copy.deepcopy(tenantCreationDICT)
   creationDICT['Name'] = creationDICT['Name'] + str(cur)
   resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
@@ -125,6 +126,7 @@ for cur in range(4):
     tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], addAuthProvDICT, [200])
     
   for curUser in range(10):
+    print(" - user ", curUser)
     creationDICT = copy.deepcopy(registeruserDICT)
     creationDICT['authProviderGUID'] = tenantDICT["AuthProviders"][0]['guid']
     creationDICT['credentialJSON']['username'] = creationDICT['credentialJSON']['username'] + "T" + str(cur) + "_" + str(curUser)

@@ -1,3 +1,10 @@
+#!/bin/bash
+
+echo "Insert Test Data"
+if [[ $# -eq 1 ]]; then
+  echo "Sleeping for ${1} seconds to allow services to start"
+  sleep ${1}
+fi
 
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
@@ -12,3 +19,4 @@ export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 
 python3 ./src/insert_test_data.py
 
+exit 0
