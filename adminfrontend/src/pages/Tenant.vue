@@ -115,7 +115,7 @@
           <q-field helper="Link to icon to be used in select auth dialog" label="Icon Link" :label-width="3">
             <q-input v-model="editAuthProvModalDialogData.IconLink" />
           </q-field>
-          <q-field helper="Auth Prov Spercific Config" label="ConfigJSON" :label-width="3">
+          <q-field helper="Auth Prov Spercific Config" label="ConfigJSON" :label-width="3"  :error="isConfigJSONInvalid">
             <q-input v-model="editAuthProvModalDialogData.ConfigJSON" type="textarea" />
           </q-field>
           <div>&nbsp;</div>
@@ -190,6 +190,16 @@ export default {
       editAuthProvModalDialogVisible: false
     }
   },
+  computed: {
+    isConfigJSONInvalid () {
+      try {
+        JSON.parse(this.editAuthProvModalDialogData.ConfigJSON)
+      } catch (e) {
+        return true
+      }
+      return false
+    }
+  },
   methods: {
     addAuthProv () {
       this.editAuthProvModalDialogData.AddMode = true
@@ -251,10 +261,8 @@ export default {
         return
       }
       // Check configJSON string is valid JSON
-      try {
-        JSON.parse(TTT.editAuthProvModalDialogData.ConfigJSON)
-      } catch (e) {
-        Notify.create({color: 'negative', detail: 'ConfigJSON is not valid JSON - ' + e.message})
+      if (this.isConfigJSONInvalid) {
+        Notify.create({color: 'negative', detail: 'ConfigJSON is not valid JSON'})
         return
       }
       var newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
@@ -280,7 +288,6 @@ export default {
           }
         }
       }
-      console.log('newTenantJSON:', newTenantJSON)
       var callback = {
         ok: function (response) {
           TTT.editAuthProvModalDialogVisible = false

@@ -55,7 +55,6 @@
             <q-input v-model="editUserModalDialogData.known_as" @keyup.enter="okEditUserDialog" ref="knownAsInput"/>
           </q-field>
           <q-field helper="Other information about the user (JSON)" label="Other Data" :label-width="3">
-            {{ editUserModalDialogData.other_data }}
             <q-input v-model="editUserModalDialogData.other_data" type="textarea" />
           </q-field>
           <q-field :helper="'Roles for ' + curRole.TenantName" :label="curRole.TenantName + ' Roles'" :label-width="3" v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole>
