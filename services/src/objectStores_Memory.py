@@ -5,6 +5,7 @@ class ObjectStore_Memory(ObjectStore):
   objectData = None
   def __init__(self):
     self.objectData = dict()
+    #Dict = (objDICT, objectVersion, creationDate, lastUpdateDate)
 
   def __getDictForObjectType(self, objectType):
     if objectType not in self.objectData:
@@ -12,28 +13,19 @@ class ObjectStore_Memory(ObjectStore):
       self.objectData[objectType] = dict()
     return self.objectData[objectType]
 
-#  #Check if the object version supplied is the currently stored object
-#  def _checkObjectVersion(self, appObj, objectType, objectKey, curVersion):
-#    if curVersion is None:
-#      return
-#    objectVersionDict = self.__getDictForObjectType(objectType)
-#    if objectKey not in objectVersionDict:
-#      raise WrongObjectVersionException
-#    if objectVersionDict[objectKey][1] != curVersion:
-#      raise WrongObjectVersionException
-
   def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion):
     dictForObjectType = self.__getDictForObjectType(objectType)
+    curTimeValue = appObj.getCurDateTime()
     newObjectVersion = None
     if objectKey not in dictForObjectType:
       newObjectVersion = 1
-      dictForObjectType[objectKey] = (JSONString, newObjectVersion)
+      dictForObjectType[objectKey] = (JSONString, newObjectVersion, curTimeValue, curTimeValue)
     else:
       if objectVersion is not None:
         if str(objectVersion) != str(dictForObjectType[objectKey][1]):
           raise WrongObjectVersionException
       newObjectVersion = int(objectVersion) + 1
-    dictForObjectType[objectKey] = (JSONString, newObjectVersion)
+    dictForObjectType[objectKey] = (JSONString, newObjectVersion, dictForObjectType[objectKey][2], curTimeValue)
     return newObjectVersion
 
   def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion):
@@ -48,7 +40,7 @@ class ObjectStore_Memory(ObjectStore):
 
   # Update the object in single operation. make transaction safe??
   def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion):
-    obj, ver = self.getObjectJSON(appObj, objectType, objectKey)
+    obj, ver, creationDateTime, lastUpdateDateTime = self.getObjectJSON(appObj, objectType, objectKey)
     if objectVersion is None:
       #If object version is not supplied then assume update will not cause an error
       objectVersion = ver 
@@ -63,7 +55,7 @@ class ObjectStore_Memory(ObjectStore):
     objectTypeDict = self.__getDictForObjectType(objectType)
     if objectKey in objectTypeDict:
       return objectTypeDict[objectKey]
-    return None, None
+    return None, None, None, None
 
   def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN, filterFN):
     return appObj.getPaginatedResult(

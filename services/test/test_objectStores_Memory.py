@@ -39,3 +39,8 @@ class test_objectStoresMemory(unittest.TestCase):
       
       self.assertEqual(savedVer, x)
       lastSavedVer = savedVer
+
+
+#TODO Test creation date is set correctly
+
+#TODO Test creation date is not updated when last update is

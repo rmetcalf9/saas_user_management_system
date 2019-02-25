@@ -76,7 +76,7 @@ def _removeUserAssociation(appObj, userID, personGUID):
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
   
-  userListForThisPerson, objectVersion = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson",personGUID)
+  userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson",personGUID)
   if userListForThisPerson is None:
     return
   if len(userListForThisPerson)==0:
@@ -87,7 +87,7 @@ def DeleteUser(appObj, UserID, objectVersion):
   userObj = GetUser(appObj, UserID)
   if userObj is None:
     raise userDosentExistException
-  associatedPersonList, objVersion = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserID)
+  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserID)
     
   for personGUID in associatedPersonList:
     _removeUserAssociation(appObj, UserID, personGUID)
@@ -98,7 +98,7 @@ def DeleteUser(appObj, UserID, objectVersion):
   return userObj
   
 def GetUser(appObj, UserID):
-  jsonData, objVersion = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
+  jsonData, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
   if jsonData is None:
     return None
   return userClass(jsonData, objVersion)
@@ -142,7 +142,7 @@ def getIdentityDict(appObj, personGUID):
 
 def getListOfUserIDsForPerson(appObj, personGUID):
   res = []
-  userIDsThisPerson, ver = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson", personGUID)
+  userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson", personGUID)
   if userIDsThisPerson is None:
     return []
   return userIDsThisPerson

@@ -15,19 +15,23 @@ class ObjectStore():
   # object version may be a number or a guid depending on store technology
   
 
+  #Return value is objectVersion of object saved
   def saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion = None):
     if 'ObjectVersion' in JSONString:
       raise SavedObjectShouldNotContainObjectVersionException
     return self._saveJSONObject(appObj, objectType, objectKey, JSONString, objectVersion)
 
+  #Return value is None
   def removeJSONObject(self, appObj, objectType, objectKey, objectVersion = None):
     return self._removeJSONObject(appObj, objectType, objectKey, objectVersion)
 
   # Update the object in single operation. make transaction safe??
+  # Return value is same as saveJSONobject
   def updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion = None):
     return self._updateJSONObject(appObj, objectType, objectKey, updateFn, objectVersion)
   
-  #Return None if object isn't in store
+  #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
+  #Return None, None, None, None if object isn't in store
   def getObjectJSON(self, appObj, objectType, objectKey):
     return self._getObjectJSON(appObj, objectType, objectKey)
   

@@ -36,7 +36,7 @@ def deletePerson(appObj, personGUID):
   #no object version check
   appObj.objectStore.removeJSONObject(appObj, "Persons", personGUID)
   
-  authsForThisGUID, objVer = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", personGUID)
+  authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", personGUID)
 
   appObj.objectStore.removeJSONObject(appObj, "AuthsForEachPerson", personGUID)
   

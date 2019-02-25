@@ -9,7 +9,7 @@ InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','Invalid
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
 
 def getAuthRecord(appObj, key):
-  authRecord, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+  authRecord, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
   return authRecord
 
 #person.py also uses userAuths
@@ -50,7 +50,7 @@ class authProvider():
 
   def AddAuth(self, appObj, credentialDICT, personGUID):
     key = self._makeKey(credentialDICT)
-    obj, objVer = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+    obj, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
     if obj is not None:
       #print('key:', key)
       raise tryingToCreateDuplicateAuthException
