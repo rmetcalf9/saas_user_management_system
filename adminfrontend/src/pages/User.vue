@@ -149,27 +149,39 @@ export default {
     },
     okEditUserDialog () {
       var TTT = this
+      if (this.isOtherDataInvalid) {
+        Notify.create({color: 'negative', detail: 'Other JSON must be valid JSON'})
+        return
+      }
       this.editUserModalDialogVisible = false
-      if (this.editUserModalDialogData.Description === this.userData.Description) {
-        if (this.editUserModalDialogData.AllowUserCreation === this.userData.AllowUserCreation) {
-          return // no change so do nothing
+      if (this.editUserModalDialogData.known_as === this.userData.known_as) {
+        if (JSON.stringify(JSON.parse(this.editUserModalDialogData.other_data)) === JSON.stringify(this.userData.other_data)) {
+          if (JSON.stringify(this.editUserModalDialogData.TenantRoles) === JSON.stringify(this.userData.TenantRoles)) {
+            return // no change so do nothing
+          }
         }
       }
       var newUserJSON = JSON.parse(JSON.stringify(this.userData))
-      newUserJSON.Description = this.editUserModalDialogData.Description
-      newUserJSON.AllowUserCreation = this.editUserModalDialogData.AllowUserCreation
+      newUserJSON.known_as = this.editUserModalDialogData.known_as
+      newUserJSON.other_data = JSON.parse(this.editUserModalDialogData.other_data)
+      newUserJSON.TenantRoles = []
+      for (var curRole in this.editUserModalDialogData.TenantRoles) {
+        if (this.editUserModalDialogData.TenantRoles[curRole].ThisTenantRoles.length !== 0) {
+          newUserJSON.TenantRoles.push(this.editUserModalDialogData.TenantRoles[curRole])
+        }
+      }
 
       var callback = {
         ok: function (response) {
           Notify.create({color: 'positive', detail: 'User Updated'})
-          TTT.refreshTenantData()
+          TTT.refreshUserData()
         },
         error: function (error) {
           Notify.create('Update User failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/users/' + newUserJSON.Name,
+        path: '/users/' + newUserJSON.UserID,
         method: 'put',
         postdata: newUserJSON,
         callback: callback,
@@ -189,7 +201,7 @@ export default {
 
       this.$refs.knownAsInput.focus()
     },
-    refreshTenantData () {
+    refreshUserData () {
       var userIDToLoad = this.$route.params.selUserID
       var TTT = this
       var callback = {
@@ -255,7 +267,7 @@ export default {
     }
   },
   mounted () {
-    this.refreshTenantData()
+    this.refreshUserData()
   }
 }
 </script>
