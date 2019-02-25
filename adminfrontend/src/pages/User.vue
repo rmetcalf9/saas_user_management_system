@@ -60,6 +60,14 @@
           <q-field :helper="'Roles for ' + curRole.TenantName" :label="curRole.TenantName + ' Roles'" :label-width="3" v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole.TenantName>
              <q-chips-input v-model="curRole.ThisTenantRoles" />
           </q-field>
+          <q-field>
+            <q-btn
+              @click="addTenantToEditUserDialog"
+              color="positive"
+              icon="add_to_queue"
+              round
+              class = "q-ml-xs"
+            />          </q-field>
           <div>&nbsp;</div>
           <q-btn
             @click="okEditUserDialog"
@@ -115,6 +123,30 @@ export default {
     }
   },
   methods: {
+    addTenantToEditUserDialog () {
+      var TTT = this
+      this.$q.dialog({
+        title: 'Prompt',
+        message: 'Name of Tenant to Add',
+        prompt: {
+          model: '',
+          type: 'text' // optional
+        },
+        cancel: true,
+        color: 'secondary'
+      }).then(data => {
+        for (var curRole in TTT.editUserModalDialogData.TenantRoles) {
+          if (TTT.editUserModalDialogData.TenantRoles[curRole].TenantName === data) {
+            Notify.create({color: 'negative', detail: 'Already exists'})
+            return
+          }
+        }
+        TTT.editUserModalDialogData.TenantRoles.push({TenantName: data, ThisTenantRoles: ['hasaccount']})
+        TTT.editUserModalDialogData.TenantRoles.sort()
+      }).catch(() => {
+        // Do nothing
+      })
+    },
     okEditUserDialog () {
       var TTT = this
       this.editUserModalDialogVisible = false
