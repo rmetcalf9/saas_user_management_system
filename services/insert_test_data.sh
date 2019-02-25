@@ -1,5 +1,11 @@
 #!/bin/bash
 
+PYTHON_CMD=python3
+if [ E${EXTPYTHONCMD} != "E" ]; then
+  PYTHON_CMD=${EXTPYTHONCMD}
+fi
+
+
 echo "Insert Test Data"
 if [[ $# -eq 1 ]]; then
   echo "Sleeping for ${1} seconds to allow services to start"
@@ -17,6 +23,6 @@ export APIAPP_MASTERPASSWORDFORPASSHASH=ABC
 export APIAPP_DEFAULTHOMEADMINUSERNAME=admin
 export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 
-python3 ./src/insert_test_data.py
+${PYTHON_CMD} ./src/insert_test_data.py
 
 exit 0

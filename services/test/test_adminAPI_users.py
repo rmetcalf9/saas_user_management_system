@@ -207,3 +207,100 @@ class test_adminAPIUsers(parent_test_api):
       headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: "1"}
     )
     self.assertEqual(result.status_code, 400, msg="non existant user deletion did not fail") 
+
+
+  def test_createNewUserUsingAdminAPI(self):
+    newUserDICT = {
+      "UserID": "testUserID@TestUser",
+      "known_as": "testUserID",
+      "mainTenant": masterTenantName
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201, msg="Create user failed - " + result.get_data(as_text=True))
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    expectedResult = copy.deepcopy(newUserDICT)
+    del expectedResult["mainTenant"]
+    expectedResult["TenantRoles"] = [{"TenantName": masterTenantName, "ThisTenantRoles": ["hasaccount"]}]
+    expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion"], msg='JSON of created User is not the same')
+    self.assertEqual(resultJSON["ObjectVersion"],"2")
+
+  def test_createNewUserWithNoRolesUsingAdminAPI(self):
+    newUserDICT = {
+      "UserID": "testUserID@TestUser",
+      "known_as": "testUserID"
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201, msg="Create user failed - " + result.get_data(as_text=True))
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    expectedResult = copy.deepcopy(newUserDICT)
+    expectedResult["TenantRoles"] = []
+    expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion"], msg='JSON of created User is not the same')
+    self.assertEqual(resultJSON["ObjectVersion"],"1")
+
+  def test_createNewUserInvalidTenantUsingAdminAPI(self):
+    newUserDICT = {
+      "UserID": "testUserID@TestUser",
+      "known_as": "testUserID",
+      "mainTenant": "someinvalidtenantname"
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create user should have failed - " + result.get_data(as_text=True))
+
+  def test_createNewUserInvalidemptyDict(self):
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps({}), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create user should have failed - " + result.get_data(as_text=True))
+
+  #create user with no userID
+  def test_createNewUserInvalidTenantUsingAdminAPI(self):
+    newUserDICT = {
+      "known_as": "testUserID",
+      "mainTenant": "someinvalidtenantname"
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create user should have failed - " + result.get_data(as_text=True))
+  
+  #create user with duplicate userID as existing fails
+  def test_createNewUserWithDuplicateIDFails(self):
+    newUserDICT = {
+      "UserID": appObj.defaultUserGUID,
+      "known_as": "admin"
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create user did not fail - " + result.get_data(as_text=True))
+

@@ -14,7 +14,7 @@ UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Alread
 ## All the functions that sets up the user, roles and asociates the user with a person
 
 def CreateUser(appObj, userData, mainTenant, createdBy):
-  print("UpdateUser createdBy:", createdBy)
+  #print("UpdateUser createdBy:", createdBy)
   UserID = userData['user_unique_identifier']
   KnownAs = userData['known_as']
   OtherData = {}
@@ -32,7 +32,8 @@ def CreateUser(appObj, userData, mainTenant, createdBy):
     "other_data": OtherData
   })
   appObj.objectStore.saveJSONObject(appObj,"users_associatedPersons", UserID, [])
-  AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
+  if mainTenant is not None:
+    AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
 
 def associateUserWithPerson(appObj, UserID, personGUID):
   #Add reference from User to person

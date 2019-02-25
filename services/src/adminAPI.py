@@ -9,7 +9,7 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser
+from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser, CreateUser
 from tenantObj import tenantClass
 from userObj import userClass
 from objectStores_base import WrongObjectVersionExceptionClass
@@ -29,6 +29,13 @@ def getCreateTenantModel(appObj):
     'Name': fields.String(default='DEFAULT', description='Name and unique identifier of tenant'),
     'Description': fields.String(default='DEFAULT', description='Description of tenant'),
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)')
+  })
+  
+def getCreateUserModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('CreateUserInfo', {
+    'UserID': fields.String(default='DEFAULT', description='Unique identifier of User'),
+    'known_as': fields.String(description='User friendly identifier for username'),
+    'mainTenant': fields.String(description='If set then a hasaccount role is setup for this tenant'),
   })
 
 def requiredInPayload(content, fieldList):
@@ -253,6 +260,41 @@ def registerAPI(appObj):
         print(str(e.args))
         print(e.args)
         raise InternalServerError   
+
+    @nsAdmin.doc('post User')
+    @nsAdmin.expect(getCreateUserModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(201, 'Created')
+    @appObj.flastRestPlusAPIObject.marshal_with(getUserModel(appObj), code=200, description='User created', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant):
+      '''Create User'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ['UserID','known_as'])
+      userData = {
+        "user_unique_identifier": content["UserID"],
+        "known_as": content["known_as"]
+      }
+      tenant = None
+      if "mainTenant" in content:
+        tenant = content["mainTenant"]
+        tenantObj = GetTenant(appObj, tenant)
+        if tenantObj is None:
+          raise BadRequest("Invalid tenant name")
+      try:
+          
+        CreateUser(appObj, userData, tenant, "adminapi/users/post")
+        userObj = GetUser(appObj, content["UserID"])
+      except customExceptionClass as err:
+        if (err.id=='TryingToCreateDuplicateUserException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+      
+      return userObj.getJSONRepresenation(), 201
+
 
   @nsAdmin.route('/<string:tenant>/users/<string:userID>')
   class userInfo(Resource):
