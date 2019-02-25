@@ -9,10 +9,18 @@ class userClass():
   _jsonRepersentation = None
   _jsonRepersentationTenantCache = None
   _objectVersion = None
-  def __init__(self, JSONRetrievedFromStore, objectVersion):
+  _creationDateTime = None
+  _lastUpdateDateTime = None
+  def __init__(self, JSONRetrievedFromStore, objectVersion, creationDateTime, lastUpdateDateTime):
+    #if creationDateTime is None:
+    #  raise Exception("Tring to create an invalid userobject")
+    #if lastUpdateDateTime is None:
+    #  raise Exception("Tring to create an invalid userobject22")
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
     self._objectVersion = objectVersion
     self._jsonRepersentationTenantCache = {}
+    self._creationDateTime = creationDateTime
+    self._lastUpdateDateTime = lastUpdateDateTime
   
   def _generateJSONRepresenationAndStoreItInCache(self, tenant):
     aa = self._mainDict.copy()
@@ -25,6 +33,8 @@ class userClass():
         })
     aa["TenantRoles"] = tenantRolesObj
     aa['ObjectVersion'] = self._objectVersion
+    aa['creationDateTime'] = self._creationDateTime
+    aa['lastUpdateDateTime'] = self._lastUpdateDateTime
     
     if tenant is None:
       self._jsonRepersentation = aa

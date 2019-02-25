@@ -125,6 +125,8 @@ class test_loginapi_norm(test_api):
     #self.assertTrue(False)
     
   def test_getMutipleIdentityResponseDefaultUser(self):
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     InternalAuthUsername = 'ABC'
@@ -156,7 +158,9 @@ class test_loginapi_norm(test_api):
       "known_as": userID1,
       "other_data": {
         "createdBy": "test/createTwoUsersForOnePerson"
-      }
+      },
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
     }
     user2ExcpectedResult = {
       "UserID": userID2,
@@ -167,7 +171,9 @@ class test_loginapi_norm(test_api):
       "known_as": userID2,
       "other_data": {
         "createdBy": "test/createTwoUsersForOnePerson"
-      }
+      },
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
     }
     id1Found = False
     id2Found = False

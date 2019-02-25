@@ -30,7 +30,7 @@ class test_adminAPIUsers(parent_test_api):
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultJSON['pagination']['total'],1)
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles"], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
     
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
 
@@ -42,6 +42,8 @@ class test_adminAPIUsers(parent_test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
     
   def test_getUserListThreeTenantsAndMutipleUsers(self):
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
     tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
 
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
@@ -70,7 +72,7 @@ class test_adminAPIUsers(parent_test_api):
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultJSON['pagination']['total'], 2, msg="Wrong number of users returned")
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles"], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": masterTenantName,
@@ -86,7 +88,7 @@ class test_adminAPIUsers(parent_test_api):
       },
       'ObjectVersion': "2"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles"], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
     self.assertEqual(len(resultJSON['result'][1]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": tenantDict["Name"],
@@ -100,10 +102,12 @@ class test_adminAPIUsers(parent_test_api):
 
     resultJSON = json.loads(result.get_data(as_text=True))
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,defaultUserData, ["TenantRoles"], msg="Returned user data")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="Returned user data")
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["TenantRoles"],defaultUserData["TenantRoles"], [], msg="Returned user data")
     
   def test_updateUserData(self):
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     origUserDICT = json.loads(result.get_data(as_text=True))
@@ -115,6 +119,11 @@ class test_adminAPIUsers(parent_test_api):
       'a': "A",
       'b': "B"
     }
+    newUserDICT["creationDateTime"] = testDateTime.isoformat() #Main user is created before the testing date is set
+    newUserDICT["lastUpdateDateTime"] = testDateTime.isoformat()
+    
+    print(testDateTime.isoformat())
+
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, 
       data=json.dumps(newUserDICT), 
@@ -125,14 +134,14 @@ class test_adminAPIUsers(parent_test_api):
     newUserDICT['ObjectVersion'] = str(int(newUserDICT['ObjectVersion']) + 1)
     
     resultJSON = json.loads(result.get_data(as_text=True))
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,newUserDICT, ["TenantRoles"], msg="Returned user data")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,newUserDICT, ["TenantRoles", "creationDateTime"], msg="Returned user data")
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["TenantRoles"],newUserDICT["TenantRoles"], [], msg="Returned user data")
 
 
     result2 = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result2.status_code, 200)
     result2JSON = json.loads(result2.get_data(as_text=True))
-    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON,newUserDICT, ["TenantRoles"], msg="Returned user data")
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON,newUserDICT, ["TenantRoles", "creationDateTime"], msg="Returned user data")
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON["TenantRoles"],newUserDICT["TenantRoles"], [], msg="Returned user data")
 
     
@@ -229,7 +238,7 @@ class test_adminAPIUsers(parent_test_api):
     expectedResult["TenantRoles"] = [{"TenantName": masterTenantName, "ThisTenantRoles": ["hasaccount"]}]
     expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion"], msg='JSON of created User is not the same')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"2")
 
   def test_createNewUserWithNoRolesUsingAdminAPI(self):
@@ -250,7 +259,7 @@ class test_adminAPIUsers(parent_test_api):
     expectedResult["TenantRoles"] = []
     expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion"], msg='JSON of created User is not the same')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"1")
 
   def test_createNewUserInvalidTenantUsingAdminAPI(self):

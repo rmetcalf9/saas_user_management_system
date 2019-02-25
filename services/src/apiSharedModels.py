@@ -32,5 +32,7 @@ def getUserModel(appObj):
     'known_as': fields.String(description='User friendly identifier for username'),
     'TenantRoles': fields.List(fields.Nested(TenantRoleModel)),
     'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
-    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
+    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
+    'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
+    'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
   })

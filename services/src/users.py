@@ -101,7 +101,7 @@ def GetUser(appObj, UserID):
   jsonData, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
   if jsonData is None:
     return None
-  return userClass(jsonData, objVersion)
+  return userClass(jsonData, objVersion, creationDateTime, lastUpdateDateTime)
 
 def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
   userObj = GetUser(appObj, UserID)

@@ -249,7 +249,7 @@ def registerAPI(appObj):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return userClass(item[0],item[1]).getJSONRepresenation()
+        return userClass(item[0],item[1],item[2],item[3]).getJSONRepresenation()
 
       try:
         outputFN = defOutput

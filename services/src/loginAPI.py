@@ -102,6 +102,7 @@ def registerAPI(appObj):
         raise 
 
       returnDict = userObj.getJSONRepresenation(tenant)
+      #print("loginAPI returnDict:", returnDict)
       del returnDict["other_data"]
       return returnDict, 201
       

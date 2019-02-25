@@ -2,8 +2,9 @@ from test_loginAPI import test_api as parent_test_api
 #from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
 from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env, internalUSerSufix
 import json
-#from appObj import appObj
-#import pytz
+from appObj import appObj
+import datetime
+import pytz
 #from datetime import timedelta, datetime
 #from dateutil.parser import parse
 import copy
@@ -13,6 +14,8 @@ from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName
 
 class test_loginapi_register(parent_test_api):  
   def test_registerNewUser(self):
+    testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
     tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
   
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
@@ -43,7 +46,9 @@ class test_loginapi_register(parent_test_api):
       "TenantRoles": [{
         "TenantName": tenantWithNoAuthProviders['Name'],
         "ThisTenantRoles": ["hasaccount"]
-      }]
+      }],
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
     }
     
     self.assertFalse('other_data' in registerResultJSON, msg="Found other_data in user registerResultJSON")
@@ -83,7 +88,9 @@ class test_loginapi_register(parent_test_api):
       'other_data': {
         "createdBy": "loginapi/register"
       }, 
-      'ObjectVersion': '2'
+      'ObjectVersion': '2',
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
     }
     self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, [], msg='Admin API User data wrong')
 
