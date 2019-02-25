@@ -83,10 +83,7 @@ class test_loginapi_norm(test_api):
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore",
       "ThisTenantRoles": ['systemadmin', 'hasaccount'],
-      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-      "other_data": {
-        "createdBy": "init/CreateMasterTenant"
-      }
+      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
 

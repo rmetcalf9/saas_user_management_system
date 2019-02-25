@@ -14,14 +14,14 @@ UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Alread
 ## All the functions that sets up the user, roles and asociates the user with a person
 
 def CreateUser(appObj, userData, mainTenant, createdBy):
+  print("UpdateUser createdBy:", createdBy)
   UserID = userData['user_unique_identifier']
   KnownAs = userData['known_as']
-  OtherData = {
-    "createdBy": createdBy
-  }
+  OtherData = {}
   if "other_data" in userData:
     OtherData = userData['other_data']
-    
+  OtherData["createdBy"] = createdBy
+  
   userObj = GetUser(appObj, UserID)
   if userObj is not None:
     raise TryingToCreateDuplicateUserException

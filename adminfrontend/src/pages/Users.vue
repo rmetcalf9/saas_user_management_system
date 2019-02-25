@@ -30,6 +30,10 @@
         {{ props.row.TenantRoles }}
       </q-td>
 
+      <q-td  slot="body-cell-other_data" slot-scope="props" :props="props">
+        {{ props.row.other_data }}
+      </q-td>
+
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
         <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.UserID)" />
       </q-td>
@@ -130,6 +134,7 @@ export default {
           // TODO ??? change when we have a store dataTableSettings.commit('JOBS', TTT.tablePersistSettings)
           // then we update the rows with the fetched ones
           TTT.tableData = response.data.result
+          // console.log('response.data.result:', response.data.result)
         },
         error: function (error) {
           TTT.tableLoading = false

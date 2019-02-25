@@ -101,7 +101,9 @@ def registerAPI(appObj):
       except:
         raise 
 
-      return userObj.getJSONRepresenation(tenant), 201
+      returnDict = userObj.getJSONRepresenation(tenant)
+      del returnDict["other_data"]
+      return returnDict, 201
       
   @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):
@@ -157,6 +159,7 @@ def registerAPI(appObj):
           possibleUsers.append(GetUser(appObj,userID).getJSONRepresenation(tenant)) #limit roles to only current tenant
         returnDict['possibleUsers'] = possibleUsers
 
+      del returnDict["other_data"]
       return returnDict
 
   @nsLogin.route('/<string:tenant>/refresh')
@@ -175,4 +178,5 @@ def registerAPI(appObj):
         raise Unauthorized('Refresh token not found, token or session may have timedout')
 
       #possibleUserIDs will always be none
+      del refreshedAuthDetails['other_data']
       return refreshedAuthDetails

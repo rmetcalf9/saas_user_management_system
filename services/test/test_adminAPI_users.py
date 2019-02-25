@@ -81,7 +81,9 @@ class test_adminAPIUsers(parent_test_api):
     expectedResult = {
       'UserID': userName + internalUSerSufix,
       'known_as': userName,
-      'other_data': {},
+      'other_data': {
+        "createdBy": "loginapi/register"
+      },
       'ObjectVersion': "2"
     }
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles"], msg="User data mismatch")

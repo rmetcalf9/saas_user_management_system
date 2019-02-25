@@ -46,6 +46,8 @@ class test_loginapi_register(parent_test_api):
       }]
     }
     
+    self.assertFalse('other_data' in registerResultJSON, msg="Found other_data in user registerResultJSON")
+    
     self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersons'], msg='Incorrect response from registration')
 
     loginJSON = {
@@ -61,6 +63,30 @@ class test_loginapi_register(parent_test_api):
       content_type='application/json'
     )
     self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user - " + loginResult.get_data(as_text=True))
+    loginResultJSON = json.loads(loginResult.get_data(as_text=True))
+    self.assertFalse('other_data' in loginResultJSON)
+    
+    #Test other_data is filled in. This is only returned in the admin API get function so can't use login api to view
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + userName + internalUSerSufix, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+
+    userGetResultDICT = json.loads(result.get_data(as_text=True))
+    expectedResult = {
+      'UserID': userName + internalUSerSufix, 
+      'known_as': userName, 
+      'TenantRoles': [
+        {
+          'TenantName': tenantWithNoAuthProviders['Name'], 
+          'ThisTenantRoles': ['hasaccount']
+        }
+      ], 
+      'other_data': {
+        "createdBy": "loginapi/register"
+      }, 
+      'ObjectVersion': '2'
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, [], msg='Admin API User data wrong')
+
 
   def test_registerNewUserTenantFail(self):
     tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, False, True)

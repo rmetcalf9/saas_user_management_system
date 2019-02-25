@@ -33,6 +33,8 @@ class test_api(parent_test_api):
     self.assertEqual(RefreshedLogin.status_code, 200)
     refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
     
+    self.assertFalse('other_date' in refreshedLoginInfo)
+    
     self.assertJSONStringsEqualWithIgnoredKeys(OrigLoginResult, refreshedLoginInfo, [ 'jwtData', 'refresh' ], msg='Data in origional auth details dosen\'t match new')
     
     # Check jwtData is as expected
