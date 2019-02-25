@@ -16,7 +16,9 @@ defaultUserData = {
     'TenantName': masterTenantName,
     'ThisTenantRoles': ['systemadmin', 'hasaccount']
   }],
-  'other_data': {},
+  'other_data': {
+    "createdBy": "init/CreateMasterTenant"
+  },
   'ObjectVersion': "3"
 }
 

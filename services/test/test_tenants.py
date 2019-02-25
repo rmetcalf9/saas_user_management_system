@@ -60,7 +60,9 @@ class test_tenants(testHelperAPIClient):
        },
        "authedPersonGuid": "Ignore",
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-      "other_data": {}
+      "other_data": {
+        "createdBy": "init/CreateMasterTenant"
+      }
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss', 'authedPersonGuid','associatedPersons'], msg="Returned roles incorrect")
     
@@ -120,7 +122,6 @@ class test_tenants(testHelperAPIClient):
     })
     foundIdentity1 = False
     foundIdentity2 = False
-    print("test_oneAuthCanAccessTwoIdentities UserIDandRoles:",UserIDandRoles)
     for curUserID in UserIDandRoles['possibleUserIDs']:
       if userID1 == curUserID:
         foundIdentity1 = True
@@ -141,7 +142,9 @@ class test_tenants(testHelperAPIClient):
       "iss": userID1,
       "authedPersonGuid": res['person']['guid'],
       "known_as": userID1,
-      "other_data": {}
+      "other_data": {
+        "createdBy": "test/createTwoUsersForOnePerson"
+      }
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 1")
     
@@ -156,7 +159,9 @@ class test_tenants(testHelperAPIClient):
       "iss": userID2,
       "authedPersonGuid": res['person']['guid'],
       "known_as": userID2,
-      "other_data": {}
+      "other_data": {
+        "createdBy": "test/createTwoUsersForOnePerson"
+      }
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
 
@@ -165,7 +170,7 @@ class test_tenants(testHelperAPIClient):
   def test_oneUserCanBeAccessedByTwoAuths(self):
     masterTenant = GetTenant(appObj,masterTenantName)
     userID = 'TestUser'
-    CreateUser(appObj, {"user_unique_identifier": userID, "known_as": userID}, masterTenantName)
+    CreateUser(appObj, {"user_unique_identifier": userID, "known_as": userID}, masterTenantName, 'test/CreateMasterTenant')
 
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
     person1 = CreatePerson(appObj)
@@ -197,7 +202,9 @@ class test_tenants(testHelperAPIClient):
       "iss": userID,
       "authedPersonGuid": person1['guid'],
       "known_as": userID,
-      "other_data": {}
+      "other_data": {
+        "createdBy": "test/CreateMasterTenant"
+      }
     }
     self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp', 'associatedPersons'], msg="Failed to login to identity 1")
     

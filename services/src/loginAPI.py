@@ -85,7 +85,7 @@ def registerAPI(appObj):
       try:
         #print("credentialJSON:",credentialJSON)
         #print("loginAPI.py regis - authProviderGUID:",authProviderGUID)
-        userObj = RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON)
+        userObj = RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register")
         
       except customExceptionClass as err:
         if (err.id=='userCreationNotAllowedException'):

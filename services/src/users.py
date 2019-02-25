@@ -13,10 +13,12 @@ UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Alread
 ##Creation functions
 ## All the functions that sets up the user, roles and asociates the user with a person
 
-def CreateUser(appObj, userData, mainTenant):
+def CreateUser(appObj, userData, mainTenant, createdBy):
   UserID = userData['user_unique_identifier']
   KnownAs = userData['known_as']
-  OtherData = {}
+  OtherData = {
+    "createdBy": createdBy
+  }
   if "other_data" in userData:
     OtherData = userData['other_data']
     

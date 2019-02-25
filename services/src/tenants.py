@@ -35,7 +35,7 @@ def CreateMasterTenant(appObj):
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
   
   #User spercific creation
-  CreateUser(appObj, {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, masterTenantName)
+  CreateUser(appObj, {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, masterTenantName, 'init/CreateMasterTenant')
   AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
   
   person = CreatePerson(appObj)
@@ -123,7 +123,7 @@ def DeleteTenant(appObj, tenantName, objectVersion):
   appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
   return tenantObj
 
-def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
+def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy):
   if not tenantObj.getAllowUserCreation():
     raise userCreationNotAllowedException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID)
@@ -131,7 +131,7 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT):
     raise userCreationNotAllowedException
   
   userData = authProvObj.getTypicalAuthData(credentialDICT)
-  CreateUser(appObj, userData, tenantObj.getName())
+  CreateUser(appObj, userData, tenantObj.getName(), createdBy)
   person = CreatePerson(appObj)
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'])

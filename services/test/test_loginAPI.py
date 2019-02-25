@@ -83,7 +83,10 @@ class test_loginapi_norm(test_api):
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore",
       "ThisTenantRoles": ['systemadmin', 'hasaccount'],
-      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
+      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      "other_data": {
+        "createdBy": "init/CreateMasterTenant"
+      }
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
 
@@ -101,7 +104,9 @@ class test_loginapi_norm(test_api):
       'exp': 1547292391,
       'authedPersonGuid': 'Ignore',
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-      "other_data": {}
+      "other_data": {
+        "createdBy": "init/CreateMasterTenant"
+      }
     }
     self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp', 'authedPersonGuid', 'associatedPersons' ])
     
@@ -152,7 +157,9 @@ class test_loginapi_norm(test_api):
         "ThisTenantRoles": ["hasaccount"]
       }],
       "known_as": userID1,
-      "other_data": {}
+      "other_data": {
+        "createdBy": "test/createTwoUsersForOnePerson"
+      }
     }
     user2ExcpectedResult = {
       "UserID": userID2,
@@ -161,7 +168,9 @@ class test_loginapi_norm(test_api):
         "ThisTenantRoles": ["hasaccount"]
       }],
       "known_as": userID2,
-      "other_data": {}
+      "other_data": {
+        "createdBy": "test/createTwoUsersForOnePerson"
+      }
     }
     id1Found = False
     id2Found = False

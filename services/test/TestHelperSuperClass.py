@@ -191,8 +191,8 @@ class testHelperAPIClient(testHelperSuperClass):
 
   def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername):
     masterTenant = GetTenant(appObj,masterTenantName)
-    CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName)
-    CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName)
+    CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName, "test/createTwoUsersForOnePerson")
+    CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName, "test/createTwoUsersForOnePerson")
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
     person = CreatePerson(appObj)
     authData = AddAuth(appObj, masterTenantName, authProvGUID, {
