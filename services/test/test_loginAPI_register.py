@@ -51,7 +51,8 @@ class test_loginapi_register(parent_test_api):
     
     self.assertFalse('other_data' in registerResultJSON, msg="Found other_data in user registerResultJSON")
     
-    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersons'], msg='Incorrect response from registration')
+    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersonGUIDs'], msg='Incorrect response from registration')
+    self.assertEqual(len(registerResultJSON['associatedPersonGUIDs']),1)
 
     loginJSON = {
       "authProviderGUID": createdAuthProvGUID,
@@ -88,7 +89,8 @@ class test_loginapi_register(parent_test_api):
       }, 
       'ObjectVersion': '2',
       "creationDateTime": testDateTime.isoformat(),
-      "lastUpdateDateTime": testDateTime.isoformat()
+      "lastUpdateDateTime": testDateTime.isoformat(),
+      "associatedPersonGUIDs": registerResultJSON['associatedPersonGUIDs']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, [], msg='Admin API User data wrong')
 

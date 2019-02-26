@@ -11,7 +11,8 @@ class userClass():
   _objectVersion = None
   _creationDateTime = None
   _lastUpdateDateTime = None
-  def __init__(self, JSONRetrievedFromStore, objectVersion, creationDateTime, lastUpdateDateTime):
+  _associatedPersonsList = None
+  def __init__(self, JSONRetrievedFromStore, objectVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList):
     #if creationDateTime is None:
     #  raise Exception("Tring to create an invalid userobject")
     #if lastUpdateDateTime is None:
@@ -21,6 +22,7 @@ class userClass():
     self._jsonRepersentationTenantCache = {}
     self._creationDateTime = creationDateTime
     self._lastUpdateDateTime = lastUpdateDateTime
+    self._associatedPersonsList = associatedPersonsList
   
   def _generateJSONRepresenationAndStoreItInCache(self, tenant):
     aa = self._mainDict.copy()
@@ -35,6 +37,7 @@ class userClass():
     aa['ObjectVersion'] = self._objectVersion
     aa['creationDateTime'] = self._creationDateTime
     aa['lastUpdateDateTime'] = self._lastUpdateDateTime
+    aa['associatedPersonGUIDs'] = self._associatedPersonsList
     
     if tenant is None:
       self._jsonRepersentation = aa

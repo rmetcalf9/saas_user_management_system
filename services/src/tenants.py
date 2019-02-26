@@ -8,7 +8,8 @@ import jwt
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
-from users import CreateUser, AddUserRole, GetUser, associateUserWithPerson, getListOfUserIDsForPerson
+from users import CreateUser, AddUserRole, GetUser, associateUserWithPerson
+from userPersonCommon import getListOfUserIDsForPerson
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -208,7 +209,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
     raise Exception
   
   #We have authed with a single authMethod, we need to get a list of identities for that provider
-  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName)
+  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser)
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
   if len(possibleUserIDs)==0:
     raise PersonHasNoAccessToAnyIdentitiesException

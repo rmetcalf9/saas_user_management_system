@@ -183,10 +183,10 @@ class test_loginapi_norm(test_api):
     for resultUser in result2JSON['possibleUsers']:
       if resultUser['UserID'] == userID1:
         id1Found = True
-        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user1ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 1 result mismatch")
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user1ExcpectedResult, [ 'guid', 'ObjectVersion', 'associatedPersonGUIDs' ], msg="Identity 1 result mismatch")
       if resultUser['UserID'] == userID2:
         id2Found = True
-        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 2 result mismatch")
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion', 'associatedPersonGUIDs' ], msg="Identity 2 result mismatch")
       
     self.assertTrue(id1Found, msg="Identity 1 not in response")
     self.assertTrue(id2Found, msg="Identity 2 not in response")
@@ -294,10 +294,10 @@ class test_loginapi_norm(test_api):
     for resultUser in result2JSON['possibleUsers']:
       if resultUser['UserID'] == userID1:
         id1Found = True
-        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user1ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 1 result mismatch")
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user1ExcpectedResult, [ 'guid', 'ObjectVersion', 'associatedPersonGUIDs' ], msg="Identity 1 result mismatch")
       if resultUser['UserID'] == userID2:
         id2Found = True
-        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 2 result mismatch")
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion', 'associatedPersonGUIDs' ], msg="Identity 2 result mismatch")
       
     self.assertTrue(id1Found, msg="Identity 1 not in response")
     self.assertTrue(id2Found, msg="Identity 2 not in response")

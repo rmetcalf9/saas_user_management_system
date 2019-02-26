@@ -30,7 +30,7 @@ class test_adminAPIUsers(parent_test_api):
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultJSON['pagination']['total'],1)
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["associatedPersonGUIDs", "TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
     
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
 
@@ -72,7 +72,7 @@ class test_adminAPIUsers(parent_test_api):
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultJSON['pagination']['total'], 2, msg="Wrong number of users returned")
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime", 'associatedPersonGUIDs'], msg="User data mismatch")
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": masterTenantName,
@@ -88,7 +88,7 @@ class test_adminAPIUsers(parent_test_api):
       },
       'ObjectVersion': "2"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles", "creationDateTime", "lastUpdateDateTime", 'associatedPersonGUIDs'], msg="User data mismatch")
     self.assertEqual(len(resultJSON['result'][1]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": tenantDict["Name"],
@@ -102,8 +102,9 @@ class test_adminAPIUsers(parent_test_api):
 
     resultJSON = json.loads(result.get_data(as_text=True))
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="Returned user data")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON,defaultUserData, ["TenantRoles", "creationDateTime", "lastUpdateDateTime", 'associatedPersonGUIDs'], msg="Returned user data")
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["TenantRoles"],defaultUserData["TenantRoles"], [], msg="Returned user data")
+    self.assertEqual(len(resultJSON["associatedPersonGUIDs"]),1)
     
   def test_updateUserData(self):
     testDateTime = datetime.now(pytz.timezone("UTC"))
@@ -238,7 +239,7 @@ class test_adminAPIUsers(parent_test_api):
     expectedResult["TenantRoles"] = [{"TenantName": masterTenantName, "ThisTenantRoles": [DefaultHasAccountRole]}]
     expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["associatedPersonGUIDs", "ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"2")
 
   def test_createNewUserWithNoRolesUsingAdminAPI(self):
@@ -259,7 +260,7 @@ class test_adminAPIUsers(parent_test_api):
     expectedResult["TenantRoles"] = []
     expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["associatedPersonGUIDs", "ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"1")
 
   def test_createNewUserInvalidTenantUsingAdminAPI(self):
@@ -313,3 +314,52 @@ class test_adminAPIUsers(parent_test_api):
     )
     self.assertEqual(result.status_code, 400, msg="Create user did not fail - " + result.get_data(as_text=True))
 
+  def test_deleteUserWithNoPersonRecords(self):
+    #Create a user with it's person
+    # delete the person record (deleting person records on their own won't result in user getting deleted)
+    # then delete the user record
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": "TTT", 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantDict['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed - " + registerResult.get_data(as_text=True))
+    resultJSON = json.loads(registerResult.get_data(as_text=True))
+    createdUserID = resultJSON["UserID"]
+    associatedPersonGUID = resultJSON["associatedPersonGUIDs"][0]
+    
+    #In order to delete the person we need it's objectversion
+    personGetResult = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + associatedPersonGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(personGetResult.status_code, 200)
+    personGetResultJSON = json.loads(personGetResult.get_data(as_text=True))
+    
+    print("About to delete the person")
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + associatedPersonGUID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: personGetResultJSON['ObjectVersion']}
+    )
+    self.assertEqual(result.status_code, 200, msg="Delete person failed - " + result.get_data(as_text=True)) 
+    print("Person deleted now deleting user")
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + createdUserID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: tenantDict['ObjectVersion']}
+    )
+    self.assertEqual(result.status_code, 200, msg="Delete user failed - " + result.get_data(as_text=True)) 
+
+    #Try and retrieve the deleted user
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + createdUserID, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    #print(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 404, msg="User still in system")    
+    
+    

@@ -5,6 +5,7 @@ import uuid
 from personObj import personClass
 from constants import customExceptionClass
 from objectStores_base import WrongObjectVersionExceptionClass
+from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck
 
 personDosentExistException = customExceptionClass('Person not found', 'personDosentExistException')
 
@@ -59,6 +60,10 @@ def UpdatePerson(appObj, personGUID, objectVersion):
 
   
 def DeletePerson(appObj, personGUID, objectVersion = None):
+  userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID)
+  for userID in userIDsThisPerson:
+    RemoveUserAssociation(appObj, userID, personGUID, None)
+  
   #may not have object version check (cascades don't)
   #not cascading delete down to users
   personObj = GetPerson(appObj, personGUID)
@@ -70,6 +75,9 @@ def DeletePerson(appObj, personGUID, objectVersion = None):
   authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", personGUID)
 
   appObj.objectStore.removeJSONObject(appObj, "AuthsForEachPerson", personGUID, ignoreMissingObject=True)
+  
+  appObj.objectStore.removeJSONObject(appObj, "UsersForEachPerson", personGUID, None, ignoreMissingObject=True)
+
   
   if authsForThisGUID is not None:
     for authKey in authsForThisGUID:

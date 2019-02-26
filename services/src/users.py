@@ -2,6 +2,7 @@ from constants import customExceptionClass, DefaultHasAccountRole
 
 from userObj import userClass
 from persons import GetPerson, DeletePerson
+from userPersonCommon import RemoveUserAssociation
 import copy
 
 #users_associatedPersons 1-1 with user object, seperated out to stop ObjectVersion getting out of sync when it dosen't need to
@@ -71,19 +72,6 @@ def AddUserRole(appObj, userID, tennantName, roleName):
   
 ##END OF CREATION FUNCTIONS
 
-def _removeUserAssociation(appObj, userID, personGUID):
-  def upd(idfea):
-    idfea.remove(userID)
-    return idfea
-  appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
-  
-  userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson",personGUID)
-  if userListForThisPerson is None:
-    return
-  if len(userListForThisPerson)==0:
-    appObj.objectStore.removeJSONObject(appObj, "UsersForEachPerson", personGUID, objectVersion)
-    DeletePerson(appObj, personGUID)
-  
 def DeleteUser(appObj, UserID, objectVersion):
   userObj = GetUser(appObj, UserID)
   if userObj is None:
@@ -91,18 +79,22 @@ def DeleteUser(appObj, UserID, objectVersion):
   associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserID)
     
   for personGUID in associatedPersonList:
-    _removeUserAssociation(appObj, UserID, personGUID)
+    RemoveUserAssociation(appObj, UserID, personGUID, DeletePerson)
     
   appObj.objectStore.removeJSONObject(appObj, "users", UserID, objectVersion)
-  appObj.objectStore.removeJSONObject(appObj, "users_associatedPersons", UserID, objectVersion)
+  appObj.objectStore.removeJSONObject(appObj, "users_associatedPersons", UserID)
   
   return userObj
-  
+
 def GetUser(appObj, UserID):
   jsonData, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
   if jsonData is None:
     return None
-  return userClass(jsonData, objVersion, creationDateTime, lastUpdateDateTime)
+  return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime)
+  
+def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime):
+  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2 = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserDict['UserID'])
+  return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
 
 def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
   userObj = GetUser(appObj, UserID)
@@ -141,17 +133,3 @@ def getIdentityDict(appObj, personGUID):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
   return identifyJSON
 
-def getListOfUserIDsForPerson(appObj, personGUID, tenantName):
-  #must only return a userID that has the hasaccount role for this tenant
-  res = []
-  userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson", personGUID)
-  if userIDsThisPerson is None:
-    return []
-  userIDsInThisTenant = []
-  for curUserID in userIDsThisPerson:
-    userObj = GetUser(appObj,curUserID)
-    if userObj is None:
-      raise Exception("Stored user ID missing")
-    if userObj.hasRole(tenantName, DefaultHasAccountRole):
-      userIDsInThisTenant.append(curUserID)
-  return userIDsInThisTenant

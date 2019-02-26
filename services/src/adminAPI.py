@@ -9,7 +9,7 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser, CreateUser
+from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser, CreateUser, CreateUserObjFromUserDict
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson
 from tenantObj import tenantClass
 from userObj import userClass
@@ -264,7 +264,7 @@ def registerAPI(appObj):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return userClass(item[0],item[1],item[2],item[3]).getJSONRepresenation()
+        return CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
 
       try:
         outputFN = defOutput
