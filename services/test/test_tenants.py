@@ -136,7 +136,7 @@ class test_tenants(testHelperAPIClient):
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     }, userID1)
     expectedJSONResponse = {
-      'TenantRoles': {"usersystem": ["hasaccount"]}, 
+      'TenantRoles': {"usersystem": [DefaultHasAccountRole]}, 
       'UserID': userID1, 
       "exp": "xx", 
       "iss": userID1,
@@ -153,7 +153,7 @@ class test_tenants(testHelperAPIClient):
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     }, userID2)
     expectedJSONResponse = {
-      'TenantRoles': {"usersystem": ["hasaccount"]}, 
+      'TenantRoles': {"usersystem": [DefaultHasAccountRole]}, 
       'UserID': userID2, 
       "exp": "xx", 
       "iss": userID2,
@@ -196,7 +196,7 @@ class test_tenants(testHelperAPIClient):
       'password': get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
     })
     expectedJSONResponse = {
-      'TenantRoles': {"usersystem": ["hasaccount"]}, 
+      'TenantRoles': {"usersystem": [DefaultHasAccountRole]}, 
       'UserID': userID, 
       "exp": "xx", 
       "iss": userID,

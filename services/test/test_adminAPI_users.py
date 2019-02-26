@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
 from appObj import appObj
-from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName
+from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from test_adminAPI import test_api as parent_test_api
 import json
 import copy
@@ -14,7 +14,7 @@ defaultUserData = {
   'known_as': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
   'TenantRoles': [{
     'TenantName': masterTenantName,
-    'ThisTenantRoles': ['systemadmin', 'hasaccount']
+    'ThisTenantRoles': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
   }],
   'other_data': {
     "createdBy": "init/CreateMasterTenant"
@@ -36,7 +36,7 @@ class test_adminAPIUsers(parent_test_api):
 
     expectedTenantRolesResult = [{
       "TenantName": masterTenantName,
-      "ThisTenantRoles": ['systemadmin', 'hasaccount']
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
     }]
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
@@ -76,7 +76,7 @@ class test_adminAPIUsers(parent_test_api):
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": masterTenantName,
-      "ThisTenantRoles": ['systemadmin', 'hasaccount']
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
     }]
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
    
@@ -92,7 +92,7 @@ class test_adminAPIUsers(parent_test_api):
     self.assertEqual(len(resultJSON['result'][1]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": tenantDict["Name"],
-      "ThisTenantRoles": ['hasaccount']
+      "ThisTenantRoles": [DefaultHasAccountRole]
     }]
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
    
@@ -235,7 +235,7 @@ class test_adminAPIUsers(parent_test_api):
     
     expectedResult = copy.deepcopy(newUserDICT)
     del expectedResult["mainTenant"]
-    expectedResult["TenantRoles"] = [{"TenantName": masterTenantName, "ThisTenantRoles": ["hasaccount"]}]
+    expectedResult["TenantRoles"] = [{"TenantName": masterTenantName, "ThisTenantRoles": [DefaultHasAccountRole]}]
     expectedResult["other_data"] = {"createdBy": "adminapi/users/post"}
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["ObjectVersion", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created User is not the same')

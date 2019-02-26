@@ -8,7 +8,7 @@ from dateutil.parser import parse
 import copy
 from users import CreateUser, associateUserWithPerson
 
-from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
+from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 
 
 
@@ -83,7 +83,7 @@ class test_loginapi_norm(test_api):
     expectedResult = {
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore",
-      "ThisTenantRoles": ['systemadmin', 'hasaccount'],
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole],
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
@@ -97,7 +97,7 @@ class test_loginapi_norm(test_api):
       'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
       'iss': 'FORCED-CONSTANT-TESTING-GUID', 
       'TenantRoles': {
-        'usersystem': ['systemadmin', 'hasaccount']
+        'usersystem': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
       }, 
       'exp': 1547292391,
       'authedPersonGuid': 'Ignore',
@@ -154,7 +154,7 @@ class test_loginapi_norm(test_api):
       "UserID": userID1,
       "TenantRoles": [{
         "TenantName": masterTenantName,
-        "ThisTenantRoles": ["hasaccount"]
+        "ThisTenantRoles": [DefaultHasAccountRole]
       }],
       "known_as": userID1,
       "other_data": {
@@ -167,7 +167,7 @@ class test_loginapi_norm(test_api):
       "UserID": userID2,
       "TenantRoles": [{
         "TenantName": masterTenantName,
-        "ThisTenantRoles": ["hasaccount"]
+        "ThisTenantRoles": [DefaultHasAccountRole]
       }],
       "known_as": userID2,
       "other_data": {
@@ -265,7 +265,7 @@ class test_loginapi_norm(test_api):
       "UserID": userID1,
       "TenantRoles": [{
         "TenantName": masterTenantName,
-        "ThisTenantRoles": ["hasaccount"]
+        "ThisTenantRoles": [DefaultHasAccountRole]
       }],
       "known_as": userID1,
       "other_data": {
@@ -278,7 +278,7 @@ class test_loginapi_norm(test_api):
       "UserID": userID2,
       "TenantRoles": [{
         "TenantName": masterTenantName,
-        "ThisTenantRoles": ["hasaccount"]
+        "ThisTenantRoles": [DefaultHasAccountRole]
       }],
       "known_as": userID2,
       "other_data": {

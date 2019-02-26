@@ -8,9 +8,7 @@ import pytz
 #from datetime import timedelta, datetime
 #from dateutil.parser import parse
 import copy
-from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName
-#from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
-
+from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole
 
 class test_loginapi_register(parent_test_api):  
   def test_registerNewUser(self):
@@ -45,7 +43,7 @@ class test_loginapi_register(parent_test_api):
       "ObjectVersion": "2",
       "TenantRoles": [{
         "TenantName": tenantWithNoAuthProviders['Name'],
-        "ThisTenantRoles": ["hasaccount"]
+        "ThisTenantRoles": [DefaultHasAccountRole]
       }],
       "creationDateTime": testDateTime.isoformat(),
       "lastUpdateDateTime": testDateTime.isoformat()
@@ -82,7 +80,7 @@ class test_loginapi_register(parent_test_api):
       'TenantRoles': [
         {
           'TenantName': tenantWithNoAuthProviders['Name'], 
-          'ThisTenantRoles': ['hasaccount']
+          'ThisTenantRoles': [DefaultHasAccountRole]
         }
       ], 
       'other_data': {
