@@ -22,8 +22,8 @@ class ObjectStore():
     return self._saveJSONObject(appObj, objectType, objectKey, JSONString, objectVersion)
 
   #Return value is None
-  def removeJSONObject(self, appObj, objectType, objectKey, objectVersion = None):
-    return self._removeJSONObject(appObj, objectType, objectKey, objectVersion)
+  def removeJSONObject(self, appObj, objectType, objectKey, objectVersion = None, ignoreMissingObject = False):
+    return self._removeJSONObject(appObj, objectType, objectKey, objectVersion, ignoreMissingObject)
 
   # Update the object in single operation. make transaction safe??
   # Return value is same as saveJSONobject
@@ -48,7 +48,7 @@ class ObjectStore():
   
   def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion):
     raise Exception('Not Overridden')
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion):
+  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject):
     raise Exception('Not Overridden')
   def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion):
     raise Exception('Not Overridden')

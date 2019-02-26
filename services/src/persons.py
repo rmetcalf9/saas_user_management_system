@@ -3,6 +3,10 @@
 # A person has access to many identities
 import uuid
 from personObj import personClass
+from constants import customExceptionClass
+from objectStores_base import WrongObjectVersionExceptionClass
+
+personDosentExistException = customExceptionClass('Person not found', 'personDosentExistException')
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information
@@ -29,19 +33,46 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
 
 def GetPerson(appObj, personGUID):
   personDICT, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
+  if personDICT is None:
+    return None
   personObj = personClass(personDICT, objVer, creationDateTime, lastUpdateDateTime)
   return personObj
 
-def deletePerson(appObj, personGUID):
-  #no object version check
-  appObj.objectStore.removeJSONObject(appObj, "Persons", personGUID)
+def UpdatePerson(appObj, personGUID, objectVersion):
+  #Can't currently update any person data but API added because we will in future
+  personObj = GetPerson(appObj, personGUID)
+  if personObj is None:
+    raise personDosentExistException
+  if str(personObj.getObjectVersion()) != str(objectVersion):
+    raise WrongObjectVersionExceptionClass
+    
+  def updPerson(person):
+    if person is None:
+      raise personDosentExistException
+    return person
+  appObj.objectStore.updateJSONObject(appObj,"Persons", personGUID, updPerson, objectVersion)
+
+  pObj = GetPerson(appObj, personGUID)
+  return pObj
+
+  
+def DeletePerson(appObj, personGUID, objectVersion = None):
+  #may not have object version check (cascades don't)
+  #not cascading delete down to users
+  personObj = GetPerson(appObj, personGUID)
+  if personObj is None:
+    raise personDosentExistException
+
+  appObj.objectStore.removeJSONObject(appObj, "Persons", personGUID, objectVersion)
   
   authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", personGUID)
 
-  appObj.objectStore.removeJSONObject(appObj, "AuthsForEachPerson", personGUID)
+  appObj.objectStore.removeJSONObject(appObj, "AuthsForEachPerson", personGUID, ignoreMissingObject=True)
   
-  for authKey in authsForThisGUID:
-    return appObj.objectStore.removeJSONObject(appObj, "userAuths", authKey)
+  if authsForThisGUID is not None:
+    for authKey in authsForThisGUID:
+      return appObj.objectStore.removeJSONObject(appObj, "userAuths", authKey)
+  return personObj
   
 def GetPaginatedPersonData(appObj, request, outputFN, filterFN):
   return appObj.objectStore.getPaginatedResult(appObj, "Persons",  appObj.getPaginatedParamValues(request), request, outputFN, filterFN)

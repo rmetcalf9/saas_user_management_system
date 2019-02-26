@@ -28,13 +28,16 @@ class ObjectStore_Memory(ObjectStore):
     dictForObjectType[objectKey] = (JSONString, newObjectVersion, dictForObjectType[objectKey][2], curTimeValue)
     return newObjectVersion
 
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion):
+  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject):
     dictForObjectType = self.__getDictForObjectType(objectType)
     if objectVersion is not None:
       if objectKey not in dictForObjectType:
         raise Exception('Deleting something that isn\'t there')
       if str(dictForObjectType[objectKey][1]) != str(objectVersion):
         raise WrongObjectVersionException
+    if objectKey not in self.__getDictForObjectType(objectType):
+      if ignoreMissingObject:
+        return None
     del self.__getDictForObjectType(objectType)[objectKey]
     return None
 

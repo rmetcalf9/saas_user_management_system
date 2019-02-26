@@ -3,7 +3,7 @@ from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Logi
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
 from constants import authFailedException
-from person import CreatePerson
+from persons import CreatePerson
 import json
 from base64 import b64decode
 from users import associateUserWithPerson

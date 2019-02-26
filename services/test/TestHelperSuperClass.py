@@ -14,7 +14,7 @@ from base64 import b64decode
 
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
-from person import CreatePerson
+from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
 

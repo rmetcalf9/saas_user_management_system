@@ -5,7 +5,7 @@ from authProviders import authProviderFactory, getNewAuthProviderJSON, getExisti
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
 import jwt
-from person import CreatePerson
+from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
 from users import CreateUser, AddUserRole, GetUser, associateUserWithPerson, getListOfUserIDsForPerson

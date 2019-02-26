@@ -1,7 +1,7 @@
 from constants import customExceptionClass, DefaultHasAccountRole
 
 from userObj import userClass
-from person import getPerson, deletePerson
+from persons import GetPerson, DeletePerson
 import copy
 
 #users_associatedPersons 1-1 with user object, seperated out to stop ObjectVersion getting out of sync when it dosen't need to
@@ -82,7 +82,7 @@ def _removeUserAssociation(appObj, userID, personGUID):
     return
   if len(userListForThisPerson)==0:
     appObj.objectStore.removeJSONObject(appObj, "UsersForEachPerson", personGUID, objectVersion)
-    deletePerson(appObj, personGUID)
+    DeletePerson(appObj, personGUID)
   
 def DeleteUser(appObj, UserID, objectVersion):
   userObj = GetUser(appObj, UserID)

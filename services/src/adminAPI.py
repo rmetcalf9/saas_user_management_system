@@ -10,8 +10,10 @@ import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
 from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser, CreateUser
+from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson
 from tenantObj import tenantClass
 from userObj import userClass
+from personObj import personClass
 from objectStores_base import WrongObjectVersionExceptionClass
 import copy
 
@@ -38,6 +40,19 @@ def getCreateUserModel(appObj):
     'mainTenant': fields.String(description='If set then a hasaccount role is setup for this tenant'),
   })
 
+def getCreatePersonModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('CreatePersonInfo', {
+  })
+
+def getPersonModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('PersonInfo', {
+    'guid': fields.String(default='DEFAULT', description='Unique identifier of Person'),
+    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
+    'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
+    'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
+  })
+
+  
 def requiredInPayload(content, fieldList):
   for a in fieldList:
     if a not in content:
@@ -307,7 +322,7 @@ def registerAPI(appObj):
     @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @nsAdmin.response(404, 'Tenant Not Found')
     def get(self, tenant, userID):
-      '''Get tenant information'''
+      '''Get User information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       a = GetUser(appObj, userID)
       if a is None:
@@ -323,7 +338,7 @@ def registerAPI(appObj):
       '''Update User'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
-      requiredInPayload(content, ['UserID','TenantRoles','known_as','other_data'])
+      requiredInPayload(content, ['UserID','TenantRoles','known_as','other_data', 'ObjectVersion'])
       if userID != content['UserID']:
         raise BadRequest("Inconsistent userID")
 
@@ -355,7 +370,7 @@ def registerAPI(appObj):
     @nsAdmin.response(409, 'Conflict')
     @appObj.flastRestPlusAPIObject.marshal_with(getUserModel(appObj), code=200, description='User Deleted')
     def delete(self, tenant, userID):
-      '''Delete Tenant'''
+      '''Delete User'''
       decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
       objectVersion = None
       if objectVersionHeaderName in request.headers:
@@ -376,4 +391,125 @@ def registerAPI(appObj):
       except WrongObjectVersionExceptionClass as err:
         raise Conflict(err)
       except:
-        raise InternalServerError  
+        raise InternalServerError
+        
+  @nsAdmin.route('/<string:tenant>/persons')
+  class personsInfo(Resource):
+  
+    '''Admin'''
+    @nsAdmin.doc('admin')
+    @nsAdmin.marshal_with(appObj.getResultModel(getPersonModel(appObj)))
+    @nsAdmin.response(200, 'Success', model=appObj.getResultModel(getPersonModel(appObj)))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @appObj.addStandardSortParams(nsAdmin)
+    def get(self, tenant):
+      '''Get list of persons'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      def defOutput(item):
+        return personClass(item[0],item[1],item[2],item[3]).getJSONRepresenation()
+
+      try:
+        outputFN = defOutput
+        filterFN = None
+        return GetPaginatedPersonData(appObj, request, outputFN, filterFN)
+      except:
+        print(e)
+        print(str(e.args))
+        print(e.args)
+        raise InternalServerError   
+
+    @nsAdmin.doc('post Person')
+    @nsAdmin.expect(getCreatePersonModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(201, 'Created')
+    @appObj.flastRestPlusAPIObject.marshal_with(getPersonModel(appObj), code=200, description='Person created', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant):
+      '''Create Person'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      if "guid" in content:
+        raise BadRequest("Can not supply guid when creating person")
+      requiredInPayload(content, [])
+      try:
+        personDict = CreatePerson(appObj)
+        personObj = GetPerson(appObj, personDict["guid"])
+      except customExceptionClass as err:
+        if (err.id=='TryingToCreateDuplicateUserException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+      
+      return personObj.getJSONRepresenation(), 201
+      
+  @nsAdmin.route('/<string:tenant>/persons/<string:personGUID>')
+  class personInfo(Resource):
+
+    '''Admin'''
+    @nsAdmin.doc('get PErson')
+    @nsAdmin.marshal_with(getPersonModel(appObj))
+    @nsAdmin.response(200, 'Success', model=getPersonModel(appObj))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - Person dosen\'t have required role')
+    @nsAdmin.response(404, 'Tenant Not Found')
+    def get(self, tenant, personGUID):
+      '''Get Person information'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      a = GetPerson(appObj, personGUID)
+      if a is None:
+        raise NotFound('Person Not Found')
+      return a.getJSONRepresenation()
+
+    @nsAdmin.doc('update Person')
+    @nsAdmin.expect(getPersonModel, validate=True)
+    @nsAdmin.response(200, 'Person Updated')
+    @nsAdmin.response(400, 'Validation Error')
+    @appObj.flastRestPlusAPIObject.marshal_with(getPersonModel(appObj), code=200, description='Perosn updated')
+    def put(self, tenant, personGUID):
+      '''Update Person'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ['guid', 'ObjectVersion'])
+      if personGUID != content['guid']:
+        raise BadRequest("Inconsistent guid")
+
+      try:
+        personObj = UpdatePerson(appObj, content['guid'], content['ObjectVersion'])
+      except customExceptionClass as err:
+        if (err.id=='personDosentExistException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
+      except:
+        raise InternalServerError
+      
+      return personObj.getJSONRepresenation()
+
+    @nsAdmin.doc('delete Person')
+    @nsAdmin.response(200, 'Person Deleted')
+    @nsAdmin.response(400, 'Error')
+    @nsAdmin.response(403, 'Forbidden - Person dosen\'t have required role')
+    @nsAdmin.response(409, 'Conflict')
+    @appObj.flastRestPlusAPIObject.marshal_with(getPersonModel(appObj), code=200, description='Person Deleted')
+    def delete(self, tenant, personGUID):
+      '''Delete Person'''
+      decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
+      objectVersion = None
+      if objectVersionHeaderName in request.headers:
+        objectVersion = request.headers.get(objectVersionHeaderName)
+      if objectVersion is None:
+        raise BadRequest(objectVersionHeaderName + " header missing")
+      try:
+        personObj = DeletePerson(appObj, personGUID, objectVersion)
+        return personObj.getJSONRepresenation()
+      except customExceptionClass as err:
+        if (err.id=='personDosentExistException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
+      except:
+        raise InternalServerError

@@ -3,7 +3,7 @@
 #  an identity has one user
 from constants import authFailedException, customExceptionClass
 import uuid
-from person import associatePersonWithAuthCalledWhenAuthIsCreated
+from persons import associatePersonWithAuthCalledWhenAuthIsCreated
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
