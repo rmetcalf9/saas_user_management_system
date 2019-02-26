@@ -75,6 +75,7 @@ class appObjClass(parAppObj):
   bcrypt = bcrypt
   gateway = None
   defaultUserGUID = None
+  testingDefaultPersonGUID = None
   refreshTokenManager = None
   scheduler = None
   getPaginatedParamValues = None
@@ -87,6 +88,7 @@ class appObjClass(parAppObj):
       print("Warning testing mode active - proper encryption is not being used")
       self.bcrypt = testOnlybcrypt
       self.defaultUserGUID = 'FORCED-CONSTANT-TESTING-GUID'
+      self.testingDefaultPersonGUID = 'FORCED-CONSTANT-TESTING-PERSON-GUID'
     
     self.curDateTimeOverrideForTesting = None
     self.serverStartTime = serverStartTime
@@ -113,7 +115,7 @@ class appObjClass(parAppObj):
 
     self.objectStore = createObjectStoreInstance(self)
     if GetTenant(self,masterTenantName) is None:
-      CreateMasterTenant(self)
+      CreateMasterTenant(self, testingMode)
 
     self.gateway = getGatewayInterface(env)
     self.refreshTokenManager = RefreshTokenManager(self)

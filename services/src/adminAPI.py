@@ -497,6 +497,8 @@ def registerAPI(appObj):
     def delete(self, tenant, personGUID):
       '''Delete Person'''
       decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
+      if personGUID == decodedTokenObj.getPersonID():
+        raise BadRequest("You can't delete the logged in users person record")
       objectVersion = None
       if objectVersionHeaderName in request.headers:
         objectVersion = request.headers.get(objectVersionHeaderName)

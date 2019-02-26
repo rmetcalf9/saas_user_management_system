@@ -230,7 +230,7 @@ class testHelperAPIClient(testHelperSuperClass):
       'secret': appObj.gateway.GetJWTTokenSecret(userDict['UserID']),
       'key': userDict['UserID']
     }
-    personGUID = '123ABC'
+    personGUID = appObj.testingDefaultPersonGUID
     return generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID)['JWTToken']
     
   def getTenantDICT(self, tenantName):

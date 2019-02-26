@@ -13,12 +13,14 @@ personDosentExistException = customExceptionClass('Person not found', 'personDos
 # The Auth has a personID stored in it
 # use store object AuthsForEachPerson to store list of auths for each person
 
-def CreatePerson(appObj):
-  guid = str(uuid.uuid4())
+#guidToUse only set in testing mode for the main defualt person
+def CreatePerson(appObj, guidToUse = None):
+  if guidToUse is None:
+    guidToUse = str(uuid.uuid4())
   personDict = {
-    'guid': guid
+    'guid': guidToUse
   }
-  appObj.objectStore.saveJSONObject(appObj, "Persons", guid, personDict)
+  appObj.objectStore.saveJSONObject(appObj, "Persons", guidToUse, personDict)
   return personDict
 
 def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserKey):

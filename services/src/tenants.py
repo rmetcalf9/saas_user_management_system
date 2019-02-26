@@ -18,7 +18,7 @@ authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not
 userCreationNotAllowedException = customExceptionClass('User Creaiton Not Allowed', 'userCreationNotAllowedException')
 
 #only called on intial setup Creates a master tenant with single internal auth provider
-def CreateMasterTenant(appObj):
+def CreateMasterTenant(appObj, testingMode):
   print("Creating master tenant")
   _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False)
   masterTenantInternalAuthProvider = AddAuthProvider(
@@ -37,8 +37,13 @@ def CreateMasterTenant(appObj):
   #User spercific creation
   CreateUser(appObj, {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, masterTenantName, 'init/CreateMasterTenant')
   AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
-  
-  person = CreatePerson(appObj)
+
+  person = None
+  if testingMode:
+    person = CreatePerson(appObj, appObj.testingDefaultPersonGUID)
+  else:
+    person = CreatePerson(appObj)
+
   credentialJSON = {
     "username": InternalAuthUsername, 
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(

@@ -157,4 +157,13 @@ class test_adminAPIPersons(parent_test_api):
     )
     self.assertEqual(deleteResult.status_code, 400, msg="Delete person did not fail - " + deleteResult.get_data(as_text=True)) 
 
+  def test_deleteLoggedInUserFails(self):
+    #The main personGUID is set to appObj.defaultUserGUID in testing mode
+    deleteResult = self.testClient.delete(
+      self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + appObj.testingDefaultPersonGUID, 
+      headers={ jwtHeaderName: self.getNormalJWTToken(), objectVersionHeaderName: "1"}
+    )
+    self.assertEqual(deleteResult.status_code, 400, msg="Delete logged in user did not fail - " + deleteResult.get_data(as_text=True)) 
+  
+    
   #TODO Test delete person with an auth deletes the auth

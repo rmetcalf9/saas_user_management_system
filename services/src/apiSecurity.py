@@ -40,3 +40,6 @@ class DecodedTokenClass():
     
   def getUserID(self):
     return self._tokenData["UserID"]
+    
+  def getPersonID(self):
+    return self._tokenData["authedPersonGuid"]
