@@ -278,12 +278,12 @@ def registerAPI(appObj):
       }
       tenant = None
       if "mainTenant" in content:
-        tenant = content["mainTenant"]
-        tenantObj = GetTenant(appObj, tenant)
-        if tenantObj is None:
-          raise BadRequest("Invalid tenant name")
+        if content["mainTenant"] != "":
+          tenant = content["mainTenant"]
+          tenantObj = GetTenant(appObj, tenant)
+          if tenantObj is None:
+            raise BadRequest("Invalid tenant name")
       try:
-          
         CreateUser(appObj, userData, tenant, "adminapi/users/post")
         userObj = GetUser(appObj, content["UserID"])
       except customExceptionClass as err:

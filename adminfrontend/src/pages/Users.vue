@@ -46,6 +46,49 @@
         <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.UserID)" />
       </q-td>
   </q-table>
+
+    <q-modal v-model="createUserModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
+      <q-modal-layout>
+        <q-toolbar slot="header">
+            <q-btn
+            color="primary"
+            flat
+            round
+            dense
+            icon="keyboard_arrow_left"
+            @click="cancelCreateTenantDialog"
+          />
+          <q-toolbar-title>
+            Create new user
+          </q-toolbar-title>
+        </q-toolbar>
+
+        <div class="layout-padding">
+          <q-field helper="Normally <User ID>@<Auth Prov>" label="User ID" :label-width="3">
+            <q-input v-model="createUserModalDialogData.UserID" ref="userIDInput"/>
+          </q-field>
+          <q-field helper="Name displayed to user" label="Known As" :label-width="3">
+            <q-input v-model="createUserModalDialogData.known_as" ref="userIDInput"/>
+          </q-field>
+          <q-field helper="Optional Tenant to create a hasaccount role" label="Main Tenant" :label-width="3">
+            <q-input v-model="createUserModalDialogData.mainTenant" @keyup.enter="okCreateUserDialog" ref="userIDInput"/>
+          </q-field>
+          <div>&nbsp;</div>
+          <q-btn
+            @click="okCreateUserDialog"
+            color="primary"
+            label="Ok"
+            class = "float-right q-ml-xs"
+          />
+          <q-btn
+            @click="cancelCreateTenantDialog"
+            label="Cancel"
+            class = "float-right"
+          />
+        </div>
+      </q-modal-layout>
+    </q-modal>
+
   </q-page>
 </template>
 
@@ -86,7 +129,11 @@ export default {
         },
         filter: ''
       },
-      futureRefreshRequested: false
+      futureRefreshRequested: false,
+      createUserModalDialogVisible: false,
+      createUserModalDialogData: {
+        UserID: ''
+      }
     }
   },
   methods: {
@@ -137,8 +184,42 @@ export default {
         // Do nothing
       })
     },
+    cancelCreateTenantDialog () {
+      this.createUserModalDialogVisible = false
+    },
+    okCreateUserDialog () {
+      var TTT = this
+      var jsonToSend = {
+        'UserID': this.createUserModalDialogData.UserID,
+        'known_as': this.createUserModalDialogData.known_as,
+        'mainTenant': this.createUserModalDialogData.mainTenant
+      }
+      var callback = {
+        ok: function (response) {
+          TTT.createUserModalDialogVisible = false
+          Notify.create({color: 'positive', detail: 'User Created'})
+          TTT.refresh()
+        },
+        error: function (error) {
+          Notify.create('Create User failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/users',
+        method: 'post',
+        postdata: jsonToSend,
+        callback: callback,
+        curPath: TTT.$router.history.current.path
+      })
+    },
     createUserButtonClick () {
-      Notify.create('TODO')
+      this.createUserModalDialogData.UserID = ''
+      this.createUserModalDialogData.known_as = ''
+      this.createUserModalDialogData.mainTenant = ''
+
+      this.createUserModalDialogVisible = true
+
+      this.$refs.userIDInput.focus()
     },
     request ({ pagination, filter }) {
       var TTT = this
