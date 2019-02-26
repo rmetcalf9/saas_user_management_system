@@ -14,6 +14,7 @@ UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Alread
 ## All the functions that sets up the user, roles and asociates the user with a person
 
 def CreateUser(appObj, userData, mainTenant, createdBy):
+  #mainTenant is validated by adminAPI
   #print("UpdateUser createdBy:", createdBy)
   UserID = userData['user_unique_identifier']
   KnownAs = userData['known_as']
@@ -140,9 +141,17 @@ def getIdentityDict(appObj, personGUID):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
   return identifyJSON
 
-def getListOfUserIDsForPerson(appObj, personGUID):
+def getListOfUserIDsForPerson(appObj, personGUID, tenantName):
+  #must only return a userID that has the hasaccount role for this tenant
   res = []
   userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson", personGUID)
   if userIDsThisPerson is None:
     return []
-  return userIDsThisPerson
+  userIDsInThisTenant = []
+  for curUserID in userIDsThisPerson:
+    userObj = GetUser(appObj,curUserID)
+    if userObj is None:
+      raise Exception("Stored user ID missing")
+    if userObj.hasRole(tenantName, DefaultHasAccountRole):
+      userIDsInThisTenant.append(curUserID)
+  return userIDsInThisTenant

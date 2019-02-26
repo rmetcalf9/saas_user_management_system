@@ -203,7 +203,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
     raise Exception
   
   #We have authed with a single authMethod, we need to get a list of identities for that provider
-  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'])
+  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName)
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
   if len(possibleUserIDs)==0:
     raise PersonHasNoAccessToAnyIdentitiesException

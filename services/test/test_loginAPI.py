@@ -6,6 +6,7 @@ import pytz
 from datetime import timedelta, datetime
 from dateutil.parser import parse
 import copy
+from users import CreateUser, associateUserWithPerson
 
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
 
@@ -178,6 +179,7 @@ class test_loginapi_norm(test_api):
     id1Found = False
     id2Found = False
 
+    self.assertEqual(len(result2JSON['possibleUsers']), 2, msg="Wrong number of possible Users")
     for resultUser in result2JSON['possibleUsers']:
       if resultUser['UserID'] == userID1:
         id1Found = True
@@ -228,3 +230,74 @@ class test_loginapi_norm(test_api):
     expectedResult = {'message': 'Invalid credentials provided'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
+  def test_getMutipleIdentityResponseOnlyReturnsUsersForThisTenant(self):
+    tenantJSON = self.createTenantForTesting(tenantWithNoAuthProviders)
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
+    userID1 = 'TestUser1'
+    userID2 = 'TestUser2'
+    userID3 = 'TestUser3InDifferentTenant'
+    InternalAuthUsername = 'ABC'
+    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername)
+    person = res['person']
+    CreateUser(appObj, {"user_unique_identifier": userID3, "known_as": userID3}, tenantWithNoAuthProviders["Name"], "test/getMutipleIdentityResponseOnlyReturnsUsersForThisTenant")
+    associateUserWithPerson(appObj, userID3, person['guid'])
+
+    
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    
+    loginJSON = {
+      ##"identityGUID": "string",
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": InternalAuthUsername, 
+        "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+       }
+    }
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    result2JSON = json.loads(result2.get_data(as_text=True))
+
+    user1ExcpectedResult = {
+      "UserID": userID1,
+      "TenantRoles": [{
+        "TenantName": masterTenantName,
+        "ThisTenantRoles": ["hasaccount"]
+      }],
+      "known_as": userID1,
+      "other_data": {
+        "createdBy": "test/createTwoUsersForOnePerson"
+      },
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
+    }
+    user2ExcpectedResult = {
+      "UserID": userID2,
+      "TenantRoles": [{
+        "TenantName": masterTenantName,
+        "ThisTenantRoles": ["hasaccount"]
+      }],
+      "known_as": userID2,
+      "other_data": {
+        "createdBy": "test/createTwoUsersForOnePerson"
+      },
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
+    }
+    id1Found = False
+    id2Found = False
+
+    self.assertEqual(len(result2JSON['possibleUsers']), 2, msg="Wrong number of possible Users")
+    for resultUser in result2JSON['possibleUsers']:
+      if resultUser['UserID'] == userID1:
+        id1Found = True
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user1ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 1 result mismatch")
+      if resultUser['UserID'] == userID2:
+        id2Found = True
+        self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion' ], msg="Identity 2 result mismatch")
+      
+    self.assertTrue(id1Found, msg="Identity 1 not in response")
+    self.assertTrue(id2Found, msg="Identity 2 not in response")

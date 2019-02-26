@@ -58,3 +58,8 @@ class userClass():
   #Callers should not expect to update this
   def getReadOnlyDict(self):
     return self._mainDict
+
+  def hasRole(self, tenantName, rollName):
+    if tenantName not in self._mainDict["TenantRoles"]:
+      return False
+    return rollName in self._mainDict["TenantRoles"][tenantName]
