@@ -1,13 +1,13 @@
 <template>
   <q-page>
   <q-table
-    title='Users'
+    title='Persons'
     :rows-per-page-options="tableRowsPerPageOptions"
     :loading="tableLoading"
     :data="tableData"
     :columns="tableColumns"
     @request="request"
-    row-key="UserID"
+    row-key="guid"
     :visible-columns="tablePersistSettings.visibleColumns"
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"
@@ -15,15 +15,15 @@
     :selected.sync="tableSelected"
   >
       <template slot="top-selection" slot-scope="props">
-        <q-btn flat round negative delete icon="delete" @click="deleteSelectedUsers" />
+        <q-btn flat round negative delete icon="delete" @click="deleteSelectedPersons" />
       </template>
 
       <template slot="top-left" slot-scope="props">
         <q-btn
           color="primary"
           push
-          @click="createUserButtonClick"
-        >Create User</q-btn>
+          @click="createPersonButtonClick"
+        >Create Person</q-btn>
       </template>
       <template slot="top-right" slot-scope="props">
        <q-table-columns
@@ -34,20 +34,12 @@
       />
       </template>
 
-      <q-td  slot="body-cell-TenantRoles" slot-scope="props" :props="props">
-        {{ props.row.TenantRoles }}
-      </q-td>
-
-      <q-td  slot="body-cell-other_data" slot-scope="props" :props="props">
-        {{ props.row.other_data }}
-      </q-td>
-
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.UserID)" />
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/persons/' + props.row.guid)" />
       </q-td>
   </q-table>
 
-    <q-modal v-model="createUserModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
+    <q-modal v-model="createPersonModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
             <q-btn
@@ -56,32 +48,26 @@
             round
             dense
             icon="keyboard_arrow_left"
-            @click="cancelCreateUserDialog"
+            @click="cancelCreatePersonDialog"
           />
           <q-toolbar-title>
-            Create new user
+            Create new person
           </q-toolbar-title>
         </q-toolbar>
 
         <div class="layout-padding">
-          <q-field helper="Normally <User ID>@<Auth Prov>" label="User ID" :label-width="3">
-            <q-input v-model="createUserModalDialogData.UserID" ref="userIDInput"/>
-          </q-field>
-          <q-field helper="Name displayed to user" label="Known As" :label-width="3">
-            <q-input v-model="createUserModalDialogData.known_as" ref="userIDInput"/>
-          </q-field>
-          <q-field helper="Optional Tenant to create a hasaccount role" label="Main Tenant" :label-width="3">
-            <q-input v-model="createUserModalDialogData.mainTenant" @keyup.enter="okCreateUserDialog" ref="userIDInput"/>
+          <q-field helper="No Editable Person Data" label="Unknown" :label-width="3">
+            <q-input v-model="createPersonModalDialogData.guid" ref="personIDInput"/>
           </q-field>
           <div>&nbsp;</div>
           <q-btn
-            @click="okCreateUserDialog"
+            @click="okCreatePersonDialog"
             color="primary"
             label="Ok"
             class = "float-right q-ml-xs"
           />
           <q-btn
-            @click="cancelCreateUserDialog"
+            @click="cancelCreatePersonDialog"
             label="Cancel"
             class = "float-right"
           />
@@ -108,18 +94,14 @@ export default {
       tableLoading: false,
       tableData: [],
       tableColumns: [
-        { name: 'UserID', required: true, label: 'UserID', align: 'left', field: 'UserID', sortable: false, filter: false },
-        { name: 'Known As', required: false, label: 'Known As', align: 'left', field: 'known_as', sortable: false, filter: false },
-        { name: 'TenantRoles', required: false, label: 'Tenant Roles', align: 'left', field: 'TenantRoles', sortable: false, filter: false },
-        { name: 'other_data', required: false, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
+        { name: 'guid', required: true, label: 'guid', align: 'left', field: 'guid', sortable: false, filter: false },
         { name: 'creationDateTime', required: false, label: 'creationDateTime', align: 'left', field: 'creationDateTime', sortable: false, filter: false },
         { name: 'lastUpdateDateTime', required: false, label: 'lastUpdateDateTime', align: 'left', field: 'lastUpdateDateTime', sortable: false, filter: false },
-        { name: 'other_data', required: false, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       tableSelected: [],
       tablePersistSettings: {
-        visibleColumns: ['known_as', 'TenantRoles'],
+        visibleColumns: ['guid'],
         serverPagination: {
           page: 1,
           rowsNumber: 10, // specifying this determines pagination is server-side
@@ -130,25 +112,25 @@ export default {
         filter: ''
       },
       futureRefreshRequested: false,
-      createUserModalDialogVisible: false,
-      createUserModalDialogData: {
-        UserID: ''
+      createPersonModalDialogVisible: false,
+      createPersonModalDialogData: {
+        guid: ''
       }
     }
   },
   methods: {
-    deleteUserNoConfirm (TTT, usr) {
+    deletePersonNoConfirm (TTT, usr) {
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'User ' + usr.UserID + ' deleted'})
+          Notify.create({color: 'positive', detail: 'Person ' + usr.guid + ' deleted'})
           TTT.futureRefresh()
         },
         error: function (error) {
-          Notify.create('Delete User failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create('Delete Person failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/users/' + usr.UserID,
+        path: '/persons/' + usr.guid,
         method: 'delete',
         postdata: null,
         callback: callback,
@@ -156,15 +138,15 @@ export default {
         headers: {'object-version-id': usr.ObjectVersion}
       })
     },
-    deleteSelectedUsers () {
+    deleteSelectedPersons () {
       var TTT = this
-      var usersToDelete = this.tableSelected.map(function (usr) {
+      var personsToDelete = this.tableSelected.map(function (usr) {
         return usr
       })
       TTT.tableSelected = []
       TTT.$q.dialog({
         title: 'Confirm',
-        message: 'Are you sure you want to delete ' + usersToDelete.length + ' users?',
+        message: 'Are you sure you want to delete ' + personsToDelete.length + ' Person records?',
         ok: {
           push: true,
           label: 'Yes - delete'
@@ -177,49 +159,45 @@ export default {
         // noBackdropDismiss: false,
         // noEscDismiss: false
       }).then(() => {
-        usersToDelete.map(function (usr) {
-          TTT.deleteUserNoConfirm(TTT, usr)
+        personsToDelete.map(function (usr) {
+          TTT.deletePersonNoConfirm(TTT, usr)
         })
       }).catch(() => {
         // Do nothing
       })
     },
-    cancelCreateUserDialog () {
-      this.createUserModalDialogVisible = false
+    cancelCreatePersonDialog () {
+      this.createPersonModalDialogVisible = false
     },
-    okCreateUserDialog () {
+    okCreatePersonDialog () {
       var TTT = this
       var jsonToSend = {
-        'UserID': this.createUserModalDialogData.UserID,
-        'known_as': this.createUserModalDialogData.known_as,
-        'mainTenant': this.createUserModalDialogData.mainTenant
+        // 'guid': this.createPersonModalDialogData.guid NO data can be sent
       }
       var callback = {
         ok: function (response) {
-          TTT.createUserModalDialogVisible = false
-          Notify.create({color: 'positive', detail: 'User Created'})
+          TTT.createPersonModalDialogVisible = false
+          Notify.create({color: 'positive', detail: 'Person Created'})
           TTT.refresh()
         },
         error: function (error) {
-          Notify.create('Create User failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create('Create Person failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/users',
+        path: '/persons',
         method: 'post',
         postdata: jsonToSend,
         callback: callback,
         curPath: TTT.$router.history.current.path
       })
     },
-    createUserButtonClick () {
-      this.createUserModalDialogData.UserID = ''
-      this.createUserModalDialogData.known_as = ''
-      this.createUserModalDialogData.mainTenant = ''
+    createPersonButtonClick () {
+      this.createPersonModalDialogData.guid = ''
 
-      this.createUserModalDialogVisible = true
+      this.createPersonModalDialogVisible = true
 
-      this.$refs.userIDInput.focus()
+      this.$refs.PersonIDInput.focus()
     },
     request ({ pagination, filter }) {
       var TTT = this
@@ -262,7 +240,7 @@ export default {
         }
         queryParams['sort'] = pagination.sortBy + postfix
       }
-      var queryString = restcallutils.buildQueryString('/users', queryParams)
+      var queryString = restcallutils.buildQueryString('/persons', queryParams)
       this.$store.dispatch('globalDataStore/callAdminAPI', {
         path: queryString,
         method: 'get',

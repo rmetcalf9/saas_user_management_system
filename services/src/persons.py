@@ -71,7 +71,7 @@ def DeletePerson(appObj, personGUID, objectVersion = None):
   
   if authsForThisGUID is not None:
     for authKey in authsForThisGUID:
-      return appObj.objectStore.removeJSONObject(appObj, "userAuths", authKey)
+      appObj.objectStore.removeJSONObject(appObj, "userAuths", authKey)
   return personObj
   
 def GetPaginatedPersonData(appObj, request, outputFN, filterFN):
