@@ -8,12 +8,19 @@ class personClass():
   _mainDict = None
   _jsonRepersentation = None
   _objectVersion = None
-  def __init__(self, JSONRetrievedFromStore, objectVersion):
+  _creationDateTime = None
+  _lastUpdateDateTime = None
+  def __init__(self, JSONRetrievedFromStore, objectVersion, creationDateTime, lastUpdateDateTime):
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
     self._objectVersion = objectVersion
+    self._creationDateTime = creationDateTime
+    self._lastUpdateDateTime = lastUpdateDateTime
   
   def _generateJSONRepresenationAndStoreItInCache(self):
     aa = self._mainDict.copy()
+    aa['ObjectVersion'] = self._objectVersion
+    aa['creationDateTime'] = self._creationDateTime
+    aa['lastUpdateDateTime'] = self._lastUpdateDateTime
     self._jsonRepersentation = aa
   
   def getJSONRepresenation(self):

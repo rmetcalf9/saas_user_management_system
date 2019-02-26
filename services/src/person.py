@@ -28,8 +28,8 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
   appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
 
 def getPerson(appObj, personGUID):
-  personDICT, objVer = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
-  personObj = personClass(personDICT, objVer)
+  personDICT, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
+  personObj = personClass(personDICT, objVer, creationDateTime, lastUpdateDateTime)
   return personObj
 
 def deletePerson(appObj, personGUID):
