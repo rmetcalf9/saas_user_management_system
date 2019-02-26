@@ -138,7 +138,19 @@ for cur in range(4):
       else:
         raise Exception()
     
-  
+
+print("Creating more tenants without any users or auths")
+for cur in range(15):
+  print("Allow User Tenant ", cur)
+  creationDICT = copy.deepcopy(tenantCreationDICT)
+  creationDICT['Name'] = creationDICT['Name'] + "_nouser_" + str(cur)
+  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
+  if (res==400):
+    if (resDICT['message'] == 'Tenant Already Exists'):
+      print('Skipping tenant create as it already exists')
+    else:
+      raise Exception()
+
 
 
 print("End")

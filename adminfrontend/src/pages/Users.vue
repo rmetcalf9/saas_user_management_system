@@ -25,6 +25,14 @@
           @click="createUserButtonClick"
         >Create User</q-btn>
       </template>
+      <template slot="top-right" slot-scope="props">
+       <q-table-columns
+        color="secondary"
+        class="q-mr-sm"
+        v-model="tablePersistSettings.visibleColumns"
+        :columns="tableColumns"
+      />
+      </template>
 
       <q-td  slot="body-cell-TenantRoles" slot-scope="props" :props="props">
         {{ props.row.TenantRoles }}
@@ -58,12 +66,26 @@ export default {
       tableData: [],
       tableColumns: [
         { name: 'UserID', required: true, label: 'UserID', align: 'left', field: 'UserID', sortable: false, filter: false },
-        { name: 'Known As', required: true, label: 'Known As', align: 'left', field: 'known_as', sortable: false, filter: false },
-        { name: 'TenantRoles', required: true, label: 'Tenant Roles', align: 'left', field: 'TenantRoles', sortable: false, filter: false },
-        { name: 'other_data', required: true, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
+        { name: 'Known As', required: false, label: 'Known As', align: 'left', field: 'known_as', sortable: false, filter: false },
+        { name: 'TenantRoles', required: false, label: 'Tenant Roles', align: 'left', field: 'TenantRoles', sortable: false, filter: false },
+        { name: 'other_data', required: false, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
+        { name: 'creationDateTime', required: false, label: 'creationDateTime', align: 'left', field: 'creationDateTime', sortable: false, filter: false },
+        { name: 'lastUpdateDateTime', required: false, label: 'lastUpdateDateTime', align: 'left', field: 'lastUpdateDateTime', sortable: false, filter: false },
+        { name: 'other_data', required: false, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       tableSelected: [],
+      tablePersistSettings: {
+        visibleColumns: ['known_as', 'TenantRoles'],
+        serverPagination: {
+          page: 1,
+          rowsNumber: 10, // specifying this determines pagination is server-side
+          rowsPerPage: 10,
+          sortBy: null,
+          descending: true
+        },
+        filter: ''
+      },
       futureRefreshRequested: false
     }
   },
@@ -188,20 +210,6 @@ export default {
     }
   },
   computed: {
-    tablePersistSettings () {
-      // TODO Arrange this to go into a Store somewhere
-      return {
-        visibleColumns: ['known_as', 'TenantRoles'],
-        serverPagination: {
-          page: 1,
-          rowsNumber: 10, // specifying this determines pagination is server-side
-          rowsPerPage: 10,
-          sortBy: null,
-          descending: true
-        },
-        filter: ''
-      }
-    }
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch

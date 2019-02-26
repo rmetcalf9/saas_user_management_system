@@ -19,7 +19,14 @@
           @click="openCreateTenantModalDialog"
         >Add Tenant</q-btn>
       </template>
-
+      <template slot="top-right" slot-scope="props">
+       <q-table-columns
+        color="secondary"
+        class="q-mr-sm"
+        v-model="tablePersistSettings.visibleColumns"
+        :columns="tableColumns"
+      />
+      </template>
       <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
         <q-btn flat no-caps dense :label="props.value" @click="$router.push('/' + $route.params.tenantName + '/tenants/' + props.row.Name)" width="100%"/>
       </q-td>
@@ -47,10 +54,21 @@ export default {
       tableData: [],
       tableColumns: [
         { name: 'Name', required: true, label: 'Tenant Name', align: 'left', field: 'Name', sortable: false, filter: false },
-        { name: 'Description', required: true, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
-        { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false },
+        { name: 'Description', required: false, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
+        { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
-      ]
+      ],
+      tablePersistSettings: {
+        visibleColumns: ['Name', 'Description'],
+        serverPagination: {
+          page: 1,
+          rowsNumber: 10, // specifying this determines pagination is server-side
+          rowsPerPage: 10,
+          sortBy: null,
+          descending: true
+        },
+        filter: ''
+      }
     }
   },
   methods: {
@@ -147,22 +165,6 @@ export default {
         pagination: this.tablePersistSettings.serverPagination,
         filter: this.tablePersistSettings.filter
       })
-    }
-  },
-  computed: {
-    tablePersistSettings () {
-      // TODO Arrange this to go into a Store somewhere
-      return {
-        visibleColumns: ['Name', 'Description'],
-        serverPagination: {
-          page: 1,
-          rowsNumber: 10, // specifying this determines pagination is server-side
-          rowsPerPage: 10,
-          sortBy: null,
-          descending: true
-        },
-        filter: ''
-      }
     }
   },
   mounted () {

@@ -53,6 +53,8 @@ module.exports = function (ctx) {
         'QTable',
         'QTableColumns',
         'QToggle',
+        'QTh',
+        'QTr',
         'QTd',
         'QBtn',
         'QIcon',
