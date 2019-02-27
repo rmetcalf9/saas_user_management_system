@@ -32,6 +32,19 @@
         </q-item-tile>
       </q-item-main>
     </q-item>
+    <q-item>
+      <q-item-main >
+        <q-item-tile label>Linked Person Records ()</q-item-tile>
+        <q-item-tile sublabel>{{ userData }}</q-item-tile>
+      </q-item-main>
+    </q-item>
+    <q-item>
+      <q-item-main >
+        <q-item-tile label>Update Info</q-item-tile>
+        <q-item-tile sublabel>Created {{ userData.creationDateTime }}</q-item-tile>
+        <q-item-tile sublabel>Last Updated {{ userData.lastUpdateDateTime }}</q-item-tile>
+      </q-item-main>
+    </q-item>
   </q-list>
 
     <q-modal v-model="editUserModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
