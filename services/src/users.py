@@ -1,8 +1,7 @@
 from constants import customExceptionClass, DefaultHasAccountRole
 
-from userObj import userClass
 from persons import GetPerson, DeletePerson
-from userPersonCommon import RemoveUserAssociation
+from userPersonCommon import RemoveUserAssociation, GetUser
 import copy
 
 #users_associatedPersons 1-1 with user object, seperated out to stop ObjectVersion getting out of sync when it dosen't need to
@@ -85,16 +84,6 @@ def DeleteUser(appObj, UserID, objectVersion):
   appObj.objectStore.removeJSONObject(appObj, "users_associatedPersons", UserID)
   
   return userObj
-
-def GetUser(appObj, UserID):
-  jsonData, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
-  if jsonData is None:
-    return None
-  return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime)
-  
-def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime):
-  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2 = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserDict['UserID'])
-  return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
 
 def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
   userObj = GetUser(appObj, UserID)

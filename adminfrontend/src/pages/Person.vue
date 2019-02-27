@@ -20,6 +20,13 @@
     </q-item>
     <q-item>
       <q-item-main >
+        <q-item-tile label>Linked User Records ({{ personData.associatedUsers.length }})</q-item-tile>
+        <q-item-tile sublabel v-for="curUserGUID in personData.associatedUsers" :key=curUserGUID><a :href="'/#/' + $route.params.tenantName + '/users/' + curUserGUID.UserID">{{ curUserGUID.UserID }}</a></q-item-tile>
+      </q-item-main>
+    </q-item>
+
+    <q-item>
+      <q-item-main >
         <q-item-tile label>Update Info</q-item-tile>
         <q-item-tile sublabel>Created {{ personData.creationDateTime }}</q-item-tile>
         <q-item-tile sublabel>Last Updated {{ personData.lastUpdateDateTime }}</q-item-tile>

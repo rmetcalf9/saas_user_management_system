@@ -4,6 +4,7 @@ from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProvi
 from appObj import appObj
 from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from test_adminAPI import test_api as parent_test_api
+from test_adminAPI_users import defaultUserData
 import json
 import copy
 
@@ -12,7 +13,8 @@ import copy
 
 defaultPersonData = {
   'guid': "SOMEVALUE",
-  'ObjectVersion': "1"
+  'ObjectVersion': "1",
+  "associatedUsers": [defaultUserData]
 }
 
 
@@ -31,10 +33,11 @@ class test_adminAPIPersons(parent_test_api):
     
     expectedResult = {
       "ObjectVersion": "1",
-      "guid": "IGN"
+      "guid": "IGN",
+      "associatedUsers": []
     }
     
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["guid", "creationDateTime", "lastUpdateDateTime"], msg='JSON of created Person is not what was expected')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["guid", "creationDateTime", "lastUpdateDateTime","associatedUsers"], msg='JSON of created Person is not what was expected')
     self.assertTrue("guid" in resultJSON, msg="Missing GUID")
     return resultJSON
 
@@ -45,8 +48,11 @@ class test_adminAPIPersons(parent_test_api):
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultJSON['pagination']['total'],1)
     
-    UnknownVals = ["creationDateTime", "lastUpdateDateTime", "guid"]
+    UnknownVals = ["creationDateTime", "lastUpdateDateTime", "guid", "associatedUsers"]
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultPersonData, UnknownVals, msg="Person data mismatch")
+    self.assertEqual(len(resultJSON['result'][0]["associatedUsers"]),1)
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["associatedUsers"][0],defaultPersonData["associatedUsers"][0], ["creationDateTime", "lastUpdateDateTime"], msg="Person data mismatch")
+
     self.assertEqual(len(resultJSON['result']),1,msg="Wrong number of person results returned")
     for a in UnknownVals:
       self.assertTrue(a in resultJSON['result'][0], msg=a + " is not in resultJSON['result'][0]") 

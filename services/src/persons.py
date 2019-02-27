@@ -5,7 +5,7 @@ import uuid
 from personObj import personClass
 from constants import customExceptionClass
 from objectStores_base import WrongObjectVersionExceptionClass
-from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck
+from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser
 
 personDosentExistException = customExceptionClass('Person not found', 'personDosentExistException')
 
@@ -34,12 +34,20 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
 
+def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime, lastUpdateDateTime):
+  AssociatedUserIDs = getListOfUserIDsForPersonNoTenantCheck(appObj, PersonDict['guid'])
+  ##print("AAA:", AssociatedUserIDs, ":", personGUID)
+  AssociatedUserObjs = []
+  for uid in AssociatedUserIDs:
+    AssociatedUserObjs.append(GetUser(appObj,uid))
+  personObj = personClass(PersonDict, objVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs)
+  return personObj
+  
 def GetPerson(appObj, personGUID):
   personDICT, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
   if personDICT is None:
     return None
-  personObj = personClass(personDICT, objVer, creationDateTime, lastUpdateDateTime)
-  return personObj
+  return CreatePersonObjFromUserDict(appObj, personDICT, objVer, creationDateTime, lastUpdateDateTime)
 
 def UpdatePerson(appObj, personGUID, objectVersion):
   #Can't currently update any person data but API added because we will in future

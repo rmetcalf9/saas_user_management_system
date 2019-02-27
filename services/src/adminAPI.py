@@ -9,8 +9,9 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from users import GetPaginatedUserData, GetUser, UpdateUser, DeleteUser, CreateUser, CreateUserObjFromUserDict
-from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson
+from userPersonCommon import GetUser, CreateUserObjFromUserDict
+from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser
+from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict
 from tenantObj import tenantClass
 from userObj import userClass
 from personObj import personClass
@@ -47,6 +48,7 @@ def getCreatePersonModel(appObj):
 def getPersonModel(appObj):
   return appObj.flastRestPlusAPIObject.model('PersonInfo', {
     'guid': fields.String(default='DEFAULT', description='Unique identifier of Person'),
+    'associatedUsers': fields.List(fields.Nested(getUserModel(appObj))),
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
     'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
     'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
@@ -407,7 +409,7 @@ def registerAPI(appObj):
       '''Get list of persons'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return personClass(item[0],item[1],item[2],item[3]).getJSONRepresenation()
+        return CreatePersonObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
 
       try:
         outputFN = defOutput

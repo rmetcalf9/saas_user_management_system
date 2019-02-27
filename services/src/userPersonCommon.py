@@ -1,6 +1,19 @@
 from constants import DefaultHasAccountRole
+from userObj import userClass
 
 #This file is required to stop circular references between users and persons
+
+def GetUser(appObj, UserID):
+  jsonData, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
+  if jsonData is None:
+    return None
+  return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime)
+  
+def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime):
+  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2 = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserDict['UserID'])
+  return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
+
+
 
 #Called when deleting both a user and a person
 # if being called when we are deleting a person then deletePersonFn will not set to None

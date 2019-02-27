@@ -19,6 +19,7 @@ defaultUserData = {
   'other_data': {
     "createdBy": "init/CreateMasterTenant"
   },
+  "associatedPersonGUIDs": ["FORCED-CONSTANT-TESTING-PERSON-GUID"],
   'ObjectVersion': "3"
 }
 

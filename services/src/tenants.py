@@ -8,8 +8,8 @@ import jwt
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
-from users import CreateUser, AddUserRole, GetUser, associateUserWithPerson
-from userPersonCommon import getListOfUserIDsForPerson
+from users import CreateUser, AddUserRole, associateUserWithPerson
+from userPersonCommon import getListOfUserIDsForPerson, GetUser
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')

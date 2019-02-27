@@ -74,33 +74,20 @@ class testHelperSuperClass(unittest.TestCase):
         raise context.exception
     self.assertTrue(ExpectedException == context.exception)
 
-  #if the type of object in the list
-  def sortListsOfObjects(self, listToSort):
-    if len(listToSort)<2:
+  def sortAllMembers(self, objToSotr):
+    if isinstance(objToSotr,list):
+      for k in objToSotr:
+        self.sortAllMembers(k)
+      if len(objToSotr)>1:
+        if isinstance(objToSotr[0],dict):
+          return #list has dicts inside so no way of sorting
+        objToSotr.sort()
       return
-    if isinstance(listToSort[0],dict):
-      def getKeyFn(item):
-        return json.dumps(item)
-      listToSort.sort(key=getKeyFn)
+    if isinstance(objToSotr,dict):
+      for k in objToSotr.keys():
+        self.sortAllMembers(objToSotr[k])
       return
-    listToSort.sort()
-
-  def sortListsInDict(self, dictToCheck):
-    if isinstance(dictToCheck,list):
-      dictToCheck.sort()
-      for k in dictToCheck:
-        if isinstance(k,dict):
-          self.sortListsInDict(k)
-        if isinstance(k,list):
-          self.sortListsOfObjects(k)
-      return
-    for k in dictToCheck.keys():
-      if isinstance(dictToCheck[k],dict):
-        self.sortListsInDict(dictToCheck[k])
-      if isinstance(dictToCheck[k],list):
-        self.sortListsOfObjects(dictToCheck[k])
-    return
-
+    
   def convertAnyByteValueToString(self, val):
     if isinstance(val,list):
       for a in val:
@@ -115,8 +102,8 @@ class testHelperSuperClass(unittest.TestCase):
       pass
     
   def areJSONStringsEqual(self, str1, str2):
-    self.sortListsInDict(str1)
-    self.sortListsInDict(str2)
+    self.sortAllMembers(str1)
+    self.sortAllMembers(str2)
     self.convertAnyByteValueToString(str1)
     self.convertAnyByteValueToString(str2)
     a = json.dumps(str1, sort_keys=True)

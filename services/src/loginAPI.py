@@ -10,7 +10,7 @@ from constants import customExceptionClass
 from apiSharedModels import getTenantModel, getUserModel
 from serverInfoAPI import registerServerInfoAPIFn
 import copy
-from users import GetUser
+from userPersonCommon import GetUser
 
 from tenants import GetTenant, Login, RegisterUser
 
