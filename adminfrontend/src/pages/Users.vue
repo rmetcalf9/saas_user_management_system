@@ -114,11 +114,10 @@ export default {
         { name: 'other_data', required: false, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
         { name: 'creationDateTime', required: false, label: 'creationDateTime', align: 'left', field: 'creationDateTime', sortable: false, filter: false },
         { name: 'lastUpdateDateTime', required: false, label: 'lastUpdateDateTime', align: 'left', field: 'lastUpdateDateTime', sortable: false, filter: false },
-        { name: 'other_data', required: false, label: 'other_data', align: 'left', field: 'other_data', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       tableSelected: [],
-      tablePersistSettings: {
+      tablePersistSettingsOLD: {
         visibleColumns: ['known_as', 'TenantRoles'],
         serverPagination: {
           page: 1,
@@ -291,6 +290,15 @@ export default {
     }
   },
   computed: {
+    tablePersistSettings: {
+      get () {
+        return this.$store.getters['tablePersistStore/tableStttings']('usersMain', ['known_as', 'TenantRoles'])
+      },
+      set (val) {
+        console.log('tablePersistSettings set:', val)
+        this.$store.commit('tablePersistStore/updateTableSettings', {tableName: 'usersMain', val: val})
+      }
+    }
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
