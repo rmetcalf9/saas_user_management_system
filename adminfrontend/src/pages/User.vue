@@ -34,8 +34,8 @@
     </q-item>
     <q-item>
       <q-item-main >
-        <q-item-tile label>Linked Person Records ()</q-item-tile>
-        <q-item-tile sublabel>{{ userData }}</q-item-tile>
+        <q-item-tile label>Linked Person Records ({{ userData['associatedPersonGUIDs'].length }})</q-item-tile>
+        <q-item-tile sublabel v-for="curPersonGUID in userData.associatedPersonGUIDs" :key=curPersonGUID><a :href="'/#/' + $route.params.tenantName + '/persons/' + curPersonGUID">{{ curPersonGUID }}</a></q-item-tile>
       </q-item-main>
     </q-item>
     <q-item>
