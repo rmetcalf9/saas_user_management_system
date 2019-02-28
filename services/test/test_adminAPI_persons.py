@@ -19,28 +19,6 @@ defaultPersonData = {
 
 
 class test_adminAPIPersons(parent_test_api):
-  def createPersonAndReturnDICT(self):
-    newPersonDICT = {
-    }
-    result = self.testClient.post(
-      self.adminAPIPrefix + '/' + masterTenantName + '/persons', 
-      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(newPersonDICT), 
-      content_type='application/json'
-    )
-    self.assertEqual(result.status_code, 201, msg="Create person failed - " + result.get_data(as_text=True))
-    resultJSON = json.loads(result.get_data(as_text=True))
-    
-    expectedResult = {
-      "ObjectVersion": "1",
-      "guid": "IGN",
-      "associatedUsers": []
-    }
-    
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["guid", "creationDateTime", "lastUpdateDateTime","associatedUsers"], msg='JSON of created Person is not what was expected')
-    self.assertTrue("guid" in resultJSON, msg="Missing GUID")
-    return resultJSON
-
   def test_getDefaultListFromMasterTenant(self):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/persons', headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)

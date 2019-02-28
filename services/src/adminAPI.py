@@ -9,8 +9,8 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
-from userPersonCommon import GetUser, CreateUserObjFromUserDict
-from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser
+from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
+from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict
 from tenantObj import tenantClass
 from userObj import userClass
@@ -52,6 +52,12 @@ def getPersonModel(appObj):
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
     'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
     'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
+  })
+
+def getAuthModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('CreateAuthInfo', {
+    'UserID': fields.String(default='DEFAULT', description='Unique identifier of User'),
+    'personGUID': fields.String(default='DEFAULT', description='Unique identifier of Person')
   })
 
   
@@ -326,10 +332,10 @@ def registerAPI(appObj):
     def get(self, tenant, userID):
       '''Get User information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      a = GetUser(appObj, userID)
-      if a is None:
+      userObj = GetUser(appObj, userID)
+      if userObj is None:
         raise NotFound('User Not Found')
-      return a.getJSONRepresenation()
+      return userObj.getJSONRepresenation()
 
     @nsAdmin.doc('update User')
     @nsAdmin.expect(getUserModel, validate=True)
@@ -517,3 +523,66 @@ def registerAPI(appObj):
         raise Conflict(err)
       except:
         raise InternalServerError
+
+  @nsAdmin.route('/<string:tenant>/auths/<string:userID>/<string:personGUID>')
+  class authInfo(Resource):
+    @nsAdmin.doc('post Auth')
+    @nsAdmin.expect(getAuthModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(201, 'Created')
+    @appObj.flastRestPlusAPIObject.marshal_with(getAuthModel(appObj), code=200, description='Auth created', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant, userID, personGUID):
+      '''Create Auth'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ["UserID", "personGUID"])
+      if userID != content['UserID']:
+        raise BadRequest("UserID in payload not the same as in URL")
+      if personGUID != content['personGUID']:
+        raise BadRequest("personGUID in payload not the same as in URL")
+      personObj = GetPerson(appObj, content["personGUID"])
+      if personObj is None:
+        raise NotFound('Person Not Found')
+      userObj = GetUser(appObj, userID)
+      if userObj is None:
+        raise NotFound('User Not Found')
+      try:
+        associateUserWithPerson(appObj, content["UserID"], content["personGUID"])
+      except customExceptionClass as err:
+        if (err.id=='UserAlreadyAssociatedWithThisPersonException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+      
+      return {
+        "UserID": userID,
+        "personGUID": personGUID
+      }, 201
+
+    @nsAdmin.doc('delete Auth')
+    @nsAdmin.response(200, 'Auth Deleted')
+    @nsAdmin.response(400, 'Error')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @nsAdmin.response(409, 'Conflict')
+    @appObj.flastRestPlusAPIObject.marshal_with(getAuthModel(appObj), code=200, description='Auth Deleted')
+    def delete(self, tenant, userID, personGUID):
+      '''Delete Auth'''
+      decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
+      #No Object version needed for auths
+      try:
+        RemoveUserAssociation(appObj, userID, personGUID, None) #Not deleting person if this is last user
+        return {
+          "UserID": userID,
+          "personGUID": personGUID
+        }
+      except customExceptionClass as err:
+        if (err.id=='personDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='userDosentExistException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+      

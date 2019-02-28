@@ -5,9 +5,7 @@ import uuid
 from personObj import personClass
 from constants import customExceptionClass
 from objectStores_base import WrongObjectVersionExceptionClass
-from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser
-
-personDosentExistException = customExceptionClass('Person not found', 'personDosentExistException')
+from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information

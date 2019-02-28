@@ -1,5 +1,8 @@
-from constants import DefaultHasAccountRole
+from constants import DefaultHasAccountRole, customExceptionClass
 from userObj import userClass
+
+personDosentExistException = customExceptionClass('Person not found', 'personDosentExistException')
+userDosentExistException = customExceptionClass('User not found', 'userDosentExistException')
 
 #This file is required to stop circular references between users and persons
 
@@ -18,21 +21,28 @@ def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, la
 #Called when deleting both a user and a person
 # if being called when we are deleting a person then deletePersonFn will not set to None
 def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn):
-  ##REmove record from users_associatedPersons
+  ##Remove record from users_associatedPersons
   def updateTheUsersPersonListFn(associatedPersonList):
+    if associatedPersonList is None:
+      raise userDosentExistException
     if personGUID in associatedPersonList:
       associatedPersonList.remove(personGUID)
+
+    #Removing other reference inside same function so they occur in same transaction
+    def updUsersForEachPerson(idfea):
+      if idfea is None:
+        raise personDosentExistException
+      #May not be in list as if person delete is called first, the user delete also calls this
+      if userID in idfea:
+        idfea.remove(userID)
+      return idfea
+    appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, updUsersForEachPerson)
+      
+      
     return associatedPersonList
   appObj.objectStore.updateJSONObject(appObj,"users_associatedPersons", userID, updateTheUsersPersonListFn)
   
   
-  def upd(idfea):
-    #May not be in list as if person delete is called first, the user delete also calls this
-    if userID in idfea:
-      idfea.remove(userID)
-    return idfea
-  appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
-  #print("RemoveUserAssociation per:user = ",personGUID, ":", userID)
   userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson",personGUID)
   if userListForThisPerson is None:
     return

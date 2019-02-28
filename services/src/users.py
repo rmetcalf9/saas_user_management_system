@@ -1,13 +1,12 @@
 from constants import customExceptionClass, DefaultHasAccountRole
 
 from persons import GetPerson, DeletePerson
-from userPersonCommon import RemoveUserAssociation, GetUser
+from userPersonCommon import RemoveUserAssociation, GetUser, userDosentExistException
 import copy
 
 #users_associatedPersons 1-1 with user object, seperated out to stop ObjectVersion getting out of sync when it dosen't need to
 
 TryingToCreateDuplicateUserException = customExceptionClass('That username is already in use', 'TryingToCreateDuplicateUserException')
-userDosentExistException = customExceptionClass('User not found', 'userDosentExistException')
 UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Already Associated With This Person', 'UserAlreadyAssociatedWithThisPersonException')
 
 ##Creation functions
@@ -40,7 +39,7 @@ def associateUserWithPerson(appObj, UserID, personGUID):
   #Add reference from User to person
   ## No object version checking because read and update is the same operaiton
   def updUser(user):
-    if 'personGUID' not in user:
+    if personGUID not in user:
       user.append(personGUID)
     return user
   appObj.objectStore.updateJSONObject(appObj,"users_associatedPersons", UserID, updUser)

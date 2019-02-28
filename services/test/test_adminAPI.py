@@ -13,7 +13,28 @@ def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
 
 
 class test_api(testHelperAPIClient):
-  pass
+  def createPersonAndReturnDICT(self):
+    newPersonDICT = {
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/persons', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newPersonDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201, msg="Create person failed - " + result.get_data(as_text=True))
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    expectedResult = {
+      "ObjectVersion": "1",
+      "guid": "IGN",
+      "associatedUsers": []
+    }
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["guid", "creationDateTime", "lastUpdateDateTime","associatedUsers"], msg='JSON of created Person is not what was expected')
+    self.assertTrue("guid" in resultJSON, msg="Missing GUID")
+    return resultJSON
+
 
 class test_securityTests(test_api):
   def test_noTokenSupplied(self):
