@@ -42,7 +42,7 @@
       </q-td>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/users/' + props.row.UserID)" />
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleUser(props)" />
       </q-td>
   </q-table>
 
@@ -97,7 +97,9 @@ import callbackHelper from '../callbackHelper'
 export default {
   // name: 'UsersTable',
   props: [
-    'defaultDisplayedColumns'
+    'defaultDisplayedColumns',
+    'persistantSettingsSlot',
+    'clickSingleUserCallback'
   ],
   data () {
     return {
@@ -114,17 +116,6 @@ export default {
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       tableSelected: [],
-      tablePersistSettingsOLD: {
-        visibleColumns: ['known_as', 'TenantRoles'],
-        serverPagination: {
-          page: 1,
-          rowsNumber: 10, // specifying this determines pagination is server-side
-          rowsPerPage: 10,
-          sortBy: null,
-          descending: true
-        },
-        filter: ''
-      },
       futureRefreshRequested: false,
       createUserModalDialogVisible: false,
       createUserModalDialogData: {
@@ -133,6 +124,11 @@ export default {
     }
   },
   methods: {
+    clickSingleUser (props) {
+      if (typeof (this.clickSingleUserCallback) !== 'undefined') {
+        this.clickSingleUserCallback(props)
+      }
+    },
     deleteUserNoConfirm (TTT, usr) {
       var callback = {
         ok: function (response) {
@@ -289,7 +285,7 @@ export default {
   computed: {
     tablePersistSettings: {
       get () {
-        return this.$store.getters['tablePersistStore/tableStttings']('usersMain', this.defaultDisplayedColumns)
+        return this.$store.getters['tablePersistStore/tableStttings'](this.persistantSettingsSlot, this.defaultDisplayedColumns)
       }
     }
   },

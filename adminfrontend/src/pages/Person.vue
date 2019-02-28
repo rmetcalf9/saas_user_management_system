@@ -86,7 +86,13 @@
       </q-modal-layout>
     </q-modal>
 
+    <UserSelectionModal
+      ref="UserSelectionModal"
+      :title="'Select User to Associate with person ' + personData.guid"
+      @ok="associateWithUserBtnClickSelectUserOK"
+    />
   </q-page>
+
 </template>
 
 <style>
@@ -95,6 +101,7 @@
 <script>
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
+import UserSelectionModal from '../components/UserSelectionModal'
 
 function getEmptyPersonData () {
   return {
@@ -103,6 +110,9 @@ function getEmptyPersonData () {
 
 export default {
   name: 'PageIndex',
+  components: {
+    UserSelectionModal
+  },
   data () {
     return {
       personData: getEmptyPersonData(),
@@ -115,8 +125,17 @@ export default {
     }
   },
   methods: {
+    associateWithUserBtnClickSelectUserOK (response) {
+      for (var x in response.selectedUserList) {
+        console.log('X:', x)
+        console.log('response.selectedUserList[x]:', response.selectedUserList[x])
+        Notify.create({color: 'positive', detail: 'TODO Process dialog result: ' + response.selectedUserList[x].UserID})
+      }
+      // TODO Future Refrest
+      // TTT.refreshPersonData()
+    },
     associateWithUserBtnClick () {
-      Notify.create('TODO User selection to associate user')
+      this.$refs.UserSelectionModal.launchDialog()
     },
     unassociateWithUserBtnClick () {
       Notify.create('TODO Selection to unassociate user')
