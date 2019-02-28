@@ -23,6 +23,22 @@
         <q-item-tile label>Linked User Records ({{ personData.associatedUsers.length }})</q-item-tile>
         <q-item-tile sublabel v-for="curUserGUID in personData.associatedUsers" :key=curUserGUID><a :href="'/#/' + $route.params.tenantName + '/users/' + curUserGUID.UserID">{{ curUserGUID.UserID }}</a></q-item-tile>
       </q-item-main>
+      <q-item-side right>
+      <q-btn
+        color="positive"
+        size="xs"
+        round
+        @click="associateWithUserBtnClick"
+        icon="add"
+      ></q-btn>&nbsp;
+      <q-btn
+        color="negative"
+        size="xs"
+        round
+        @click="unassociateWithUserBtnClick"
+        icon="remove"
+      ></q-btn>
+      </q-item-side>
     </q-item>
 
     <q-item>
@@ -99,6 +115,12 @@ export default {
     }
   },
   methods: {
+    associateWithUserBtnClick () {
+      Notify.create('TODO User selection to associate user')
+    },
+    unassociateWithUserBtnClick () {
+      Notify.create('TODO Selection to unassociate user')
+    },
     okEditPersonDialog () {
       var TTT = this
       this.editPersonModalDialogVisible = false
