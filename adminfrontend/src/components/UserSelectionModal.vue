@@ -76,7 +76,9 @@ export default {
       this.visible = false
     },
     launchDialog () {
+      this.$store.commit('tablePersistStore/resetTableSettings', 'usersSel')
       this.$refs.userTable.tableSelected = []
+      this.$refs.userTable.refresh()
       this.visible = true
     }
   }

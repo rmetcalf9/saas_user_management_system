@@ -21,7 +21,17 @@
     <q-item>
       <q-item-main >
         <q-item-tile label>Linked User Records ({{ personData.associatedUsers.length }})</q-item-tile>
-        <q-item-tile sublabel v-for="curUserGUID in personData.associatedUsers" :key=curUserGUID><a :href="'/#/' + $route.params.tenantName + '/users/' + curUserGUID.UserID">{{ curUserGUID.UserID }}</a></q-item-tile>
+        <q-item-tile sublabel v-for="curUser in personData.associatedUsers" :key=curUser>
+          <a :href="'/#/' + $route.params.tenantName + '/users/' + curUser.UserID">{{ curUser.UserID }}</a>&nbsp;
+          <q-btn
+            color="negative"
+            size="xs"
+            round
+            @click="unassociateWithUserBtnClick(curUser)"
+            icon="remove"
+          >
+          </q-btn>
+        </q-item-tile>
       </q-item-main>
       <q-item-side right>
       <q-btn
@@ -31,13 +41,6 @@
         @click="associateWithUserBtnClick"
         icon="add"
       ></q-btn>&nbsp;
-      <q-btn
-        color="negative"
-        size="xs"
-        round
-        @click="unassociateWithUserBtnClick"
-        icon="remove"
-      ></q-btn>
       </q-item-side>
     </q-item>
 
@@ -121,24 +124,78 @@ export default {
         guid: '',
         ObjectVersion: ''
       },
-      editPersonModalDialogVisible: false
+      editPersonModalDialogVisible: false,
+      futureRefreshRequested: false
     }
   },
   methods: {
-    associateWithUserBtnClickSelectUserOK (response) {
-      for (var x in response.selectedUserList) {
-        console.log('X:', x)
-        console.log('response.selectedUserList[x]:', response.selectedUserList[x])
-        Notify.create({color: 'positive', detail: 'TODO Process dialog result: ' + response.selectedUserList[x].UserID})
+    _addAuth (userData) {
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', detail: 'Person Auth Added - ' + userData.UserID})
+          TTT.futureRefresh()
+        },
+        error: function (error) {
+          Notify.create('Add Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error))
+        }
       }
-      // TODO Future Refrest
-      // TTT.refreshPersonData()
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/auths/' + userData.UserID + '/' + TTT.personData.guid,
+        method: 'post',
+        postdata: {
+          'UserID': userData.UserID,
+          'personGUID': TTT.personData.guid
+        },
+        callback: callback,
+        curPath: TTT.$router.history.current.path
+      })
+    },
+    associateWithUserBtnClickSelectUserOK (response) {
+      var TTT = this
+      for (var x in response.selectedUserList) {
+        TTT._addAuth(response.selectedUserList[x])
+      }
     },
     associateWithUserBtnClick () {
       this.$refs.UserSelectionModal.launchDialog()
     },
-    unassociateWithUserBtnClick () {
-      Notify.create('TODO Selection to unassociate user')
+    unassociateWithUserBtnClick (userData) {
+      var TTT = this
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to remove user auth with ' + userData.UserID,
+        ok: {
+          push: true,
+          label: 'Yes - remove'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).then(() => {
+        var callback = {
+          ok: function (response) {
+            Notify.create({color: 'positive', detail: 'Person Auth Removed - ' + userData.UserID})
+            // TTT.futureRefresh()
+            TTT.refreshPersonData()
+          },
+          error: function (error) {
+            Notify.create('Remove Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error))
+          }
+        }
+        TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+          path: '/auths/' + userData.UserID + '/' + TTT.personData.guid,
+          method: 'delete',
+          callback: callback,
+          curPath: TTT.$router.history.current.path
+        })
+      }).catch(() => {
+        // Do nothing
+      })
     },
     okEditPersonDialog () {
       var TTT = this
@@ -180,6 +237,17 @@ export default {
       this.editPersonModalDialogVisible = true
 
       this.$refs.someTextBoxDataInput.focus()
+    },
+    futureRefresh () {
+      if (this.futureRefreshRequested) {
+        return
+      }
+      this.futureRefreshRequested = true
+      setTimeout(this.futureRefreshDo, 500)
+    },
+    futureRefreshDo () {
+      this.futureRefreshRequested = false
+      this.refreshPersonData()
     },
     refreshPersonData () {
       var personIDToLoad = this.$route.params.selPerGUID
