@@ -2,28 +2,30 @@
 export function someGetter (state) {
 }
 */
-/*
-function getDefaultTableSettings (defaultVisibleColumns) {
-  return {
-    visibleColumns: defaultVisibleColumns,
-    serverPagination: {
-      page: 1,
-      rowsNumber: 10, // specifying this determines pagination is server-side
-      rowsPerPage: 10,
-      sortBy: null,
-      descending: true
-    },
-    filter: ''
-  }
-}
-*/
+
 export function tableStttings (state) {
   return function (tableName, defaultVisibleColumns) {
-    return state.ttt
-    // console.log('Calling Getter', tableName)
-    // if (typeof (state.tableSettingsValues[tableName]) === 'undefined') {
-    //   state.tableSettingsValues[tableName] = getDefaultTableSettings(defaultVisibleColumns)
-    // }
-    // return getDefaultTableSettings(defaultVisibleColumns)
+    var freeSlot = -1
+    var curSlot = 0
+    while (freeSlot === -1) {
+      if (state.tableSettingsLink[curSlot] === tableName) {
+        return state.tableSettingsValues[curSlot]
+      }
+      if (state.tableSettingsLink[curSlot] === '_') {
+        freeSlot = curSlot
+      }
+      curSlot++
+      // We will get an error if we try and use more than 10 slots
+    }
+    // no data found for this table name but slot is found
+    state.tableSettingsLink[freeSlot] = tableName
+    state.tableSettingsValues[freeSlot].visibleColumns = defaultVisibleColumns
+    state.tableSettingsValues[freeSlot].serverPagination.page = 1
+    state.tableSettingsValues[freeSlot].serverPagination.rowsNumber = 10
+    state.tableSettingsValues[freeSlot].serverPagination.rowsPerPage = 10
+    state.tableSettingsValues[freeSlot].serverPagination.sortBy = null
+    state.tableSettingsValues[freeSlot].serverPagination.descending = true
+    state.tableSettingsValues[freeSlot].filter = ''
+    return state.tableSettingsValues[freeSlot]
   }
 }

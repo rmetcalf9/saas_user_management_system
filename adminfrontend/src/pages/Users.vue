@@ -293,10 +293,6 @@ export default {
     tablePersistSettings: {
       get () {
         return this.$store.getters['tablePersistStore/tableStttings']('usersMain', ['known_as', 'TenantRoles'])
-      },
-      set (val) {
-        console.log('tablePersistSettings set:', val)
-        this.$store.commit('tablePersistStore/updateTableSettings', {tableName: 'usersMain', val: val})
       }
     }
   },

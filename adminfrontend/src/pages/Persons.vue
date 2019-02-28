@@ -100,17 +100,6 @@ export default {
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       tableSelected: [],
-      tablePersistSettings: {
-        visibleColumns: ['guid'],
-        serverPagination: {
-          page: 1,
-          rowsNumber: 10, // specifying this determines pagination is server-side
-          rowsPerPage: 10,
-          sortBy: null,
-          descending: true
-        },
-        filter: ''
-      },
       futureRefreshRequested: false,
       createPersonModalDialogVisible: false,
       createPersonModalDialogData: {
@@ -269,6 +258,11 @@ export default {
     }
   },
   computed: {
+    tablePersistSettings: {
+      get () {
+        return this.$store.getters['tablePersistStore/tableStttings']('personsMain', ['guid'])
+      }
+    }
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch

@@ -57,18 +57,7 @@ export default {
         { name: 'Description', required: false, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
         { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
-      ],
-      tablePersistSettings: {
-        visibleColumns: ['Name', 'Description'],
-        serverPagination: {
-          page: 1,
-          rowsNumber: 10, // specifying this determines pagination is server-side
-          rowsPerPage: 10,
-          sortBy: null,
-          descending: true
-        },
-        filter: ''
-      }
+      ]
     }
   },
   methods: {
@@ -165,6 +154,13 @@ export default {
         pagination: this.tablePersistSettings.serverPagination,
         filter: this.tablePersistSettings.filter
       })
+    }
+  },
+  computed: {
+    tablePersistSettings: {
+      get () {
+        return this.$store.getters['tablePersistStore/tableStttings']('tenantsMain', ['Name', 'Description'])
+      }
     }
   },
   mounted () {
