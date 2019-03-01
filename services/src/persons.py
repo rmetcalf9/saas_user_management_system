@@ -90,6 +90,6 @@ def DeletePerson(appObj, personGUID, objectVersion = None):
       appObj.objectStore.removeJSONObject(appObj, "userAuths", authKey)
   return personObj
   
-def GetPaginatedPersonData(appObj, request, outputFN, filterFN):
-  return appObj.objectStore.getPaginatedResult(appObj, "Persons",  appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
+def GetPaginatedPersonData(appObj, request, outputFN):
+  return appObj.objectStore.getPaginatedResult(appObj, "Persons",  appObj.getPaginatedParamValues(request), request, outputFN)
 

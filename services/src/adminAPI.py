@@ -122,37 +122,10 @@ def registerAPI(appObj):
 
       try:
         outputFN = defOutput
-        filterFN = None
-        return appObj.objectStore.getPaginatedResult(appObj, "tenants", appObj.getPaginatedParamValues(request), request, outputFN, filterFN)
+        return appObj.objectStore.getPaginatedResult(appObj, "tenants", appObj.getPaginatedParamValues(request), request, outputFN)
       except:
         raise InternalServerError   
 
-#      def output(item):
-#        return item
-#        #return appObj.appData['jobsData'].jobs[item]._caculatedDict(appObj)
-#      def filter(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
-#        #if whereClauseText.find('=') == -1:
-#        #  if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
-#        #    return True
-#        #  if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
-#        #    return True
-#        #  return False
-#        ##only supports a single search param
-#        #sp = whereClauseText.split("=")
-#        #if sp[0]=="PINNED":
-#        #  if sp[1]=="TRUE":
-#        #     return appObj.appData['jobsData'].jobs[item].pinned
-#        #  if sp[1]=="FALSE":
-#        #     return not appObj.appData['jobsData'].jobs[item].pinned
-#        #  return False
-#        #return False
-#        return True
-#      return appObj.getPaginatedResult(
-#        [], #appObj.appData['jobsData'].jobs_name_lookup,
-#        output,
-#        request,
-#        filter
-#      )
 
     @nsAdmin.doc('post Tenant')
     @nsAdmin.expect(getCreateTenantModel(appObj), validate=True)
@@ -274,15 +247,9 @@ def registerAPI(appObj):
       def defOutput(item):
         return CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
 
-      def filterFN(item, whereClauseText):
-        userDICT = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
-        #TODO replace with a dict awear generic function
-        #  we also need to consider removing spaces from consideration
-        return whereClauseText in str(userDICT).upper()
-        
       try:
         outputFN = defOutput
-        return GetPaginatedUserData(appObj, request, outputFN, filterFN)
+        return GetPaginatedUserData(appObj, request, outputFN)
       except Exception as e:
         print(e)
         print(str(e.args))
@@ -424,12 +391,8 @@ def registerAPI(appObj):
 
       try:
         outputFN = defOutput
-        filterFN = None
-        return GetPaginatedPersonData(appObj, request, outputFN, filterFN)
+        return GetPaginatedPersonData(appObj, request, outputFN)
       except:
-        print(e)
-        print(str(e.args))
-        print(e.args)
         raise InternalServerError   
 
     @nsAdmin.doc('post Person')

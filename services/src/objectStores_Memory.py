@@ -60,10 +60,21 @@ class ObjectStore_Memory(ObjectStore):
       return objectTypeDict[objectKey]
     return None, None, None, None
 
-  def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN, filterFN):
+  def _filterFN(self, item, whereClauseText):
+    if whereClauseText is None:
+      return True
+    if whereClauseText == '':
+      return True
+    ###userDICT = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
+    #TODO replace with a dict awear generic function
+    #  we also need to consider removing spaces from consideration
+    return whereClauseText in str(item).upper()
+    
+    
+  def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN):
     return appObj.getPaginatedResult(
       self.objectData[objectType],
       outputFN,
       request,
-      filterFN
+      self._filterFN
     )
