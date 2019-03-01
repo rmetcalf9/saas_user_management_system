@@ -11,12 +11,14 @@ class personClass():
   _creationDateTime = None
   _lastUpdateDateTime = None
   _AssociatedUserObjs = None
-  def __init__(self, JSONRetrievedFromStore, objectVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs):
+  _authObjs = None
+  def __init__(self, JSONRetrievedFromStore, objectVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs, authObjs):
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
     self._objectVersion = objectVersion
     self._creationDateTime = creationDateTime
     self._lastUpdateDateTime = lastUpdateDateTime
     self._AssociatedUserObjs = AssociatedUserObjs
+    self._authObjs = authObjs
   
   def _generateJSONRepresenationAndStoreItInCache(self):
     aa = self._mainDict.copy()
@@ -27,6 +29,7 @@ class personClass():
     for u in self._AssociatedUserObjs:
       associatedUsers.append(u.getJSONRepresenation())
     aa['associatedUsers'] = associatedUsers
+    aa['personAuths'] = self._authObjs
     
     self._jsonRepersentation = aa
   

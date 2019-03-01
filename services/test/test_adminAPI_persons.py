@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
 from appObj import appObj
-from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
+from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, uniqueKeyCombinator
 from test_adminAPI import test_api as parent_test_api
 from test_adminAPI_users import defaultUserData
 import json
@@ -14,7 +14,12 @@ import copy
 defaultPersonData = {
   'guid': "SOMEVALUE",
   'ObjectVersion': "1",
-  "associatedUsers": [defaultUserData]
+  "associatedUsers": [defaultUserData],
+  "personAuths": [{
+    "AuthProviderGUID": "574a7b51-110d-4fcd-b4a4-868884922109", 
+    "AuthProviderType": "internal", 
+    "AuthUserKey": "AdminTestSet" + internalUSerSufix + uniqueKeyCombinator +"internal"
+  }]
 }
 
 
@@ -26,8 +31,12 @@ class test_adminAPIPersons(parent_test_api):
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultJSON['pagination']['total'],1)
     
+    masterTenantDictTenantDict = self.getTenantDICT(masterTenantName)
+    
+    defaultPersonDataAltered = copy.deepcopy(defaultPersonData)
+    defaultPersonDataAltered["personAuths"][0]["AuthProviderGUID"] = masterTenantDictTenantDict["AuthProviders"][0]["guid"]
     UnknownVals = ["creationDateTime", "lastUpdateDateTime", "guid", "associatedUsers"]
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultPersonData, UnknownVals, msg="Person data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultPersonDataAltered, UnknownVals, msg="Person data mismatch")
     self.assertEqual(len(resultJSON['result'][0]["associatedUsers"]),1)
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["associatedUsers"][0],defaultPersonData["associatedUsers"][0], ["creationDateTime", "lastUpdateDateTime"], msg="Person data mismatch")
 

@@ -28,7 +28,8 @@ class test_api(testHelperAPIClient):
     expectedResult = {
       "ObjectVersion": "1",
       "guid": "IGN",
-      "associatedUsers": []
+      "associatedUsers": [],
+      "personAuths": []
     }
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, ["guid", "creationDateTime", "lastUpdateDateTime","associatedUsers"], msg='JSON of created Person is not what was expected')

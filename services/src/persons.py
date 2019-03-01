@@ -6,6 +6,7 @@ from personObj import personClass
 from constants import customExceptionClass
 from objectStores_base import WrongObjectVersionExceptionClass
 from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
+from authsCommon import getAuthRecord
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information
@@ -32,15 +33,31 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
 
+def _getAuthInfoForKeyForPersonObj(appObj, authKey):
+  authRecordDict = getAuthRecord(appObj, authKey)
+  return {
+    "AuthUserKey": authRecordDict["AuthUserKey"],
+    "AuthProviderType": authRecordDict["AuthProviderType"],  
+    "AuthProviderGUID": authRecordDict["AuthProviderGUID"]
+  }
+  
 def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime, lastUpdateDateTime):
   AssociatedUserIDs = getListOfUserIDsForPersonNoTenantCheck(appObj, PersonDict['guid'])
   ##print("AAA:", AssociatedUserIDs, ":", personGUID)
   AssociatedUserObjs = []
   for uid in AssociatedUserIDs:
     AssociatedUserObjs.append(GetUser(appObj,uid))
-  personObj = personClass(PersonDict, objVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs)
-  return personObj
   
+  authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2 = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", PersonDict['guid'])
+  authObjs = []
+  if authKeyDICT is not None:
+    #there are people with no auths
+    for authKey in authKeyDICT:
+      authObjs.append(_getAuthInfoForKeyForPersonObj(appObj, authKey))
+  
+  personObj = personClass(PersonDict, objVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs, authObjs)
+  return personObj
+
 def GetPerson(appObj, personGUID):
   personDICT, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
   if personDICT is None:

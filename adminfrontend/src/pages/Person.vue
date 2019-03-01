@@ -46,6 +46,12 @@
 
     <q-item>
       <q-item-main >
+        <q-item-tile label>Auths</q-item-tile>
+        <q-item-tile sublabel v-for="curAuth in personData.personAuths" :key=curAuth.AuthUserKey>Provider: {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
+      </q-item-main>
+    </q-item>
+    <q-item>
+      <q-item-main >
         <q-item-tile label>Update Info</q-item-tile>
         <q-item-tile sublabel>Created {{ personData.creationDateTime }}</q-item-tile>
         <q-item-tile sublabel>Last Updated {{ personData.lastUpdateDateTime }}</q-item-tile>

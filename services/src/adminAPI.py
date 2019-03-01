@@ -13,8 +13,6 @@ from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssoc
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict
 from tenantObj import tenantClass
-from userObj import userClass
-from personObj import personClass
 from objectStores_base import WrongObjectVersionExceptionClass
 import copy
 
@@ -46,9 +44,15 @@ def getCreatePersonModel(appObj):
   })
 
 def getPersonModel(appObj):
+  personAuthsModel = appObj.flastRestPlusAPIObject.model('PersonAuthsInfo', {
+    'AuthUserKey': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
+    'AuthProviderType': fields.String(default='DEFAULT', description='Type of AuthProvider for this Auth'),
+    'AuthProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider for this Auth')
+  })
   return appObj.flastRestPlusAPIObject.model('PersonInfo', {
     'guid': fields.String(default='DEFAULT', description='Unique identifier of Person'),
     'associatedUsers': fields.List(fields.Nested(getUserModel(appObj))),
+    'personAuths': fields.List(fields.Nested(personAuthsModel)),
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
     'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
     'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')

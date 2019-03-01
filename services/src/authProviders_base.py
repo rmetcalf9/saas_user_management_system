@@ -4,13 +4,10 @@
 from constants import authFailedException, customExceptionClass
 import uuid
 from persons import associatePersonWithAuthCalledWhenAuthIsCreated
+from authsCommon import getAuthRecord
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
-
-def getAuthRecord(appObj, key):
-  authRecord, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
-  return authRecord
 
 #person.py also uses userAuths
   
@@ -58,6 +55,7 @@ class authProvider():
     mainObjToStore = {
       "AuthUserKey": key,
       "AuthProviderType": self.dataDict["Type"],
+      "AuthProviderGUID": self.guid,
       "AuthProviderJSON": self._getAuthData(appObj, credentialDICT),
       "personGUID": personGUID
     }
