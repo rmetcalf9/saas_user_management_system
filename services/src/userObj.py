@@ -66,3 +66,4 @@ class userClass():
     if tenantName not in self._mainDict["TenantRoles"]:
       return False
     return rollName in self._mainDict["TenantRoles"][tenantName]
+

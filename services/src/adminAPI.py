@@ -274,9 +274,14 @@ def registerAPI(appObj):
       def defOutput(item):
         return CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
 
+      def filterFN(item, whereClauseText):
+        userDICT = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3]).getJSONRepresenation()
+        #TODO replace with a dict awear generic function
+        #  we also need to consider removing spaces from consideration
+        return whereClauseText in str(userDICT).upper()
+        
       try:
         outputFN = defOutput
-        filterFN = None
         return GetPaginatedUserData(appObj, request, outputFN, filterFN)
       except Exception as e:
         print(e)
@@ -456,7 +461,7 @@ def registerAPI(appObj):
   class personInfo(Resource):
 
     '''Admin'''
-    @nsAdmin.doc('get PErson')
+    @nsAdmin.doc('get Person')
     @nsAdmin.marshal_with(getPersonModel(appObj))
     @nsAdmin.response(200, 'Success', model=getPersonModel(appObj))
     @nsAdmin.response(401, 'Unauthorized')
