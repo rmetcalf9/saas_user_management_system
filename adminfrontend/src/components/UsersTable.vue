@@ -22,7 +22,8 @@
           color="primary"
           push
           @click="createUserButtonClick"
-        >Create User</q-btn>
+        >Create User</q-btn>&nbsp;
+        <q-search clearable hide-underline v-model="tablePersistSettings.filter" />
       </template>
       <template slot="top-right" slot-scope="props">
        <q-table-columns
