@@ -54,8 +54,8 @@ def getPersonModel(appObj):
     'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
   })
 
-def getAuthModel(appObj):
-  return appObj.flastRestPlusAPIObject.model('CreateAuthInfo', {
+def getUserPersonLinkModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('UserPersonLinkInfo', {
     'UserID': fields.String(default='DEFAULT', description='Unique identifier of User'),
     'personGUID': fields.String(default='DEFAULT', description='Unique identifier of Person')
   })
@@ -524,16 +524,16 @@ def registerAPI(appObj):
       except:
         raise InternalServerError
 
-  @nsAdmin.route('/<string:tenant>/auths/<string:userID>/<string:personGUID>')
-  class authInfo(Resource):
-    @nsAdmin.doc('post Auth')
-    @nsAdmin.expect(getAuthModel(appObj), validate=True)
+  @nsAdmin.route('/<string:tenant>/userpersonlinks/<string:userID>/<string:personGUID>')
+  class userpersonlinkInfo(Resource):
+    @nsAdmin.doc('post userpersonlink')
+    @nsAdmin.expect(getUserPersonLinkModel(appObj), validate=True)
     @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
     @appObj.flastRestPlusAPIObject.response(201, 'Created')
-    @appObj.flastRestPlusAPIObject.marshal_with(getAuthModel(appObj), code=200, description='Auth created', skip_none=True)
-    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @appObj.flastRestPlusAPIObject.marshal_with(getUserPersonLinkModel(appObj), code=200, description='userpersonlink created', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - userpersonlink dosen\'t have required role')
     def post(self, tenant, userID, personGUID):
-      '''Create Auth'''
+      '''Create userpersonlink'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       content = request.get_json()
       requiredInPayload(content, ["UserID", "personGUID"])
@@ -561,14 +561,14 @@ def registerAPI(appObj):
         "personGUID": personGUID
       }, 201
 
-    @nsAdmin.doc('delete Auth')
-    @nsAdmin.response(200, 'Auth Deleted')
+    @nsAdmin.doc('delete userpersonlink')
+    @nsAdmin.response(200, 'userpersonlink Deleted')
     @nsAdmin.response(400, 'Error')
     @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @nsAdmin.response(409, 'Conflict')
-    @appObj.flastRestPlusAPIObject.marshal_with(getAuthModel(appObj), code=200, description='Auth Deleted')
+    @appObj.flastRestPlusAPIObject.marshal_with(getUserPersonLinkModel(appObj), code=200, description='User Person Link Deleted')
     def delete(self, tenant, userID, personGUID):
-      '''Delete Auth'''
+      '''Delete userpersonlink'''
       decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
       #No Object version needed for auths
       try:

@@ -141,7 +141,7 @@ export default {
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/auths/' + userData.UserID + '/' + TTT.personData.guid,
+        path: '/userpersonlinks/' + userData.UserID + '/' + TTT.personData.guid,
         method: 'post',
         postdata: {
           'UserID': userData.UserID,
@@ -188,7 +188,7 @@ export default {
           }
         }
         TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-          path: '/auths/' + userData.UserID + '/' + TTT.personData.guid,
+          path: '/userpersonlinks/' + userData.UserID + '/' + TTT.personData.guid,
           method: 'delete',
           callback: callback,
           curPath: TTT.$router.history.current.path
