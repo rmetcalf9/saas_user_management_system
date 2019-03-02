@@ -20,8 +20,8 @@
     </q-item>
     <q-item>
       <q-item-main >
-        <q-item-tile label>Linked User Records ({{ personData.associatedUsers.length }})</q-item-tile>
-        <q-item-tile sublabel v-for="curUser in personData.associatedUsers" :key=curUser>
+        <q-item-tile label>Linked User Records ({{ numberOfAssociatedUsers }})</q-item-tile>
+        <q-item-tile sublabel v-for="curUser in personData.associatedUsers" :key=curUser.UserID>
           <a :href="'/#/' + $route.params.tenantName + '/users/' + curUser.UserID">{{ curUser.UserID }}</a>&nbsp;
           <q-btn
             color="negative"
@@ -47,7 +47,22 @@
     <q-item>
       <q-item-main >
         <q-item-tile label>Auths</q-item-tile>
-        <q-item-tile sublabel v-for="curAuth in personData.personAuths" :key=curAuth.AuthUserKey>Provider: {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
+        <div v-for="curAuth in personData.personAuths" :key=curAuth.AuthUserKey>
+          <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'internal'">
+            <AuthDisplayInternal
+              :person="personData"
+              :authData="curAuth"
+            />
+          </div>
+          <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'default'">
+            <q-item-tile sublabel >Provider: {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
+          </div>
+        </div>
+        <q-item-tile sublabel >
+          <AuthAddInternal
+            :person="personData"
+          />
+        </q-item-tile>
       </q-item-main>
     </q-item>
     <q-item>
@@ -111,6 +126,8 @@
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import UserSelectionModal from '../components/UserSelectionModal'
+import AuthDisplayInternal from '../components/authDisplayInternal'
+import AuthAddInternal from '../components/authAddInternal'
 
 function getEmptyPersonData () {
   return {
@@ -120,7 +137,9 @@ function getEmptyPersonData () {
 export default {
   name: 'PageIndex',
   components: {
-    UserSelectionModal
+    UserSelectionModal,
+    AuthDisplayInternal,
+    AuthAddInternal
   },
   data () {
     return {
@@ -135,6 +154,12 @@ export default {
     }
   },
   methods: {
+    supportedAuthType (authType) {
+      if (authType === 'internal') {
+        return 'internal'
+      }
+      return 'default'
+    },
     _addAuth (userData) {
       var TTT = this
       var callback = {
@@ -318,6 +343,17 @@ export default {
       }).catch(() => {
         // Do nothing
       })
+    }
+  },
+  computed: {
+    numberOfAssociatedUsers () {
+      if (typeof (this.personData) === 'undefined') {
+        return 0
+      }
+      if (typeof (this.personData.associatedUsers) === 'undefined') {
+        return 0
+      }
+      return this.personData.associatedUsers.length
     }
   },
   mounted () {
