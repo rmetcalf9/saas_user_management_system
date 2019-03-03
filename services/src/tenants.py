@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException
+from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException, personDosentExistException
 import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
@@ -10,6 +10,7 @@ from jwtTokenGeneration import generateJWTToken
 from objectStores_base import WrongObjectVersionException
 from users import CreateUser, AddUserRole, associateUserWithPerson
 from userPersonCommon import getListOfUserIDsForPerson, GetUser
+from persons import GetPerson
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -143,7 +144,20 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy):
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'])
   
   return GetUser(appObj, userData['user_unique_identifier'])
+
+def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT):
+  tenantObj = GetTenant(appObj, tenantName)
+  if tenantObj is None:
+    raise tenantDosentExistException
+  personObj = GetPerson(appObj, personGUID)
+  if personObj is None:
+    raise personDosentExistException
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID)
+  authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID)
   
+  return authData
+
+
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
   def updTenant(tenant):

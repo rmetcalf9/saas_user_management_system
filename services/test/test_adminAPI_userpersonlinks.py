@@ -174,7 +174,7 @@ class test_adminAPIUserPersonLinks(parent_test_api):
       data=json.dumps(newauthDICT), 
       content_type='application/json'
     )
-    self.assertEqual(result.status_code, 201, msg="Create auth failed - " + result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 201, msg="Create userpsersonlink failed - " + result.get_data(as_text=True))
 
     result = self.testClient.delete(
       self.adminAPIPrefix + '/' + masterTenantName + userPersonLinkApiPath + newauthDICT["UserID"] + 'XX' + '/' + newauthDICT["personGUID"], 

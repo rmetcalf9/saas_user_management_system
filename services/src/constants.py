@@ -29,6 +29,7 @@ tenantDosentExistException = customExceptionClass('Tenant Dosen\'t Exist','tenan
 ShouldNotSupplySaltWhenCreatingAuthProvException = customExceptionClass('Should not supply salt when creating new auth prov', 'ShouldNotSupplySaltWhenCreatingAuthProvException')
 cantUpdateExistingAuthProvException = customExceptionClass('can\'t Update Existing Auth Prov', 'cantUpdateExistingAuthProvException')
 cantDeleteMasterTenantException = customExceptionClass('can\'t delete master tenant', 'cantDeleteMasterTenantException')
+personDosentExistException = customExceptionClass('Person Dosen\'t Exist','personDosentExistException')
 
 
 jwtHeaderName="jwt-auth-token"

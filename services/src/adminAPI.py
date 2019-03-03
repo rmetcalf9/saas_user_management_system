@@ -8,7 +8,7 @@ from apiSharedModels import getTenantModel, getUserModel
 from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
-from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant
+from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
 from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict
@@ -64,6 +64,21 @@ def getUserPersonLinkModel(appObj):
     'personGUID': fields.String(default='DEFAULT', description='Unique identifier of Person')
   })
 
+def getCreateAuthModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('AuthInfo', {
+    'personGUID': fields.String(default='DEFAULT', description='Unique identifier of Person', required=True),
+    'tenantName': fields.String(description='Name of Tenant'),
+    'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of Person', required=True),
+    'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
+  })
+
+def getAuthModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('AuthInfo', {
+    'personGUID': fields.String(default='DEFAULT', description='Unique identifier of Person', required=True),
+    'tenantName': fields.String(description='Name of Tenant'),
+    'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of Person', required=True),
+    'AuthUserKey': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
+  })
   
 def requiredInPayload(content, fieldList):
   for a in fieldList:
@@ -557,4 +572,42 @@ def registerAPI(appObj):
         raise Exception('InternalServerError')
       except:
         raise InternalServerError
+     
+  @nsAdmin.route('/<string:tenant>/auths')
+  class authsInfo(Resource):
+    
+    @nsAdmin.doc('post Auth')
+    @nsAdmin.expect(getCreateAuthModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(201, 'Created')
+    @appObj.flastRestPlusAPIObject.marshal_with(getAuthModel(appObj), code=200, description='Auth created', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant):
+      '''Create Auth'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ["personGUID", "authProviderGUID", "credentialJSON", "tenantName"])
+      try:
+        authData = AddAuthForUser(appObj, content["tenantName"], content["authProviderGUID"], content["personGUID"], content["credentialJSON"])
+        print("authDate:", authData)
+        resp = {
+          "personGUID": authData["personGUID"],
+          "tenantName": content["tenantName"],
+          "authProviderGUID": authData["AuthProviderGUID"],
+          "AuthUserKey": authData["AuthUserKey"]
+        }
+        return resp, 201
+      except customExceptionClass as err:
+        if (err.id=='tenantDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='personDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='authProviderNotFoundException'):
+          raise BadRequest(err.text)
+        if (err.id=='InvalidAuthConfigException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError
+     
       
