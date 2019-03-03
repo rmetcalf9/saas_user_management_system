@@ -113,7 +113,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getNewAuthProviderJSON(appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], authProv['AllowUserCreation'], authProv['ConfigJSON'])
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
   
-  def updTenant(tenant):
+  def updTenant(tenant, transactionContext):
     if tenant is None:
       raise tenantDosentExistException
     return jsonForTenant
@@ -160,7 +160,7 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT)
 
 def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
-  def updTenant(tenant):
+  def updTenant(tenant, transactionContext):
     if tenant is None:
       raise tenantDosentExistException
     tenant["AuthProviders"][authProviderJSON['guid']] = authProviderJSON

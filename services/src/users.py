@@ -38,13 +38,13 @@ def CreateUser(appObj, userData, mainTenant, createdBy):
 def associateUserWithPerson(appObj, UserID, personGUID):
   #Add reference from User to person
   ## No object version checking because read and update is the same operaiton
-  def updUser(user):
+  def updUser(user, transactionContext):
     if personGUID not in user:
       user.append(personGUID)
     return user
   appObj.objectStore.updateJSONObject(appObj,"users_associatedPersons", UserID, updUser)
 
-  def upd(idfea):
+  def upd(idfea, transactionContext):
     if idfea is None:
       idfea = []
     if UserID in idfea:
@@ -56,7 +56,7 @@ def associateUserWithPerson(appObj, UserID, personGUID):
   appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
   
 def AddUserRole(appObj, userID, tennantName, roleName):
-  def updUser(obj):
+  def updUser(obj, transactionContext):
     if obj is None:
       raise userDosentExistException
     if tennantName not in obj["TenantRoles"]:
@@ -105,7 +105,7 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
     "other_data": other_data
   }
 
-  def updUser(user):
+  def updUser(user, transactionContext):
     if user is None:
       raise userNotFoundException
     return jsonForUser

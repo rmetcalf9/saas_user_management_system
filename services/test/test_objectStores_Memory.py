@@ -26,7 +26,7 @@ class test_objectStoresMemory(unittest.TestCase):
     obj = ObjectStore_Memory()
     lastSavedVer = None
     for x in range(1,6): 
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastSavedVer)
+      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastSavedVer, None)
       self.assertEqual(savedVer, x)
       lastSavedVer = savedVer
 
@@ -35,7 +35,7 @@ class test_objectStoresMemory(unittest.TestCase):
     lastSavedVer = None
     for x in range(1,6): 
       newJSONString = copy.deepcopy(JSONString)
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", newJSONString, lastSavedVer)
+      savedVer = obj._saveJSONObject(appObj, "Test", "123", newJSONString, lastSavedVer, None)
       newJSONString = copy.deepcopy( obj._getObjectJSON(appObj, "Test", "123"))
       
       self.assertEqual(savedVer, x)
@@ -46,7 +46,7 @@ class test_objectStoresMemory(unittest.TestCase):
     obj = ObjectStore_Memory()
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
-    savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, None)
+    savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, None, None)
     objDict, ver, creationDateTime, lastUpdateDateTime = obj._getObjectJSON(appObj, "Test", "123")
     self.assertEqual(objDict, JSONString)
     self.assertEqual(ver, savedVer)
@@ -61,7 +61,7 @@ class test_objectStoresMemory(unittest.TestCase):
     incTime = testDateTime
     for x in range(1,6):
       appObj.setTestingDateTime(incTime)
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastVersion)
+      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastVersion, None)
       objDict, ver, creationDateTime, lastUpdateDateTime = obj._getObjectJSON(appObj, "Test", "123")
       self.assertEqual(objDict, JSONString)
       self.assertEqual(ver, savedVer)

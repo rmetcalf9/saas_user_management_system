@@ -13,7 +13,7 @@ class ObjectStore_Memory(ObjectStore):
       self.objectData[objectType] = dict()
     return self.objectData[objectType]
 
-  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion):
+  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion, transactionContext):
     dictForObjectType = self.__getDictForObjectType(objectType)
     curTimeValue = appObj.getCurDateTime()
     newObjectVersion = None
@@ -28,7 +28,7 @@ class ObjectStore_Memory(ObjectStore):
     dictForObjectType[objectKey] = (JSONString, newObjectVersion, dictForObjectType[objectKey][2], curTimeValue)
     return newObjectVersion
 
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject):
+  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext):
     dictForObjectType = self.__getDictForObjectType(objectType)
     if objectVersion is not None:
       if objectKey not in dictForObjectType:
@@ -42,17 +42,20 @@ class ObjectStore_Memory(ObjectStore):
     return None
 
   # Update the object in single operation. make transaction safe??
-  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion):
+  ## updateFn gets two paramaters:
+  ##  object
+  ##  transactionContext
+  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion, transactionContext):
     obj, ver, creationDateTime, lastUpdateDateTime = self.getObjectJSON(appObj, objectType, objectKey)
     if objectVersion is None:
       #If object version is not supplied then assume update will not cause an error
       objectVersion = ver 
     if str(objectVersion) != str(ver):
       raise WrongObjectVersionException
-    obj = updateFn(obj)
+    obj = updateFn(obj, transactionContext)
     if obj is None:
       raise StoringNoneObjectAfterUpdateOperationException
-    return self.saveJSONObject(appObj, objectType, objectKey, obj, objectVersion)
+    return self.saveJSONObject(appObj, objectType, objectKey, obj, objectVersion, transactionContext)
   
   def _getObjectJSON(self, appObj, objectType, objectKey):
     objectTypeDict = self.__getDictForObjectType(objectType)

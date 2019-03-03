@@ -22,21 +22,21 @@ def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, la
 # if being called when we are deleting a person then deletePersonFn will not set to None
 def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn):
   ##Remove record from users_associatedPersons
-  def updateTheUsersPersonListFn(associatedPersonList):
+  def updateTheUsersPersonListFn(associatedPersonList, transactionContext):
     if associatedPersonList is None:
       raise userDosentExistException
     if personGUID in associatedPersonList:
       associatedPersonList.remove(personGUID)
 
     #Removing other reference inside same function so they occur in same transaction
-    def updUsersForEachPerson(idfea):
+    def updUsersForEachPerson(idfea, transactionContext):
       if idfea is None:
         raise personDosentExistException
       #May not be in list as if person delete is called first, the user delete also calls this
       if userID in idfea:
         idfea.remove(userID)
       return idfea
-    appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, updUsersForEachPerson)
+    appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, updUsersForEachPerson, transactionContext)
       
       
     return associatedPersonList

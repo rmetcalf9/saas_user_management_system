@@ -24,7 +24,7 @@ def CreatePerson(appObj, guidToUse = None):
   return personDict
 
 def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserKey):
-  def upd(idfea):
+  def upd(idfea, transactionContext):
     if idfea is None:
       idfea = []
     if AuthUserKey in idfea:
@@ -72,7 +72,7 @@ def UpdatePerson(appObj, personGUID, objectVersion):
   if str(personObj.getObjectVersion()) != str(objectVersion):
     raise WrongObjectVersionExceptionClass
     
-  def updPerson(person):
+  def updPerson(person, transactionContext):
     if person is None:
       raise personDosentExistException
     return person

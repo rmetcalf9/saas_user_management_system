@@ -16,19 +16,19 @@ class ObjectStore():
   
 
   #Return value is objectVersion of object saved
-  def saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion = None):
+  def saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion = None, transactionContext = None):
     if 'ObjectVersion' in JSONString:
       raise SavedObjectShouldNotContainObjectVersionException
-    return self._saveJSONObject(appObj, objectType, objectKey, JSONString, objectVersion)
+    return self._saveJSONObject(appObj, objectType, objectKey, JSONString, objectVersion, transactionContext)
 
   #Return value is None
-  def removeJSONObject(self, appObj, objectType, objectKey, objectVersion = None, ignoreMissingObject = False):
-    return self._removeJSONObject(appObj, objectType, objectKey, objectVersion, ignoreMissingObject)
+  def removeJSONObject(self, appObj, objectType, objectKey, objectVersion = None, ignoreMissingObject = False, transactionContext = None):
+    return self._removeJSONObject(appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext)
 
   # Update the object in single operation. make transaction safe??
   # Return value is same as saveJSONobject
-  def updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion = None):
-    return self._updateJSONObject(appObj, objectType, objectKey, updateFn, objectVersion)
+  def updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion = None, transactionContext = None):
+    return self._updateJSONObject(appObj, objectType, objectKey, updateFn, objectVersion, transactionContext)
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
   #Return None, None, None, None if object isn't in store
@@ -44,11 +44,11 @@ class ObjectStore():
       outputFN = defOutput
     return self._getPaginatedResult(appObj, objectType, paginatedParamValues, request, outputFN)
   
-  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion):
+  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion, transactionContext):
     raise Exception('Not Overridden')
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject):
+  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext):
     raise Exception('Not Overridden')
-  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion):
+  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion, transactionContext):
     raise Exception('Not Overridden')
   def _getObjectJSON(self, appObj, objectType, objectKey):
     raise Exception('Not Overridden')
