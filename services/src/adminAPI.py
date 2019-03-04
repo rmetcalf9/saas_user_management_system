@@ -66,7 +66,7 @@ def getUserPersonLinkModel(appObj):
   })
 
 def getCreateAuthModel(appObj):
-  return appObj.flastRestPlusAPIObject.model('AuthInfo', {
+  return appObj.flastRestPlusAPIObject.model('CreateAuthInfo', {
     'personGUID': fields.String(default='DEFAULT', description='Unique identifier of Person', required=True),
     'tenantName': fields.String(description='Name of Tenant'),
     'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of Person', required=True),

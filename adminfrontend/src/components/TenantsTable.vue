@@ -29,11 +29,11 @@
       />
       </template>
       <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
-        <q-btn flat no-caps dense :label="props.value" @click="clickSingleTenantCallback" width="100%"/>
+        <q-btn flat no-caps dense :label="props.value" @click="clickSingleTenantCallbackFN(props)" width="100%"/>
       </q-td>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/tenants/' + props.row.Name)" />
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleTenantCallbackFN(props)" />
       </q-td>
   </q-table>
 </div></template>
@@ -64,6 +64,11 @@ export default {
     }
   },
   methods: {
+    clickSingleTenantCallbackFN (props) {
+      if (typeof (this.clickSingleTenantCallback) !== 'undefined') {
+        this.clickSingleTenantCallback(props)
+      }
+    },
     request ({ pagination, filter }) {
       var TTT = this
       TTT.tableLoading = true
