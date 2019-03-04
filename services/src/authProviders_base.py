@@ -47,7 +47,7 @@ class authProvider():
 
   def AddAuth(self, appObj, credentialDICT, personGUID):
     key = self._makeKey(credentialDICT)
-    obj, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"userAuths", key)
+    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, key)
     if obj is not None:
       #print('key:', key)
       raise tryingToCreateDuplicateAuthException
@@ -64,7 +64,7 @@ class authProvider():
     return mainObjToStore
 
   def Auth(self, appObj, credentialDICT):
-    obj = getAuthRecord(appObj, self._makeKey(credentialDICT))
+    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT))
     if obj is None:
       raise authFailedException
     self._auth(appObj, obj, credentialDICT)

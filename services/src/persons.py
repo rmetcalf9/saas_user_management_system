@@ -34,7 +34,7 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
   appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
 
 def _getAuthInfoForKeyForPersonObj(appObj, authKey):
-  authRecordDict = getAuthRecord(appObj, authKey)
+  authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey)
   return {
     "AuthUserKey": authRecordDict["AuthUserKey"],
     "AuthProviderType": authRecordDict["AuthProviderType"],  

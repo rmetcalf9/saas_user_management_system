@@ -402,7 +402,7 @@ class test_funcitonal(test_api):
     authTypeConfigDict = {'username': 'AA'}
     authRecordKey = AuthProvider._makeKey(authTypeConfigDict)
     #Use the key the first time to make sure auth record exists
-    authRecord = getAuthRecord(appObj, authRecordKey)
+    authRecord, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey)
     #print("print Auth Record is:",authRecord)
 
     
@@ -425,7 +425,7 @@ class test_funcitonal(test_api):
     #Check auth record has been NOT been removed
     # auth records will not be removed with the tenant as auth records
     # are independant of tenant. Any clean up will be done when the person is deleted
-    authRecord2 = getAuthRecord(appObj, authRecordKey)
+    authRecord2, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey)
     self.assertJSONStringsEqualWithIgnoredKeys(authRecord, authRecord2, [], msg='Error userAuths should not have changed')
     
   def test_deleteTwoAuthProvidersTogether(self):
