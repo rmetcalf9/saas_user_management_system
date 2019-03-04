@@ -61,6 +61,7 @@
         <q-item-tile sublabel >
           <AuthAddInternal
             :person="personData"
+            @updateMaster="refreshPersonData"
           />
         </q-item-tile>
       </q-item-main>

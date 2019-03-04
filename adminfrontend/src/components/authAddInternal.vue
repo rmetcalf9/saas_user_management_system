@@ -19,6 +19,7 @@
 import { Notify } from 'quasar'
 import TenantSelectionModal from '../components/TenantSelectionModal'
 import bcrypt from 'bcryptjs'
+import callbackHelper from '../callbackHelper'
 
 export default {
   // name: 'AuthAddInternal',
@@ -78,9 +79,25 @@ export default {
             password: passwordhash
           }
         }
-        console.log('createAuthPostData:', createAuthPostData)
-        console.log('randPassword:', randPassword)
-        Notify.create({color: 'positive', detail: 'TODO ' + tenant.Name + ':' + username + ':' + passwordhash})
+        var callback = {
+          ok: function (response) {
+            TTT.$emit('updateMaster', {})
+            TTT.$q.dialog({
+              title: 'New Internal Auth account created',
+              message: 'Username: ' + username + ' Password: ' + randPassword
+            })
+          },
+          error: function (error) {
+            Notify.create('Create Auth failed - ' + callbackHelper.getErrorFromResponse(error))
+          }
+        }
+        TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+          path: '/auths',
+          method: 'post',
+          postdata: createAuthPostData,
+          callback: callback,
+          curPath: TTT.$router.history.current.path
+        })
       })
     }
   }
