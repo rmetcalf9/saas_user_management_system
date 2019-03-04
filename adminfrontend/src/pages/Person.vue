@@ -55,7 +55,7 @@
             />
           </div>
           <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'default'">
-            <q-item-tile sublabel >Provider: {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
+            <q-item-tile sublabel > {{ curAuth.tenantName }} - {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
           </div>
         </div>
         <q-item-tile sublabel >

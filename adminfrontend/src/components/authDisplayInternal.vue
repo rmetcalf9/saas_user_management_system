@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-item-tile sublabel >
-      Provider: Internal, Key:{{ authData.AuthUserKey }}
+      Provider: {{ authData.tenantName }} - Internal, Key:{{ authData.AuthUserKey }}
     <q-btn
         color="primary"
         push
