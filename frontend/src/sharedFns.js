@@ -64,7 +64,7 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
-function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtTokenData, refreshTokenData) {
+function updateCookieWithRefreshToken (refreshCompleteFN, callback, apiPrefix, tenantName, jwtTokenData, refreshTokenData) {
   var config = {
     method: 'POST',
     url: getAPIPathToCall(apiPrefix, false, '/login/' + tenantName + '/refresh'),
@@ -80,6 +80,7 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
 
       // callback ok
       callback.ok(response)
+      refreshCompleteFN()
     },
     (response) => {
       callback.error(response)
@@ -87,7 +88,18 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
   )
 }
 
+/*
+refreshFns {
+  startRefreshFN,
+  endRefreshFN,
+  refreshCompleteFN,
+  isRefreshInProgressFN,
+  addPostRefreshActionFN
+}
+*/
+
 function callAPI (
+  refreshFns,
   tenantName,
   apiPrefix,
   authed,
@@ -137,18 +149,33 @@ function callAPI (
       }
       // Only code 401 gets here
       if (!refreshAlreadyTried) {
+        if (refreshFns.isRefreshInProgressFN()) {
+          // console.log('Got a 401 but as a refresh is in progress storing it for retry')
+          var callback3 = {
+            ok: function (response) {
+              // console.log('FUTURE CALLBACK OK')
+              var cookie = Cookies.get('usersystemUserCredentials')
+              callAPI(refreshFns, tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
+            },
+            error: callback.error
+          }
+          refreshFns.addPostRefreshActionFN(callback3)
+          return
+        }
+        refreshFns.startRefreshFN()
         var callback2 = {
           ok: function (response) {
             // callAPI with new jwtTokenData value and refresh value - ignore response
             var cookie = Cookies.get('usersystemUserCredentials')
-            callAPI(tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
+            callAPI(refreshFns, tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
+            refreshFns.endRefreshFN()
           },
           error: function (response) {
             moveToLoginService(curPath, 'Session refresh failed')
             // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
           }
         }
-        updateCookieWithRefreshToken(callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
+        updateCookieWithRefreshToken(refreshFns.refreshCompleteFN, callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
       } else {
         moveToLoginService(curPath, 'Logged out due to inactivity')
         // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')

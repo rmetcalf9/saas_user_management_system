@@ -42,10 +42,43 @@ function readServerInfo (state, commit, currentHREF, callback) {
   shared.TryToConnectToAPI(currentHREF, state.tenantName, callback2, '/login/serverinfo')
 }
 
-function _callAdminAPI (state, path, method, postdata, callback, curPath, headers) {
+function _callAdminAPI (commit, state, path, method, postdata, callback, curPath, headers) {
   var cookie = Cookies.get('usersystemUserCredentials')
 
-  shared.callAPI(state.tenantName, state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+  var refreshFns = {
+    startRefreshFN: function () {
+      commit('START_REFRESH')
+    },
+    endRefreshFN: function () {
+      commit('END_REFRESH')
+    },
+    isRefreshInProgressFN: function () {
+      return state.refeshTokenInProgress
+    },
+    refreshCompleteFN: function () {
+      for (var curIdx in state.refeshTokenInfoStoredResponses) {
+        // console.log('Launching refresh delayed API call')
+        state.refeshTokenInfoStoredResponses[curIdx].ok('undefined')
+      }
+      commit('REFRESH_STORED_RESPONSE_PROCESS_COMPLETE')
+    },
+    addPostRefreshActionFN: function (callback) {
+      commit('RECORD_REFRESH_STORED_RESPONSE', callback)
+    }
+  }
+
+  if (state.refeshTokenInProgress) {
+    console.log('Preventing call in action.js because refresh is in progress')
+    var callback2 = {
+      ok: function (response) {
+        shared.callAPI(refreshFns, state.tenantName, state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+      },
+      error: callback.error
+    }
+    commit('RECORD_REFRESH_STORED_RESPONSE', callback2)
+  } else {
+    shared.callAPI(refreshFns, state.tenantName, state.apiPrefix, true, '/admin/' + state.tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+  }
 }
 
 export const callAdminAPI = ({ dispatch, commit, state }, params) => {
@@ -57,7 +90,7 @@ export const callAdminAPI = ({ dispatch, commit, state }, params) => {
   if (state.apiPrefix === null) {
     var callback = {
       ok: function (response) {
-        _callAdminAPI(state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers)
+        _callAdminAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers)
       },
       error: params.callback.error
     }
@@ -65,5 +98,5 @@ export const callAdminAPI = ({ dispatch, commit, state }, params) => {
     return
   }
 
-  _callAdminAPI(state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers)
+  _callAdminAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers)
 }

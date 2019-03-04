@@ -2,6 +2,8 @@
 export default {
   readServerInfoInProgress: false,
   readServerInfoStoredResponses: [],
+  refeshTokenInProgress: false,
+  refeshTokenInfoStoredResponses: [],
   apiPrefix: null,
   tenantName: null,
   pageTitle: 'Default Page Title',

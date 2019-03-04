@@ -24,5 +24,23 @@ export const checkAuthProviders = ({ dispatch, commit, state }, params) => {
 }
 
 export const callLoginAPI = ({ dispatch, commit, state }, params) => {
-  shared.callAPI(state.tenant, state.apiPrefix, false, '/login/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback)
+  var refreshFns = {
+    startRefreshFN: function () {
+      console.log('Not Implemented')
+    },
+    endRefreshFN: function () {
+      console.log('Not Implemented')
+    },
+    isRefreshInProgressFN: function () {
+      console.log('Not Implemented')
+    },
+    refreshCompleteFN: function () {
+      console.log('Not Implemented')
+    },
+    addPostRefreshActionFN: function (callback) {
+      console.log('Not Implemented')
+    }
+  }
+
+  shared.callAPI(refreshFns, state.tenant, state.apiPrefix, false, '/login/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback)
 }
