@@ -14,7 +14,8 @@ tryingToCreateDuplicateAuthException = customExceptionClass('That username is al
 class authProvider():
   dataDict = None #See checks in init
   guid = None
-  def __init__(self, dataDict, guid):
+  tenantName = None
+  def __init__(self, dataDict, guid, tenantName):
     if not 'ConfigJSON' in dataDict:
       raise Exception("ERROR No ConfigJSON supplied when creating authProvider")
     if not 'Type' in dataDict:
@@ -24,6 +25,7 @@ class authProvider():
     self.dataDict = dataDict
     self._authSpercificInit()
     self.guid = guid
+    self.tenantName = tenantName
     
   def getType(self):
     return self.dataDict['Type']
@@ -57,7 +59,8 @@ class authProvider():
       "AuthProviderType": self.dataDict["Type"],
       "AuthProviderGUID": self.guid,
       "AuthProviderJSON": self._getAuthData(appObj, credentialDICT),
-      "personGUID": personGUID
+      "personGUID": personGUID,
+      "tenantName": self.tenantName
     }
     appObj.objectStore.saveJSONObject(appObj,"userAuths",  key, mainObjToStore)
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key)

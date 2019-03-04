@@ -18,7 +18,8 @@ defaultPersonData = {
   "personAuths": [{
     "AuthProviderGUID": "574a7b51-110d-4fcd-b4a4-868884922109", 
     "AuthProviderType": "internal", 
-    "AuthUserKey": "AdminTestSet" + internalUSerSufix + uniqueKeyCombinator +"internal"
+    "AuthUserKey": "AdminTestSet" + internalUSerSufix + uniqueKeyCombinator +"internal",
+    "tenantName": masterTenantName
   }]
 }
 

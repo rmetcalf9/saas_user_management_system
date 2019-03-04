@@ -193,7 +193,7 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
   tenant = GetTenant(appObj, tenantName)
   if tenant is None:
     raise tenantDosentExistException
-  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID),authProviderGUID)
+  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID),authProviderGUID, tenantName)
   if AuthProvider is None:
     print("Can't find auth provider with type \"" + tenant.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenant.getName())
     raise authProviderTypeNotFoundException

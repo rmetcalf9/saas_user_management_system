@@ -397,7 +397,8 @@ class test_funcitonal(test_api):
     }
     AuthProvider = authProviderFactory(
       authProvDict,
-      authProvGUID
+      authProvGUID,
+      tenantWithNoAuthProviders['Name']
     )
     authTypeConfigDict = {'username': 'AA'}
     authRecordKey = AuthProvider._makeKey(authTypeConfigDict)

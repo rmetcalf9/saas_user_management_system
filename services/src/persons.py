@@ -38,7 +38,8 @@ def _getAuthInfoForKeyForPersonObj(appObj, authKey):
   return {
     "AuthUserKey": authRecordDict["AuthUserKey"],
     "AuthProviderType": authRecordDict["AuthProviderType"],  
-    "AuthProviderGUID": authRecordDict["AuthProviderGUID"]
+    "AuthProviderGUID": authRecordDict["AuthProviderGUID"],
+    "tenantName": authRecordDict["tenantName"]
   }
   
 def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime, lastUpdateDateTime):
