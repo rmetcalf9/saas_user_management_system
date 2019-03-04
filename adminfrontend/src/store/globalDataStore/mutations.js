@@ -24,7 +24,14 @@ export function SET_LOGOUT_CLICK_CUR_ROUTE (state, curRoute) {
 
 export function START_READ_SERVER_INFO (state) {
   state.readServerInfoInProgress = true
+  state.readServerInfoStoredResponses = []
 }
 export function END_READ_SERVER_INFO (state) {
   state.readServerInfoInProgress = false
+}
+export function RECORD_READ_SERVER_INFO_STORED_RESPONSE (state, callback) {
+  state.readServerInfoStoredResponses.push(callback)
+}
+export function READ_SERVER_INFO_STORED_RESPONSE_PROCESS_COMPLETE (state) {
+  state.readServerInfoStoredResponses = []
 }

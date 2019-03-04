@@ -70,8 +70,8 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
     url: getAPIPathToCall(apiPrefix, false, '/login/' + tenantName + '/refresh'),
     data: {'token': refreshTokenData.token}
   }
-  console.log(config)
-  console.log(refreshTokenData)
+  // console.log(config)
+  // console.log(refreshTokenData)
 
   axios(config).then(
     (response) => {
