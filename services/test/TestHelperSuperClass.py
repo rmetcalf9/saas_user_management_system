@@ -12,7 +12,7 @@ from baseapp_for_restapi_backend_with_swagger import from_iso8601
 import jwt
 from base64 import b64decode
 
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, _getAuthProvider
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken

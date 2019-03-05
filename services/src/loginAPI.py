@@ -18,7 +18,7 @@ def getLoginPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('LoginPostData', {
   'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
   'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
-  'identityGUID': fields.String(default='DEFAULT', description='Identity to use to log in with')
+  'UserID': fields.String(default='DEFAULT', description='If a person has access to mutiple Users then they specify the UserID of the one they need to login with')
   })
 def getRefreshPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('RefreshPostData', {
@@ -132,13 +132,13 @@ def registerAPI(appObj):
       if 'authProviderGUID' not in request.get_json():
         raise BadRequest('No authProviderGUID provided')
       authProviderGUID = request.get_json()['authProviderGUID']
-      identityGUID = None
-      if 'identityGUID' in request.get_json():
-        identityGUID = request.get_json()['identityGUID']
+      UserID = None
+      if 'UserID' in request.get_json():
+        UserID = request.get_json()['UserID']
      
       try:
         #print("loginAPI.py login - authProviderGUID:",authProviderGUID)
-        loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], requestedUserID='not_valid_guid')
+        loginResult = Login(appObj, tenant, authProviderGUID,  request.get_json()['credentialJSON'], UserID)
       except customExceptionClass as err:
         if (err.id=='authFailedException'):
           raise Unauthorized('authFailedException')
@@ -148,6 +148,8 @@ def registerAPI(appObj):
           raise BadRequest('authProviderNotFoundException')
         if (err.id=='InvalidAuthConfigException'):
           raise Unauthorized('Invalid credentials provided')
+        if (err.id=='UnknownUserIDException'):
+          raise BadRequest(err.text)
         raise Exception('InternalServerError')
       except:
         raise InternalServerError

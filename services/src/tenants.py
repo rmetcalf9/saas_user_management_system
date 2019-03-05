@@ -15,7 +15,7 @@ from persons import GetPerson
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
-UnknownIdentityException = Exception('Unknown Identity')
+UnknownUserIDException = customExceptionClass('Unknown UserID', 'UnknownUserIDException')
 authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not found', 'authProviderTypeNotFoundException')
 userCreationNotAllowedException = customExceptionClass('User Creaiton Not Allowed', 'userCreationNotAllowedException')
 
@@ -205,7 +205,7 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
 # - if no identityGUID is specified and the user only has one identity then the user and role info for the selected identity is returned
 # - if no identityGUID is specified and the user has mutiple identities a list of possible identities is returned
 # - if an identityGUID is specified and correct then the user and role info
-def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID='not_valid_guid'):
+def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=None):
   resDict = {
     'possibleUserIDs': None,
     'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
@@ -218,7 +218,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
     'other_data': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
-  authUserObj = _getAuthProvider(appObj, tenantName, authProviderGUID).Auth(appObj, credentialJSON)
+  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID)
+  authUserObj = authProvider.Auth(appObj, credentialJSON)
   if authUserObj is None:
     raise Exception
   
@@ -227,7 +228,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
   if len(possibleUserIDs)==0:
     raise PersonHasNoAccessToAnyIdentitiesException
-  if requestedUserID == "not_valid_guid":
+  if requestedUserID is None:
     if len(possibleUserIDs)==1:
       requestedUserID = possibleUserIDs[0]
     else:
@@ -235,7 +236,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
       resDict['possibleUserIDs'] = possibleUserIDs
       return resDict
   if requestedUserID not in possibleUserIDs:
-    raise UnknownIdentityException
+    print('requestedUserID:',requestedUserID)
+    raise UnknownUserIDException
 
   userDict = GetUser(appObj,requestedUserID).getReadOnlyDict()
   if userDict is None:

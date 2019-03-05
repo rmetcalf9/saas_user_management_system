@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
+from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
 import unittest
 import json
 from appObj import appObj
@@ -125,12 +125,7 @@ class test_loginapi_norm(test_api):
     #Sucessfull login test point
     #self.assertTrue(False)
     
-  def test_getMutipleIdentityResponseDefaultUser(self):
-    testDateTime = datetime.now(pytz.timezone("UTC"))
-    appObj.setTestingDateTime(testDateTime)
-    userID1 = 'TestUser1'
-    userID2 = 'TestUser2'
-    InternalAuthUsername = 'ABC'
+  def setupLoginWithMutipleUserIDsAndGetLoginResponse(self, InternalAuthUsername, userID1, userID2):
     res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername)
     
     result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
@@ -148,8 +143,15 @@ class test_loginapi_norm(test_api):
     }
     result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 200)
-    result2JSON = json.loads(result2.get_data(as_text=True))
-
+    return json.loads(result2.get_data(as_text=True))
+    
+  def test_getMutipleUserIDsResponseDefaultUser(self):
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
+    userID1 = 'TestUser1'
+    userID2 = 'TestUser2'
+    result2JSON = self.setupLoginWithMutipleUserIDsAndGetLoginResponse('ABC', userID1, userID2)
+    
     user1ExcpectedResult = {
       "UserID": userID1,
       "TenantRoles": [{
@@ -301,3 +303,50 @@ class test_loginapi_norm(test_api):
       
     self.assertTrue(id1Found, msg="Identity 1 not in response")
     self.assertTrue(id2Found, msg="Identity 2 not in response")
+
+  def test_loginAsOneOfTwoPossibleUsers(self):
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
+    userID1 = 'TestUser1'
+    userID2 = 'TestUser2'
+    result2JSON = self.setupLoginWithMutipleUserIDsAndGetLoginResponse('ABC', userID1, userID2)
+
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+
+    loginJSON = {
+      "UserID": userID1,
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": 'ABC', 
+        "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+       }
+    }
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 200, 'Login failed - ' + result2.get_data(as_text=True))
+
+  def test_loginAsInvalidUSerIDWithOfTwoPossibleUsers(self):
+    testDateTime = datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
+    userID1 = 'TestUser1'
+    userID2 = 'TestUser2'
+    result2JSON = self.setupLoginWithMutipleUserIDsAndGetLoginResponse('ABC', userID1, userID2)
+
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+
+    loginJSON = {
+      "UserID": 'invalid',
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": 'ABC', 
+        "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
+       }
+    }
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 400, 'Login failed - ' + result2.get_data(as_text=True))
+

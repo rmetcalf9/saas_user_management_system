@@ -212,8 +212,27 @@ export default {
             console.log('Redirecting back to main site:', TTT.$store.state.globalDataStore.usersystemReturnaddress)
             window.location.href = TTT.$store.state.globalDataStore.usersystemReturnaddress
           } else {
-            Notify.create('Identity selection not implemented')
-            console.log(response.data)
+            console.log('response:', response.data.possibleUsers)
+            var items = []
+            for (var x in response.data.possibleUsers) {
+              console.log(response.data.possibleUsers[x])
+              items.push({label: response.data.possibleUsers[x].known_as + ' (' + response.data.possibleUsers[x].UserID + ')', value: response.data.possibleUsers[x].UserID})
+            }
+            console.log(items)
+            TTT.$q.dialog({
+              title: 'Select User',
+              message: 'You have access to mutiple user accounts on this site',
+              options: {
+                type: 'radio',
+                model: items[0].value,
+                items: items
+              },
+              cancel: true,
+              preventClose: true,
+              color: 'secondary'
+            }).then(data => {
+              Notify.create('Identity selection not implemented ' + data)
+            })
           }
         },
         error: function (response) {

@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient, env, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownIdentityException, CreateUser, _getAuthProvider
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 from appObj import appObj
 from constants import authFailedException
@@ -106,7 +106,7 @@ class test_tenants(testHelperAPIClient):
         'username': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
         'password': bytes(self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant.getAuthProvider(singleAuthProvGUID)['saltForPasswordHashing']),'utf-8')
       }, 'invalid_identity_guid')
-    self.checkGotRightException(context,UnknownIdentityException)
+    self.checkGotRightException(context,UnknownUserIDException)
 
   # Person can log in and choose to use userA or userB
   def test_oneAuthCanAccessTwoIdentities(self):
