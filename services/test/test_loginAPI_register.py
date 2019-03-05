@@ -301,3 +301,67 @@ class test_loginapi_register(parent_test_api):
     )
     self.assertEqual(loginResult.status_code, 401, msg="Managed to login as a deleted user")
     
+  def test_registerNewUserFailsWithDuplicateUsername(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+  
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 400, msg="Registration of second user with same name did not fail")
+
+  def test_registerNewUserFailsWithDuplicateUsernameDifferByCase(self):
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+  
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    userName = "testSetUserName"
+    userName2 = "testSetUserNaME"
+    
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": { 
+        "username": userName, 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
+       }
+    }
+
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+    
+    registerJSON2 = copy.deepcopy(registerJSON)
+    registerJSON2["credentialJSON"]["username"] = userName2
+    
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 400, msg="Registration of second user with same name did not fail " + registerResult.get_data(as_text=True) )
+    

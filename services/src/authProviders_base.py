@@ -4,7 +4,7 @@
 from constants import authFailedException, customExceptionClass
 import uuid
 from persons import associatePersonWithAuthCalledWhenAuthIsCreated
-from authsCommon import getAuthRecord
+from authsCommon import getAuthRecord, SaveAuthRecord
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
@@ -62,7 +62,7 @@ class authProvider():
       "personGUID": personGUID,
       "tenantName": self.tenantName
     }
-    appObj.objectStore.saveJSONObject(appObj,"userAuths",  key, mainObjToStore)
+    SaveAuthRecord(appObj, key, mainObjToStore)
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key)
     return mainObjToStore
 

@@ -106,3 +106,46 @@ class test_adminAPIAuths(parent_test_api):
       content_type='application/json'
     )
     self.assertEqual(result.status_code, 400, msg="Create auth did not fail - " + result.get_data(as_text=True))
+
+    
+  def test_createInternalAuthViaAdminAPIFailsWithDuplicateUsername(self):
+    #creates auths for the default person
+    
+    newAuthDICT = self.getNewAuthDICT("testUsername")
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/auths', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newAuthDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201, msg="Create auth failed - " + result.get_data(as_text=True))
+
+    newAuthDICT = self.getNewAuthDICT("testUsername")
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/auths', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newAuthDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create auth did not fail - " + result.get_data(as_text=True))
+
+  def test_createInternalAuthViaAdminAPIFailsWithDuplicateUsernameCaseDiffers(self):
+    #creates auths for the default person
+    
+    newAuthDICT = self.getNewAuthDICT("testUsername")
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/auths', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newAuthDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201, msg="Create auth failed - " + result.get_data(as_text=True))
+
+    newAuthDICT = self.getNewAuthDICT("testUsernaME")
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/auths', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newAuthDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create auth did not fail - " + result.get_data(as_text=True))

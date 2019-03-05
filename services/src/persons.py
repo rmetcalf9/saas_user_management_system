@@ -6,7 +6,7 @@ from personObj import personClass
 from constants import customExceptionClass
 from objectStores_base import WrongObjectVersionExceptionClass
 from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
-from authsCommon import getAuthRecord
+from authsCommon import getAuthRecord, DeleteAuthRecord
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information
@@ -105,7 +105,7 @@ def DeletePerson(appObj, personGUID, objectVersion = None):
   
   if authsForThisGUID is not None:
     for authKey in authsForThisGUID:
-      appObj.objectStore.removeJSONObject(appObj, "userAuths", authKey)
+      DeleteAuthRecord(appObj, authKey)
   return personObj
   
 def GetPaginatedPersonData(appObj, request, outputFN):
