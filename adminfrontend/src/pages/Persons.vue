@@ -24,6 +24,8 @@
           push
           @click="createPersonButtonClick"
         >Create Person</q-btn>
+        &nbsp;
+        <q-search clearable hide-underline v-model="tablePersistSettings.filter" />
       </template>
       <template slot="top-right" slot-scope="props">
        <q-table-columns
