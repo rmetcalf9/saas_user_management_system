@@ -1,5 +1,5 @@
 #Python script to insert test data to a running instance
-from constants import masterTenantName, jwtHeaderName
+from constants import masterTenantName, jwtHeaderName, masterTenantDefaultSystemAdminRole
 import requests
 import json
 import os
@@ -106,6 +106,79 @@ registeruserDICT = {
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
    }
 }
+
+def createUserUsingAdminAPI(UserID, known_as, mainTenant):
+  print(" - creating user " + UserID + " on " + mainTenant + ' ', end='')
+  postDict = {"UserID":UserID,"known_as":known_as,"mainTenant":mainTenant}
+  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/users", postDict,[201, 400])
+  if (res==400):
+    if (resDICT['message'] == 'That username is already in use'):
+      print('Skipping as it already exists', end='')
+    else:
+      print("")
+      print("ERROR ERROR ERROR")
+      print(res)
+      print(resDICT)
+      raise Exception()
+  print(".")
+
+def getTenantRoleDictFromTenantRoles(tenantRoles, tenantName):
+  for x in tenantRoles:
+    if x["TenantName"] == tenantName:
+      return x
+  a = {
+    "TenantName": tenantName,
+    "ThisTenantRoles": []
+  }
+  tenantRoles.append(a)
+  return a
+  
+def addUserRole(UserID, TenantName, role):
+  print(" - adding " + role + " role to " + UserID + " on " + TenantName + " ", end='')
+  AuthProvidersDICT,res = callGetService(ADMIN, "/" + masterTenantName + "/users/" + UserID, [200])
+  #only works with existing tenant. When we need to add tenant will expand code
+  tenantRoleDict = getTenantRoleDictFromTenantRoles(AuthProvidersDICT["TenantRoles"], TenantName)
+  tenantRoleDict["ThisTenantRoles"].append(role)
+  tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/users/" + UserID, AuthProvidersDICT, [200])
+  print(".")
+
+def createPersonUsingAdminAPI():
+  print(" - creating person ", end='')
+  postDict = {}
+  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/persons", postDict,[201])
+  print(' - new person GUID=' + resDICT['guid'])
+  return resDICT
+
+def linkUserAndPerson(UserID, personGUID):
+  print(" - creating person link between " + UserID + " and " + personGUID + ' ', end='')
+  postDict = {"UserID":UserID,"personGUID":personGUID}
+  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/userpersonlinks/" + UserID + "/" + personGUID, postDict,[201])
+  print(".")
+
+def addInternalAuth(personGUID, tenantName, authProvider, username, password):
+  hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, authProvider['saltForPasswordHashing'])
+  print(" - adding admin2 internal auth for " + personGUID + " ", end='')
+  postDict = {"personGUID":personGUID,"tenantName":tenantName,"authProviderGUID":authProvider['guid'],"credentialJSON":{"username":username,"password":hashedPassword}}
+  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/auths", postDict,[201, 400])
+  if (res==400):
+    if (resDICT['message'] == 'That username is already in use'):
+      print('Skipping as it already exists', end='')
+    else:
+      print("")
+      print("ERROR ERROR ERROR")
+      print(res)
+      print(resDICT)
+      raise Exception()
+  print('.')
+  
+print("Setting up admin2 auth connected to two users - adminTest and normalTest")
+createUserUsingAdminAPI("adminTest", "adminTest", masterTenantName)
+createUserUsingAdminAPI("normalTest", "normalTest", masterTenantName)
+addUserRole("adminTest", masterTenantName, masterTenantDefaultSystemAdminRole)
+personDICT = createPersonUsingAdminAPI()
+linkUserAndPerson("adminTest", personDICT['guid'])
+linkUserAndPerson("normalTest", personDICT['guid'])
+addInternalAuth(personDICT['guid'], masterTenantName, MainAuthProvider, 'admin2', 'admin2')
 
 print("Creating allowUserCreation tenants with users created with register method")
 for cur in range(4):
