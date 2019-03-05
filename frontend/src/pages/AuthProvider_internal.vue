@@ -177,63 +177,91 @@ export default {
     cancelCreateAccountDialog () {
       this.createAccountDialogModel.visible = false
     },
+    processLoginOKResponse (response, loginRequestPostData) {
+      var TTT = this
+      Loading.hide()
+      // Decide if we got a JWTToken back or an identity selection list
+      //   either forward to the JWTToken setting page or
+      //   the identity selection page
+      var gotLogin = false
+      if ('jwtData' in response.data) {
+        gotLogin = true
+      }
+      if (gotLogin) {
+        if (TTT.$store.state.globalDataStore.usersystemReturnaddress === null) {
+          Notify.create('Error - Webapplication failed to provide return address')
+          return
+        }
+        if (typeof (TTT.$store.state.globalDataStore.usersystemReturnaddress) === 'undefined') {
+          Notify.create('Error - Webapplication failed to provide return address (undefined)')
+          return
+        }
+        if (TTT.$store.state.globalDataStore.usersystemReturnaddress === 'undefined') {
+          Notify.create('Error - Webapplication failed to provide return address (undefined string)')
+          return
+        }
+        // Expires in one day
+        TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+        console.log('Redirecting back to main site:', TTT.$store.state.globalDataStore.usersystemReturnaddress)
+        window.location.href = TTT.$store.state.globalDataStore.usersystemReturnaddress
+      } else {
+        console.log('response:', response.data.possibleUsers)
+        var items = []
+        for (var x in response.data.possibleUsers) {
+          console.log(response.data.possibleUsers[x])
+          items.push({label: response.data.possibleUsers[x].known_as + ' (' + response.data.possibleUsers[x].UserID + ')', value: response.data.possibleUsers[x].UserID})
+        }
+        console.log(items)
+        TTT.$q.dialog({
+          title: 'Select User',
+          message: 'You have access to mutiple user accounts on this site',
+          options: {
+            type: 'radio',
+            model: items[0].value,
+            items: items
+          },
+          cancel: true,
+          preventClose: true,
+          color: 'secondary'
+        }).then(data => {
+          var postUserSelectionCallback = {
+            ok: function (response) {
+              TTT.processLoginOKResponse(response, loginRequestPostData)
+            },
+            error: function (response) {
+              Loading.hide()
+              Notify.create('Login Failed')
+            }
+          }
+          Loading.show()
+          loginRequestPostData.UserID = data
+          this.$store.dispatch('globalDataStore/callLoginAPI', {
+            method: 'POST',
+            path: '/authproviders',
+            callback: postUserSelectionCallback,
+            postdata: loginRequestPostData
+          })
+          Notify.create('Identity selection not implemented ' + data)
+        })
+      }
+    },
     usernamePassLogin () {
       var TTT = this
       if (this.$store.state.globalDataStore.selectedAuthProvGUID === null) {
         Notify.create('No AuthProvGUID selected - you shouldn\'t navigate here directly')
         return
       }
-
+      var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.authProvInfo.saltForPasswordHashing))
+      var loginRequestPostData = {
+        credentialJSON: {
+          username: this.usernamePass.username,
+          password: passwordhash
+        },
+        authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
+      }
       var callback = {
         ok: function (response) {
-          Loading.hide()
-          // Decide if we got a JWTToken back or an identity selection list
-          //   either forward to the JWTToken setting page or
-          //   the identity selection page
-          var gotLogin = false
-          if ('jwtData' in response.data) {
-            gotLogin = true
-          }
-          if (gotLogin) {
-            if (TTT.$store.state.globalDataStore.usersystemReturnaddress === null) {
-              Notify.create('Error - Webapplication failed to provide return address')
-              return
-            }
-            if (typeof (TTT.$store.state.globalDataStore.usersystemReturnaddress) === 'undefined') {
-              Notify.create('Error - Webapplication failed to provide return address (undefined)')
-              return
-            }
-            if (TTT.$store.state.globalDataStore.usersystemReturnaddress === 'undefined') {
-              Notify.create('Error - Webapplication failed to provide return address (undefined string)')
-              return
-            }
-            // Expires in one day
-            TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
-            console.log('Redirecting back to main site:', TTT.$store.state.globalDataStore.usersystemReturnaddress)
-            window.location.href = TTT.$store.state.globalDataStore.usersystemReturnaddress
-          } else {
-            console.log('response:', response.data.possibleUsers)
-            var items = []
-            for (var x in response.data.possibleUsers) {
-              console.log(response.data.possibleUsers[x])
-              items.push({label: response.data.possibleUsers[x].known_as + ' (' + response.data.possibleUsers[x].UserID + ')', value: response.data.possibleUsers[x].UserID})
-            }
-            console.log(items)
-            TTT.$q.dialog({
-              title: 'Select User',
-              message: 'You have access to mutiple user accounts on this site',
-              options: {
-                type: 'radio',
-                model: items[0].value,
-                items: items
-              },
-              cancel: true,
-              preventClose: true,
-              color: 'secondary'
-            }).then(data => {
-              Notify.create('Identity selection not implemented ' + data)
-            })
-          }
+          TTT.processLoginOKResponse(response, loginRequestPostData)
         },
         error: function (response) {
           Loading.hide()
@@ -241,18 +269,11 @@ export default {
         }
       }
       Loading.show()
-      var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.authProvInfo.saltForPasswordHashing))
       this.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'POST',
         path: '/authproviders',
         callback: callback,
-        postdata: {
-          credentialJSON: {
-            username: this.usernamePass.username,
-            password: passwordhash
-          },
-          authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
-        }
+        postdata: loginRequestPostData
       })
     }
   },
