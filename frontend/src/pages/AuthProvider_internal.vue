@@ -42,7 +42,7 @@
           <q-field helper="Username" label="Username" :label-width="3">
             <q-input v-model="createAccountDialogModel.username" ref="usernameDialogInput"/>
           </q-field>
-          <q-field helper="Password" label="Password" :label-width="3" :error="passwordERROR">
+          <q-field :helper="passwordERRORMessage" label="Password" :label-width="3" :error="passwordERROR">
             <q-input type="password" v-model="createAccountDialogModel.password" />
           </q-field>
           <q-field helper="Retype Password" label="Retype" :label-width="3" :error="passwordERROR">
@@ -99,10 +99,25 @@ export default {
       return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
     },
     passwordERROR () {
-      if (this.createAccountDialogModel.password !== this.createAccountDialogModel.password2) {
-        return true
+      return (this.passwordERRORMessage !== 'Password')
+    },
+    passwordERRORMessage () {
+      if (/[A-Z]/.test(this.createAccountDialogModel.password) !== true) {
+        return 'Password must contain at least one uppercase letter'
       }
-      return false
+      if (/[a-z]/.test(this.createAccountDialogModel.password) !== true) {
+        return 'Password must contain at least one lowercase letter'
+      }
+      if (/\d/.test(this.createAccountDialogModel.password) !== true) {
+        return 'Password must contain at least one number'
+      }
+      if (this.createAccountDialogModel.password.length < 5) {
+        return 'Password must be at least 5 characters'
+      }
+      if (this.createAccountDialogModel.password !== this.createAccountDialogModel.password2) {
+        return 'Passwords must match'
+      }
+      return 'Password'
     }
   },
   methods: {
@@ -118,7 +133,7 @@ export default {
     okCreateAccountDialog () {
       var TTT = this
       if (this.passwordERROR) {
-        Notify.create('Invliad Password')
+        Notify.create(this.passwordERRORMessage)
         return
       }
       var callback = {
