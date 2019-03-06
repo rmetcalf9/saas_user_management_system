@@ -33,6 +33,16 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
     return idfea
   appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
 
+def deleteAuthAndUnassiciateFromPerson(appObj, personGUID, AuthUserKey):
+  def upd(idfea, transactionContext):
+    if idfea is not None:
+      if AuthUserKey in idfea:
+        idfea.remove(AuthUserKey)
+    return idfea
+  appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
+
+  DeleteAuthRecord(appObj, AuthUserKey)
+  
 def _getAuthInfoForKeyForPersonObj(appObj, authKey):
   authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey)
   return {

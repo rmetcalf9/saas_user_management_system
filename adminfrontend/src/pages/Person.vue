@@ -49,10 +49,13 @@
         <q-item-tile label>Auths</q-item-tile>
         <div v-for="curAuth in personData.personAuths" :key=curAuth.AuthUserKey>
           <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'internal'">
-            <AuthDisplayInternal
-              :person="personData"
-              :authData="curAuth"
-            />
+            <q-item-tile sublabel >
+              <q-btn class="float-left" color="negative" round @click="deleteAuth(curAuth)" icon="remove" size="xs" />
+              <AuthDisplayInternal
+                :person="personData"
+                :authData="curAuth"
+              />
+            </q-item-tile>
           </div>
           <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'default'">
             <q-item-tile sublabel > {{ curAuth.tenantName }} - {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
@@ -155,6 +158,41 @@ export default {
     }
   },
   methods: {
+    deleteAuth (curAuth) {
+      var TTT = this
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to remove auth ' + curAuth.AuthUserKey + ' (Tenant ' + curAuth.tenantName + ')',
+        ok: {
+          push: true,
+          label: 'Yes - Delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).then(() => {
+        var base64encodedkey = btoa(curAuth.AuthUserKey)
+        var callback = {
+          ok: function (response) {
+            Notify.create({color: 'positive', detail: 'Auth Deleted'})
+            TTT.refreshPersonData()
+          },
+          error: function (error) {
+            Notify.create('Delete auth failed ( ' + curAuth.AuthUserKey + ') - ' + callbackHelper.getErrorFromResponse(error))
+          }
+        }
+        TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+          path: '/auths/' + base64encodedkey,
+          method: 'delete',
+          callback: callback,
+          curPath: TTT.$router.history.current.path
+        })
+      })
+    },
     supportedAuthType (authType) {
       if (authType === 'internal') {
         return 'internal'
@@ -196,7 +234,7 @@ export default {
       var TTT = this
       TTT.$q.dialog({
         title: 'Confirm',
-        message: 'Are you sure you want to remove user auth with ' + userData.UserID,
+        message: 'Are you sure you want to remove user link with ' + userData.UserID,
         ok: {
           push: true,
           label: 'Yes - remove'
@@ -211,7 +249,7 @@ export default {
       }).then(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'Person Auth Removed - ' + userData.UserID})
+            Notify.create({color: 'positive', detail: 'User Person Link Removed - ' + userData.UserID})
             // TTT.futureRefresh()
             TTT.refreshPersonData()
           },

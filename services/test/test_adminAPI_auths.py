@@ -167,6 +167,12 @@ class test_adminAPIAuths(parent_test_api):
     loginTestResult = self.canWeLoginWithInternalAuth(newAuthDICT["authProviderGUID"], newAuthDICT["credentialJSON"]["username"], newAuthDICT["credentialJSON"]["password"], masterTenantName)
     self.assertEqual(loginTestResult.status_code, 200, msg='Could not log in - ' + result.get_data(as_text=True))  
 
+    #query the person and check it has two auths now
+    getPersonresult = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + createAuthResultJSON['personGUID'], headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(getPersonresult.status_code, 200)
+    personResultJSON = json.loads(getPersonresult.get_data(as_text=True))
+    self.assertEquals(len(personResultJSON['personAuths']),2,msg="Wrong number of auths in get Person result, was the auth created?")
+    
     base64EncodedKey = base64.b64encode(createAuthResultJSON['AuthUserKey'].encode('utf-8')).decode("utf-8") 
     deleteResult = self.testClient.delete(
       self.adminAPIPrefix + '/' + masterTenantName + '/auths/' + base64EncodedKey,
@@ -182,12 +188,42 @@ class test_adminAPIAuths(parent_test_api):
       "tenantName": masterTenantName
     }
     self.assertJSONStringsEqualWithIgnoredKeys(deleteResultJSON,expectedResult, [], msg="Delete Returned bad auth data")
-    
 
     #Check we can no longer log in with created auth
     loginTestResult = self.canWeLoginWithInternalAuth(newAuthDICT["authProviderGUID"], newAuthDICT["credentialJSON"]["username"], newAuthDICT["credentialJSON"]["password"], masterTenantName)
-    self.assertEqual(loginTestResult.status_code, 401, msg='Could log in - ' + result.get_data(as_text=True))  
-
+    self.assertEqual(loginTestResult.status_code, 401, msg='Could log in after the auth was deleted - ' + result.get_data(as_text=True))
+    
+    #Check we can still query the person and the auth link there has been removed
+    getPersonresult = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + createAuthResultJSON['personGUID'], headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(getPersonresult.status_code, 200)
+    personResultJSON = json.loads(getPersonresult.get_data(as_text=True))
+    self.assertEquals(len(personResultJSON['personAuths']),1,msg="Wrong number of auths in get Person result")
+    expectedResult = {
+      'guid': 'FORCED-CONSTANT-TESTING-PERSON-GUID', 
+      'associatedUsers': [{ #associatedUSers not checked but placed here for completeness
+        'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
+        'known_as': 'AdminTestSet', 
+        'TenantRoles': [{'TenantName': masterTenantName, 'ThisTenantRoles': [DefaultHasAccountRole, masterTenantDefaultSystemAdminRole]}], 
+        'other_data': {'createdBy': 'init/CreateMasterTenant'}, 
+        'associatedPersonGUIDs': ['FORCED-CONSTANT-TESTING-PERSON-GUID'], 
+        'ObjectVersion': '3', 
+        'creationDateTime': 'xx', 
+        'lastUpdateDateTime': 'xx'
+      }], 
+      'personAuths': [{
+        'AuthUserKey': "AdminTestSet" + internalUSerSufix + uniqueKeyCombinator + "internal", 
+        'AuthProviderType': 'internal', 
+        'AuthProviderGUID': newAuthDICT["authProviderGUID"], 
+        'tenantName': 'usersystem'
+       }], 
+      'ObjectVersion': '1', 
+      'creationDateTime': 'xx', 
+      'lastUpdateDateTime': 'xx'
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(personResultJSON,expectedResult, ['creationDateTime', 'lastUpdateDateTime', 'associatedUsers', 'personAuths'], msg="Ger person Returned bad auth data")
+    self.assertJSONStringsEqualWithIgnoredKeys(personResultJSON['personAuths'],expectedResult['personAuths'], [], msg="Get person Returned bad list of perosnAuths")
+     
+    
   def test_deleteInternalAuthBadKey(self):
     newAuthDICT = self.getNewAuthDICT()
     result = self.testClient.post(

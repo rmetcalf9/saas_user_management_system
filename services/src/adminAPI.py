@@ -9,10 +9,10 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
-from authsCommon import getAuthRecord, DeleteAuthRecord
+from authsCommon import getAuthRecord
 from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
-from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict
+from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict, deleteAuthAndUnassiciateFromPerson
 from tenantObj import tenantClass
 from objectStores_base import WrongObjectVersionExceptionClass
 import copy
@@ -631,7 +631,7 @@ def registerAPI(appObj):
       if authData is None:
         raise BadRequest('Bad auth')
       try:
-        DeleteAuthRecord(appObj, authUserKey)
+        deleteAuthAndUnassiciateFromPerson(appObj, authData["personGUID"], authUserKey)
         resp = {
           "personGUID": authData["personGUID"],
           "tenantName": authData["tenantName"],
