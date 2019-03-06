@@ -9,12 +9,14 @@ from urllib.parse import unquote
 import json
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
+from authsCommon import getAuthRecord, DeleteAuthRecord
 from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict
 from tenantObj import tenantClass
 from objectStores_base import WrongObjectVersionExceptionClass
 import copy
+import base64
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
   if 'AuthProviders' in content:
@@ -612,4 +614,37 @@ def registerAPI(appObj):
       except:
         raise InternalServerError
      
-      
+  @nsAdmin.route('/<string:tenant>/auths/<string:authUserKeyEncoded>')
+  class authInfo(Resource):
+    @nsAdmin.doc('delete auth')
+    @nsAdmin.response(200, 'auth Deleted')
+    @nsAdmin.response(400, 'Error')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @nsAdmin.response(409, 'Conflict')
+    @appObj.flastRestPlusAPIObject.marshal_with(getAuthModel(appObj), code=200, description='auth Deleted')
+    def delete(self, tenant, authUserKeyEncoded):
+      '''Delete auth'''
+      decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
+      #No Object version needed for auths
+      authUserKey = base64.b64decode(authUserKeyEncoded).decode('utf-8')
+      authData, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authUserKey)
+      if authData is None:
+        raise BadRequest('Bad auth')
+      try:
+        DeleteAuthRecord(appObj, authUserKey)
+        resp = {
+          "personGUID": authData["personGUID"],
+          "tenantName": authData["tenantName"],
+          "authProviderGUID": authData["AuthProviderGUID"],
+          "AuthUserKey": authData["AuthUserKey"]
+        }
+        return resp, 200
+        
+      except customExceptionClass as err:
+        if (err.id=='personDosentExistException'):
+          raise BadRequest(err.text)
+        if (err.id=='userDosentExistException'):
+          raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except:
+        raise InternalServerError    
