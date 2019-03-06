@@ -590,7 +590,6 @@ def registerAPI(appObj):
       requiredInPayload(content, ["personGUID", "authProviderGUID", "credentialJSON", "tenantName"])
       try:
         authData = AddAuthForUser(appObj, content["tenantName"], content["authProviderGUID"], content["personGUID"], content["credentialJSON"])
-        print("authDate:", authData)
         resp = {
           "personGUID": authData["personGUID"],
           "tenantName": content["tenantName"],
