@@ -3,7 +3,7 @@ from objectStores_base import ObjectStore, StoringNoneObjectAfterUpdateOperation
 # Class that will store objects in memory only
 class ObjectStore_Memory(ObjectStore):
   objectData = None
-  def __init__(self):
+  def __init__(self, configJSON):
     self.objectData = dict()
     #Dict = (objDICT, objectVersion, creationDate, lastUpdateDate)
 
@@ -18,6 +18,8 @@ class ObjectStore_Memory(ObjectStore):
     curTimeValue = appObj.getCurDateTime()
     newObjectVersion = None
     if objectKey not in dictForObjectType:
+      if objectVersion is not None:
+        raise WrongObjectVersionException
       newObjectVersion = 1
       dictForObjectType[objectKey] = (JSONString, newObjectVersion, curTimeValue, curTimeValue)
     else:

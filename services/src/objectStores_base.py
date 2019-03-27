@@ -8,12 +8,28 @@ class WrongObjectVersionExceptionClass(Exception):
   pass
 WrongObjectVersionException = WrongObjectVersionExceptionClass('Wrong object version supplied - Has another change occured since loading?')
 
+class ObjectStoreConfigError(Exception):
+  pass
 
+class MissingTransactionContextExceptionClass(Exception):
+  pass
+MissingTransactionContextException = MissingTransactionContextExceptionClass('Missing Transaction Context')
+
+  
 #Base class for object store
 class ObjectStore():
   #if object version is set to none object version checking is turned off
   # object version may be a number or a guid depending on store technology
   
+  def startTransaction(self):
+    return self._startTransaction()
+  def commitTransaction(self, transactionContext):
+    return self._commitTransaction(transactionContext)
+  def rollbackTransaction(self, transactionContext):
+    return self._rollbackTransaction(transactionContext)
+
+  def resetDataForTest(self):
+    return self._resetDataForTest()
 
   #Return value is objectVersion of object saved
   def saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion = None, transactionContext = None):
@@ -53,4 +69,16 @@ class ObjectStore():
   def _getObjectJSON(self, appObj, objectType, objectKey):
     raise Exception('Not Overridden')
   def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN):
+    raise Exception('Not Overridden')
+
+  #should return a fresh transaction context
+  def _startTransaction(self):
+    raise Exception('Not Overridden')
+  def _commitTransaction(self, transactionContext):
+    raise Exception('Not Overridden')
+  def _rollbackTransaction(self, transactionContext):
+    raise Exception('Not Overridden')
+
+  #test only functions  
+  def _resetDataForTest(self):
     raise Exception('Not Overridden')
