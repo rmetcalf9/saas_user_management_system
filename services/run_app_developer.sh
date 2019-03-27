@@ -39,6 +39,7 @@ export APIAPP_DEFAULTHOMEADMINUSERNAME=admin
 export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 #export APIAPP_JWT_TOKEN_TIMEOUT=2   #2 seconds, default is 5 minutes Use default
 #export APIAPP_REFRESH_TOKEN_TIMEOUT=30  #30 seconds, default is 2 hours
+export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"Memory\"}"
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/VERSION ]; then

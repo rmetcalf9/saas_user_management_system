@@ -113,7 +113,7 @@ class appObjClass(parAppObj):
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
 
-    self.objectStore = createObjectStoreInstance(self)
+    self.objectStore = createObjectStoreInstance(self, env)
     if GetTenant(self,masterTenantName) is None:
       CreateMasterTenant(self, testingMode)
 
