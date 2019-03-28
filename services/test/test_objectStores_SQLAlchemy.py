@@ -30,56 +30,91 @@ ConfigDict = {
 class test_objectStoresSQLAlchemy(testHelperSuperClass):
   def test_saveFailsWithInvalidObjectVersionFirstSave(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest()
+    obj.resetDataForTest(appObj)
     objVerIDToSaveAs = 123
-    transactionContext = obj.startTransaction()
-    with self.assertRaises(Exception) as context:
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, objVerIDToSaveAs, transactionContext)
-    self.checkGotRightException(context,WrongObjectVersionException)
+    
+    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection.startTransaction()
+    gContext = None
+    try:
+      with self.assertRaises(Exception) as context:
+        savedVer = storeConnection._saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
+      gContext = context
+      storeConnection.commitTransaction()
+    except:
+      storeConnection.rollbackTransaction()
+      raise
+    self.checkGotRightException(gContext,WrongObjectVersionException)
+
 
   def test_saveFailsWithInvalidObjectVersionSecondSave(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest()
+    obj.resetDataForTest(appObj)
     objVerIDToSaveAs = 123
-    transactionContext = obj.startTransaction()
-    savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, None, transactionContext)
-    obj.commitTransaction(transactionContext)
-    transactionContext = obj.startTransaction()
-    with self.assertRaises(Exception) as context:
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, objVerIDToSaveAs, transactionContext)
-    obj.commitTransaction(transactionContext)
-    self.checkGotRightException(context,WrongObjectVersionException)
+    
+    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection.startTransaction()
+    try:
+      savedVer = storeConnection._saveJSONObject("Test", "123", JSONString, None)
+      storeConnection.commitTransaction()
+    except:
+      storeConnection.rollbackTransaction()
+      raise    
+    
+    storeConnection.startTransaction()
+    gContext = None
+    try:
+      with self.assertRaises(Exception) as context:
+        savedVer = storeConnection._saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
+      storeConnection.commitTransaction()
+      gContext = context
+    except:
+      storeConnection.rollbackTransaction()
+      raise    
+    self.checkGotRightException(gContext,WrongObjectVersionException)
 
   def test_saveObjectsInSingleTransaction(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest()
+    obj.resetDataForTest(appObj)
     lastSavedVer = None
-    transactionContext = obj.startTransaction()
-    for x in range(1,6): 
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastSavedVer, transactionContext)
-      self.assertEqual(savedVer, x)
-      lastSavedVer = savedVer
-    obj.commitTransaction(transactionContext)
+    
+    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection.startTransaction()
+    try:
+      for x in range(1,6): 
+        savedVer = storeConnection._saveJSONObject("Test", "123", JSONString, lastSavedVer)
+        self.assertEqual(savedVer, x)
+        lastSavedVer = savedVer
+
+      storeConnection.commitTransaction()
+    except:
+      storeConnection.rollbackTransaction()
+      raise    
     
     #Check object was saved correctly
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = obj._getObjectJSON(appObj, "Test", "123")
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection._getObjectJSON("Test", "123")
     self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='Saved object dosen\'t match')
     
   def test_saveObjectsInMutipleTransactions(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest()
+    obj.resetDataForTest(appObj)
     lastSavedVer = None
+    storeConnection = obj.getConnectionContext(appObj)
     for x in range(1,6): 
-      transactionContext = obj.startTransaction()
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastSavedVer, transactionContext)
-      obj.commitTransaction(transactionContext)
-      self.assertEqual(savedVer, x)
-      lastSavedVer = savedVer
+      storeConnection.startTransaction()
+      try:
+        savedVer = storeConnection._saveJSONObject("Test", "123", JSONString, lastSavedVer)
+        storeConnection.commitTransaction()
+        self.assertEqual(savedVer, x)
+        lastSavedVer = savedVer
+      except:
+        storeConnection.rollbackTransaction()
+        raise       
     
     #Check object was saved correctly
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = obj._getObjectJSON(appObj, "Test", "123")
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection._getObjectJSON("Test", "123")
     self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='Saved object dosen\'t match')
-    
+
     
 #  def test_creationDateSetCorrectly(self):
 #    obj = ObjectStore_SQLAlchemy(ConfigDict)

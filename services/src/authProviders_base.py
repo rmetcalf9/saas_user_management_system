@@ -47,9 +47,9 @@ class authProvider():
   def _authSpercificInit(self):
     raise NotOverriddenException
 
-  def AddAuth(self, appObj, credentialDICT, personGUID):
+  def AddAuth(self, appObj, credentialDICT, personGUID, storeConnection):
     key = self._makeKey(credentialDICT)
-    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, key)
+    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, key, storeConnection)
     if obj is not None:
       #print('key:', key)
       raise tryingToCreateDuplicateAuthException
@@ -62,12 +62,12 @@ class authProvider():
       "personGUID": personGUID,
       "tenantName": self.tenantName
     }
-    SaveAuthRecord(appObj, key, mainObjToStore)
-    associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key)
+    SaveAuthRecord(appObj, key, mainObjToStore, storeConnection)
+    associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
 
-  def Auth(self, appObj, credentialDICT):
-    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT))
+  def Auth(self, appObj, credentialDICT, storeConnection):
+    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
       raise authFailedException
     self._auth(appObj, obj, credentialDICT)

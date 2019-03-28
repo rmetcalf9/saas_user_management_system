@@ -20,9 +20,9 @@ authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not
 userCreationNotAllowedException = customExceptionClass('User Creaiton Not Allowed', 'userCreationNotAllowedException')
 
 #only called on intial setup Creates a master tenant with single internal auth provider
-def CreateMasterTenant(appObj, testingMode):
+def CreateMasterTenant(appObj, testingMode, storeConnection):
   print("Creating master tenant")
-  _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False)
+  _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection)
   masterTenantInternalAuthProvider = AddAuthProvider(
     appObj, 
     masterTenantName, 
@@ -30,21 +30,28 @@ def CreateMasterTenant(appObj, testingMode):
     masterTenantDefaultAuthProviderMenuIconLink, 
     "internal", 
     False, 
-    {"userSufix": "@internalDataStore"}
+    {"userSufix": "@internalDataStore"},
+    storeConnection
   )
   
   userID = appObj.defaultUserGUID
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
   
   #User spercific creation
-  CreateUser(appObj, {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, masterTenantName, 'init/CreateMasterTenant')
-  AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole)
+  CreateUser(
+    appObj, 
+    {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, 
+    masterTenantName, 
+    'init/CreateMasterTenant', 
+    storeConnection
+  )
+  AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole, storeConnection)
 
   person = None
   if testingMode:
-    person = CreatePerson(appObj, appObj.testingDefaultPersonGUID)
+    person = CreatePerson(appObj, storeConnection, appObj.testingDefaultPersonGUID, 'a','b','c')
   else:
-    person = CreatePerson(appObj)
+    person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
 
   credentialJSON = {
     "username": InternalAuthUsername, 
@@ -53,11 +60,15 @@ def CreateMasterTenant(appObj, testingMode):
     )
   }
 
-  authData = _getAuthProvider(appObj, masterTenantName, masterTenantInternalAuthProvider['guid']).AddAuth(appObj, credentialJSON, person['guid'])
+  authData = _getAuthProvider(
+    appObj, masterTenantName, 
+    masterTenantInternalAuthProvider['guid'],
+    storeConnection
+  ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection)
 
   #mainUserIdentity with authData
   
-  associateUserWithPerson(appObj, userID, person['guid'])
+  associateUserWithPerson(appObj, userID, person['guid'], storeConnection)
 
 
 #Called from API call
@@ -158,7 +169,7 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT)
   return authData
 
 
-def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON):
+def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON, storeConnection):
   authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
   def updTenant(tenant, transactionContext):
     if tenant is None:
@@ -166,12 +177,12 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
     tenant["AuthProviders"][authProviderJSON['guid']] = authProviderJSON
     return tenant
   #This update function will not alter the tenant version at all so we can find the latest object version and use that
-  appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant, None)
+  storeConnection.updateJSONObject("tenants", tenantName, updTenant)
   return authProviderJSON
   
 # called locally
-def _createTenant(appObj, tenantName, description, allowUserCreation):
-  tenantWithSameName, ver, creationDateTime, lastUpdateDateTime =  appObj.objectStore.getObjectJSON(appObj,"tenants", tenantName)
+def _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection):
+  tenantWithSameName, ver, creationDateTime, lastUpdateDateTime =  storeConnection.getObjectJSON("tenants", tenantName)
   if tenantWithSameName is not None:
     raise tenantAlreadtExistsException
   jsonForTenant = {
@@ -180,17 +191,18 @@ def _createTenant(appObj, tenantName, description, allowUserCreation):
     "AllowUserCreation": allowUserCreation,
     "AuthProviders": {}
   }
-  createdTenantVer = appObj.objectStore.saveJSONObject(appObj,"tenants", tenantName, jsonForTenant, None)
+  createdTenantVer = storeConnection.saveJSONObject("tenants", tenantName, jsonForTenant)
+
   return tenantClass(jsonForTenant, createdTenantVer)
 
-def GetTenant(appObj, tenantName):
-  a, aVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"tenants",tenantName)
+def GetTenant(tenantName, storeConnection, a,b,c):
+  a, aVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",tenantName)
   if a is None:
     return a
   return tenantClass(a, aVer)
   
-def _getAuthProvider(appObj, tenantName, authProviderGUID):
-  tenant = GetTenant(appObj, tenantName)
+def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection):
+  tenant = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
   if tenant is None:
     raise tenantDosentExistException
   AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID),authProviderGUID, tenantName)
@@ -205,7 +217,8 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID):
 # - if no identityGUID is specified and the user only has one identity then the user and role info for the selected identity is returned
 # - if no identityGUID is specified and the user has mutiple identities a list of possible identities is returned
 # - if an identityGUID is specified and correct then the user and role info
-def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=None):
+### requestedUserID can be None
+def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID, storeConnection, a,b,c):
   resDict = {
     'possibleUserIDs': None,
     'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
@@ -218,13 +231,13 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
     'other_data': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
-  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID)
-  authUserObj = authProvider.Auth(appObj, credentialJSON)
+  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection)
+  authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection)
   if authUserObj is None:
     raise Exception
   
   #We have authed with a single authMethod, we need to get a list of identities for that provider
-  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser)
+  possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
   if len(possibleUserIDs)==0:
     raise PersonHasNoAccessToAnyIdentitiesException
@@ -239,7 +252,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID=
     print('requestedUserID:',requestedUserID)
     raise UnknownUserIDException
 
-  userDict = GetUser(appObj,requestedUserID).getReadOnlyDict()
+  userDict = GetUser(appObj,requestedUserID, storeConnection).getReadOnlyDict()
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 

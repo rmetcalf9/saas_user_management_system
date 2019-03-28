@@ -1,4 +1,4 @@
-from objectStores_base import ObjectStore, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON
 
 
@@ -23,7 +23,89 @@ def testFunctionToBeGotRidOf():
 ###testFunctionToBeGotRidOf()
 
 
-# Class that will store objects in memory only
+class ConnectionContext(ObjectStoreConnectionContext):
+  appObj = None
+  connection = None
+  transaction = None
+  objectStore = None
+
+  def __init__(self, appObj, objectStore):
+    self.appObj = appObj
+    self.objectStore = objectStore
+    self.connection = self.objectStore.engine.connect()
+
+  def _startTransaction(self):
+    if self.transaction is not None:
+      raise Exception("ERROR Starting transaction when there is already one in progress")
+    self.transaction = self.connection.begin()
+
+  #Internal function for executing a statement
+  ## only called from this file
+  def _INT_execute(self, statement):
+    if self.transaction is None:
+      MissingTransactionContextException
+    return self.connection.execute(statement.execution_options(autocommit=False))
+    
+  def _commitTransaction(self):
+    res = self.transaction.commit()
+    self.transaction = None
+    return res
+  def _rollbackTransaction(self):
+    res = self.transaction.rollback()
+    self.transaction = None
+    return res
+
+  def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
+    query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
+    result =  self._INT_execute(query)
+    firstRow = result.first()
+    if firstRow is None:
+      if objectVersion is not None:
+        raise WrongObjectVersionException
+      newObjectVersion = 1
+      query = self.objectStore.objDataTable.insert().values(key=objectKey, objectVersion=newObjectVersion)
+      result = self._INT_execute(query)
+      if len(result.inserted_primary_key) != 1:
+        raise Exception('_saveJSONObject wrong number of rows inserted')
+      if result.inserted_primary_key[0] != objectKey:
+        raise Exception('_saveJSONObject issue with primary key')
+      return newObjectVersion
+    if firstRow.objectVersion != objectVersion:
+      raise WrongObjectVersionException
+    newObjectVersion = firstRow.objectVersion + 1
+    query = self.objectStore.objDataTable.update(whereclause=(self.objectStore.objDataTable.c.key==objectKey)).values(objectVersion=newObjectVersion, objectDICT=JSONString)
+    result = self._INT_execute(query)
+    if result.rowcount != 1:
+      raise Exceptoin('_saveJSONObject wrong number of rows updated')
+    return newObjectVersion
+
+  def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
+    if transactionContext is None:
+      raise MissingTransactionContextException
+    raise Exception('_removeJSONObject Not Implemented')
+  def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
+    if transactionContext is None:
+      raise MissingTransactionContextException
+    raise Exception('_updateJSONObject Not Implemented')
+    
+  #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
+  #Return None, None, None, None if object isn't in store
+  def _getObjectJSON(self, objectType, objectKey):
+    query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
+    result = self._INT_execute(query)
+    firstRow = result.first()
+    if firstRow is None:
+      return None, None, None, None
+    if result.rowcount != 1:
+      raise Exception('_getObjectJSON Wrong number of rows returned for key')
+    creationDate = None
+    lastUpdateDate = None
+    return firstRow.objectDICT, firstRow.objectVersion, creationDate, lastUpdateDate
+
+
+  def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
+    raise Exception('_getPaginatedResult Not Implemented')
+
 class ObjectStore_SQLAlchemy(ObjectStore):
   engine = None
   objDataTable = None
@@ -50,75 +132,14 @@ class ObjectStore_SQLAlchemy(ObjectStore):
     )
     metadata.create_all(self.engine)
 
-  def _startTransaction(self):
-    connection = self.engine.connect()
-    trans = connection.begin()
-    def execute(statement):
-      return connection.execute(statement.execution_options(autocommit=False))
-    return {
-      'execute': execute,
-      'trans': trans
-    }
-  def _commitTransaction(self, transactionContext):
-    return transactionContext["trans"].commit()
-  def _rollbackTransaction(self, transactionContext):
-    return transactionContext["trans"].rollback()
-
-  def resetDataForTest(self):
-    transactionContext = self.startTransaction()
+  def _resetDataForTest(self, appObj):
     query = self.objDataTable.delete()
-    result = transactionContext["execute"](query)
-    self.commitTransaction(transactionContext)
+
+    con = self.getConnectionContext(appObj)
+    con.startTransaction()
+    con._INT_execute(query)
+    con.commitTransaction()
     
-  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion, transactionContext):
-    if transactionContext is None:
-      raise MissingTransactionContextException
-    query = self.objDataTable.select(whereclause=(self.objDataTable.c.key==objectKey))
-    result = transactionContext["execute"](query)
-    firstRow = result.first()
-    if firstRow is None:
-      if objectVersion is not None:
-        raise WrongObjectVersionException
-      newObjectVersion = 1
-      query = self.objDataTable.insert().values(key=objectKey, objectVersion=newObjectVersion)
-      result = transactionContext["execute"](query)
-      if len(result.inserted_primary_key) != 1:
-        raise Exception('_saveJSONObject wrong number of rows inserted')
-      if result.inserted_primary_key[0] != objectKey:
-        raise Exception('_saveJSONObject issue with primary key')
-      return newObjectVersion
-    if firstRow.objectVersion != objectVersion:
-      raise WrongObjectVersionException
-    newObjectVersion = firstRow.objectVersion + 1
-    query = self.objDataTable.update(whereclause=(self.objDataTable.c.key==objectKey)).values(objectVersion=newObjectVersion, objectDICT=JSONString)
-    result = transactionContext["execute"](query)
-    if result.rowcount != 1:
-      raise Exceptoin('_saveJSONObject wrong number of rows updated')
-    return newObjectVersion
+  def _getConnectionContext(self, appObj):
+    return ConnectionContext(appObj, self)
 
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext):
-    if transactionContext is None:
-      raise MissingTransactionContextException
-    raise Exception('_removeJSONObject Not Implemented')
-  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion, transactionContext):
-    if transactionContext is None:
-      raise MissingTransactionContextException
-    raise Exception('_updateJSONObject Not Implemented')
-    
-  #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
-  #Return None, None, None, None if object isn't in store
-  def _getObjectJSON(self, appObj, objectType, objectKey):
-    query = self.objDataTable.select(whereclause=(self.objDataTable.c.key==objectKey))
-    result = self.engine.connect().execute(query)
-    firstRow = result.first()
-    if firstRow is None:
-      return None, None, None, None
-    if result.rowcount != 1:
-      raise Exception('_getObjectJSON Wrong numnber of rows returned for key')
-    creationDate = None
-    lastUpdateDate = None
-    return firstRow.objectDICT, firstRow.objectVersion, creationDate, lastUpdateDate
-
-
-  def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN):
-    raise Exception('_getPaginatedResult Not Implemented')

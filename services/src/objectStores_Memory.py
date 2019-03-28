@@ -1,21 +1,24 @@
-from objectStores_base import ObjectStore, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException
 
-# Class that will store objects in memory only
-class ObjectStore_Memory(ObjectStore):
-  objectData = None
-  def __init__(self, configJSON):
-    self.objectData = dict()
-    #Dict = (objDICT, objectVersion, creationDate, lastUpdateDate)
+class ConnectionContext(ObjectStoreConnectionContext):
+  appObj = None
+  objectType = None
+  def __init__(self, appObj, objectType):
+    self.appObj = appObj
+    self.objectType = objectType
 
-  def __getDictForObjectType(self, objectType):
-    if objectType not in self.objectData:
-      #print("Creating dict for " + objectType)
-      self.objectData[objectType] = dict()
-    return self.objectData[objectType]
+  #transactional memory not implemented
+  def _startTransaction(self):
+    pass
+  def _commitTransaction(self):
+    pass
+  def _rollbackTransaction(self):
+    pass
 
-  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion, transactionContext):
-    dictForObjectType = self.__getDictForObjectType(objectType)
-    curTimeValue = appObj.getCurDateTime()
+    
+  def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
+    dictForObjectType = self.objectType._INT_getDictForObjectType(objectType)
+    curTimeValue = self.appObj.getCurDateTime()
     newObjectVersion = None
     if objectKey not in dictForObjectType:
       if objectVersion is not None:
@@ -30,37 +33,37 @@ class ObjectStore_Memory(ObjectStore):
     dictForObjectType[objectKey] = (JSONString, newObjectVersion, dictForObjectType[objectKey][2], curTimeValue)
     return newObjectVersion
 
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext):
-    dictForObjectType = self.__getDictForObjectType(objectType)
+  def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
+    dictForObjectType = self.objectType._INT_getDictForObjectType(objectType)
     if objectVersion is not None:
       if objectKey not in dictForObjectType:
         raise Exception('Deleting something that isn\'t there')
       if str(dictForObjectType[objectKey][1]) != str(objectVersion):
         raise WrongObjectVersionException
-    if objectKey not in self.__getDictForObjectType(objectType):
+    if objectKey not in self.objectType._INT_getDictForObjectType(objectType):
       if ignoreMissingObject:
         return None
-    del self.__getDictForObjectType(objectType)[objectKey]
+    del self.objectType._INT_getDictForObjectType(objectType)[objectKey]
     return None
 
   # Update the object in single operation. make transaction safe??
   ## updateFn gets two paramaters:
   ##  object
-  ##  transactionContext
-  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion, transactionContext):
-    obj, ver, creationDateTime, lastUpdateDateTime = self.getObjectJSON(appObj, objectType, objectKey)
+  ##  connection
+  def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
+    obj, ver, creationDateTime, lastUpdateDateTime = self.getObjectJSON(objectType, objectKey)
     if objectVersion is None:
       #If object version is not supplied then assume update will not cause an error
       objectVersion = ver 
     if str(objectVersion) != str(ver):
       raise WrongObjectVersionException
-    obj = updateFn(obj, transactionContext)
+    obj = updateFn(obj, self)
     if obj is None:
       raise StoringNoneObjectAfterUpdateOperationException
-    return self.saveJSONObject(appObj, objectType, objectKey, obj, objectVersion, transactionContext)
+    return self.saveJSONObject(objectType, objectKey, obj, objectVersion)
   
-  def _getObjectJSON(self, appObj, objectType, objectKey):
-    objectTypeDict = self.__getDictForObjectType(objectType)
+  def _getObjectJSON(self, objectType, objectKey):
+    objectTypeDict = self.objectType._INT_getDictForObjectType(objectType)
     if objectKey in objectTypeDict:
       return objectTypeDict[objectKey]
     return None, None, None, None
@@ -76,10 +79,27 @@ class ObjectStore_Memory(ObjectStore):
     return whereClauseText in str(item).upper()
     
     
-  def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN):
-    return appObj.getPaginatedResult(
+  def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
+    return self.appObj.getPaginatedResult(
       self.objectData[objectType],
       outputFN,
       request,
       self._filterFN
     )
+
+# Class that will store objects in memory only
+class ObjectStore_Memory(ObjectStore):
+  objectData = None
+  def __init__(self, configJSON):
+    self.objectData = dict()
+    #Dict = (objDICT, objectVersion, creationDate, lastUpdateDate)
+
+  def _INT_getDictForObjectType(self, objectType):
+    if objectType not in self.objectData:
+      #print("Creating dict for " + objectType)
+      self.objectData[objectType] = dict()
+    return self.objectData[objectType]
+
+  def _getConnectionContext(self, appObj):
+    return ConnectionContext(appObj, self)
+

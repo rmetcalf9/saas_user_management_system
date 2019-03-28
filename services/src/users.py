@@ -12,7 +12,7 @@ UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Alread
 ##Creation functions
 ## All the functions that sets up the user, roles and asociates the user with a person
 
-def CreateUser(appObj, userData, mainTenant, createdBy):
+def CreateUser(appObj, userData, mainTenant, createdBy, storeConnection):
   #mainTenant is validated by adminAPI
   #print("UpdateUser createdBy:", createdBy)
   UserID = userData['user_unique_identifier']
@@ -22,27 +22,27 @@ def CreateUser(appObj, userData, mainTenant, createdBy):
     OtherData = userData['other_data']
   OtherData["createdBy"] = createdBy
   
-  userObj = GetUser(appObj, UserID)
+  userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is not None:
     raise TryingToCreateDuplicateUserException
-  appObj.objectStore.saveJSONObject(appObj,"users", UserID, {
+  storeConnection.saveJSONObject("users", UserID, {
     "UserID": UserID,
     "TenantRoles": {},
     "known_as": KnownAs,
     "other_data": OtherData
   })
-  appObj.objectStore.saveJSONObject(appObj,"users_associatedPersons", UserID, [])
+  storeConnection.saveJSONObject("users_associatedPersons", UserID, [])
   if mainTenant is not None:
-    AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole)
+    AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole, storeConnection)
 
-def associateUserWithPerson(appObj, UserID, personGUID):
+def associateUserWithPerson(appObj, UserID, personGUID, storeConnection):
   #Add reference from User to person
   ## No object version checking because read and update is the same operaiton
   def updUser(user, transactionContext):
     if personGUID not in user:
       user.append(personGUID)
     return user
-  appObj.objectStore.updateJSONObject(appObj,"users_associatedPersons", UserID, updUser)
+  storeConnection.updateJSONObject("users_associatedPersons", UserID, updUser)
 
   def upd(idfea, transactionContext):
     if idfea is None:
@@ -53,9 +53,9 @@ def associateUserWithPerson(appObj, UserID, personGUID):
     return idfea
   #print('Asociating user ', UserID, ' with ', personGUID)
   
-  appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, upd)
+  storeConnection.updateJSONObject("UsersForEachPerson", personGUID, upd)
   
-def AddUserRole(appObj, userID, tennantName, roleName):
+def AddUserRole(appObj, userID, tennantName, roleName, storeConnection):
   def updUser(obj, transactionContext):
     if obj is None:
       raise userDosentExistException
@@ -64,7 +64,7 @@ def AddUserRole(appObj, userID, tennantName, roleName):
     else:
       obj["TenantRoles"][tennantName].append(roleName)
     return obj
-  appObj.objectStore.updateJSONObject(appObj,"users", userID, updUser)
+  storeConnection.updateJSONObject("users", userID, updUser)
 
 
   

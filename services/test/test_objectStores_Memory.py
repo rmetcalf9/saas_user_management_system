@@ -29,45 +29,66 @@ class test_objectStoresMemory(testHelperSuperClass):
     obj = ObjectStore_Memory(ConfigDict)
     objVerIDToSaveAs = 123
     with self.assertRaises(Exception) as context:
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, objVerIDToSaveAs, None)
+      storeConnection = obj.getConnectionContext(appObj)
+      def someFn(connectionContext):
+        savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
+      storeConnection.executeInsideTransaction(someFn)
     self.checkGotRightException(context,WrongObjectVersionException)
 
   def test_saveFailsWithInvalidObjectVersionSecondSave(self):
     obj = ObjectStore_Memory(ConfigDict)
     objVerIDToSaveAs = 123
-    savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, None, None)
-    with self.assertRaises(Exception) as context:
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, objVerIDToSaveAs, None)
-    self.checkGotRightException(context,WrongObjectVersionException)
+    storeConnection = obj.getConnectionContext(appObj)
+    def someFn(connectionContext):
+      savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, None)
+      with self.assertRaises(Exception) as context:
+        savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
+      self.checkGotRightException(context,WrongObjectVersionException)
+
+    storeConnection.executeInsideTransaction(someFn)
 
   def test_saveAndRetrieveObject(self):
     obj = ObjectStore_Memory(ConfigDict)
-    lastSavedVer = None
-    for x in range(1,6): 
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastSavedVer, None)
-      self.assertEqual(savedVer, x)
-      lastSavedVer = savedVer
+    storeConnection = obj.getConnectionContext(appObj)
+    
+    def someFn(connectionContext):
+      lastSavedVer = None
+      for x in range(1,6): 
+        savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, lastSavedVer)
+        self.assertEqual(savedVer, x)
+        lastSavedVer = savedVer
+    storeConnection.executeInsideTransaction(someFn)
       
-    #TODO Actual retrival Check
+    #Check object was saved correctly
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection._getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='Saved object dosen\'t match')
 
   def test_saveGetSaveObj(self):
     obj = ObjectStore_Memory(ConfigDict)
-    lastSavedVer = None
-    for x in range(1,6): 
-      newJSONString = copy.deepcopy(JSONString)
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", newJSONString, lastSavedVer, None)
-      newJSONString = copy.deepcopy( obj._getObjectJSON(appObj, "Test", "123"))
-      
-      self.assertEqual(savedVer, x)
-      lastSavedVer = savedVer
+    storeConnection = obj.getConnectionContext(appObj)
 
+    def someFn(connectionContext):
+      lastSavedVer = None
+      for x in range(1,6): 
+        newJSONString = copy.deepcopy(JSONString)
+        savedVer = connectionContext._saveJSONObject("Test", "123", newJSONString, lastSavedVer)
+        newJSONString = copy.deepcopy( connectionContext._getObjectJSON("Test", "123"))
+        
+        self.assertEqual(savedVer, x)
+        lastSavedVer = savedVer
+    storeConnection.executeInsideTransaction(someFn)
 
   def test_creationDateSetCorrectly(self):
     obj = ObjectStore_Memory(ConfigDict)
+    storeConnection = obj.getConnectionContext(appObj)
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
-    savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, None, None)
-    objDict, ver, creationDateTime, lastUpdateDateTime = obj._getObjectJSON(appObj, "Test", "123")
+
+    def someFn(connectionContext):
+      return connectionContext._saveJSONObject("Test", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+
+    objDict, ver, creationDateTime, lastUpdateDateTime = storeConnection._getObjectJSON("Test", "123")
     self.assertEqual(objDict, JSONString)
     self.assertEqual(ver, savedVer)
     self.assertEqual(creationDateTime, testDateTime)
@@ -75,14 +96,19 @@ class test_objectStoresMemory(testHelperSuperClass):
     
   def test_updateDateSetCorrectly(self):
     obj = ObjectStore_Memory(ConfigDict)
+    storeConnection = obj.getConnectionContext(appObj)
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
     lastVersion = None
     incTime = testDateTime
     for x in range(1,6):
       appObj.setTestingDateTime(incTime)
-      savedVer = obj._saveJSONObject(appObj, "Test", "123", JSONString, lastVersion, None)
-      objDict, ver, creationDateTime, lastUpdateDateTime = obj._getObjectJSON(appObj, "Test", "123")
+      
+      def someFn(connectionContext):
+        return connectionContext._saveJSONObject("Test", "123", JSONString, lastVersion)
+      savedVer = storeConnection.executeInsideTransaction(someFn)
+      
+      objDict, ver, creationDateTime, lastUpdateDateTime = storeConnection._getObjectJSON("Test", "123")
       self.assertEqual(objDict, JSONString)
       self.assertEqual(ver, savedVer)
       self.assertEqual(creationDateTime, testDateTime, msg="creation time not right")

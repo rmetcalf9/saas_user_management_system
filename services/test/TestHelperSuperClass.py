@@ -18,8 +18,8 @@ from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
 
-def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
+def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   return auth
 
 internalUSerSufix = "@internalDataStore"
@@ -176,19 +176,22 @@ class testHelperAPIClient(testHelperSuperClass):
   def decodeToken(self, JWTToken): 
     return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
-  def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername):
-    masterTenant = GetTenant(appObj,masterTenantName)
-    CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName, "test/createTwoUsersForOnePerson")
-    CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName, "test/createTwoUsersForOnePerson")
+  def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername, storeConnection):
+    masterTenant = GetTenant(masterTenantName, storeConnection, 'a','b','c')
+    CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName, "test/createTwoUsersForOnePerson", storeConnection)
+    CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName, "test/createTwoUsersForOnePerson", storeConnection)
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider
-    person = CreatePerson(appObj)
-    authData = AddAuth(appObj, masterTenantName, authProvGUID, {
-      "username": InternalAuthUsername, 
-      "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
-    },
-    person['guid'])
-    associateUserWithPerson(appObj, userID1, person['guid'])
-    associateUserWithPerson(appObj, userID2, person['guid'])
+    person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
+    authData = AddAuth(
+      appObj, masterTenantName, authProvGUID, {
+        "username": InternalAuthUsername, 
+        "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
+      },
+      person['guid'],
+      storeConnection
+    )
+    associateUserWithPerson(appObj, userID1, person['guid'], storeConnection)
+    associateUserWithPerson(appObj, userID2, person['guid'], storeConnection)
     
     return {
       'authProvGUID': authProvGUID,

@@ -15,70 +15,111 @@ class MissingTransactionContextExceptionClass(Exception):
   pass
 MissingTransactionContextException = MissingTransactionContextExceptionClass('Missing Transaction Context')
 
-  
-#Base class for object store
-class ObjectStore():
+'''
+Calling pattern for connection where obj is and instance of ObjectStore:
+
+storeConnection = obj.getConnectionContext(appObj)
+def someFn(connectionContext):
+  ##DO STUFF
+storeConnection.executeInsideTransaction(someFn)
+
+##Alternative
+storeConnection = obj.getConnectionContext(appObj)
+storeConnection.startTransaction()
+try:
+  ##DO STUFF
+  storeConnection.commitTransaction()
+except:
+  storeConnection.rollbackTransaction()
+  raise
+
+'''
+
+class ObjectStoreConnectionContext():
   #if object version is set to none object version checking is turned off
   # object version may be a number or a guid depending on store technology
   
   def startTransaction(self):
     return self._startTransaction()
-  def commitTransaction(self, transactionContext):
-    return self._commitTransaction(transactionContext)
-  def rollbackTransaction(self, transactionContext):
-    return self._rollbackTransaction(transactionContext)
-
-  def resetDataForTest(self):
-    return self._resetDataForTest()
+  def commitTransaction(self):
+    return self._commitTransaction()
+  def rollbackTransaction(self):
+    return self._rollbackTransaction()
+    
+  def executeInsideTransaction(self, fnToExecute):
+    retVal = None
+    self.startTransaction()
+    try:
+      retVal = fnToExecute(self)
+      self.commitTransaction()
+    except:
+      self.rollbackTransaction()
+      raise
+    return retVal
 
   #Return value is objectVersion of object saved
-  def saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion = None, transactionContext = None):
+  def saveJSONObject(self, objectType, objectKey, JSONString, objectVersion = None):
     if 'ObjectVersion' in JSONString:
       raise SavedObjectShouldNotContainObjectVersionException
-    return self._saveJSONObject(appObj, objectType, objectKey, JSONString, objectVersion, transactionContext)
+    return self._saveJSONObject(objectType, objectKey, JSONString, objectVersion)
 
   #Return value is None
-  def removeJSONObject(self, appObj, objectType, objectKey, objectVersion = None, ignoreMissingObject = False, transactionContext = None):
-    return self._removeJSONObject(appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext)
+  def removeJSONObject(self, objectType, objectKey, objectVersion = None, ignoreMissingObject = False):
+    return self._removeJSONObject(objectType, objectKey, objectVersion, ignoreMissingObject)
 
   # Update the object in single operation. make transaction safe??
   # Return value is same as saveJSONobject
-  def updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion = None, transactionContext = None):
-    return self._updateJSONObject(appObj, objectType, objectKey, updateFn, objectVersion, transactionContext)
+  ## updateFn gets two paramaters:
+  ##  object
+  ##  connection
+  def updateJSONObject(self, objectType, objectKey, updateFn, objectVersion = None):
+    return self._updateJSONObject(objectType, objectKey, updateFn, objectVersion)
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
   #Return None, None, None, None if object isn't in store
-  def getObjectJSON(self, appObj, objectType, objectKey):
-    return self._getObjectJSON(appObj, objectType, objectKey)
+  def getObjectJSON(self, objectType, objectKey):
+    return self._getObjectJSON(objectType, objectKey)
   
-  def getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN=None):
+  def getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN=None):
     def defOutput(item):
       return item
     def defFilter(item, whereClauseText):
       return True
     if outputFN is None:
       outputFN = defOutput
-    return self._getPaginatedResult(appObj, objectType, paginatedParamValues, request, outputFN)
+    return self._getPaginatedResult(objectType, paginatedParamValues, request, outputFN)
   
-  def _saveJSONObject(self, appObj, objectType, objectKey, JSONString, objectVersion, transactionContext):
+  def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
     raise Exception('Not Overridden')
-  def _removeJSONObject(self, appObj, objectType, objectKey, objectVersion, ignoreMissingObject, transactionContext):
+  def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
     raise Exception('Not Overridden')
-  def _updateJSONObject(self, appObj, objectType, objectKey, updateFn, objectVersion, transactionContext):
+  def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
     raise Exception('Not Overridden')
-  def _getObjectJSON(self, appObj, objectType, objectKey):
+  def _getObjectJSON(self, objectType, objectKey):
     raise Exception('Not Overridden')
-  def _getPaginatedResult(self, appObj, objectType, paginatedParamValues, request, outputFN):
+  def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
     raise Exception('Not Overridden')
 
   #should return a fresh transaction context
   def _startTransaction(self):
     raise Exception('Not Overridden')
-  def _commitTransaction(self, transactionContext):
+  def _commitTransaction(self):
     raise Exception('Not Overridden')
-  def _rollbackTransaction(self, transactionContext):
+  def _rollbackTransaction(self):
     raise Exception('Not Overridden')
+
+#Base class for object store
+class ObjectStore():
+  def getConnectionContext(self, appObj):
+    return self._getConnectionContext(appObj)
+  def _getConnectionContext(self, appObj):
+    raise Exception('Not Overridden')
+
+  def resetDataForTest(self, appObj):
+    return self._resetDataForTest(appObj)
 
   #test only functions  
   def _resetDataForTest(self):
     raise Exception('Not Overridden')
+
+

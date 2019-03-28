@@ -14,16 +14,16 @@ from authsCommon import getAuthRecord, DeleteAuthRecord
 # use store object AuthsForEachPerson to store list of auths for each person
 
 #guidToUse only set in testing mode for the main defualt person
-def CreatePerson(appObj, guidToUse = None):
+def CreatePerson(appObj, storeConnection, guidToUse, a,b,c):
   if guidToUse is None:
     guidToUse = str(uuid.uuid4())
   personDict = {
     'guid': guidToUse
   }
-  appObj.objectStore.saveJSONObject(appObj, "Persons", guidToUse, personDict)
+  storeConnection.saveJSONObject("Persons", guidToUse, personDict)
   return personDict
 
-def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserKey):
+def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserKey, storeConnection):
   def upd(idfea, transactionContext):
     if idfea is None:
       idfea = []
@@ -31,7 +31,7 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
       raise PersonAlreadyHasThisAuthException
     idfea.append(AuthUserKey)
     return idfea
-  appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
+  storeConnection.updateJSONObject("AuthsForEachPerson", personGUID, upd)
 
 def deleteAuthAndUnassiciateFromPerson(appObj, personGUID, AuthUserKey):
   def upd(idfea, transactionContext):

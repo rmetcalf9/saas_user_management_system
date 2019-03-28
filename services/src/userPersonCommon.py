@@ -6,14 +6,14 @@ userDosentExistException = customExceptionClass('User not found', 'userDosentExi
 
 #This file is required to stop circular references between users and persons
 
-def GetUser(appObj, UserID):
-  jsonData, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users",UserID)
+def GetUser(appObj, UserID, storeConnection):
+  jsonData, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("users",UserID)
   if jsonData is None:
     return None
-  return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime)
+  return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime, storeConnection)
   
-def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime):
-  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2 = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserDict['UserID'])
+def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime, storeConnection):
+  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2 = storeConnection.getObjectJSON("users_associatedPersons",UserDict['UserID'])
   return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
 
 
@@ -52,19 +52,19 @@ def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn):
       #print("RemoveUserAssociation Last user for this persion - deleting the person")
       deletePersonFn(appObj, personGUID)
 
-def getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID):
+def getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection):
   res = []
-  userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson", personGUID)
+  userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("UsersForEachPerson", personGUID)
   if userIDsThisPerson is None:
     return []
   return userIDsThisPerson
 
   
-def getListOfUserIDsForPerson(appObj, personGUID, tenantName, GetUser):
-  userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID)
+def getListOfUserIDsForPerson(appObj, personGUID, tenantName, GetUser, storeConnection):
+  userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
   userIDsInThisTenant = []
   for curUserID in userIDsThisPerson:
-    userObj = GetUser(appObj,curUserID)
+    userObj = GetUser(appObj, curUserID, storeConnection)
     if userObj is None:
       raise Exception("Stored user ID missing")
     if userObj.hasRole(tenantName, DefaultHasAccountRole):
