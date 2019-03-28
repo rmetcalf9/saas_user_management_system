@@ -57,7 +57,7 @@ def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime
   ##print("AAA:", AssociatedUserIDs, ":", personGUID)
   AssociatedUserObjs = []
   for uid in AssociatedUserIDs:
-    AssociatedUserObjs.append(GetUser(appObj,uid))
+    AssociatedUserObjs.append(GetUser(appObj,uid, storeConnection))
   
   authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2 = storeConnection.getObjectJSON("AuthsForEachPerson", PersonDict['guid'])
   authObjs = []
@@ -96,7 +96,7 @@ def UpdatePerson(appObj, personGUID, objectVersion):
 def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
   userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
   for userID in userIDsThisPerson:
-    RemoveUserAssociation(appObj, userID, personGUID, None)
+    RemoveUserAssociation(appObj, userID, personGUID, None, storeConnection)
   
   #may not have object version check (cascades don't)
   #not cascading delete down to users

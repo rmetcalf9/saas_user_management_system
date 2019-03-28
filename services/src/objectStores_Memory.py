@@ -80,8 +80,9 @@ class ConnectionContext(ObjectStoreConnectionContext):
     
     
   def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
+    ##print('objectStoresMemory._getPaginatedResult self.objectType.objectData[objectType]:', self.objectType.objectData[objectType])
     return self.appObj.getPaginatedResult(
-      self.objectData[objectType],
+      self.objectType.objectData[objectType],
       outputFN,
       request,
       self._filterFN

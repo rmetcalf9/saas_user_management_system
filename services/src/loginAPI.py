@@ -119,7 +119,8 @@ def registerAPI(appObj):
     @nsLogin.response(400, 'Bad Request')
     def get(self, tenant):
      '''Get list of auth providers supported by this service'''
-     tenantObj = getValidTenantObj(appObj, tenant)
+     storeConnection = appObj.objectStore.getConnectionContext(appObj)
+     tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
      return tenantObj.getJSONRepresenation()
      
     '''Login'''
@@ -173,7 +174,7 @@ def registerAPI(appObj):
         #populate possibleUsers from possibleUserIDs
         possibleUsers = []
         for userID in returnDict['possibleUserIDs']:
-          possibleUsers.append(GetUser(appObj,userID).getJSONRepresenation(tenant)) #limit roles to only current tenant
+          possibleUsers.append(GetUser(appObj,userID,storeConnection).getJSONRepresenation(tenant)) #limit roles to only current tenant
         returnDict['possibleUsers'] = possibleUsers
 
       del returnDict["other_data"]
@@ -189,7 +190,8 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Get new JWT token with Refresh'''
-      tenantObj = getValidTenantObj(appObj, tenant)
+      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
       refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
       if refreshedAuthDetails is None:
         raise Unauthorized('Refresh token not found, token or session may have timedout')

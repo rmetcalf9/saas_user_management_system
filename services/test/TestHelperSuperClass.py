@@ -123,8 +123,8 @@ class testHelperSuperClass(unittest.TestCase):
     
   #provide a list of ignored keys
   def assertJSONStringsEqualWithIgnoredKeys(self, str1, str2, ignoredKeys, msg=''):
-    cleaned1 = str1.copy()
-    cleaned2 = str2.copy()
+    cleaned1 = copy.deepcopy(str1)
+    cleaned2 = copy.deepcopy(str2)
     for key_to_ignore in ignoredKeys:
       keyPresentInEither = False
       if key_to_ignore in cleaned1:

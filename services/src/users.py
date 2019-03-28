@@ -84,8 +84,8 @@ def DeleteUser(appObj, UserID, objectVersion, storeConnection):
   
   return userObj
 
-def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
-  userObj = GetUser(appObj, UserID)
+def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, storeConnection):
+  userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is None:
     raise userDosentExistException
   if str(userObj.getObjectVersion()) != str(objectVersion):
@@ -105,19 +105,19 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion):
     "other_data": other_data
   }
 
-  def updUser(user, transactionContext):
+  def updUser(user, storeConnection):
     if user is None:
       raise userNotFoundException
     return jsonForUser
-  appObj.objectStore.updateJSONObject(appObj,"users", UserID, updUser, objectVersion)
+  storeConnection.updateJSONObject("users", UserID, updUser, objectVersion)
 
-  uObj = GetUser(appObj, UserID)
+  uObj = GetUser(appObj, UserID, storeConnection)
   return uObj
 
-def GetPaginatedUserData(appObj, request, outputFN):
-  return appObj.objectStore.getPaginatedResult(appObj, "users",  appObj.getPaginatedParamValues(request), request, outputFN)
+def GetPaginatedUserData(appObj, request, outputFN, storeConnection):
+  return storeConnection.getPaginatedResult("users",  appObj.getPaginatedParamValues(request), request, outputFN)
 
-def getIdentityDict(appObj, personGUID):
+def getIdentityDict(appObj, personGUID, storeConnection):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
   return identifyJSON
 

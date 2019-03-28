@@ -151,3 +151,10 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
 #TODO Test rollback single transaction
 
 #TODO Test rollback mutiple transactions in same context
+
+
+#TODO Test that all changes to data happen inside transactions
+# this is important because unless executeInsideTransaction is used then developers might forget to execute commit
+#  (Sometimes they think they are qurying when they are not)
+#  one possible solution will be to always require a transaction even for queries
+#   and completly dissalow manual calls of start/commit/rollback

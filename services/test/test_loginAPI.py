@@ -126,7 +126,8 @@ class test_loginapi_norm(test_api):
     #self.assertTrue(False)
     
   def setupLoginWithMutipleUserIDsAndGetLoginResponse(self, InternalAuthUsername, userID1, userID2):
-    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername)
+    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername, storeConnection)
     
     result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
@@ -233,6 +234,7 @@ class test_loginapi_norm(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
   def test_getMutipleIdentityResponseOnlyReturnsUsersForThisTenant(self):
+    storeConnection = appObj.objectStore.getConnectionContext(appObj)
     tenantJSON = self.createTenantForTesting(tenantWithNoAuthProviders)
     testDateTime = datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
@@ -240,10 +242,10 @@ class test_loginapi_norm(test_api):
     userID2 = 'TestUser2'
     userID3 = 'TestUser3InDifferentTenant'
     InternalAuthUsername = 'ABC'
-    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername)
+    res = self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername, storeConnection)
     person = res['person']
-    CreateUser(appObj, {"user_unique_identifier": userID3, "known_as": userID3}, tenantWithNoAuthProviders["Name"], "test/getMutipleIdentityResponseOnlyReturnsUsersForThisTenant")
-    associateUserWithPerson(appObj, userID3, person['guid'])
+    CreateUser(appObj, {"user_unique_identifier": userID3, "known_as": userID3}, tenantWithNoAuthProviders["Name"], "test/getMutipleIdentityResponseOnlyReturnsUsersForThisTenant", storeConnection) #might fail if I require transaction in future
+    associateUserWithPerson(appObj, userID3, person['guid'], storeConnection)
 
     
     result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')

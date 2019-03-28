@@ -24,25 +24,10 @@ defaultUserData = {
 }
 
 class test_adminAPIUsers(parent_test_api):
-  def test_getDefaultListFromMasterTenant(self):
-    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users', headers={ jwtHeaderName: self.getNormalJWTToken()})
-    self.assertEqual(result.status_code, 200)
-    
-    resultJSON = json.loads(result.get_data(as_text=True))
-    self.assertEqual(resultJSON['pagination']['total'],1)
-    
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["associatedPersonGUIDs", "TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
-    
-    self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
 
-    expectedTenantRolesResult = [{
-      "TenantName": masterTenantName,
-      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
-    }]
-    
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
-    
   def test_getUserListThreeTenantsAndMutipleUsers(self):
+    defaultUserData["UserID"] = appObj.defaultUserGUID
+    
     testDateTime = datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
     tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
@@ -96,8 +81,32 @@ class test_adminAPIUsers(parent_test_api):
       "ThisTenantRoles": [DefaultHasAccountRole]
     }]
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
-   
+    
+
+  def test_getDefaultListFromMasterTenant(self):
+    defaultUserData["UserID"] = appObj.defaultUserGUID
+  
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users', headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+    
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultJSON['pagination']['total'],1)
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0],defaultUserData, ["associatedPersonGUIDs", "TenantRoles", "creationDateTime", "lastUpdateDateTime"], msg="User data mismatch")
+    
+    self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
+
+    expectedTenantRolesResult = [{
+      "TenantName": masterTenantName,
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+    }]
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
+
+    
   def test_getSingleUser(self):
+    defaultUserData["UserID"] = appObj.defaultUserGUID
+  
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
 
@@ -362,5 +371,5 @@ class test_adminAPIUsers(parent_test_api):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + createdUserID, headers={ jwtHeaderName: self.getNormalJWTToken()})
     #print(result.get_data(as_text=True))
     self.assertEqual(result.status_code, 404, msg="User still in system")    
-    
+
   

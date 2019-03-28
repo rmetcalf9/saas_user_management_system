@@ -17,8 +17,9 @@ class test_tenants(testHelperAPIClient):
 #Actual tests below
 
   def test_cantCreateTenantWithSameNameAsMaster(self):
+    storeConnection = appObj.objectStore.getConnectionContext(appObj)
     with self.assertRaises(Exception) as context:
-      tenant = CreateTenant(appObj, masterTenantName)
+      tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, 'a','b','c')
     self.checkGotRightException(context,failedToCreateTenantException)
 
 
