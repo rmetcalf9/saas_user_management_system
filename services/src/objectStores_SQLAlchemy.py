@@ -129,12 +129,11 @@ class ObjectStore_SQLAlchemy(ObjectStore):
     metadata.create_all(self.engine)
 
   def _resetDataForTest(self, appObj):
-    query = self.objDataTable.delete()
-
-    con = self.getConnectionContext(appObj)
-    con.startTransaction()
-    con._INT_execute(query)
-    con.commitTransaction()
+    storeConnection = self.getConnectionContext(appObj)
+    def someFn(connectionContext):
+      query = self.objDataTable.delete()
+      connectionContext._INT_execute(query)
+    storeConnection.executeInsideTransaction(someFn)
     
   def _getConnectionContext(self, appObj):
     return ConnectionContext(appObj, self)

@@ -39,21 +39,21 @@ class ObjectStoreConnectionContext():
   #if object version is set to none object version checking is turned off
   # object version may be a number or a guid depending on store technology
   
-  def startTransaction(self):
+  def _INT_startTransaction(self):
     return self._startTransaction()
-  def commitTransaction(self):
+  def _INT_commitTransaction(self):
     return self._commitTransaction()
-  def rollbackTransaction(self):
+  def _INT_rollbackTransaction(self):
     return self._rollbackTransaction()
     
   def executeInsideTransaction(self, fnToExecute):
     retVal = None
-    self.startTransaction()
+    self._INT_startTransaction()
     try:
       retVal = fnToExecute(self)
-      self.commitTransaction()
+      self._INT_commitTransaction()
     except:
-      self.rollbackTransaction()
+      self._INT_rollbackTransaction()
       raise
     return retVal
 
