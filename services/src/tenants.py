@@ -135,11 +135,11 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
 def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
   if tenantName == masterTenantName:
     raise cantDeleteMasterTenantException
-  tenantObj = GetTenant(appObj, tenantName)
+  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
   if tenantObj is None:
     raise tenantDosentExistException
   ##print("DeleteTenant objectVersion:", objectVersion)
-  appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
+  storeConnection.removeJSONObject("tenants", tenantName, objectVersion)
   return tenantObj
 
 def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection):
@@ -158,14 +158,14 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
   return GetUser(appObj, userData['user_unique_identifier'], storeConnection)
 
 def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT, storeConnection):
-  tenantObj = GetTenant(appObj, tenantName)
+  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
   if tenantObj is None:
     raise tenantDosentExistException
-  personObj = GetPerson(appObj, personGUID)
+  personObj = GetPerson(appObj, personGUID, storeConnection)
   if personObj is None:
     raise personDosentExistException
-  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID)
-  authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID)
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection)
+  authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   
   return authData
 

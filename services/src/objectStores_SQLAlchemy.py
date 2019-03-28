@@ -80,12 +80,8 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return newObjectVersion
 
   def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
-    if transactionContext is None:
-      raise MissingTransactionContextException
     raise Exception('_removeJSONObject Not Implemented')
   def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
-    if transactionContext is None:
-      raise MissingTransactionContextException
     raise Exception('_updateJSONObject Not Implemented')
     
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate

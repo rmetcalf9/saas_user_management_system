@@ -33,15 +33,15 @@ def associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, AuthUserK
     return idfea
   storeConnection.updateJSONObject("AuthsForEachPerson", personGUID, upd)
 
-def deleteAuthAndUnassiciateFromPerson(appObj, personGUID, AuthUserKey):
+def deleteAuthAndUnassiciateFromPerson(appObj, personGUID, AuthUserKey, storeConnection):
   def upd(idfea, transactionContext):
     if idfea is not None:
       if AuthUserKey in idfea:
         idfea.remove(AuthUserKey)
     return idfea
-  appObj.objectStore.updateJSONObject(appObj,"AuthsForEachPerson", personGUID, upd)
+  storeConnection.updateJSONObject("AuthsForEachPerson", personGUID, upd)
 
-  DeleteAuthRecord(appObj, AuthUserKey)
+  DeleteAuthRecord(appObj, AuthUserKey, storeConnection)
   
 def _getAuthInfoForKeyForPersonObj(appObj, authKey, storeConnection):
   authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey, storeConnection)
@@ -75,21 +75,21 @@ def GetPerson(appObj, personGUID, storeConnection):
     return None
   return CreatePersonObjFromUserDict(appObj, personDICT, objVer, creationDateTime, lastUpdateDateTime, storeConnection)
 
-def UpdatePerson(appObj, personGUID, objectVersion):
+def UpdatePerson(appObj, personGUID, objectVersion, storeConnection):
   #Can't currently update any person data but API added because we will in future
-  personObj = GetPerson(appObj, personGUID)
+  personObj = GetPerson(appObj, personGUID, storeConnection)
   if personObj is None:
     raise personDosentExistException
   if str(personObj.getObjectVersion()) != str(objectVersion):
     raise WrongObjectVersionExceptionClass
     
-  def updPerson(person, transactionContext):
+  def updPerson(person, storeConnection):
     if person is None:
       raise personDosentExistException
     return person
-  appObj.objectStore.updateJSONObject(appObj,"Persons", personGUID, updPerson, objectVersion)
+  storeConnection.updateJSONObject("Persons", personGUID, updPerson, objectVersion)
 
-  pObj = GetPerson(appObj, personGUID)
+  pObj = GetPerson(appObj, personGUID, storeConnection)
   return pObj
 
 #objectVersion used to default to None
@@ -118,6 +118,6 @@ def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
       DeleteAuthRecord(appObj, authKey, storeConnection)
   return personObj
   
-def GetPaginatedPersonData(appObj, request, outputFN):
-  return appObj.objectStore.getPaginatedResult(appObj, "Persons",  appObj.getPaginatedParamValues(request), request, outputFN)
+def GetPaginatedPersonData(appObj, request, outputFN, storeConnection):
+  return storeConnection.getPaginatedResult("Persons",  appObj.getPaginatedParamValues(request), request, outputFN)
 

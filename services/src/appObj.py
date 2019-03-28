@@ -15,7 +15,7 @@ from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
 
 from tenants import GetTenant, CreateMasterTenant
-from constants import masterTenantName
+from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
 from objectStores import createObjectStoreInstance
 import bcrypt
 from gatewayInterface import getGatewayInterface
@@ -87,8 +87,8 @@ class appObjClass(parAppObj):
     if testingMode:
       print("Warning testing mode active - proper encryption is not being used")
       self.bcrypt = testOnlybcrypt
-      self.defaultUserGUID = 'FORCED-CONSTANT-TESTING-GUID'
-      self.testingDefaultPersonGUID = 'FORCED-CONSTANT-TESTING-PERSON-GUID'
+      self.defaultUserGUID = conDefaultUserGUID
+      self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
     
     self.curDateTimeOverrideForTesting = None
     self.serverStartTime = serverStartTime

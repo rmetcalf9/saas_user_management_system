@@ -7,6 +7,10 @@ masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
 DefaultHasAccountRole="hasaccount"
 
+conDefaultUserGUID = "FORCED-CONSTANT-TESTING-GUID"
+conTestingDefaultPersonGUID = "FORCED-CONSTANT-TESTING-PERSON-GUID"
+
+
 uniqueKeyCombinator="_`@\/'"
 
 masterInternalAuthTypePassword="dsF4F.D32654.....3D5g"

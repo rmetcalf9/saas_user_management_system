@@ -7,8 +7,8 @@ from appObj import appObj
 from authProviders import authProviderFactory
 from authProviders_base import getAuthRecord
 
-def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID).AddAuth(appObj, credentialDICT, personGUID)
+def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   return auth
 
 
@@ -380,14 +380,17 @@ class test_funcitonal(test_api):
   def test_deleteOnlyAuthProvider(self):
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
     authProvGUID = origTenantDict['AuthProviders'][0]['guid']
+    
+    storeConnection = appObj.objectStore.getConnectionContext(appObj)
 
     #Also create some auth data for the single auth
-    person = CreatePerson(appObj)
+    person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
     authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
       "username": 'AA', 
       "password": b'BB'
       },
-      person['guid']
+      person['guid'],
+      storeConnection
     )
 
     #Before we delete the auth provider we must get the key it used to create the userAuth
@@ -403,7 +406,7 @@ class test_funcitonal(test_api):
     authTypeConfigDict = {'username': 'AA'}
     authRecordKey = AuthProvider._makeKey(authTypeConfigDict)
     #Use the key the first time to make sure auth record exists
-    authRecord, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey)
+    authRecord, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey, storeConnection)
     #print("print Auth Record is:",authRecord)
 
     
@@ -426,7 +429,7 @@ class test_funcitonal(test_api):
     #Check auth record has been NOT been removed
     # auth records will not be removed with the tenant as auth records
     # are independant of tenant. Any clean up will be done when the person is deleted
-    authRecord2, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey)
+    authRecord2, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey, storeConnection)
     self.assertJSONStringsEqualWithIgnoredKeys(authRecord, authRecord2, [], msg='Error userAuths should not have changed')
     
   def test_deleteTwoAuthProvidersTogether(self):

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
 from appObj import appObj
-from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
+from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, conDefaultUserGUID
 from test_adminAPI import test_api as parent_test_api
 import json
 import copy
@@ -10,7 +10,7 @@ import copy
 #Test user functoins of the admin API
 
 defaultUserData = {
-  'UserID': appObj.defaultUserGUID,
+  'UserID': conDefaultUserGUID,
   'known_as': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
   'TenantRoles': [{
     'TenantName': masterTenantName,
@@ -26,8 +26,6 @@ defaultUserData = {
 class test_adminAPIUsers(parent_test_api):
 
   def test_getUserListThreeTenantsAndMutipleUsers(self):
-    defaultUserData["UserID"] = appObj.defaultUserGUID
-    
     testDateTime = datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
     tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
@@ -84,8 +82,6 @@ class test_adminAPIUsers(parent_test_api):
     
 
   def test_getDefaultListFromMasterTenant(self):
-    defaultUserData["UserID"] = appObj.defaultUserGUID
-  
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users', headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     
@@ -105,8 +101,6 @@ class test_adminAPIUsers(parent_test_api):
 
     
   def test_getSingleUser(self):
-    defaultUserData["UserID"] = appObj.defaultUserGUID
-  
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + appObj.defaultUserGUID, headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
 

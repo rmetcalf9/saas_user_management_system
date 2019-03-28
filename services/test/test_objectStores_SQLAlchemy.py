@@ -158,3 +158,10 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
 #  (Sometimes they think they are qurying when they are not)
 #  one possible solution will be to always require a transaction even for queries
 #   and completly dissalow manual calls of start/commit/rollback
+
+#  one possible solution (in base)
+#   remove all manual runs of start/commit/rollback, they are only called via executeInsideTransaction
+#   mark all new connections "readonly"
+#   when start transaction is called mark the conneciton as writeable
+#   when commit/rollback is called mark the connection ad readonly
+#   in the base class add a check to create, delete and update methods to raise exception is connection is readonly
