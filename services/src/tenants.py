@@ -74,13 +74,14 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
 #Called from API call
 
 #returns tenantObj
-def CreateTenant(appObj, tenantName, description="", allowUserCreation=False):
+##allowUserCreation used to default to false, description used to default to ""
+def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnection, a,b,c):
   if tenantName == masterTenantName:
     raise failedToCreateTenantException
-  return _createTenant(appObj, tenantName, description, allowUserCreation)
+  return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection)
   
-def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion):
-  tenantObj = GetTenant(appObj, tenantName)
+def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection):
+  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
   if tenantObj is None:
     raise tenantDosentExistException
   if str(tenantObj.getObjectVersion()) != str(objectVersion):
@@ -124,14 +125,14 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getNewAuthProviderJSON(appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], authProv['AllowUserCreation'], authProv['ConfigJSON'])
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
   
-  def updTenant(tenant, transactionContext):
+  def updTenant(tenant, storeConnection):
     if tenant is None:
       raise tenantDosentExistException
     return jsonForTenant
-  appObj.objectStore.updateJSONObject(appObj,"tenants", tenantName, updTenant, objectVersion)
-  return GetTenant(appObj, tenantName)
+  storeConnection.updateJSONObject("tenants", tenantName, updTenant, objectVersion)
+  return GetTenant(tenantName, storeConnection, 'a','b','c')
   
-def DeleteTenant(appObj, tenantName, objectVersion):
+def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
   if tenantName == masterTenantName:
     raise cantDeleteMasterTenantException
   tenantObj = GetTenant(appObj, tenantName)
@@ -141,22 +142,22 @@ def DeleteTenant(appObj, tenantName, objectVersion):
   appObj.objectStore.removeJSONObject(appObj, "tenants", tenantName, objectVersion)
   return tenantObj
 
-def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy):
+def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection):
   if not tenantObj.getAllowUserCreation():
     raise userCreationNotAllowedException
-  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID)
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection)
   if not authProvObj.getAllowUserCreation():
     raise userCreationNotAllowedException
   
   userData = authProvObj.getTypicalAuthData(credentialDICT)
-  CreateUser(appObj, userData, tenantObj.getName(), createdBy)
-  person = CreatePerson(appObj)
-  authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'])
-  associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'])
+  CreateUser(appObj, userData, tenantObj.getName(), createdBy, storeConnection)
+  person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
+  authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'], storeConnection)
+  associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'], storeConnection)
   
-  return GetUser(appObj, userData['user_unique_identifier'])
+  return GetUser(appObj, userData['user_unique_identifier'], storeConnection)
 
-def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT):
+def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT, storeConnection):
   tenantObj = GetTenant(appObj, tenantName)
   if tenantObj is None:
     raise tenantDosentExistException

@@ -43,8 +43,8 @@ def deleteAuthAndUnassiciateFromPerson(appObj, personGUID, AuthUserKey):
 
   DeleteAuthRecord(appObj, AuthUserKey)
   
-def _getAuthInfoForKeyForPersonObj(appObj, authKey):
-  authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey)
+def _getAuthInfoForKeyForPersonObj(appObj, authKey, storeConnection):
+  authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey, storeConnection)
   return {
     "AuthUserKey": authRecordDict["AuthUserKey"],
     "AuthProviderType": authRecordDict["AuthProviderType"],  
@@ -52,28 +52,28 @@ def _getAuthInfoForKeyForPersonObj(appObj, authKey):
     "tenantName": authRecordDict["tenantName"]
   }
   
-def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime, lastUpdateDateTime):
-  AssociatedUserIDs = getListOfUserIDsForPersonNoTenantCheck(appObj, PersonDict['guid'])
+def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime, lastUpdateDateTime, storeConnection):
+  AssociatedUserIDs = getListOfUserIDsForPersonNoTenantCheck(appObj, PersonDict['guid'], storeConnection)
   ##print("AAA:", AssociatedUserIDs, ":", personGUID)
   AssociatedUserObjs = []
   for uid in AssociatedUserIDs:
     AssociatedUserObjs.append(GetUser(appObj,uid))
   
-  authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2 = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", PersonDict['guid'])
+  authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2 = storeConnection.getObjectJSON("AuthsForEachPerson", PersonDict['guid'])
   authObjs = []
   if authKeyDICT is not None:
     #there are people with no auths
     for authKey in authKeyDICT:
-      authObjs.append(_getAuthInfoForKeyForPersonObj(appObj, authKey))
+      authObjs.append(_getAuthInfoForKeyForPersonObj(appObj, authKey, storeConnection))
   
   personObj = personClass(PersonDict, objVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs, authObjs)
   return personObj
 
-def GetPerson(appObj, personGUID):
-  personDICT, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"Persons", personGUID)
+def GetPerson(appObj, personGUID, storeConnection):
+  personDICT, objVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("Persons", personGUID)
   if personDICT is None:
     return None
-  return CreatePersonObjFromUserDict(appObj, personDICT, objVer, creationDateTime, lastUpdateDateTime)
+  return CreatePersonObjFromUserDict(appObj, personDICT, objVer, creationDateTime, lastUpdateDateTime, storeConnection)
 
 def UpdatePerson(appObj, personGUID, objectVersion):
   #Can't currently update any person data but API added because we will in future
@@ -92,30 +92,30 @@ def UpdatePerson(appObj, personGUID, objectVersion):
   pObj = GetPerson(appObj, personGUID)
   return pObj
 
-  
-def DeletePerson(appObj, personGUID, objectVersion = None):
-  userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID)
+#objectVersion used to default to None
+def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
+  userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
   for userID in userIDsThisPerson:
     RemoveUserAssociation(appObj, userID, personGUID, None)
   
   #may not have object version check (cascades don't)
   #not cascading delete down to users
-  personObj = GetPerson(appObj, personGUID)
+  personObj = GetPerson(appObj, personGUID, storeConnection)
   if personObj is None:
     raise personDosentExistException
 
-  appObj.objectStore.removeJSONObject(appObj, "Persons", personGUID, objectVersion)
+  storeConnection.removeJSONObject("Persons", personGUID, objectVersion)
   
-  authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"AuthsForEachPerson", personGUID)
+  authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("AuthsForEachPerson", personGUID)
 
-  appObj.objectStore.removeJSONObject(appObj, "AuthsForEachPerson", personGUID, ignoreMissingObject=True)
+  storeConnection.removeJSONObject("AuthsForEachPerson", personGUID, ignoreMissingObject=True)
   
-  appObj.objectStore.removeJSONObject(appObj, "UsersForEachPerson", personGUID, None, ignoreMissingObject=True)
+  storeConnection.removeJSONObject("UsersForEachPerson", personGUID, None, ignoreMissingObject=True)
 
   
   if authsForThisGUID is not None:
     for authKey in authsForThisGUID:
-      DeleteAuthRecord(appObj, authKey)
+      DeleteAuthRecord(appObj, authKey, storeConnection)
   return personObj
   
 def GetPaginatedPersonData(appObj, request, outputFN):

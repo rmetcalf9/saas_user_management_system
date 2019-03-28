@@ -70,17 +70,17 @@ def AddUserRole(appObj, userID, tennantName, roleName, storeConnection):
   
 ##END OF CREATION FUNCTIONS
 
-def DeleteUser(appObj, UserID, objectVersion):
-  userObj = GetUser(appObj, UserID)
+def DeleteUser(appObj, UserID, objectVersion, storeConnection):
+  userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is None:
     raise userDosentExistException
-  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"users_associatedPersons",UserID)
+  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("users_associatedPersons",UserID)
     
   for personGUID in associatedPersonList:
-    RemoveUserAssociation(appObj, UserID, personGUID, DeletePerson)
+    RemoveUserAssociation(appObj, UserID, personGUID, DeletePerson, storeConnection)
     
-  appObj.objectStore.removeJSONObject(appObj, "users", UserID, objectVersion)
-  appObj.objectStore.removeJSONObject(appObj, "users_associatedPersons", UserID)
+  storeConnection.removeJSONObject("users", UserID, objectVersion)
+  storeConnection.removeJSONObject("users_associatedPersons", UserID)
   
   return userObj
 

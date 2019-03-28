@@ -164,7 +164,11 @@ def registerAPI(appObj):
         if len(content["AuthProviders"]) != 0:
           raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
-        tenantObj = CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'])
+        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        def someFn(connectionContext):
+          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, 'a','b','c')
+        tenantObj = storeConnection.executeInsideTransaction(someFn)
+        
       except customExceptionClass as err:
         if (err.id=='tenantAlreadtExistsException'):
           raise BadRequest(err.text)
@@ -205,7 +209,12 @@ def registerAPI(appObj):
 
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
-        tenantObj = UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'])
+
+        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        def someFn(connectionContext):
+          return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext)
+        tenantObj = storeConnection.executeInsideTransaction(someFn)
+      
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
           raise BadRequest(err.text)
@@ -326,7 +335,8 @@ def registerAPI(appObj):
     def get(self, tenant, userID):
       '''Get User information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      userObj = GetUser(appObj, userID)
+      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      userObj = GetUser(appObj, userID, storeConnection)
       if userObj is None:
         raise NotFound('User Not Found')
       return userObj.getJSONRepresenation()
@@ -384,7 +394,11 @@ def registerAPI(appObj):
       if (decodedTokenObj.getUserID() == userID):
         raise BadRequest("Can't delete logged in user")
       try:
-        userObj = DeleteUser(appObj, userID, objectVersion)
+        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        def someFn(connectionContext):
+          return DeleteUser(appObj, userID, objectVersion, connectionContext)
+        userObj = storeConnection.executeInsideTransaction(someFn)
+        
         return userObj.getJSONRepresenation()
       except customExceptionClass as err:
         if (err.id=='userDosentExistException'):

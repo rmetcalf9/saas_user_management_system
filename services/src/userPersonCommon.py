@@ -20,37 +20,37 @@ def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, la
 
 #Called when deleting both a user and a person
 # if being called when we are deleting a person then deletePersonFn will not set to None
-def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn):
+def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn, storeConnection):
   ##Remove record from users_associatedPersons
-  def updateTheUsersPersonListFn(associatedPersonList, transactionContext):
+  def updateTheUsersPersonListFn(associatedPersonList, storeConnection):
     if associatedPersonList is None:
       raise userDosentExistException
     if personGUID in associatedPersonList:
       associatedPersonList.remove(personGUID)
 
     #Removing other reference inside same function so they occur in same transaction
-    def updUsersForEachPerson(idfea, transactionContext):
+    def updUsersForEachPerson(idfea, storeConnection):
       if idfea is None:
         raise personDosentExistException
       #May not be in list as if person delete is called first, the user delete also calls this
       if userID in idfea:
         idfea.remove(userID)
       return idfea
-    appObj.objectStore.updateJSONObject(appObj,"UsersForEachPerson", personGUID, updUsersForEachPerson, transactionContext)
+    storeConnection.updateJSONObject("UsersForEachPerson", personGUID, updUsersForEachPerson)
       
       
     return associatedPersonList
-  appObj.objectStore.updateJSONObject(appObj,"users_associatedPersons", userID, updateTheUsersPersonListFn)
+  storeConnection.updateJSONObject("users_associatedPersons", userID, updateTheUsersPersonListFn)
   
   
-  userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime = appObj.objectStore.getObjectJSON(appObj,"UsersForEachPerson",personGUID)
+  userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("UsersForEachPerson",personGUID)
   if userListForThisPerson is None:
     return
     
   if deletePersonFn is not None:
     if len(userListForThisPerson)==0:
       #print("RemoveUserAssociation Last user for this persion - deleting the person")
-      deletePersonFn(appObj, personGUID)
+      deletePersonFn(appObj, personGUID, None, storeConnection, 'a','b','c')
 
 def getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection):
   res = []
