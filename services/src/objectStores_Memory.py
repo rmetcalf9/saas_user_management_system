@@ -4,6 +4,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
   appObj = None
   objectType = None
   def __init__(self, appObj, objectType):
+    super(ConnectionContext, self).__init__()
     self.appObj = appObj
     self.objectType = objectType
 

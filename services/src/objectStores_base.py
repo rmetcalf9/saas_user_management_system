@@ -23,7 +23,7 @@ def someFn(connectionContext):
   ##DO STUFF
 storeConnection.executeInsideTransaction(someFn)
 
-##Alternative
+##Alternative (depreciated)
 storeConnection = obj.getConnectionContext(appObj)
 storeConnection.startTransaction()
 try:
@@ -39,12 +39,30 @@ class ObjectStoreConnectionContext():
   #if object version is set to none object version checking is turned off
   # object version may be a number or a guid depending on store technology
   
+  callsToStartTransaction = None
+  def __init__(self):
+    self.callsToStartTransaction = 0
+  
   def _INT_startTransaction(self):
+    if self.callsToStartTransaction != 0:
+      raise Exception("Disabled ability for nexted transactions")
+    self.callsToStartTransaction = self.callsToStartTransaction + 1
     return self._startTransaction()
   def _INT_commitTransaction(self):
+    if self.callsToStartTransaction == 0:
+      raise Exception("Trying to commit transaction but none started")
+    self.callsToStartTransaction = self.callsToStartTransaction - 1
     return self._commitTransaction()
   def _INT_rollbackTransaction(self):
+    if self.callsToStartTransaction == 0:
+      raise Exception("Trying to rollback transaction but none started")
+    self.callsToStartTransaction = self.callsToStartTransaction - 1
     return self._rollbackTransaction()
+    
+  def _INT_varifyWeCanMutateData(self):
+    if self.callsToStartTransaction == 0:
+      raise Exception("Trying to mutate objectStore without first starting a transaction")
+  
     
   def executeInsideTransaction(self, fnToExecute):
     retVal = None
@@ -61,10 +79,12 @@ class ObjectStoreConnectionContext():
   def saveJSONObject(self, objectType, objectKey, JSONString, objectVersion = None):
     if 'ObjectVersion' in JSONString:
       raise SavedObjectShouldNotContainObjectVersionException
+    self._INT_varifyWeCanMutateData()
     return self._saveJSONObject(objectType, objectKey, JSONString, objectVersion)
 
   #Return value is None
   def removeJSONObject(self, objectType, objectKey, objectVersion = None, ignoreMissingObject = False):
+    self._INT_varifyWeCanMutateData()
     return self._removeJSONObject(objectType, objectKey, objectVersion, ignoreMissingObject)
 
   # Update the object in single operation. make transaction safe??
@@ -73,6 +93,7 @@ class ObjectStoreConnectionContext():
   ##  object
   ##  connection
   def updateJSONObject(self, objectType, objectKey, updateFn, objectVersion = None):
+    self._INT_varifyWeCanMutateData()
     return self._updateJSONObject(objectType, objectKey, updateFn, objectVersion)
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate

@@ -30,6 +30,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
   objectStore = None
 
   def __init__(self, appObj, objectStore):
+    super(ConnectionContext, self).__init__()
     self.appObj = appObj
     self.objectStore = objectStore
     self.connection = self.objectStore.engine.connect()

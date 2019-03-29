@@ -384,14 +384,18 @@ class test_funcitonal(test_api):
     storeConnection = appObj.objectStore.getConnectionContext(appObj)
 
     #Also create some auth data for the single auth
-    person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
-    authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
-      "username": 'AA', 
-      "password": b'BB'
-      },
-      person['guid'],
-      storeConnection
-    )
+    def someFn1(connectionContext):
+      person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
+      authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
+        "username": 'AA', 
+        "password": b'BB'
+        },
+        person['guid'],
+        storeConnection
+      )
+      return person, authData
+    (person, authData) = storeConnection.executeInsideTransaction(someFn1)
+    
 
     #Before we delete the auth provider we must get the key it used to create the userAuth
     authProvDict = {
