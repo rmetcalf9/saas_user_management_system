@@ -35,8 +35,17 @@ ConfigDict = {
   "Type":"SQLAlchemy",
   "connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man"
 }
+ConfigDict_withPrefix = {
+  "Type":"SQLAlchemy",
+  "connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man",
+  "objectPrefix":"testPrefix"
+}
+
+class dummyException(Exception):
+  pass
 
 class test_objectStoresSQLAlchemy(testHelperSuperClass):
+
   def test_saveFailsWithInvalidObjectVersionFirstSave(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict)
     obj.resetDataForTest(appObj)
@@ -181,13 +190,115 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
         incTime = incTime + datetime.timedelta(seconds=60)
     storeConnection.executeInsideTransaction(someFn)
 
-#TODO Make sure we object keys are respected
+  #Different prefixes don't share data
+  def test_differentPrefixesDontShareData(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict)
+    obj.resetDataForTest(appObj)
+    obj2 = ObjectStore_SQLAlchemy(ConfigDict_withPrefix)
+    obj2.resetDataForTest(appObj)
+    storeConnection = obj.getConnectionContext(appObj)
+    def someFn(connectionContext):
+      for x in range(1,6):
+        connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
+    storeConnection.executeInsideTransaction(someFn)
+    storeConnection2 = obj2.getConnectionContext(appObj)
+    def someFn(connectionContext):
+      for x in range(1,6):
+        connectionContext.saveJSONObject("Test", "2_123" + str(x), JSONString, None)
+    storeConnection2.executeInsideTransaction(someFn)
 
-#TODO Different prefixes don't share data
+    for x in range(1,6):
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "1_123" + str(x))
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
+    
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "2_123" + str(x))
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "2_123" + str(x))
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+    
+  #Test rollback single transaction
+  def test_rollbackTransactionIsSuccessful_InsertOnly(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict)
+    obj.resetDataForTest(appObj)
+    storeConnection = obj.getConnectionContext(appObj)
+    
+    #Test creation of record rollback works
+    # _no data to start with
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Object found before it was added')
+  
+    # insert data
+    def someFn(connectionContext):
+      connectionContext.saveJSONObject("Test", "1_123", JSONString, None)
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='object never added')
+      raise dummyException("rollback")
+    try:
+      storeConnection.executeInsideTransaction(someFn)
+    except dummyException:
+      pass
+    
+    # _no data after rolledback insert start with
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Found but it should have rolled back')
 
-#TODO Test rollback single transaction
+  def test_rollbackTransactionIsSuccessful_UpdateOnly(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict)
+    obj.resetDataForTest(appObj)
+    storeConnection = obj.getConnectionContext(appObj)
+    
+    # insert data
+    def someFn(connectionContext):
+      objVer = connectionContext.saveJSONObject("Test", "1_123", JSONString, None)
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='object not added')
+      return objVer
+    objVer = storeConnection.executeInsideTransaction(someFn)
 
-#TODO Test rollback mutiple transactions in same context
+    # _no data to start with
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Object found before it was added')
+  
+    # update data
+    def someFn(connectionContext):
+      connectionContext.saveJSONObject("Test", "1_123", JSONString2, objVer)
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString2, [  ], msg='object not updated')
+      raise dummyException("rollback")
+    try:
+      storeConnection.executeInsideTransaction(someFn)
+    except dummyException:
+      pass
+    
+    # Make sure data has revereted to origional value
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Did not roll back to previous value')    
+    
+  # Make sure mutiple object keys are respected
+  def test_differentKeys(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict)
+    obj.resetDataForTest(appObj)
+    storeConnection = obj.getConnectionContext(appObj)
+    def someFn(connectionContext):
+      objKeyMap = {}
+      for x in range(1,6):
+        objKeyMap["1_123" + str(x)] = connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
+      return objKeyMap
+    objKeyMap = storeConnection.executeInsideTransaction(someFn)
+    
+    #update 3rd object to alternative data
+    def someFn(connectionContext):
+      connectionContext.saveJSONObject("Test", "1_123" + str(3), JSONString2, objKeyMap["1_123" + str(3)])
+    storeConnection.executeInsideTransaction(someFn)
+
+    for x in range(1,6):
+      expRes = copy.deepcopy(JSONString)
+      if x==3:
+        expRes = copy.deepcopy(JSONString2)
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, expRes, [  ], msg='Saved object dosen\'t match')
 
 #TODO Decide if I want to refactor to use index rather primary key to remove limit on maximum key size
 #      I probally do due to componed keys __TENANT__:__USER__:__ETC__
