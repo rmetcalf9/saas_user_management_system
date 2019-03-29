@@ -31,7 +31,7 @@ class test_objectStoresMemory(testHelperSuperClass):
     with self.assertRaises(Exception) as context:
       storeConnection = obj.getConnectionContext(appObj)
       def someFn(connectionContext):
-        savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
+        savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
       storeConnection.executeInsideTransaction(someFn)
     self.checkGotRightException(context,WrongObjectVersionException)
 
@@ -40,9 +40,9 @@ class test_objectStoresMemory(testHelperSuperClass):
     objVerIDToSaveAs = 123
     storeConnection = obj.getConnectionContext(appObj)
     def someFn(connectionContext):
-      savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, None)
+      savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
       with self.assertRaises(Exception) as context:
-        savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
+        savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
       self.checkGotRightException(context,WrongObjectVersionException)
 
     storeConnection.executeInsideTransaction(someFn)
@@ -54,13 +54,13 @@ class test_objectStoresMemory(testHelperSuperClass):
     def someFn(connectionContext):
       lastSavedVer = None
       for x in range(1,6): 
-        savedVer = connectionContext._saveJSONObject("Test", "123", JSONString, lastSavedVer)
+        savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastSavedVer)
         self.assertEqual(savedVer, x)
         lastSavedVer = savedVer
     storeConnection.executeInsideTransaction(someFn)
       
     #Check object was saved correctly
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection._getObjectJSON("Test", "123")
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
     self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='Saved object dosen\'t match')
 
   def test_saveGetSaveObj(self):
@@ -71,8 +71,8 @@ class test_objectStoresMemory(testHelperSuperClass):
       lastSavedVer = None
       for x in range(1,6): 
         newJSONString = copy.deepcopy(JSONString)
-        savedVer = connectionContext._saveJSONObject("Test", "123", newJSONString, lastSavedVer)
-        newJSONString = copy.deepcopy( connectionContext._getObjectJSON("Test", "123"))
+        savedVer = connectionContext.saveJSONObject("Test", "123", newJSONString, lastSavedVer)
+        newJSONString = copy.deepcopy( connectionContext.getObjectJSON("Test", "123"))
         
         self.assertEqual(savedVer, x)
         lastSavedVer = savedVer
@@ -85,10 +85,10 @@ class test_objectStoresMemory(testHelperSuperClass):
     appObj.setTestingDateTime(testDateTime)
 
     def someFn(connectionContext):
-      return connectionContext._saveJSONObject("Test", "123", JSONString, None)
+      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
     savedVer = storeConnection.executeInsideTransaction(someFn)
 
-    objDict, ver, creationDateTime, lastUpdateDateTime = storeConnection._getObjectJSON("Test", "123")
+    objDict, ver, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("Test", "123")
     self.assertEqual(objDict, JSONString)
     self.assertEqual(ver, savedVer)
     self.assertEqual(creationDateTime, testDateTime)
@@ -105,10 +105,10 @@ class test_objectStoresMemory(testHelperSuperClass):
       appObj.setTestingDateTime(incTime)
       
       def someFn(connectionContext):
-        return connectionContext._saveJSONObject("Test", "123", JSONString, lastVersion)
+        return connectionContext.saveJSONObject("Test", "123", JSONString, lastVersion)
       savedVer = storeConnection.executeInsideTransaction(someFn)
       
-      objDict, ver, creationDateTime, lastUpdateDateTime = storeConnection._getObjectJSON("Test", "123")
+      objDict, ver, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("Test", "123")
       self.assertEqual(objDict, JSONString)
       self.assertEqual(ver, savedVer)
       self.assertEqual(creationDateTime, testDateTime, msg="creation time not right")
