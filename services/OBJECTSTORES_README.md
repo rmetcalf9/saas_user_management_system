@@ -19,6 +19,7 @@ It is still beneficial in the early phase of projects to be able to change type 
 }
 ```
 
+When using the memomory store you still need to use executeInsideTransaction to mutate the datastore however transactions have not been implemented so everything is committed even if it is rolled back.
 
 ## SQLAlchmey
 

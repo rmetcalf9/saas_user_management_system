@@ -4,36 +4,15 @@ import pytz
 ##import datetime
 from dateutil.parser import parse
 
-def testFunctionToBeGotRidOf():
-  print("Test start")
-
-  connectionString="mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man"
-
-  engine = create_engine(connectionString, pool_recycle=3600, pool_size=20, max_overflow=0)
-
-  metadata = MetaData()
-  users = Table('rjm_test_table', metadata,
-      Column('id', Integer, primary_key=True),
-      Column('name', String(2048)),
-      Column('fullname', String(2048)),
-  )
-
-  metadata.create_all(engine)
-
-  print("Test end")
-
-###testFunctionToBeGotRidOf()
-
+objectStoreHardCodedVersionInteger = 1
 
 class ConnectionContext(ObjectStoreConnectionContext):
-  appObj = None
   connection = None
   transaction = None
   objectStore = None
 
-  def __init__(self, appObj, objectStore):
+  def __init__(self, objectStore):
     super(ConnectionContext, self).__init__()
-    self.appObj = appObj
     self.objectStore = objectStore
     self.connection = self.objectStore.engine.connect()
 
@@ -62,7 +41,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
     result =  self._INT_execute(query)
     firstRow = result.first()
-    curTime = self.appObj.getCurDateTime()
+    curTime = self.objectStore.appObj.getCurDateTime()
     if firstRow is None:
       if objectVersion is not None:
         raise WrongObjectVersionException
@@ -127,8 +106,10 @@ class ConnectionContext(ObjectStoreConnectionContext):
 class ObjectStore_SQLAlchemy(ObjectStore):
   engine = None
   objDataTable = None
+  verTable = None
   objectPrefix = None
-  def __init__(self, ConfigDict):
+  def __init__(self, ConfigDict, appObj):
+    super(ObjectStore_SQLAlchemy, self).__init__(appObj)
     if "connectionString" not in ConfigDict:
       raise ObjectStoreConfigError("APIAPP_OBJECTSTORECONFIG SQLAlchemy ERROR - Expected connectionString")
     if "objectPrefix" in ConfigDict:
@@ -142,7 +123,11 @@ class ObjectStore_SQLAlchemy(ObjectStore):
     #from https://stackoverflow.com/questions/15157227/mysql-varchar-index-length
     #MySQL assumes 3 bytes per utf8 character. 255 characters is the maximum index size you can specify per column, because 256x3=768, which breaks the 767 byte limit.
     self.objDataTable = Table(self.objectPrefix + '_objData', metadata,
-        Column('key', String(255), primary_key=True),
+        #Tired intorudcing a seperate primary key and using key column as index but
+        # I found the same lenght restriction exists on an index
+        #Column('id', Integer, primary_key=True),
+        #Column('key', String(300), index=True, unique=True),
+        Column('key', String(300), primary_key=True),
         Column('objectDICT', JSON),
         Column('objectVersion', BigInteger),
         Column('creationDate', DateTime(timezone=True)), 
@@ -150,15 +135,50 @@ class ObjectStore_SQLAlchemy(ObjectStore):
         Column('creationDate_iso8601', String(length=40)), 
         Column('lastUpdateDate_iso8601', String(length=40))
     )
+    self.verTable = Table(self.objectPrefix + '_ver', metadata,
+        Column('id', Integer, primary_key=True),
+        Column('first_installed_ver', Integer),
+        Column('current_installed_ver', Integer),
+        Column('creationDate_iso8601', String(length=40)), 
+        Column('lastUpdateDate_iso8601', String(length=40))
+    )
     metadata.create_all(self.engine)
+    
+    self._INT_setupOrUpdateVer(appObj)
+  
+  #AppObj passed in as None
+  def _INT_setupOrUpdateVer(self, appObj):
+    storeConnection = self.getConnectionContext()
+    def someFn(connectionContext):
+      curTime = appObj.getCurDateTime()
+      query = self.verTable.select()
+      result = connectionContext._INT_execute(query)
+      if result.rowcount != 1:
+        if result.rowcount != 0:
+          raise Exception('invalid database structure - can\'t read version')
+        #There are 0 rows, create one
+        query = self.verTable.insert().values(
+          first_installed_ver=objectStoreHardCodedVersionInteger, 
+          current_installed_ver=objectStoreHardCodedVersionInteger, 
+          creationDate_iso8601=curTime.isoformat(),
+          lastUpdateDate_iso8601=curTime.isoformat()
+        )
+        result = connectionContext._INT_execute(query)
+        return
+      firstRow = result.first()
+      if objectStoreHardCodedVersionInteger == firstRow['current_installed_ver']:
+        return
+      raise Exception('Not Implemented - update datastore from x to objectStoreHardCodedVersionInteger')
+    storeConnection.executeInsideTransaction(someFn)
+    
 
-  def _resetDataForTest(self, appObj):
-    storeConnection = self.getConnectionContext(appObj)
+  def _resetDataForTest(self):
+    storeConnection = self.getConnectionContext()
     def someFn(connectionContext):
       query = self.objDataTable.delete()
       connectionContext._INT_execute(query)
     storeConnection.executeInsideTransaction(someFn)
     
-  def _getConnectionContext(self, appObj):
-    return ConnectionContext(appObj, self)
+  def _getConnectionContext(self):
+    return ConnectionContext(self)
 

@@ -131,13 +131,17 @@ class ObjectStoreConnectionContext():
 
 #Base class for object store
 class ObjectStore():
-  def getConnectionContext(self, appObj):
-    return self._getConnectionContext(appObj)
-  def _getConnectionContext(self, appObj):
+  appObj = None
+  def __init__(self, appObj):
+    self.appObj = appObj
+  
+  def getConnectionContext(self):
+    return self._getConnectionContext()
+  def _getConnectionContext(self):
     raise Exception('Not Overridden')
 
-  def resetDataForTest(self, appObj):
-    return self._resetDataForTest(appObj)
+  def resetDataForTest(self):
+    return self._resetDataForTest()
 
   #test only functions  
   def _resetDataForTest(self):

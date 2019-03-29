@@ -381,7 +381,7 @@ class test_funcitonal(test_api):
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
     authProvGUID = origTenantDict['AuthProviders'][0]['guid']
     
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
 
     #Also create some auth data for the single auth
     def someFn1(connectionContext):

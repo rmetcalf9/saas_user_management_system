@@ -11,7 +11,7 @@ InvalidObjectStoreConfigUnknownTypeException = customExceptionClass('APIAPP_OBJE
 
 def _createObjectStoreInstanceTypeSpecified(appObj, type, configDICT, initFN):
   print("Using Object Store Type: " + type)
-  return initFN(configDICT)
+  return initFN(configDICT, appObj)
 
 #Based on applicaiton options create an instance of objectStore to be used
 def createObjectStoreInstance(appObj, env):

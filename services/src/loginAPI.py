@@ -74,7 +74,7 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def put(self, tenant):
       '''Register'''
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
       if 'authProviderGUID' not in request.get_json():
         raise BadRequest('No authProviderGUID provided')
@@ -119,7 +119,7 @@ def registerAPI(appObj):
     @nsLogin.response(400, 'Bad Request')
     def get(self, tenant):
      '''Get list of auth providers supported by this service'''
-     storeConnection = appObj.objectStore.getConnectionContext(appObj)
+     storeConnection = appObj.objectStore.getConnectionContext()
      tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
      return tenantObj.getJSONRepresenation()
      
@@ -132,7 +132,7 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Login and recieve JWT token'''
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
       if 'authProviderGUID' not in request.get_json():
         raise BadRequest('No authProviderGUID provided')
@@ -190,7 +190,7 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Get new JWT token with Refresh'''
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
       refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
       if refreshedAuthDetails is None:

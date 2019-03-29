@@ -1,11 +1,9 @@
 from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException
 
 class ConnectionContext(ObjectStoreConnectionContext):
-  appObj = None
   objectType = None
-  def __init__(self, appObj, objectType):
+  def __init__(self, objectType):
     super(ConnectionContext, self).__init__()
-    self.appObj = appObj
     self.objectType = objectType
 
   #transactional memory not implemented
@@ -19,7 +17,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     
   def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
     dictForObjectType = self.objectType._INT_getDictForObjectType(objectType)
-    curTimeValue = self.appObj.getCurDateTime()
+    curTimeValue = self.objectType.appObj.getCurDateTime()
     newObjectVersion = None
     if objectKey not in dictForObjectType:
       if objectVersion is not None:
@@ -82,7 +80,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     
   def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
     ##print('objectStoresMemory._getPaginatedResult self.objectType.objectData[objectType]:', self.objectType.objectData[objectType])
-    return self.appObj.getPaginatedResult(
+    return self.objectType.appObj.getPaginatedResult(
       self.objectType.objectData[objectType],
       outputFN,
       request,
@@ -92,7 +90,8 @@ class ConnectionContext(ObjectStoreConnectionContext):
 # Class that will store objects in memory only
 class ObjectStore_Memory(ObjectStore):
   objectData = None
-  def __init__(self, configJSON):
+  def __init__(self, configJSON, appObj):
+    super(ObjectStore_Memory, self).__init__(appObj)
     self.objectData = dict()
     #Dict = (objDICT, objectVersion, creationDate, lastUpdateDate)
 
@@ -102,6 +101,6 @@ class ObjectStore_Memory(ObjectStore):
       self.objectData[objectType] = dict()
     return self.objectData[objectType]
 
-  def _getConnectionContext(self, appObj):
-    return ConnectionContext(appObj, self)
+  def _getConnectionContext(self):
+    return ConnectionContext(self)
 

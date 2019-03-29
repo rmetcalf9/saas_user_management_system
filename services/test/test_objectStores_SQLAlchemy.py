@@ -47,11 +47,11 @@ class dummyException(Exception):
 class test_objectStoresSQLAlchemy(testHelperSuperClass):
 
   def test_saveFailsWithInvalidObjectVersionFirstSave(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
     objVerIDToSaveAs = 123
     
-    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       with self.assertRaises(Exception) as context:
         savedVer = storeConnection.saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
@@ -59,11 +59,11 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     storeConnection.executeInsideTransaction(someFn)
 
   def test_saveFailsWithInvalidObjectVersionSecondSave(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
     objVerIDToSaveAs = 123
     
-    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       return storeConnection.saveJSONObject("Test", "123", JSONString, None)
     savedVer = storeConnection.executeInsideTransaction(someFn)
@@ -76,9 +76,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     storeConnection.executeInsideTransaction(someFn2)
 
   def test_singleSaveAndRetrieveCommittedTransaction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     
     def someFn(connectionContext):
       savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
@@ -88,9 +88,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
   
   def test_singleSaveAndRetrieveUncommittedTransaction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     
     def someFn(connectionContext):
       savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
@@ -99,10 +99,10 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     savedVer = storeConnection.executeInsideTransaction(someFn)
     
   def test_saveObjectsInSingleTransaction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
     
-    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection = obj.getConnectionContext()
     
     def someFn(connectionContext):
       lastSavedVer = None
@@ -117,10 +117,10 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='Saved object dosen\'t match')
     
   def test_saveObjectsInMutipleTransactions(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
     lastSavedVer = None
-    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection = obj.getConnectionContext()
     for x in range(1,6): 
       def someFn(connectionContext):
         savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastSavedVer)
@@ -133,10 +133,10 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
 
   def test_updateToDifferentJSONWorks(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
     lastSavedVer = None
-    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastSavedVer)
       return savedVer
@@ -152,13 +152,13 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     
  
   def test_creationDateSetCorrectly(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
 
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
     
-    storeConnection = obj.getConnectionContext(appObj)
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
       objDict, ver, creationDateTime, lastUpdateDateTime = connectionContext.getObjectJSON("Test", "123")
@@ -170,9 +170,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
  
     
   def test_updateDateSetCorrectly(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
       appObj.setTestingDateTime(testDateTime)
@@ -192,16 +192,16 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
 
   #Different prefixes don't share data
   def test_differentPrefixesDontShareData(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    obj2 = ObjectStore_SQLAlchemy(ConfigDict_withPrefix)
-    obj2.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    obj2 = ObjectStore_SQLAlchemy(ConfigDict_withPrefix, appObj)
+    obj2.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       for x in range(1,6):
         connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
     storeConnection.executeInsideTransaction(someFn)
-    storeConnection2 = obj2.getConnectionContext(appObj)
+    storeConnection2 = obj2.getConnectionContext()
     def someFn(connectionContext):
       for x in range(1,6):
         connectionContext.saveJSONObject("Test", "2_123" + str(x), JSONString, None)
@@ -220,9 +220,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     
   #Test rollback single transaction
   def test_rollbackTransactionIsSuccessful_InsertOnly(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     
     #Test creation of record rollback works
     # _no data to start with
@@ -245,9 +245,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Found but it should have rolled back')
 
   def test_rollbackTransactionIsSuccessful_UpdateOnly(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     
     # insert data
     def someFn(connectionContext):
@@ -278,9 +278,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     
   # Make sure mutiple object keys are respected
   def test_differentKeys(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict)
-    obj.resetDataForTest(appObj)
-    storeConnection = obj.getConnectionContext(appObj)
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
     def someFn(connectionContext):
       objKeyMap = {}
       for x in range(1,6):
@@ -300,5 +300,3 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
       (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
       self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, expRes, [  ], msg='Saved object dosen\'t match')
 
-#TODO Decide if I want to refactor to use index rather primary key to remove limit on maximum key size
-#      I probally do due to componed keys __TENANT__:__USER__:__ETC__

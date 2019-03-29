@@ -17,14 +17,14 @@ class test_tenants(testHelperAPIClient):
 #Actual tests below
 
   def test_cantCreateTenantWithSameNameAsMaster(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     with self.assertRaises(Exception) as context:
       tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, 'a','b','c')
     self.checkGotRightException(context,failedToCreateTenantException)
 
 
   def test_MasterTenantExists(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertFalse(masterTenant is None, msg="Master Tenant was not created")
@@ -74,7 +74,7 @@ class test_tenants(testHelperAPIClient):
     storeConnection.executeInsideTransaction(someFn)
 
   def test_StandardUserInvalidPassword(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -94,7 +94,7 @@ class test_tenants(testHelperAPIClient):
     storeConnection.executeInsideTransaction(someFn)
 
   def test_StandardUserInvalidUsername(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -114,7 +114,7 @@ class test_tenants(testHelperAPIClient):
     storeConnection.executeInsideTransaction(someFn)
 
   def test_StandardUserLoginToInvalidIdentity(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -140,7 +140,7 @@ class test_tenants(testHelperAPIClient):
 
   # Person can log in and choose to use userA or userB
   def test_oneAuthCanAccessTwoIdentities(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       userID1 = 'TestUser1'
       userID2 = 'TestUser2'
@@ -223,7 +223,7 @@ class test_tenants(testHelperAPIClient):
 
   #UserA can be shared by many People (Who may or may not have many auths)
   def test_oneUserCanBeAccessedByTwoAuths(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, storeConnection, 'a','b','c')
       userID = 'TestUser'

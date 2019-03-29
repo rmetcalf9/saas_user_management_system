@@ -126,7 +126,7 @@ class test_loginapi_norm(test_api):
     #self.assertTrue(False)
     
   def setupLoginWithMutipleUserIDsAndGetLoginResponse(self, InternalAuthUsername, userID1, userID2):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):
       return self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername, storeConnection)
     res = storeConnection.executeInsideTransaction(someFn)    
@@ -236,7 +236,7 @@ class test_loginapi_norm(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
   def test_getMutipleIdentityResponseOnlyReturnsUsersForThisTenant(self):
-    storeConnection = appObj.objectStore.getConnectionContext(appObj)
+    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):
       tenantJSON = self.createTenantForTesting(tenantWithNoAuthProviders)
       testDateTime = datetime.now(pytz.timezone("UTC"))

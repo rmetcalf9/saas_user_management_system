@@ -143,7 +143,7 @@ def registerAPI(appObj):
         return tenantClass(item[0],item[1]).getJSONRepresenation()
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         outputFN = defOutput
         return storeConnection.getPaginatedResult("tenants", appObj.getPaginatedParamValues(request), request, outputFN)
       except:
@@ -165,7 +165,7 @@ def registerAPI(appObj):
         if len(content["AuthProviders"]) != 0:
           raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, 'a','b','c')
         tenantObj = storeConnection.executeInsideTransaction(someFn)
@@ -192,7 +192,7 @@ def registerAPI(appObj):
     def get(self, tenant, tenantName):
       '''Get tenant information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       a = GetTenant(tenantName, storeConnection, 'a','b','c')
       if a is None:
         raise NotFound('Tenant Not Found')
@@ -212,7 +212,7 @@ def registerAPI(appObj):
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
 
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext)
         tenantObj = storeConnection.executeInsideTransaction(someFn)
@@ -251,7 +251,7 @@ def registerAPI(appObj):
       if objectVersion is None:
         raise BadRequest(objectVersionHeaderName + " header missing")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           tenantObj = DeleteTenant(appObj, tenantName, objectVersion, connectionContext)
           return tenantObj.getJSONRepresenation()
@@ -280,7 +280,7 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       def defOutput(item):
         a = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
         ##print("a:", a)
@@ -288,7 +288,7 @@ def registerAPI(appObj):
 
       try:
         outputFN = defOutput
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         return GetPaginatedUserData(appObj, request, outputFN, storeConnection)
       except Exception as e:
         print(e)
@@ -312,7 +312,7 @@ def registerAPI(appObj):
         "known_as": content["known_as"]
       }
       tenant = None
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       if "mainTenant" in content:
         if content["mainTenant"] != "":
           tenant = content["mainTenant"]
@@ -349,7 +349,7 @@ def registerAPI(appObj):
     def get(self, tenant, userID):
       '''Get User information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       userObj = GetUser(appObj, userID, storeConnection)
       if userObj is None:
         raise NotFound('User Not Found')
@@ -369,7 +369,7 @@ def registerAPI(appObj):
         raise BadRequest("Inconsistent userID")
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return UpdateUser(
             appObj, 
@@ -420,7 +420,7 @@ def registerAPI(appObj):
       if (decodedTokenObj.getUserID() == userID):
         raise BadRequest("Can't delete logged in user")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return DeleteUser(appObj, userID, objectVersion, connectionContext)
         userObj = storeConnection.executeInsideTransaction(someFn)
@@ -450,7 +450,7 @@ def registerAPI(appObj):
       verifySecurityOfAdminAPICall(appObj, request, tenant)
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def defOutput(item):
           return CreatePersonObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
         def someFn(connectionContext):
@@ -475,7 +475,7 @@ def registerAPI(appObj):
         raise BadRequest("Can not supply guid when creating person")
       requiredInPayload(content, [])
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           personDict = CreatePerson(appObj, connectionContext, None, 'a','b','c')
           return GetPerson(appObj, personDict["guid"], connectionContext)
@@ -503,7 +503,7 @@ def registerAPI(appObj):
     def get(self, tenant, personGUID):
       '''Get Person information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       a = GetPerson(appObj, personGUID, storeConnection)
       if a is None:
         raise NotFound('Person Not Found')
@@ -523,7 +523,7 @@ def registerAPI(appObj):
         raise BadRequest("Inconsistent guid")
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return UpdatePerson(appObj, content['guid'], content['ObjectVersion'], connectionContext)
         personObj = storeConnection.executeInsideTransaction(someFn)
@@ -557,7 +557,7 @@ def registerAPI(appObj):
       if objectVersion is None:
         raise BadRequest(objectVersionHeaderName + " header missing")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return DeletePerson(appObj, personGUID, objectVersion, connectionContext, 'a','b','c')
         personObj = storeConnection.executeInsideTransaction(someFn)
@@ -590,7 +590,7 @@ def registerAPI(appObj):
         raise BadRequest("UserID in payload not the same as in URL")
       if personGUID != content['personGUID']:
         raise BadRequest("personGUID in payload not the same as in URL")
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       personObj = GetPerson(appObj, content["personGUID"], storeConnection)
       if personObj is None:
         raise NotFound('Person Not Found')
@@ -598,7 +598,7 @@ def registerAPI(appObj):
       if userObj is None:
         raise NotFound('User Not Found')
       try:
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return associateUserWithPerson(appObj, content["UserID"], content["personGUID"], connectionContext)
         storeConnection.executeInsideTransaction(someFn)
@@ -628,7 +628,7 @@ def registerAPI(appObj):
       try:
 
         
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           RemoveUserAssociation(appObj, userID, personGUID, None, connectionContext) #Not deleting person if this is last user
           return {
@@ -664,7 +664,7 @@ def registerAPI(appObj):
       try:
 
         
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           authData = AddAuthForUser(appObj, content["tenantName"], content["authProviderGUID"], content["personGUID"], content["credentialJSON"], connectionContext)
           resp = {
@@ -705,14 +705,14 @@ def registerAPI(appObj):
       decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
       #No Object version needed for auths
       authUserKey = base64.b64decode(authUserKeyEncoded).decode('utf-8')
-      storeConnection = appObj.objectStore.getConnectionContext(appObj)
+      storeConnection = appObj.objectStore.getConnectionContext()
       authData, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authUserKey, storeConnection)
       if authData is None:
         raise BadRequest('Bad auth')
       try:
 
         
-        storeConnection = appObj.objectStore.getConnectionContext(appObj)
+        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           deleteAuthAndUnassiciateFromPerson(appObj, authData["personGUID"], authUserKey, connectionContext)
           resp = {
