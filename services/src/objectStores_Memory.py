@@ -1,4 +1,4 @@
-from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
 
 class ConnectionContext(ObjectStoreConnectionContext):
   objectType = None
@@ -25,9 +25,11 @@ class ConnectionContext(ObjectStoreConnectionContext):
       newObjectVersion = 1
       dictForObjectType[objectKey] = (JSONString, newObjectVersion, curTimeValue, curTimeValue)
     else:
-      if objectVersion is not None:
-        if str(objectVersion) != str(dictForObjectType[objectKey][1]):
-          raise WrongObjectVersionException
+      #We have found an object in the DB
+      if objectVersion is None:
+        raise TryingToCreateExistingObjectException
+      if str(objectVersion) != str(dictForObjectType[objectKey][1]):
+        raise WrongObjectVersionException
       newObjectVersion = int(objectVersion) + 1
     dictForObjectType[objectKey] = (JSONString, newObjectVersion, dictForObjectType[objectKey][2], curTimeValue)
     return newObjectVersion
@@ -36,7 +38,9 @@ class ConnectionContext(ObjectStoreConnectionContext):
     dictForObjectType = self.objectType._INT_getDictForObjectType(objectType)
     if objectVersion is not None:
       if objectKey not in dictForObjectType:
-        raise Exception('Deleting something that isn\'t there')
+        if ignoreMissingObject:
+          return None
+        raise TriedToDeleteMissingObjectException
       if str(dictForObjectType[objectKey][1]) != str(objectVersion):
         raise WrongObjectVersionException
     if objectKey not in self.objectType._INT_getDictForObjectType(objectType):
@@ -45,22 +49,6 @@ class ConnectionContext(ObjectStoreConnectionContext):
     del self.objectType._INT_getDictForObjectType(objectType)[objectKey]
     return None
 
-  # Update the object in single operation. make transaction safe??
-  ## updateFn gets two paramaters:
-  ##  object
-  ##  connection
-  def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
-    obj, ver, creationDateTime, lastUpdateDateTime = self.getObjectJSON(objectType, objectKey)
-    if objectVersion is None:
-      #If object version is not supplied then assume update will not cause an error
-      objectVersion = ver 
-    if str(objectVersion) != str(ver):
-      raise WrongObjectVersionException
-    obj = updateFn(obj, self)
-    if obj is None:
-      raise StoringNoneObjectAfterUpdateOperationException
-    return self.saveJSONObject(objectType, objectKey, obj, objectVersion)
-  
   def _getObjectJSON(self, objectType, objectKey):
     objectTypeDict = self.objectType._INT_getDictForObjectType(objectType)
     if objectKey in objectTypeDict:

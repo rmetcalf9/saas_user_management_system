@@ -1,7 +1,7 @@
 #from TestHelperSuperClass import testHelperAPIClient, env
 from appObj import appObj
 from TestHelperSuperClass import testHelperSuperClass
-from objectStores_base import WrongObjectVersionException
+from objectStores_base import WrongObjectVersionException, UnallowedMutationException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
 from objectStores_SQLAlchemy import ObjectStore_SQLAlchemy
 import copy
 import datetime
@@ -300,3 +300,119 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
       (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
       self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, expRes, [  ], msg='Saved object dosen\'t match')
 
+  def test_updateUsingFunctionOutsideOfTransactionFails(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+    def someFn(connectionContext):
+      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+    
+    def updateFn(obj, connectionContext):
+      self.assertJSONStringsEqualWithIgnoredKeys(JSONString, obj, [  ], msg='Saved object dosen\'t match')
+      return JSONString2
+    
+    with self.assertRaises(Exception) as context:
+      newVer = storeConnection.updateJSONObject("Test", "123", updateFn, savedVer)
+    self.checkGotRightException(context,UnallowedMutationException)
+
+  def test_updateUsingFunction(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+    def someFn(connectionContext):
+      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+    
+    def updateFn(obj, connectionContext):
+      self.assertJSONStringsEqualWithIgnoredKeys(JSONString, obj, [  ], msg='Saved object dosen\'t match')
+      return JSONString2
+
+    def someFn(connectionContext):
+      newVer = connectionContext.updateJSONObject("Test", "123", updateFn, savedVer)
+    storeConnection.executeInsideTransaction(someFn)
+    
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(JSONString2, objectDICT, [  ], msg='object was not updated')
+
+  def test_removeMissingObject(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+
+    def someFn(connectionContext):
+      newVer = connectionContext.removeJSONObject("Test", "123", 1, False)
+    with self.assertRaises(Exception) as context:
+      storeConnection.executeInsideTransaction(someFn)
+    self.checkGotRightException(context,TriedToDeleteMissingObjectException)
+
+  def test_removeMissingObjectIgnoreMissing(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+
+    def someFn(connectionContext):
+      newVer = connectionContext.removeJSONObject("Test", "123", 1, True)
+    storeConnection.executeInsideTransaction(someFn)
+
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='object was not removed')
+
+  def test_removeObjectWithNoTransactionFails(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+    def someFn(connectionContext):
+      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object was not added')
+
+    with self.assertRaises(Exception) as context:
+      newVer = storeConnection.removeJSONObject("Test", "123", savedVer, False)
+    self.checkGotRightException(context,UnallowedMutationException)
+
+  def test_removeObject(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+    def someFn(connectionContext):
+      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object was not added')
+
+    def someFn(connectionContext):
+      newVer = connectionContext.removeJSONObject("Test", "123", savedVer, False)
+    storeConnection.executeInsideTransaction(someFn)
+
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='object was not removed')
+    
+  def test_createExistingObjectFails(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+    def someFn(connectionContext):
+      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
+    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object was not added')
+
+
+    with self.assertRaises(Exception) as context:
+      savedVer = storeConnection.executeInsideTransaction(someFn)
+    self.checkGotRightException(context,TryingToCreateExistingObjectException)
+
+  def test_supportsDifferentObjectTypes(self):
+    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj.resetDataForTest()
+    storeConnection = obj.getConnectionContext()
+    def someFn(connectionContext):
+      a = connectionContext.saveJSONObject("TestType1", "123", JSONString, None)
+      b = connectionContext.saveJSONObject("TestType2", "123", JSONString, None)
+    savedVer = storeConnection.executeInsideTransaction(someFn)
+    

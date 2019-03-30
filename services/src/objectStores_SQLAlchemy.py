@@ -1,4 +1,4 @@
-from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON, func
 import pytz
 ##import datetime
@@ -41,6 +41,9 @@ class ConnectionContext(ObjectStoreConnectionContext):
     query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
     result =  self._INT_execute(query)
     firstRow = result.first()
+    print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
+    if firstRow is not None:
+      print(" firstRow:", firstRow)
     curTime = self.objectStore.appObj.getCurDateTime()
     if firstRow is None:
       if objectVersion is not None:
@@ -61,6 +64,8 @@ class ConnectionContext(ObjectStoreConnectionContext):
       if result.inserted_primary_key[0] != objectKey:
         raise Exception('_saveJSONObject issue with primary key')
       return newObjectVersion
+    if objectVersion is None:
+      raise TryingToCreateExistingObjectException
     if firstRow.objectVersion != objectVersion:
       raise WrongObjectVersionException
     newObjectVersion = firstRow.objectVersion + 1
@@ -76,10 +81,11 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return newObjectVersion
 
   def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
-    raise Exception('_removeJSONObject Not Implemented')
-  def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
-    raise Exception('_updateJSONObject Not Implemented')
-  
+    query = self.objectStore.objDataTable.delete(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
+    result = self._INT_execute(query)
+    if result.rowcount == 0:
+      if not ignoreMissingObject:
+        raise TriedToDeleteMissingObjectException
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
   #Return None, None, None, None if object isn't in store

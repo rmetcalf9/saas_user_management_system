@@ -15,6 +15,18 @@ class MissingTransactionContextExceptionClass(Exception):
   pass
 MissingTransactionContextException = MissingTransactionContextExceptionClass('Missing Transaction Context')
 
+class UnallowedMutationExceptionClass(Exception):
+  pass
+UnallowedMutationException = UnallowedMutationExceptionClass("Trying to mutate objectStore without first starting a transaction")
+
+class TriedToDeleteMissingObjectExceptionClass(Exception):
+  pass
+TriedToDeleteMissingObjectException = TriedToDeleteMissingObjectExceptionClass("Tried to delete non existant object")
+
+class TryingToCreateExistingObjectExceptionClass(Exception):
+  pass
+TryingToCreateExistingObjectException = TryingToCreateExistingObjectExceptionClass("Tried to create an object that already exists")
+
 '''
 Calling pattern for connection where obj is and instance of ObjectStore:
 
@@ -61,7 +73,7 @@ class ObjectStoreConnectionContext():
     
   def _INT_varifyWeCanMutateData(self):
     if self.callsToStartTransaction == 0:
-      raise Exception("Trying to mutate objectStore without first starting a transaction")
+      raise UnallowedMutationException
   
     
   def executeInsideTransaction(self, fnToExecute):
@@ -92,9 +104,20 @@ class ObjectStoreConnectionContext():
   ## updateFn gets two paramaters:
   ##  object
   ##  connection
+  #Seperate implementations not required as this uses save function
   def updateJSONObject(self, objectType, objectKey, updateFn, objectVersion = None):
     self._INT_varifyWeCanMutateData()
-    return self._updateJSONObject(objectType, objectKey, updateFn, objectVersion)
+    
+    obj, ver, creationDateTime, lastUpdateDateTime = self.getObjectJSON(objectType, objectKey)
+    if objectVersion is None:
+      #If object version is not supplied then assume update will not cause an error
+      objectVersion = ver 
+    if str(objectVersion) != str(ver):
+      raise WrongObjectVersionException
+    obj = updateFn(obj, self)
+    if obj is None:
+      raise StoringNoneObjectAfterUpdateOperationException
+    return self.saveJSONObject(objectType, objectKey, obj, objectVersion)
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
   #Return None, None, None, None if object isn't in store
@@ -113,8 +136,6 @@ class ObjectStoreConnectionContext():
   def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
     raise Exception('Not Overridden')
   def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
-    raise Exception('Not Overridden')
-  def _updateJSONObject(self, objectType, objectKey, updateFn, objectVersion):
     raise Exception('Not Overridden')
   def _getObjectJSON(self, objectType, objectKey):
     raise Exception('Not Overridden')
