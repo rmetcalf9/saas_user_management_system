@@ -116,6 +116,7 @@ class appObjClass(parAppObj):
     self.objectStore = createObjectStoreInstance(self, env)
     storeConnection = self.objectStore.getConnectionContext()
     if GetTenant(masterTenantName, storeConnection, 'a','b','c') is None:
+      print("********No master tenant found - creating********")
       def someFn(connectionContext):
         CreateMasterTenant(self, testingMode, storeConnection)
       storeConnection.executeInsideTransaction(someFn)

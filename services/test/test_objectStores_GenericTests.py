@@ -16,6 +16,11 @@ JSONString = {
     "CC.BB": "BB",
     "CC.CC": "CC"
   }
+  #My test comparison can't handle bytes
+  #'exampleByteObject': b'abc',
+  #'exampleListObject': [1, 2, 3],
+  #'exampleListObjectWithSubObject': [{'a':'a', 'bytes': b'b'}, {'bytes': b'b'}],
+  #'listOfBytes': [b'abc1', b'abc2']
 }
 JSONString2 = {
   'AA': "AA2",
@@ -25,6 +30,11 @@ JSONString2 = {
     "CC.BB": "BB2",
     "CC.CC": "CC2"
   }
+  #My test comparison can't handle bytes
+  #'exampleByteObject': b'abc2',
+  #'exampleListObject': [12, 22, 32],
+  #'exampleListObjectWithSubObject': [{'a':'a2', 'bytes': b'b2'}, {'bytes': b'b2'}],
+  #'listOfBytes': [b'abc1', b'abc2']
 }
 
 
@@ -32,9 +42,13 @@ def runAllGenericTests(testClass, getObjFn, ConfigDict):
   curModuleName = globals()['__name__']
   for x in globals():
     if x.startswith("t_"):
+      print("**********************************************************************")
+      print("    test " + x)
+      print("**********************************************************************")
       test_fn = globals()[x]
       obj = getObjFn(ConfigDict)
       test_fn(testClass, obj)
+      print("")
 
 #*************************************
 #   SaveJSONObject Tests

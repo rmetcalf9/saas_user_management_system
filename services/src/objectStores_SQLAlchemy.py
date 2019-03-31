@@ -4,6 +4,9 @@ import pytz
 ##import datetime
 from dateutil.parser import parse
 
+from makeDictJSONSerializable import getRJMJSONSerializableDICT, getNormalDICTFromRJMJSONSerializableDICT
+
+
 objectStoreHardCodedVersionInteger = 1
 
 class ConnectionContext(ObjectStoreConnectionContext):
@@ -38,6 +41,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return res
 
   def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
+    #print("JSONString:", JSONString)
     query = self.objectStore.objDataTable.select(
       whereclause=(
         and_(
@@ -60,7 +64,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
         type=objectType,
         key=objectKey, 
         objectVersion=newObjectVersion, 
-        objectDICT=JSONString,
+        objectDICT=getRJMJSONSerializableDICT(JSONString),
         creationDate=curTime,
         lastUpdateDate=curTime,
         creationDate_iso8601=curTime.isoformat(),
@@ -84,7 +88,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
         )
       )).values(
       objectVersion=newObjectVersion, 
-      objectDICT=JSONString,
+      objectDICT=getRJMJSONSerializableDICT(JSONString),
       lastUpdateDate=curTime,
       lastUpdateDate_iso8601=curTime.isoformat()
     )
@@ -127,7 +131,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     creationDate = dt.astimezone(pytz.utc)
     dt = parse(firstRow['lastUpdateDate_iso8601'])
     lastUpdateDate = dt.astimezone(pytz.utc)
-    return firstRow['objectDICT'], firstRow['objectVersion'], creationDate, lastUpdateDate
+    return getNormalDICTFromRJMJSONSerializableDICT(firstRow['objectDICT']), firstRow['objectVersion'], creationDate, lastUpdateDate
 
 
   def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
