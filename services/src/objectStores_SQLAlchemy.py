@@ -1,5 +1,5 @@
-from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON, func
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON, func, UniqueConstraint, and_
 import pytz
 ##import datetime
 from dateutil.parser import parse
@@ -38,18 +38,26 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return res
 
   def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
-    query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
+    query = self.objectStore.objDataTable.select(
+      whereclause=(
+        and_(
+          self.objectStore.objDataTable.c.type==objectType, 
+          self.objectStore.objDataTable.c.key==objectKey
+          )
+        )
+    )
     result =  self._INT_execute(query)
     firstRow = result.first()
-    #print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
-    #if firstRow is not None:
-    #  print(" firstRow:", firstRow)
+    print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
+    if firstRow is not None:
+      print(" firstRow:", firstRow)
     curTime = self.objectStore.appObj.getCurDateTime()
     if firstRow is None:
       if objectVersion is not None:
-        raise WrongObjectVersionException
+        raise SuppliedObjectVersionWhenCreatingException
       newObjectVersion = 1
       query = self.objectStore.objDataTable.insert().values(
+        type=objectType,
         key=objectKey, 
         objectVersion=newObjectVersion, 
         objectDICT=JSONString,
@@ -61,8 +69,8 @@ class ConnectionContext(ObjectStoreConnectionContext):
       result = self._INT_execute(query)
       if len(result.inserted_primary_key) != 1:
         raise Exception('_saveJSONObject wrong number of rows inserted')
-      if result.inserted_primary_key[0] != objectKey:
-        raise Exception('_saveJSONObject issue with primary key')
+      #if result.inserted_primary_key[0] != objectKey:
+      #  raise Exception('_saveJSONObject issue with primary key')
       return newObjectVersion
     if objectVersion is None:
       raise TryingToCreateExistingObjectException
@@ -81,7 +89,12 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return newObjectVersion
 
   def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):
-    query = self.objectStore.objDataTable.delete(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
+    query = self.objectStore.objDataTable.delete(whereclause=(
+      and_(
+        self.objectStore.objDataTable.c.type==objectType,
+        self.objectStore.objDataTable.c.key==objectKey
+      )
+    ))
     result = self._INT_execute(query)
     if result.rowcount == 0:
       if not ignoreMissingObject:
@@ -91,7 +104,12 @@ class ConnectionContext(ObjectStoreConnectionContext):
   #Return None, None, None, None if object isn't in store
   ObjTableKeyMap = None
   def _getObjectJSON(self, objectType, objectKey):
-    query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
+    query = self.objectStore.objDataTable.select(whereclause=(
+      and_(
+        self.objectStore.objDataTable.c.type==objectType,
+        self.objectStore.objDataTable.c.key==objectKey
+      )
+    ))
     result = self._INT_execute(query)
     firstRow = result.fetchone()
     if firstRow is None:
@@ -131,15 +149,16 @@ class ObjectStore_SQLAlchemy(ObjectStore):
     self.objDataTable = Table(self.objectPrefix + '_objData', metadata,
         #Tired intorudcing a seperate primary key and using key column as index but
         # I found the same lenght restriction exists on an index
-        #Column('id', Integer, primary_key=True),
-        #Column('key', String(300), index=True, unique=True),
-        Column('key', String(300), primary_key=True),
+        Column('id', Integer, primary_key=True),
+        Column('type', String(300), index=True),
+        Column('key', String(300), index=True),
         Column('objectDICT', JSON),
         Column('objectVersion', BigInteger),
         Column('creationDate', DateTime(timezone=True)), 
         Column('lastUpdateDate', DateTime(timezone=True)),
         Column('creationDate_iso8601', String(length=40)), 
-        Column('lastUpdateDate_iso8601', String(length=40))
+        Column('lastUpdateDate_iso8601', String(length=40)),
+        UniqueConstraint('type', 'key', name=self.objectPrefix + '_objData_ix1')
     )
     self.verTable = Table(self.objectPrefix + '_ver', metadata,
         Column('id', Integer, primary_key=True),

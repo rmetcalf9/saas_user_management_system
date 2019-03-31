@@ -3,7 +3,7 @@
 # so they don't need to be implemented in individual test classes.
 
 from appObj import appObj
-from objectStores_base import WrongObjectVersionException, UnallowedMutationException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
+from objectStores_base import WrongObjectVersionException, UnallowedMutationException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException
 import datetime
 import pytz
 import copy
@@ -48,9 +48,9 @@ def t_saveFailsWithInvalidObjectVersionFirstSave(testClass, objectStoreType):
   def someFn(connectionContext):
     with testClass.assertRaises(Exception) as context:
       savedVer = storeConnection.saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
-    testClass.checkGotRightException(context,WrongObjectVersionException)
+    testClass.checkGotRightException(context,SuppliedObjectVersionWhenCreatingException)
   storeConnection.executeInsideTransaction(someFn)
-  
+
 def t_saveFailsWithInvalidObjectVersionSecondSave(testClass, objectStoreType):
   objVerIDToSaveAs = 123
   

@@ -1,4 +1,4 @@
-from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException
 
 class ConnectionContext(ObjectStoreConnectionContext):
   objectType = None
@@ -21,7 +21,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     newObjectVersion = None
     if objectKey not in dictForObjectType:
       if objectVersion is not None:
-        raise WrongObjectVersionException
+        raise SuppliedObjectVersionWhenCreatingException
       newObjectVersion = 1
       dictForObjectType[objectKey] = (JSONString, newObjectVersion, curTimeValue, curTimeValue)
     else:

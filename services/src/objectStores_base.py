@@ -8,6 +8,10 @@ class WrongObjectVersionExceptionClass(Exception):
   pass
 WrongObjectVersionException = WrongObjectVersionExceptionClass('Wrong object version supplied - Has another change occured since loading?')
 
+class SuppliedObjectVersionWhenCreatingExceptionClass(Exception):
+  pass
+SuppliedObjectVersionWhenCreatingException = SuppliedObjectVersionWhenCreatingExceptionClass('Object verion was supplied but no current object found to be modified')
+
 class ObjectStoreConfigError(Exception):
   pass
 
