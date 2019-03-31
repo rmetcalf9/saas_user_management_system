@@ -48,9 +48,9 @@ class ConnectionContext(ObjectStoreConnectionContext):
     )
     result =  self._INT_execute(query)
     firstRow = result.first()
-    print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
-    if firstRow is not None:
-      print(" firstRow:", firstRow)
+    #print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
+    #if firstRow is not None:
+    #  print(" firstRow:", firstRow)
     curTime = self.objectStore.appObj.getCurDateTime()
     if firstRow is None:
       if objectVersion is not None:
@@ -77,7 +77,12 @@ class ConnectionContext(ObjectStoreConnectionContext):
     if firstRow.objectVersion != objectVersion:
       raise WrongObjectVersionException
     newObjectVersion = firstRow.objectVersion + 1
-    query = self.objectStore.objDataTable.update(whereclause=(self.objectStore.objDataTable.c.key==objectKey)).values(
+    query = self.objectStore.objDataTable.update(whereclause=(
+      and_(
+        self.objectStore.objDataTable.c.type==objectType, 
+        self.objectStore.objDataTable.c.key==objectKey
+        )
+      )).values(
       objectVersion=newObjectVersion, 
       objectDICT=JSONString,
       lastUpdateDate=curTime,
@@ -85,7 +90,8 @@ class ConnectionContext(ObjectStoreConnectionContext):
     )
     result = self._INT_execute(query)
     if result.rowcount != 1:
-      raise Exceptoin('_saveJSONObject wrong number of rows updated')
+      print('Result count is ', result.rowcount)
+      raise Exception('_saveJSONObject wrong number of rows updated')
     return newObjectVersion
 
   def _removeJSONObject(self, objectType, objectKey, objectVersion, ignoreMissingObject):

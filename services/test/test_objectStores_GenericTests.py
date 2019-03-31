@@ -260,6 +260,33 @@ def t_updateUsingFunction(testClass, objectStoreType):
   (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
   testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString2, objectDICT, [  ], msg='object was not updated')
 
+def t_updateUpdatesCorrectObjecTypet(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  def someFn(connectionContext):
+    savedVer1 = connectionContext.saveJSONObject("TestType1", "123", JSONString, None)
+    savedVer2 = connectionContext.saveJSONObject("TestType2", "123", JSONString, None)
+    return savedVer1, savedVer2
+  savedVer1, savedVer2 = storeConnection.executeInsideTransaction(someFn)
+
+  (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("TestType1", "123")
+  testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object1 was not added')
+  (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("TestType2", "123")
+  testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object2 was not added')
+
+  #Update TestType1
+  def updateFn(obj, connectionContext):
+    return JSONString2
+
+  def someFn(connectionContext):
+    newVer = connectionContext.updateJSONObject("TestType1", "123", updateFn, savedVer1)
+  storeConnection.executeInsideTransaction(someFn)
+
+  #Verify Type1 was changed and Type2 remains the same
+  (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("TestType1", "123")
+  testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString2, objectDICT, [  ], msg='object was not updated')
+  (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("TestType2", "123")
+  testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object with different key was updated')
+
 #*************************************
 #   RemoveJSONObject Tests
 #*************************************
