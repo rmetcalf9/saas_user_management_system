@@ -12,6 +12,8 @@ import pytz
 
 #from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink
 
+import test_objectStores_GenericTests as genericTests
+
 JSONString = {
   'AA': "AA",
   'BB': "BB",
@@ -44,151 +46,38 @@ ConfigDict_withPrefix = {
 class dummyException(Exception):
   pass
 
-class test_objectStoresSQLAlchemy(testHelperSuperClass):
+#SQLAlchemt only test
+def differentPrefixesDontShareData(testClass, objectStoreType, objectStoreType2):
+  storeConnection = objectStoreType.getConnectionContext()
+  def someFn(connectionContext):
+    for x in range(1,6):
+      connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
+  storeConnection.executeInsideTransaction(someFn)
+  storeConnection2 = objectStoreType2.getConnectionContext()
+  def someFn(connectionContext):
+    for x in range(1,6):
+      connectionContext.saveJSONObject("Test", "2_123" + str(x), JSONString, None)
+  storeConnection2.executeInsideTransaction(someFn)
 
-  def test_saveFailsWithInvalidObjectVersionFirstSave(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    objVerIDToSaveAs = 123
-    
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      with self.assertRaises(Exception) as context:
-        savedVer = storeConnection.saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
-      self.checkGotRightException(context,WrongObjectVersionException)
-    storeConnection.executeInsideTransaction(someFn)
-
-  def test_saveFailsWithInvalidObjectVersionSecondSave(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    objVerIDToSaveAs = 123
-    
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      return storeConnection.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-    
-    def someFn2(connectionContext):
-      gContext = None
-      with self.assertRaises(Exception) as context:
-        savedVer = storeConnection.saveJSONObject("Test", "123", JSONString, objVerIDToSaveAs)
-      self.checkGotRightException(context,WrongObjectVersionException)
-    storeConnection.executeInsideTransaction(someFn2)
-
-  def test_singleSaveAndRetrieveCommittedTransaction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    
-    def someFn(connectionContext):
-      savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-    
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+  for x in range(1,6):
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
+    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "1_123" + str(x))
+    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
   
-  def test_singleSaveAndRetrieveUncommittedTransaction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    
-    def someFn(connectionContext):
-      savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-    
-  def test_saveObjectsInSingleTransaction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    
-    storeConnection = obj.getConnectionContext()
-    
-    def someFn(connectionContext):
-      lastSavedVer = None
-      for x in range(1,6): 
-        savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastSavedVer)
-        self.assertEqual(savedVer, x)
-        lastSavedVer = savedVer
-    storeConnection.executeInsideTransaction(someFn)
-    
-    #Check object was saved correctly
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='Saved object dosen\'t match')
-    
-  def test_saveObjectsInMutipleTransactions(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    lastSavedVer = None
-    storeConnection = obj.getConnectionContext()
-    for x in range(1,6): 
-      def someFn(connectionContext):
-        savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastSavedVer)
-        self.assertEqual(savedVer, x)
-        return savedVer
-      lastSavedVer = storeConnection.executeInsideTransaction(someFn)
-
-    #Check object was saved correctly
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
-
-  def test_updateToDifferentJSONWorks(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    lastSavedVer = None
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastSavedVer)
-      return savedVer
-    lastSavedVer = storeConnection.executeInsideTransaction(someFn)
-    def someFn2(connectionContext):
-      savedVer = connectionContext.saveJSONObject("Test", "123", JSONString2, lastSavedVer)
-      return savedVer
-    lastSavedVer = storeConnection.executeInsideTransaction(someFn2)
-
-    #Check object was saved correctly
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString2, [  ], msg='Saved object dosen\'t match')
-    
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "2_123" + str(x))
+    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
+    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "2_123" + str(x))
+    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
  
-  def test_creationDateSetCorrectly(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
 
-    testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
-    appObj.setTestingDateTime(testDateTime)
-    
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, None)
-      objDict, ver, creationDateTime, lastUpdateDateTime = connectionContext.getObjectJSON("Test", "123")
-      self.assertEqual(objDict, JSONString, msg="Saved object mismatch")
-      self.assertEqual(ver, savedVer, msg="Saved ver mismatch")
-      self.assertEqual(creationDateTime, testDateTime, msg="Creation date time wrong")
-      self.assertEqual(lastUpdateDateTime, testDateTime, msg="Last update date time wrong")
-    storeConnection.executeInsideTransaction(someFn)
- 
-    
-  def test_updateDateSetCorrectly(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
-      appObj.setTestingDateTime(testDateTime)
-      lastVersion = None
-      incTime = testDateTime
-      for x in range(1,6):
-        appObj.setTestingDateTime(incTime)
-        savedVer = connectionContext.saveJSONObject("Test", "123", JSONString, lastVersion)
-        objDict, ver, creationDateTime, lastUpdateDateTime = connectionContext._getObjectJSON("Test", "123")
-        self.assertEqual(objDict, JSONString)
-        self.assertEqual(ver, savedVer)
-        self.assertEqual(creationDateTime, testDateTime, msg="creation time not right")
-        self.assertEqual(lastUpdateDateTime, incTime, msg="Update time not right")
-        lastVersion = ver
-        incTime = incTime + datetime.timedelta(seconds=60)
-    storeConnection.executeInsideTransaction(someFn)
+class test_objectStoresSQLAlchemy(testHelperSuperClass):
+  def test_genericTests(self):
+    def getObjFn(ConfigDict):
+      obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+      obj.resetDataForTest()
+      return obj
+    genericTests.runAllGenericTests(self, getObjFn, ConfigDict)
 
   #Different prefixes don't share data
   def test_differentPrefixesDontShareData(self):
@@ -196,27 +85,7 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     obj.resetDataForTest()
     obj2 = ObjectStore_SQLAlchemy(ConfigDict_withPrefix, appObj)
     obj2.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      for x in range(1,6):
-        connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
-    storeConnection.executeInsideTransaction(someFn)
-    storeConnection2 = obj2.getConnectionContext()
-    def someFn(connectionContext):
-      for x in range(1,6):
-        connectionContext.saveJSONObject("Test", "2_123" + str(x), JSONString, None)
-    storeConnection2.executeInsideTransaction(someFn)
-
-    for x in range(1,6):
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "1_123" + str(x))
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
-    
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "2_123" + str(x))
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "2_123" + str(x))
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+    differentPrefixesDontShareData(self, obj, obj2)
     
   #Test rollback single transaction
   def test_rollbackTransactionIsSuccessful_InsertOnly(self):
@@ -275,144 +144,4 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     # Make sure data has revereted to origional value
     (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
     self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Did not roll back to previous value')    
-    
-  # Make sure mutiple object keys are respected
-  def test_differentKeys(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      objKeyMap = {}
-      for x in range(1,6):
-        objKeyMap["1_123" + str(x)] = connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
-      return objKeyMap
-    objKeyMap = storeConnection.executeInsideTransaction(someFn)
-    
-    #update 3rd object to alternative data
-    def someFn(connectionContext):
-      connectionContext.saveJSONObject("Test", "1_123" + str(3), JSONString2, objKeyMap["1_123" + str(3)])
-    storeConnection.executeInsideTransaction(someFn)
 
-    for x in range(1,6):
-      expRes = copy.deepcopy(JSONString)
-      if x==3:
-        expRes = copy.deepcopy(JSONString2)
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, expRes, [  ], msg='Saved object dosen\'t match')
-
-  def test_updateUsingFunctionOutsideOfTransactionFails(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-    
-    def updateFn(obj, connectionContext):
-      self.assertJSONStringsEqualWithIgnoredKeys(JSONString, obj, [  ], msg='Saved object dosen\'t match')
-      return JSONString2
-    
-    with self.assertRaises(Exception) as context:
-      newVer = storeConnection.updateJSONObject("Test", "123", updateFn, savedVer)
-    self.checkGotRightException(context,UnallowedMutationException)
-
-  def test_updateUsingFunction(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-    
-    def updateFn(obj, connectionContext):
-      self.assertJSONStringsEqualWithIgnoredKeys(JSONString, obj, [  ], msg='Saved object dosen\'t match')
-      return JSONString2
-
-    def someFn(connectionContext):
-      newVer = connectionContext.updateJSONObject("Test", "123", updateFn, savedVer)
-    storeConnection.executeInsideTransaction(someFn)
-    
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(JSONString2, objectDICT, [  ], msg='object was not updated')
-
-  def test_removeMissingObject(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-
-    def someFn(connectionContext):
-      newVer = connectionContext.removeJSONObject("Test", "123", 1, False)
-    with self.assertRaises(Exception) as context:
-      storeConnection.executeInsideTransaction(someFn)
-    self.checkGotRightException(context,TriedToDeleteMissingObjectException)
-
-  def test_removeMissingObjectIgnoreMissing(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-
-    def someFn(connectionContext):
-      newVer = connectionContext.removeJSONObject("Test", "123", 1, True)
-    storeConnection.executeInsideTransaction(someFn)
-
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='object was not removed')
-
-  def test_removeObjectWithNoTransactionFails(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object was not added')
-
-    with self.assertRaises(Exception) as context:
-      newVer = storeConnection.removeJSONObject("Test", "123", savedVer, False)
-    self.checkGotRightException(context,UnallowedMutationException)
-
-  def test_removeObject(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object was not added')
-
-    def someFn(connectionContext):
-      newVer = connectionContext.removeJSONObject("Test", "123", savedVer, False)
-    storeConnection.executeInsideTransaction(someFn)
-
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='object was not removed')
-    
-  def test_createExistingObjectFails(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      return connectionContext.saveJSONObject("Test", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "123")
-    self.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object was not added')
-
-
-    with self.assertRaises(Exception) as context:
-      savedVer = storeConnection.executeInsideTransaction(someFn)
-    self.checkGotRightException(context,TryingToCreateExistingObjectException)
-
-  def test_supportsDifferentObjectTypes(self):
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
-    obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
-    def someFn(connectionContext):
-      a = connectionContext.saveJSONObject("TestType1", "123", JSONString, None)
-      b = connectionContext.saveJSONObject("TestType2", "123", JSONString, None)
-    savedVer = storeConnection.executeInsideTransaction(someFn)
-    

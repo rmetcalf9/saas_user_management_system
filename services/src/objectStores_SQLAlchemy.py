@@ -41,9 +41,9 @@ class ConnectionContext(ObjectStoreConnectionContext):
     query = self.objectStore.objDataTable.select(whereclause=(self.objectStore.objDataTable.c.key==objectKey))
     result =  self._INT_execute(query)
     firstRow = result.first()
-    print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
-    if firstRow is not None:
-      print(" firstRow:", firstRow)
+    #print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
+    #if firstRow is not None:
+    #  print(" firstRow:", firstRow)
     curTime = self.objectStore.appObj.getCurDateTime()
     if firstRow is None:
       if objectVersion is not None:
