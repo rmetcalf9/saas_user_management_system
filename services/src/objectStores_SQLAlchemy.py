@@ -141,10 +141,16 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return True
     
   def _getPaginatedResult(self, objectType, paginatedParamValues, outputFN):
+    whereclauseToUse = self.objectStore.objDataTable.c.type==objectType
+    if paginatedParamValues['query'] is not None:
+      if paginatedParamValues['query'] != '':
+        whereclauseToUse = and_(
+          whereclauseToUse,
+          self.objectStore.objDataTable.c.objectDICT.ilike('%' + paginatedParamValues['query'] + '%')
+        )
+      
     query = self.objectStore.objDataTable.select(
-      whereclause=(
-        self.objectStore.objDataTable.c.type==objectType
-      ),
+      whereclause=whereclauseToUse,
       order_by=self.objectStore.objDataTable.c.key
     )
     result =  self._INT_execute(query)
