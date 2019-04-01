@@ -176,6 +176,10 @@ class ConnectionContext(ObjectStoreConnectionContext):
       self._INT_filterFn
     )
 
+  def _close(self):
+    self.connection.close()
+
+    
 class ObjectStore_SQLAlchemy(ObjectStore):
   engine = None
   objDataTable = None
