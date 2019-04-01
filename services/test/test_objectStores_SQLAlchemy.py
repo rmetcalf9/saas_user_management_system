@@ -48,28 +48,31 @@ class dummyException(Exception):
 
 #SQLAlchemt only test
 def differentPrefixesDontShareData(testClass, objectStoreType, objectStoreType2):
-  storeConnection = objectStoreType.getConnectionContext()
-  def someFn(connectionContext):
-    for x in range(1,6):
-      connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
-  storeConnection.executeInsideTransaction(someFn)
-  storeConnection2 = objectStoreType2.getConnectionContext()
-  def someFn(connectionContext):
-    for x in range(1,6):
-      connectionContext.saveJSONObject("Test", "2_123" + str(x), JSONString, None)
-  storeConnection2.executeInsideTransaction(someFn)
+  def dbfn(storeConnection):
+    def dbfn2(storeConnection2):
 
-  for x in range(1,6):
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
-    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "1_123" + str(x))
-    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
-  
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "2_123" + str(x))
-    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "2_123" + str(x))
-    testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
- 
+      def someFn(connectionContext):
+        for x in range(1,6):
+          connectionContext.saveJSONObject("Test", "1_123" + str(x), JSONString, None)
+      def someFn2(connectionContext2):
+        for x in range(1,6):
+          connectionContext2.saveJSONObject("Test", "2_123" + str(x), JSONString, None)
+
+      storeConnection.executeInsideTransaction(someFn)
+      storeConnection2.executeInsideTransaction(someFn2)
+
+      for x in range(1,6):
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123" + str(x))
+        testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "1_123" + str(x))
+        testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
+      
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "2_123" + str(x))
+        testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Saved object dosen\'t match')
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection2.getObjectJSON("Test", "2_123" + str(x))
+        testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Saved object dosen\'t match')
+    objectStoreType2.executeInsideConnectionContext(dbfn2)
+  objectStoreType.executeInsideConnectionContext(dbfn)
 
 class test_objectStoresSQLAlchemy(testHelperSuperClass):
   def test_genericTests(self):
@@ -91,57 +94,59 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
   def test_rollbackTransactionIsSuccessful_InsertOnly(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
     obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
     
-    #Test creation of record rollback works
-    # _no data to start with
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Object found before it was added')
-  
-    # insert data
-    def someFn(connectionContext):
-      connectionContext.saveJSONObject("Test", "1_123", JSONString, None)
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='object never added')
-      raise dummyException("rollback")
-    try:
-      storeConnection.executeInsideTransaction(someFn)
-    except dummyException:
-      pass
-    
-    # _no data after rolledback insert start with
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Found but it should have rolled back')
+    def dbfn(storeConnection):
+      #Test creation of record rollback works
+      # _no data to start with
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Object found before it was added')
 
+      # insert data
+      def someFn(connectionContext):
+        connectionContext.saveJSONObject("Test", "1_123", JSONString, None)
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
+        self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='object never added')
+        raise dummyException("rollback")
+      try:
+        storeConnection.executeInsideTransaction(someFn)
+      except dummyException:
+        pass
+      
+      # _no data after rolledback insert start with
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, None, [  ], msg='Found but it should have rolled back')
+      
+    obj.executeInsideConnectionContext(dbfn)
   def test_rollbackTransactionIsSuccessful_UpdateOnly(self):
     obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
     obj.resetDataForTest()
-    storeConnection = obj.getConnectionContext()
     
-    # insert data
-    def someFn(connectionContext):
-      objVer = connectionContext.saveJSONObject("Test", "1_123", JSONString, None)
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='object not added')
-      return objVer
-    objVer = storeConnection.executeInsideTransaction(someFn)
+    def dbfn(storeConnection):
+      # insert data
+      def someFn(connectionContext):
+        objVer = connectionContext.saveJSONObject("Test", "1_123", JSONString, None)
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
+        self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='object not added')
+        return objVer
+      objVer = storeConnection.executeInsideTransaction(someFn)
 
-    # _no data to start with
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Object found before it was added')
-  
-    # update data
-    def someFn(connectionContext):
-      connectionContext.saveJSONObject("Test", "1_123", JSONString2, objVer)
-      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
-      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString2, [  ], msg='object not updated')
-      raise dummyException("rollback")
-    try:
-      storeConnection.executeInsideTransaction(someFn)
-    except dummyException:
-      pass
+      # _no data to start with
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Object found before it was added')
     
-    # Make sure data has revereted to origional value
-    (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
-    self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Did not roll back to previous value')    
+      # update data
+      def someFn(connectionContext):
+        connectionContext.saveJSONObject("Test", "1_123", JSONString2, objVer)
+        (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = connectionContext.getObjectJSON("Test", "1_123")
+        self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString2, [  ], msg='object not updated')
+        raise dummyException("rollback")
+      try:
+        storeConnection.executeInsideTransaction(someFn)
+      except dummyException:
+        pass
+      
+      # Make sure data has revereted to origional value
+      (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test", "1_123")
+      self.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString, [  ], msg='Did not roll back to previous value')    
 
+    obj.executeInsideConnectionContext(dbfn)

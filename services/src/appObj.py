@@ -114,12 +114,13 @@ class appObjClass(parAppObj):
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
 
     self.objectStore = createObjectStoreInstance(self, env)
-    storeConnection = self.objectStore.getConnectionContext()
-    if GetTenant(masterTenantName, storeConnection, 'a','b','c') is None:
-      print("********No master tenant found - creating********")
-      def someFn(connectionContext):
-        CreateMasterTenant(self, testingMode, storeConnection)
-      storeConnection.executeInsideTransaction(someFn)
+    def dbChangingFn(storeConnection):
+      if GetTenant(masterTenantName, storeConnection, 'a','b','c') is None:
+        print("********No master tenant found - creating********")
+        def someFn(connectionContext):
+          CreateMasterTenant(self, testingMode, storeConnection)
+        storeConnection.executeInsideTransaction(someFn)
+    self.objectStore.executeInsideConnectionContext(dbChangingFn)
 
     self.gateway = getGatewayInterface(env)
     self.refreshTokenManager = RefreshTokenManager(self)

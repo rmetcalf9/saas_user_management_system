@@ -143,9 +143,10 @@ def registerAPI(appObj):
         return tenantClass(item[0],item[1]).getJSONRepresenation()
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
-        outputFN = defOutput
-        return storeConnection.getPaginatedResult("tenants", appObj.getPaginatedParamValues(request), outputFN)
+        def dbfn(storeConnection):
+          outputFN = defOutput
+          return storeConnection.getPaginatedResult("tenants", appObj.getPaginatedParamValues(request), outputFN)
+        return appObj.objectStore.executeInsideConnectionContext(dbfn)
       except:
         raise InternalServerError   
 
@@ -165,10 +166,9 @@ def registerAPI(appObj):
         if len(content["AuthProviders"]) != 0:
           raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, 'a','b','c')
-        tenantObj = storeConnection.executeInsideTransaction(someFn)
+        tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
         
       except customExceptionClass as err:
         if (err.id=='tenantAlreadtExistsException'):
@@ -192,11 +192,12 @@ def registerAPI(appObj):
     def get(self, tenant, tenantName):
       '''Get tenant information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext()
-      a = GetTenant(tenantName, storeConnection, 'a','b','c')
-      if a is None:
-        raise NotFound('Tenant Not Found')
-      return a.getJSONRepresenation()
+      def dbfn(storeConnection):
+        a = GetTenant(tenantName, storeConnection, 'a','b','c')
+        if a is None:
+          raise NotFound('Tenant Not Found')
+        return a.getJSONRepresenation()
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
     @nsAdmin.doc('update Tenant')
     @nsAdmin.expect(getTenantModel, validate=True)
@@ -212,10 +213,9 @@ def registerAPI(appObj):
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
 
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext)
-        tenantObj = storeConnection.executeInsideTransaction(someFn)
+        tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
       
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
@@ -251,11 +251,10 @@ def registerAPI(appObj):
       if objectVersion is None:
         raise BadRequest(objectVersionHeaderName + " header missing")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           tenantObj = DeleteTenant(appObj, tenantName, objectVersion, connectionContext)
           return tenantObj.getJSONRepresenation()
-        return storeConnection.executeInsideTransaction(someFn)
+        return appObj.objectStore.executeInsideTransaction(someFn)
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
           raise BadRequest(err.text)
@@ -280,21 +279,21 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of users'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext()
-      def defOutput(item):
-        a = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
-        ##print("a:", a)
-        return a
+      def dbfn(storeConnection):
+        def defOutput(item):
+          a = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
+          ##print("a:", a)
+          return a
 
-      try:
-        outputFN = defOutput
-        storeConnection = appObj.objectStore.getConnectionContext()
-        return GetPaginatedUserData(appObj, request, outputFN, storeConnection)
-      except Exception as e:
-        print(e)
-        print(str(e.args))
-        print(e.args)
-        raise InternalServerError   
+        try:
+          outputFN = defOutput
+          return GetPaginatedUserData(appObj, request, outputFN, storeConnection)
+        except Exception as e:
+          print(e)
+          print(str(e.args))
+          print(e.args)
+          raise InternalServerError   
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
     @nsAdmin.doc('post User')
     @nsAdmin.expect(getCreateUserModel(appObj), validate=True)
@@ -311,30 +310,30 @@ def registerAPI(appObj):
         "user_unique_identifier": content["UserID"],
         "known_as": content["known_as"]
       }
-      tenant = None
-      storeConnection = appObj.objectStore.getConnectionContext()
-      if "mainTenant" in content:
-        if content["mainTenant"] != "":
-          tenant = content["mainTenant"]
-          tenantObj = GetTenant(tenant, storeConnection, 'a','b','c')
-          if tenantObj is None:
-            raise BadRequest("Invalid tenant name")
-      try:
-        def someFn(connectionContext):
-          CreateUser(appObj, userData, tenant, "adminapi/users/post", connectionContext)
-          return GetUser(appObj, content["UserID"], connectionContext)
-        userObj = storeConnection.executeInsideTransaction(someFn)
+      def dbfn(storeConnection):
+        tenant = None
+        if "mainTenant" in content:
+          if content["mainTenant"] != "":
+            tenant = content["mainTenant"]
+            tenantObj = GetTenant(tenant, storeConnection, 'a','b','c')
+            if tenantObj is None:
+              raise BadRequest("Invalid tenant name")
+        try:
+          def someFn(connectionContext):
+            CreateUser(appObj, userData, tenant, "adminapi/users/post", connectionContext)
+            return GetUser(appObj, content["UserID"], connectionContext)
+          userObj = storeConnection.executeInsideTransaction(someFn)
+          
+          
+        except customExceptionClass as err:
+          if (err.id=='TryingToCreateDuplicateUserException'):
+            raise BadRequest(err.text)
+          raise Exception('InternalServerError')
+        except:
+          raise InternalServerError
         
-        
-      except customExceptionClass as err:
-        if (err.id=='TryingToCreateDuplicateUserException'):
-          raise BadRequest(err.text)
-        raise Exception('InternalServerError')
-      except:
-        raise InternalServerError
-      
-      return userObj.getJSONRepresenation(), 201
-
+        return userObj.getJSONRepresenation(), 201
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
   @nsAdmin.route('/<string:tenant>/users/<string:userID>')
   class userInfo(Resource):
@@ -349,11 +348,12 @@ def registerAPI(appObj):
     def get(self, tenant, userID):
       '''Get User information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext()
-      userObj = GetUser(appObj, userID, storeConnection)
-      if userObj is None:
-        raise NotFound('User Not Found')
-      return userObj.getJSONRepresenation()
+      def dbfn(storeConnection):
+        userObj = GetUser(appObj, userID, storeConnection)
+        if userObj is None:
+          raise NotFound('User Not Found')
+        return userObj.getJSONRepresenation()
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
     @nsAdmin.doc('update User')
     @nsAdmin.expect(getUserModel, validate=True)
@@ -369,7 +369,6 @@ def registerAPI(appObj):
         raise BadRequest("Inconsistent userID")
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return UpdateUser(
             appObj, 
@@ -378,9 +377,9 @@ def registerAPI(appObj):
             content['known_as'],  
             content['other_data'], 
             content['ObjectVersion'],
-            storeConnection
+            connectionContext
           )
-        userObj = storeConnection.executeInsideTransaction(someFn)
+        userObj = appObj.objectStore.executeInsideTransaction(someFn)
 
       except customExceptionClass as err:
         if (err.id=='userDosentExistException'):
@@ -420,10 +419,9 @@ def registerAPI(appObj):
       if (decodedTokenObj.getUserID() == userID):
         raise BadRequest("Can't delete logged in user")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return DeleteUser(appObj, userID, objectVersion, connectionContext)
-        userObj = storeConnection.executeInsideTransaction(someFn)
+        userObj = appObj.objectStore.executeInsideTransaction(someFn)
         
         return userObj.getJSONRepresenation()
       except customExceptionClass as err:
@@ -450,12 +448,11 @@ def registerAPI(appObj):
       verifySecurityOfAdminAPICall(appObj, request, tenant)
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
-        def defOutput(item):
-          return CreatePersonObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
         def someFn(connectionContext):
+          def defOutput(item):
+            return CreatePersonObjFromUserDict(appObj, item[0],item[1],item[2],item[3], connectionContext).getJSONRepresenation()
           return GetPaginatedPersonData(appObj, request, defOutput, connectionContext)
-        return storeConnection.executeInsideTransaction(someFn)
+        return appObj.objectStore.executeInsideTransaction(someFn)
         
         
       except:
@@ -475,11 +472,10 @@ def registerAPI(appObj):
         raise BadRequest("Can not supply guid when creating person")
       requiredInPayload(content, [])
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           personDict = CreatePerson(appObj, connectionContext, None, 'a','b','c')
           return GetPerson(appObj, personDict["guid"], connectionContext)
-        personObj = storeConnection.executeInsideTransaction(someFn)
+        personObj = appObj.objectStore.executeInsideTransaction(someFn)
         
       except customExceptionClass as err:
         if (err.id=='TryingToCreateDuplicateUserException'):
@@ -503,11 +499,12 @@ def registerAPI(appObj):
     def get(self, tenant, personGUID):
       '''Get Person information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      storeConnection = appObj.objectStore.getConnectionContext()
-      a = GetPerson(appObj, personGUID, storeConnection)
-      if a is None:
-        raise NotFound('Person Not Found')
-      return a.getJSONRepresenation()
+      def dbfn(storeConnection):
+        a = GetPerson(appObj, personGUID, storeConnection)
+        if a is None:
+          raise NotFound('Person Not Found')
+        return a.getJSONRepresenation()
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
     @nsAdmin.doc('update Person')
     @nsAdmin.expect(getPersonModel, validate=True)
@@ -523,11 +520,9 @@ def registerAPI(appObj):
         raise BadRequest("Inconsistent guid")
 
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return UpdatePerson(appObj, content['guid'], content['ObjectVersion'], connectionContext)
-        personObj = storeConnection.executeInsideTransaction(someFn)
-        
+        personObj = appObj.objectStore.executeInsideTransaction(someFn)
         
       except customExceptionClass as err:
         if (err.id=='personDosentExistException'):
@@ -557,10 +552,9 @@ def registerAPI(appObj):
       if objectVersion is None:
         raise BadRequest(objectVersionHeaderName + " header missing")
       try:
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           return DeletePerson(appObj, personGUID, objectVersion, connectionContext, 'a','b','c')
-        personObj = storeConnection.executeInsideTransaction(someFn)
+        personObj = appObj.objectStore.executeInsideTransaction(someFn)
         
         
         return personObj.getJSONRepresenation()
@@ -590,30 +584,30 @@ def registerAPI(appObj):
         raise BadRequest("UserID in payload not the same as in URL")
       if personGUID != content['personGUID']:
         raise BadRequest("personGUID in payload not the same as in URL")
-      storeConnection = appObj.objectStore.getConnectionContext()
-      personObj = GetPerson(appObj, content["personGUID"], storeConnection)
-      if personObj is None:
-        raise NotFound('Person Not Found')
-      userObj = GetUser(appObj, userID, storeConnection)
-      if userObj is None:
-        raise NotFound('User Not Found')
-      try:
-        storeConnection = appObj.objectStore.getConnectionContext()
-        def someFn(connectionContext):
-          return associateUserWithPerson(appObj, content["UserID"], content["personGUID"], connectionContext)
-        storeConnection.executeInsideTransaction(someFn)
+      def dbfn(storeConnection):
+        personObj = GetPerson(appObj, content["personGUID"], storeConnection)
+        if personObj is None:
+          raise NotFound('Person Not Found')
+        userObj = GetUser(appObj, userID, storeConnection)
+        if userObj is None:
+          raise NotFound('User Not Found')
+        try:
+          def someFn(connectionContext):
+            return associateUserWithPerson(appObj, content["UserID"], content["personGUID"], connectionContext)
+          storeConnection.executeInsideTransaction(someFn)
+          
+        except customExceptionClass as err:
+          if (err.id=='UserAlreadyAssociatedWithThisPersonException'):
+            raise BadRequest(err.text)
+          raise Exception('InternalServerError')
+        except:
+          raise InternalServerError
         
-      except customExceptionClass as err:
-        if (err.id=='UserAlreadyAssociatedWithThisPersonException'):
-          raise BadRequest(err.text)
-        raise Exception('InternalServerError')
-      except:
-        raise InternalServerError
-      
-      return {
-        "UserID": userID,
-        "personGUID": personGUID
-      }, 201
+        return {
+          "UserID": userID,
+          "personGUID": personGUID
+        }, 201
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
     @nsAdmin.doc('delete userpersonlink')
     @nsAdmin.response(200, 'userpersonlink Deleted')
@@ -626,16 +620,13 @@ def registerAPI(appObj):
       decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
       #No Object version needed for auths
       try:
-
-        
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           RemoveUserAssociation(appObj, userID, personGUID, None, connectionContext) #Not deleting person if this is last user
           return {
             "UserID": userID,
             "personGUID": personGUID
           }
-        return storeConnection.executeInsideTransaction(someFn)
+        return appObj.objectStore.executeInsideTransaction(someFn)
         
         
       except customExceptionClass as err:
@@ -663,8 +654,6 @@ def registerAPI(appObj):
       requiredInPayload(content, ["personGUID", "authProviderGUID", "credentialJSON", "tenantName"])
       try:
 
-        
-        storeConnection = appObj.objectStore.getConnectionContext()
         def someFn(connectionContext):
           authData = AddAuthForUser(appObj, content["tenantName"], content["authProviderGUID"], content["personGUID"], content["credentialJSON"], connectionContext)
           resp = {
@@ -674,8 +663,7 @@ def registerAPI(appObj):
             "AuthUserKey": authData["AuthUserKey"]
           }
           return resp, 201
-        return storeConnection.executeInsideTransaction(someFn)
-        
+        return appObj.objectStore.executeInsideTransaction(someFn)
         
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
@@ -705,31 +693,29 @@ def registerAPI(appObj):
       decodedTokenObj = verifySecurityOfAdminAPICall(appObj, request, tenant)
       #No Object version needed for auths
       authUserKey = base64.b64decode(authUserKeyEncoded).decode('utf-8')
-      storeConnection = appObj.objectStore.getConnectionContext()
-      authData, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authUserKey, storeConnection)
-      if authData is None:
-        raise BadRequest('Bad auth')
-      try:
-
-        
-        storeConnection = appObj.objectStore.getConnectionContext()
-        def someFn(connectionContext):
-          deleteAuthAndUnassiciateFromPerson(appObj, authData["personGUID"], authUserKey, connectionContext)
-          resp = {
-            "personGUID": authData["personGUID"],
-            "tenantName": authData["tenantName"],
-            "authProviderGUID": authData["AuthProviderGUID"],
-            "AuthUserKey": authData["AuthUserKey"]
-          }
-          return resp, 200
-        return storeConnection.executeInsideTransaction(someFn)
-        
-        
-      except customExceptionClass as err:
-        if (err.id=='personDosentExistException'):
-          raise BadRequest(err.text)
-        if (err.id=='userDosentExistException'):
-          raise BadRequest(err.text)
-        raise Exception('InternalServerError')
-      except:
-        raise InternalServerError    
+      def dbfn(storeConnection): 
+        authData, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authUserKey, storeConnection)
+        if authData is None:
+          raise BadRequest('Bad auth')
+        try:
+          
+          def someFn(connectionContext):
+            deleteAuthAndUnassiciateFromPerson(appObj, authData["personGUID"], authUserKey, connectionContext)
+            resp = {
+              "personGUID": authData["personGUID"],
+              "tenantName": authData["tenantName"],
+              "authProviderGUID": authData["AuthProviderGUID"],
+              "AuthUserKey": authData["AuthUserKey"]
+            }
+            return resp, 200
+          return storeConnection.executeInsideTransaction(someFn)
+          
+        except customExceptionClass as err:
+          if (err.id=='personDosentExistException'):
+            raise BadRequest(err.text)
+          if (err.id=='userDosentExistException'):
+            raise BadRequest(err.text)
+          raise Exception('InternalServerError')
+        except:
+          raise InternalServerError    
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)

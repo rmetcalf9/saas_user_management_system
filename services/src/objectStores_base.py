@@ -169,14 +169,33 @@ class ObjectStoreConnectionContext():
   def _rollbackTransaction(self):
     raise Exception('Not Overridden')
 
+  #Optional override for closing the context
+  def _close(self):
+    pass
+    
 #Base class for object store
 class ObjectStore():
   appObj = None
   def __init__(self, appObj):
     self.appObj = appObj
   
-  def getConnectionContext(self):
-    return self._getConnectionContext()
+  #def getConnectionContext(self):
+  #  return self._getConnectionContext()
+  def executeInsideConnectionContext(self, fnToExecute):
+    context = self._getConnectionContext()
+    a = None
+    try:
+      a = fnToExecute(context)
+    finally:
+      context._close()
+    return a
+
+  #helper function if we need just a single transaction in our contexts
+  def executeInsideTransaction(self, fnToExecute):
+    def dbfn(context):
+      return context.executeInsideTransaction(fnToExecute)
+    return self.executeInsideConnectionContext(dbfn)
+      
   def _getConnectionContext(self):
     raise Exception('Not Overridden')
 

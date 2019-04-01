@@ -17,14 +17,15 @@ class test_tenants(testHelperAPIClient):
 #Actual tests below
 
   def test_cantCreateTenantWithSameNameAsMaster(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
-    with self.assertRaises(Exception) as context:
-      tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, 'a','b','c')
-    self.checkGotRightException(context,failedToCreateTenantException)
+    def dbfn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, 'a','b','c')
+      self.checkGotRightException(context,failedToCreateTenantException)
+
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
 
 
   def test_MasterTenantExists(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertFalse(masterTenant is None, msg="Master Tenant was not created")
@@ -71,10 +72,9 @@ class test_tenants(testHelperAPIClient):
         }
       }
       self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss', 'authedPersonGuid','associatedPersons'], msg="Returned roles incorrect")
-    storeConnection.executeInsideTransaction(someFn)
+    appObj.objectStore.executeInsideTransaction(someFn)
 
   def test_StandardUserInvalidPassword(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -91,10 +91,9 @@ class test_tenants(testHelperAPIClient):
           connectionContext,
           'a','b','c')
       self.checkGotRightException(context,authFailedException)
-    storeConnection.executeInsideTransaction(someFn)
+    appObj.objectStore.executeInsideTransaction(someFn)
 
   def test_StandardUserInvalidUsername(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -111,10 +110,9 @@ class test_tenants(testHelperAPIClient):
           connectionContext,
           'a','b','c')
       self.checkGotRightException(context,authFailedException)
-    storeConnection.executeInsideTransaction(someFn)
+    appObj.objectStore.executeInsideTransaction(someFn)
 
   def test_StandardUserLoginToInvalidIdentity(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -136,11 +134,11 @@ class test_tenants(testHelperAPIClient):
           'a','b','c'
         )
       self.checkGotRightException(context,UnknownUserIDException)
-    storeConnection.executeInsideTransaction(someFn)
+      
+    appObj.objectStore.executeInsideTransaction(someFn)
 
   # Person can log in and choose to use userA or userB
   def test_oneAuthCanAccessTwoIdentities(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
       userID1 = 'TestUser1'
       userID2 = 'TestUser2'
@@ -219,13 +217,15 @@ class test_tenants(testHelperAPIClient):
         }
       }
       self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
-    storeConnection.executeInsideTransaction(someFn)
+      
+    def dbfn(storeConnection):
+      storeConnection.executeInsideTransaction(someFn)
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
 
   #UserA can be shared by many People (Who may or may not have many auths)
   def test_oneUserCanBeAccessedByTwoAuths(self):
-    storeConnection = appObj.objectStore.getConnectionContext()
     def someFn(connectionContext):    
-      masterTenant = GetTenant(masterTenantName, storeConnection, 'a','b','c')
+      masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
       userID = 'TestUser'
       CreateUser(appObj, {"user_unique_identifier": userID, "known_as": userID}, masterTenantName, 'test/CreateMasterTenant', connectionContext)
 
@@ -280,5 +280,9 @@ class test_tenants(testHelperAPIClient):
       expectedJSONResponse['authedPersonGuid'] = person2['guid']
       self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
 
-    storeConnection.executeInsideTransaction(someFn)
+    def dbfn(storeConnection):
+      storeConnection.executeInsideTransaction(someFn)
+      
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
+
 

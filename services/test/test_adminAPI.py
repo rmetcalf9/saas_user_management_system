@@ -381,60 +381,60 @@ class test_funcitonal(test_api):
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])
     authProvGUID = origTenantDict['AuthProviders'][0]['guid']
     
-    storeConnection = appObj.objectStore.getConnectionContext()
+    def dbfn(storeConnection):
+      #Also create some auth data for the single auth
+      def someFn1(connectionContext):
+        person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
+        authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
+          "username": 'AA', 
+          "password": b'BB'
+          },
+          person['guid'],
+          storeConnection
+        )
+        return person, authData
+      (person, authData) = storeConnection.executeInsideTransaction(someFn1)
+      
 
-    #Also create some auth data for the single auth
-    def someFn1(connectionContext):
-      person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
-      authData = AddAuth(appObj, tenantWithNoAuthProviders['Name'], authProvGUID, {
-        "username": 'AA', 
-        "password": b'BB'
-        },
-        person['guid'],
-        storeConnection
+      #Before we delete the auth provider we must get the key it used to create the userAuth
+      authProvDict = {
+        "Type": "internal",
+        "ConfigJSON": json.loads(sampleInternalAuthProv001_CREATE["ConfigJSON"])
+      }
+      AuthProvider = authProviderFactory(
+        authProvDict,
+        authProvGUID,
+        tenantWithNoAuthProviders['Name']
       )
-      return person, authData
-    (person, authData) = storeConnection.executeInsideTransaction(someFn1)
-    
+      authTypeConfigDict = {'username': 'AA'}
+      authRecordKey = AuthProvider._makeKey(authTypeConfigDict)
+      #Use the key the first time to make sure auth record exists
+      authRecord, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey, storeConnection)
+      #print("print Auth Record is:",authRecord)
 
-    #Before we delete the auth provider we must get the key it used to create the userAuth
-    authProvDict = {
-      "Type": "internal",
-      "ConfigJSON": json.loads(sampleInternalAuthProv001_CREATE["ConfigJSON"])
-    }
-    AuthProvider = authProviderFactory(
-      authProvDict,
-      authProvGUID,
-      tenantWithNoAuthProviders['Name']
-    )
-    authTypeConfigDict = {'username': 'AA'}
-    authRecordKey = AuthProvider._makeKey(authTypeConfigDict)
-    #Use the key the first time to make sure auth record exists
-    authRecord, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey, storeConnection)
-    #print("print Auth Record is:",authRecord)
+      
+      changedTenantDict = copy.deepcopy(origTenantDict)
+      changedTenantDict['AuthProviders'] = []
+      result = self.testClient.put(
+        self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
+        headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+        data=json.dumps(changedTenantDict), 
+        content_type='application/json'
+      )
+      self.assertEqual(result.status_code, 200) 
+      
+      changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
+      self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+      self.assertEqual(changedResultJSON["ObjectVersion"],"3")
 
-    
-    changedTenantDict = copy.deepcopy(origTenantDict)
-    changedTenantDict['AuthProviders'] = []
-    result = self.testClient.put(
-      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + changedTenantDict['Name'], 
-      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(changedTenantDict), 
-      content_type='application/json'
-    )
-    self.assertEqual(result.status_code, 200) 
-    
-    changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, changedTenantDict, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
-    self.assertEqual(changedResultJSON["ObjectVersion"],"3")
-
-    self.assertEqual(len(changedResultJSON['AuthProviders']),0,msg='Wrong number of remaining auth providers')
-    
-    #Check auth record has been NOT been removed
-    # auth records will not be removed with the tenant as auth records
-    # are independant of tenant. Any clean up will be done when the person is deleted
-    authRecord2, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey, storeConnection)
-    self.assertJSONStringsEqualWithIgnoredKeys(authRecord, authRecord2, [], msg='Error userAuths should not have changed')
+      self.assertEqual(len(changedResultJSON['AuthProviders']),0,msg='Wrong number of remaining auth providers')
+      
+      #Check auth record has been NOT been removed
+      # auth records will not be removed with the tenant as auth records
+      # are independant of tenant. Any clean up will be done when the person is deleted
+      authRecord2, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authRecordKey, storeConnection)
+      self.assertJSONStringsEqualWithIgnoredKeys(authRecord, authRecord2, [], msg='Error userAuths should not have changed')
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
     
   def test_deleteTwoAuthProvidersTogether(self):
     origTenantDict = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])

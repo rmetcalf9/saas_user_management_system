@@ -189,7 +189,7 @@ class ObjectStore_SQLAlchemy(ObjectStore):
       self.objectPrefix = ConfigDict["objectPrefix"]
     else:
       self.objectPrefix = ""
-    self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=20, max_overflow=0)
+    self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0)
     
     metadata = MetaData()
     #(objDICT, objectVersion, creationDate, lastUpdateDate)
@@ -222,7 +222,6 @@ class ObjectStore_SQLAlchemy(ObjectStore):
   
   #AppObj passed in as None
   def _INT_setupOrUpdateVer(self, appObj):
-    storeConnection = self.getConnectionContext()
     def someFn(connectionContext):
       curTime = appObj.getCurDateTime()
       query = self.verTable.select()
@@ -243,15 +242,14 @@ class ObjectStore_SQLAlchemy(ObjectStore):
       if objectStoreHardCodedVersionInteger == firstRow['current_installed_ver']:
         return
       raise Exception('Not Implemented - update datastore from x to objectStoreHardCodedVersionInteger')
-    storeConnection.executeInsideTransaction(someFn)
+    self.executeInsideTransaction(someFn)
     
 
   def _resetDataForTest(self):
-    storeConnection = self.getConnectionContext()
     def someFn(connectionContext):
       query = self.objDataTable.delete()
       connectionContext._INT_execute(query)
-    storeConnection.executeInsideTransaction(someFn)
+    self.executeInsideTransaction(someFn)
     
   def _getConnectionContext(self):
     return ConnectionContext(self)

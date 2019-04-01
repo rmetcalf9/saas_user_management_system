@@ -15,22 +15,24 @@ userPersonLinkApiPath="/userpersonlinks/"
 
 class test_adminAPIUserPersonLinks(parent_test_api):
   def assertUserPersonLinkExists(self, UserID, personGUID):
-    storeConnection = appObj.objectStore.getConnectionContext()
-    l = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
-    self.assertTrue(UserID in l, msg="UserPersonLink dosen't exsit but it should (1)")
-    userObj = GetUser(appObj, UserID, storeConnection)
-    if userObj is None:
-      self.assertFalse(True, msg="User not found but they should have an UserPersonLink")
-    self.assertTrue(personGUID in userObj._associatedPersonsList, msg="UserPersonLink dosen't exsit but it should (2)")
+    def dbfn(storeConnection):
+      l = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
+      self.assertTrue(UserID in l, msg="UserPersonLink dosen't exsit but it should (1)")
+      userObj = GetUser(appObj, UserID, storeConnection)
+      if userObj is None:
+        self.assertFalse(True, msg="User not found but they should have an UserPersonLink")
+      self.assertTrue(personGUID in userObj._associatedPersonsList, msg="UserPersonLink dosen't exsit but it should (2)")
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
 
   def assertUserPersonLinkDosentExists(self, UserID, personGUID):
-    storeConnection = appObj.objectStore.getConnectionContext()
-    l = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
-    self.assertFalse(UserID in l, msg="UserPersonLink dosen't exsit but it should (1)")
-    userObj = GetUser(appObj, UserID, storeConnection)
-    if userObj is None:
-      return
-    self.assertFalse(personGUID in userObj._associatedPersonsList, msg="UserPersonLink dosen't exsit but it should (2)")
+    def dbfn(storeConnection):
+      l = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
+      self.assertFalse(UserID in l, msg="UserPersonLink dosen't exsit but it should (1)")
+      userObj = GetUser(appObj, UserID, storeConnection)
+      if userObj is None:
+        return
+      self.assertFalse(personGUID in userObj._associatedPersonsList, msg="UserPersonLink dosen't exsit but it should (2)")
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
 
   def test_createUserPersonLink(self):
     newPerson = self.createPersonAndReturnDICT()

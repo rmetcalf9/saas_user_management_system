@@ -74,41 +74,42 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def put(self, tenant):
       '''Register'''
-      storeConnection = appObj.objectStore.getConnectionContext()
-      tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
-      if 'authProviderGUID' not in request.get_json():
-        raise BadRequest('No authProviderGUID provided')
-      authProviderGUID = request.get_json()['authProviderGUID']
-      if 'credentialJSON' not in request.get_json():
-        raise BadRequest('No credentialJSON provided')
-      credentialJSON = request.get_json()['credentialJSON']
+      def dbfn(storeConnection):
+        tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+        if 'authProviderGUID' not in request.get_json():
+          raise BadRequest('No authProviderGUID provided')
+        authProviderGUID = request.get_json()['authProviderGUID']
+        if 'credentialJSON' not in request.get_json():
+          raise BadRequest('No credentialJSON provided')
+        credentialJSON = request.get_json()['credentialJSON']
 
-      try:
-        #print("credentialJSON:",credentialJSON)
-        #print("loginAPI.py regis - authProviderGUID:",authProviderGUID)
-        def someFn(connectionContext):
-          return RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register", connectionContext)
-        userObj = storeConnection.executeInsideTransaction(someFn)
-        
-      except customExceptionClass as err:
-        if (err.id=='userCreationNotAllowedException'):
-          raise Unauthorized(err.text)
-        if (err.id=='InvalidAuthConfigException'):
-          raise BadRequest(err.text)
-        if (err.id=='tryingToCreateDuplicateAuthException'):
-          raise BadRequest(err.text)
-        if (err.id=='TryingToCreateDuplicateUserException'):
-          raise BadRequest(err.text)
+        try:
+          #print("credentialJSON:",credentialJSON)
+          #print("loginAPI.py regis - authProviderGUID:",authProviderGUID)
+          def someFn(connectionContext):
+            return RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register", connectionContext)
+          userObj = storeConnection.executeInsideTransaction(someFn)
           
-        raise Exception('InternalServerError')
-      except:
-        raise 
+        except customExceptionClass as err:
+          if (err.id=='userCreationNotAllowedException'):
+            raise Unauthorized(err.text)
+          if (err.id=='InvalidAuthConfigException'):
+            raise BadRequest(err.text)
+          if (err.id=='tryingToCreateDuplicateAuthException'):
+            raise BadRequest(err.text)
+          if (err.id=='TryingToCreateDuplicateUserException'):
+            raise BadRequest(err.text)
+            
+          raise Exception('InternalServerError')
+        except:
+          raise 
 
-      returnDict = userObj.getJSONRepresenation(tenant)
-      #print("loginAPI returnDict:", returnDict)
-      del returnDict["other_data"]
-      return returnDict, 201
-      
+        returnDict = userObj.getJSONRepresenation(tenant)
+        #print("loginAPI returnDict:", returnDict)
+        del returnDict["other_data"]
+        return returnDict, 201
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
+
   @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):
   
@@ -119,9 +120,10 @@ def registerAPI(appObj):
     @nsLogin.response(400, 'Bad Request')
     def get(self, tenant):
      '''Get list of auth providers supported by this service'''
-     storeConnection = appObj.objectStore.getConnectionContext()
-     tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
-     return tenantObj.getJSONRepresenation()
+     def dbfn(storeConnection):
+       tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+       return tenantObj.getJSONRepresenation()
+     return appObj.objectStore.executeInsideConnectionContext(dbfn)
      
     '''Login'''
     @nsLogin.doc('login')
@@ -132,53 +134,54 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Login and recieve JWT token'''
-      storeConnection = appObj.objectStore.getConnectionContext()
-      tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
-      if 'authProviderGUID' not in request.get_json():
-        raise BadRequest('No authProviderGUID provided')
-      authProviderGUID = request.get_json()['authProviderGUID']
-      UserID = None
-      if 'UserID' in request.get_json():
-        UserID = request.get_json()['UserID']
-     
-      try:
-        #print("loginAPI.py login - authProviderGUID:",authProviderGUID)
-        def someFn(connectionContext):
-          return Login(
-            appObj, 
-            tenant, 
-            authProviderGUID,  
-            request.get_json()['credentialJSON'], 
-            UserID, 
-            connectionContext, 'a','b','c'
-          )
-        loginResult = storeConnection.executeInsideTransaction(someFn)
-        
-      except customExceptionClass as err:
-        if (err.id=='authFailedException'):
-          raise Unauthorized('authFailedException')
-        if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
-          raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
-        if (err.id=='authProviderNotFoundException'):
-          raise BadRequest('authProviderNotFoundException')
-        if (err.id=='InvalidAuthConfigException'):
-          raise Unauthorized('Invalid credentials provided')
-        if (err.id=='UnknownUserIDException'):
-          raise BadRequest(err.text)
-        raise Exception('InternalServerError')
-      except:
-        raise InternalServerError
+      def dbfn(storeConnection):
+        tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+        if 'authProviderGUID' not in request.get_json():
+          raise BadRequest('No authProviderGUID provided')
+        authProviderGUID = request.get_json()['authProviderGUID']
+        UserID = None
+        if 'UserID' in request.get_json():
+          UserID = request.get_json()['UserID']
+       
+        try:
+          #print("loginAPI.py login - authProviderGUID:",authProviderGUID)
+          def someFn(connectionContext):
+            return Login(
+              appObj, 
+              tenant, 
+              authProviderGUID,  
+              request.get_json()['credentialJSON'], 
+              UserID, 
+              connectionContext, 'a','b','c'
+            )
+          loginResult = storeConnection.executeInsideTransaction(someFn)
+          
+        except customExceptionClass as err:
+          if (err.id=='authFailedException'):
+            raise Unauthorized('authFailedException')
+          if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
+            raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
+          if (err.id=='authProviderNotFoundException'):
+            raise BadRequest('authProviderNotFoundException')
+          if (err.id=='InvalidAuthConfigException'):
+            raise Unauthorized('Invalid credentials provided')
+          if (err.id=='UnknownUserIDException'):
+            raise BadRequest(err.text)
+          raise Exception('InternalServerError')
+        except:
+          raise InternalServerError
 
-      returnDict = copy.deepcopy(loginResult)
-      if returnDict['possibleUserIDs'] is not None:
-        #populate possibleUsers from possibleUserIDs
-        possibleUsers = []
-        for userID in returnDict['possibleUserIDs']:
-          possibleUsers.append(GetUser(appObj,userID,storeConnection).getJSONRepresenation(tenant)) #limit roles to only current tenant
-        returnDict['possibleUsers'] = possibleUsers
+        returnDict = copy.deepcopy(loginResult)
+        if returnDict['possibleUserIDs'] is not None:
+          #populate possibleUsers from possibleUserIDs
+          possibleUsers = []
+          for userID in returnDict['possibleUserIDs']:
+            possibleUsers.append(GetUser(appObj,userID,storeConnection).getJSONRepresenation(tenant)) #limit roles to only current tenant
+          returnDict['possibleUsers'] = possibleUsers
 
-      del returnDict["other_data"]
-      return returnDict
+        del returnDict["other_data"]
+        return returnDict
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
 
   @nsLogin.route('/<string:tenant>/refresh')
   class refreshAPI(Resource):
@@ -190,12 +193,13 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Get new JWT token with Refresh'''
-      storeConnection = appObj.objectStore.getConnectionContext()
-      tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
-      refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
-      if refreshedAuthDetails is None:
-        raise Unauthorized('Refresh token not found, token or session may have timedout')
+      def dbfn(storeConnection):
+        tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+        refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
+        if refreshedAuthDetails is None:
+          raise Unauthorized('Refresh token not found, token or session may have timedout')
 
-      #possibleUserIDs will always be none
-      del refreshedAuthDetails['other_data']
-      return refreshedAuthDetails
+        #possibleUserIDs will always be none
+        del refreshedAuthDetails['other_data']
+        return refreshedAuthDetails
+      return appObj.objectStore.executeInsideConnectionContext(dbfn)
