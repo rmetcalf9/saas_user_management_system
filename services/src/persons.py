@@ -119,5 +119,5 @@ def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
   return personObj
   
 def GetPaginatedPersonData(appObj, request, outputFN, storeConnection):
-  return storeConnection.getPaginatedResult("Persons",  appObj.getPaginatedParamValues(request), request, outputFN)
+  return storeConnection.getPaginatedResult("Persons",  appObj.getPaginatedParamValues(request), outputFN)
 

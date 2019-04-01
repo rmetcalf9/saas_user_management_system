@@ -1,4 +1,4 @@
-from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException, artificalRequestWithPaginationArgs
 
 class ConnectionContext(ObjectStoreConnectionContext):
   objectType = None
@@ -66,12 +66,15 @@ class ConnectionContext(ObjectStoreConnectionContext):
     return whereClauseText in str(item).upper()
     
     
-  def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
+  def _getPaginatedResult(self, objectType, paginatedParamValues, outputFN):
     ##print('objectStoresMemory._getPaginatedResult self.objectType.objectData[objectType]:', self.objectType.objectData[objectType])
+    srcData = []
+    if objectType in self.objectType.objectData:
+      srcData = self.objectType.objectData[objectType]
     return self.objectType.appObj.getPaginatedResult(
-      self.objectType.objectData[objectType],
+      srcData,
       outputFN,
-      request,
+      artificalRequestWithPaginationArgs(paginatedParamValues),
       self._filterFN
     )
 

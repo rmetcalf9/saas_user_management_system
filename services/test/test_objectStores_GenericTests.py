@@ -42,13 +42,13 @@ def runAllGenericTests(testClass, getObjFn, ConfigDict):
   curModuleName = globals()['__name__']
   for x in globals():
     if x.startswith("t_"):
-      print("**********************************************************************")
-      print("    test " + x)
-      print("**********************************************************************")
+      #print("**********************************************************************")
+      #print("    test " + x)
+      #print("**********************************************************************")
       test_fn = globals()[x]
       obj = getObjFn(ConfigDict)
       test_fn(testClass, obj)
-      print("")
+      #print("")
 
 #*************************************
 #   SaveJSONObject Tests
@@ -380,4 +380,143 @@ def t_removeObjectOnlyRemovesKeyOfSameObjectType(testClass, objectStoreType):
   (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("Test2", "123")
   testClass.assertJSONStringsEqualWithIgnoredKeys(objectDICT, JSONString2, [  ], msg='object2 should not have been removed')
   
+#*************************************
+#   getPaginatedResult Tests
+#*************************************
+
+def addSampleRows(storeConnection, numRows):
+  def someFn(connectionContext):
+    for x in range(0,numRows):
+      toInsert = copy.deepcopy(JSONString)
+      toInsert['AA'] = x
+      xres = connectionContext.saveJSONObject("Test1", "123" + str(x), toInsert, None)
+  storeConnection.executeInsideTransaction(someFn)
+
+def assertCorrectPaginationResult(testClass, result, expectedOffset, expectedPageSize, expectedTotal):
+  testClass.assertEqual(result['pagination']['offset'], expectedOffset, msg='Wrong offset in pagination')
+  testClass.assertEqual(result['pagination']['pagesize'], expectedPageSize, msg='Wrong offset in pagination')
+  if result['pagination']['total'] != expectedTotal:
+    testClass.assertEqual(result['pagination']['total'], (expectedOffset + expectedPageSize + 1), msg='Total is wrong, shoulw be actual total (' + str(expectedTotal) + ') or one more than can be displayed in this page')
+
+def t_getPaginatedResultsNoData(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  def outputFN(item):
+    return item
+  paginatedParamValues = {
+    'offset': 0,
+    'pagesize': 10,
+    'query': '',
+    'sort': ''
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = {'pagination': {'offset': 0, 'pagesize': 10, 'total': 0}, 'result': []}
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res, expectedRes, [  ], msg='Wrong result')
   
+#Test with five rows all in one
+def t_getPaginatedResultsFiveRowsInOneHit(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  addSampleRows(storeConnection, 5)
+  def outputFN(item):
+    return item[0]
+  paginatedParamValues = {
+    'offset': 0,
+    'pagesize': 10,
+    'query': '',
+    'sort': None
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = []
+  for x in range(0,5):
+    expectedRes.append({"AA": x, "BB": "BB", "CC": {"CC.AA": "AA", "CC.BB": "BB", "CC.CC": "CC"}})
+  assertCorrectPaginationResult(testClass, res, 0, 10, 5)
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res['result'], expectedRes, [  ], msg='Wrong result')
+
+def t_getPaginatedResultsFiveRowsInOneHitWithPagesize(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  addSampleRows(storeConnection, 5)
+  def outputFN(item):
+    return item[0]
+  paginatedParamValues = {
+    'offset': 0,
+    'pagesize': 5,
+    'query': '',
+    'sort': None
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = []
+  for x in range(0,5):
+    expectedRes.append({"AA": x, "BB": "BB", "CC": {"CC.AA": "AA", "CC.BB": "BB", "CC.CC": "CC"}})
+  assertCorrectPaginationResult(testClass, res, 0, 5, 5)
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res['result'], expectedRes, [  ], msg='Wrong result')
+
+def t_getPaginatedResultsFiveRowsPagesize2offset0(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  addSampleRows(storeConnection, 5)
+  def outputFN(item):
+    return item[0]
+  paginatedParamValues = {
+    'offset': 0,
+    'pagesize': 2,
+    'query': '',
+    'sort': None
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = []
+  for x in range(0,2):
+    expectedRes.append({"AA": x, "BB": "BB", "CC": {"CC.AA": "AA", "CC.BB": "BB", "CC.CC": "CC"}})
+  assertCorrectPaginationResult(testClass, res, 0, 2, 5)
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res['result'], expectedRes, [  ], msg='Wrong result')
+
+def t_getPaginatedResultsFiveRowsPagesize2offset2(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  addSampleRows(storeConnection, 5)
+  def outputFN(item):
+    return item[0]
+  paginatedParamValues = {
+    'offset': 2,
+    'pagesize': 2,
+    'query': '',
+    'sort': None
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = []
+  for x in range(2,4):
+    expectedRes.append({"AA": x, "BB": "BB", "CC": {"CC.AA": "AA", "CC.BB": "BB", "CC.CC": "CC"}})
+  assertCorrectPaginationResult(testClass, res, 2, 2, 5)
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res['result'], expectedRes, [  ], msg='Wrong result')
+  
+def t_getPaginatedResultsFiveRowsPagesize2offset4(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  addSampleRows(storeConnection, 5)
+  def outputFN(item):
+    return item[0]
+  paginatedParamValues = {
+    'offset': 4,
+    'pagesize': 2,
+    'query': '',
+    'sort': None
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = []
+  for x in range(4,5):
+    expectedRes.append({"AA": x, "BB": "BB", "CC": {"CC.AA": "AA", "CC.BB": "BB", "CC.CC": "CC"}})
+  assertCorrectPaginationResult(testClass, res, 4, 2, 5)
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res['result'], expectedRes, [  ], msg='Wrong result')
+  
+def t_getPaginatedResultsFiveRowsPagesize2offset10(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  addSampleRows(storeConnection, 5)
+  def outputFN(item):
+    return item[0]
+  paginatedParamValues = {
+    'offset': 10,
+    'pagesize': 2,
+    'query': '',
+    'sort': None
+  }
+  res = storeConnection.getPaginatedResult("Test1", paginatedParamValues, outputFN)
+  expectedRes = []
+  assertCorrectPaginationResult(testClass, res, 10, 2, 5)
+  testClass.assertJSONStringsEqualWithIgnoredKeys(res['result'], expectedRes, [  ], msg='Wrong result')
+
+

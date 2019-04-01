@@ -51,6 +51,21 @@ except:
 
 '''
 
+#Required until I update the baseapp with a class that accepts paginated param vlalues rather than a request
+class artificalRequestWithPaginationArgs_args():
+  paginatedParamValues = None
+  def __init__(self, paginatedParamValues):
+    self.paginatedParamValues = paginatedParamValues
+  def get(self, paramName):
+    if paramName in ['offset', 'pagesize', 'query', 'sort']:
+      return self.paginatedParamValues[paramName]
+    raise Exception("Unknown argument - " + paramName)
+class artificalRequestWithPaginationArgs():
+  args = None
+  def __init__(self, paginatedParamValues):
+    self.args = artificalRequestWithPaginationArgs_args(paginatedParamValues)
+  
+
 class ObjectStoreConnectionContext():
   #if object version is set to none object version checking is turned off
   # object version may be a number or a guid depending on store technology
@@ -128,14 +143,14 @@ class ObjectStoreConnectionContext():
   def getObjectJSON(self, objectType, objectKey):
     return self._getObjectJSON(objectType, objectKey)
   
-  def getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN=None):
+  def getPaginatedResult(self, objectType, paginatedParamValues, outputFN):
     def defOutput(item):
       return item
     def defFilter(item, whereClauseText):
       return True
     if outputFN is None:
       outputFN = defOutput
-    return self._getPaginatedResult(objectType, paginatedParamValues, request, outputFN)
+    return self._getPaginatedResult(objectType, paginatedParamValues, outputFN)
   
   def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
     raise Exception('Not Overridden')
@@ -143,7 +158,7 @@ class ObjectStoreConnectionContext():
     raise Exception('Not Overridden')
   def _getObjectJSON(self, objectType, objectKey):
     raise Exception('Not Overridden')
-  def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
+  def _getPaginatedResult(self, objectType, paginatedParamValues, outputFN):
     raise Exception('Not Overridden')
 
   #should return a fresh transaction context

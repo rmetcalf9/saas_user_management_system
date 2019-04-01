@@ -1,4 +1,4 @@
-from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException
+from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException, artificalRequestWithPaginationArgs
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON, func, UniqueConstraint, and_
 import pytz
 ##import datetime
@@ -110,6 +110,14 @@ class ConnectionContext(ObjectStoreConnectionContext):
       if not ignoreMissingObject:
         raise TriedToDeleteMissingObjectException
   
+  def _INT_getTupleFromRow(self, row):
+    dt = parse(row['creationDate_iso8601'])
+    creationDate = dt.astimezone(pytz.utc)
+    dt = parse(row['lastUpdateDate_iso8601'])
+    lastUpdateDate = dt.astimezone(pytz.utc)
+    return getNormalDICTFromRJMJSONSerializableDICT(row['objectDICT']), row['objectVersion'], creationDate, lastUpdateDate
+  
+  
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
   #Return None, None, None, None if object isn't in store
   ObjTableKeyMap = None
@@ -127,15 +135,40 @@ class ConnectionContext(ObjectStoreConnectionContext):
     if result.rowcount != 1:
       raise Exception('_getObjectJSON Wrong number of rows returned for key')
 
-    dt = parse(firstRow['creationDate_iso8601'])
-    creationDate = dt.astimezone(pytz.utc)
-    dt = parse(firstRow['lastUpdateDate_iso8601'])
-    lastUpdateDate = dt.astimezone(pytz.utc)
-    return getNormalDICTFromRJMJSONSerializableDICT(firstRow['objectDICT']), firstRow['objectVersion'], creationDate, lastUpdateDate
+    return self._INT_getTupleFromRow(firstRow)
 
-
-  def _getPaginatedResult(self, objectType, paginatedParamValues, request, outputFN):
-    raise Exception('_getPaginatedResult Not Implemented')
+  def _INT_filterFn(self, item, whereClauseText):
+    return True
+    
+  def _getPaginatedResult(self, objectType, paginatedParamValues, outputFN):
+    query = self.objectStore.objDataTable.select(
+      whereclause=(
+        self.objectStore.objDataTable.c.type==objectType
+      ),
+      order_by=self.objectStore.objDataTable.c.key
+    )
+    result =  self._INT_execute(query)
+    
+    srcData = {}
+    fetching = True
+    numFetched = 0
+    while (fetching):
+      row = result.fetchone()
+      numFetched = numFetched + 1
+      if row is None:
+        fetching = False
+      else:
+        srcData[row['key']] = self._INT_getTupleFromRow(row)
+      if numFetched > (paginatedParamValues['offset'] + paginatedParamValues['pagesize']): #Total caculation will be off when we don't go thorough entire dataset
+                          # but invalid figure will be always be one over as we fetch one past in all cases
+        fetching = False
+  
+    return self.objectStore.appObj.getPaginatedResult(
+      srcData,
+      outputFN,
+      artificalRequestWithPaginationArgs(paginatedParamValues),
+      self._INT_filterFn
+    )
 
 class ObjectStore_SQLAlchemy(ObjectStore):
   engine = None

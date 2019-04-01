@@ -145,7 +145,7 @@ def registerAPI(appObj):
       try:
         storeConnection = appObj.objectStore.getConnectionContext()
         outputFN = defOutput
-        return storeConnection.getPaginatedResult("tenants", appObj.getPaginatedParamValues(request), request, outputFN)
+        return storeConnection.getPaginatedResult("tenants", appObj.getPaginatedParamValues(request), outputFN)
       except:
         raise InternalServerError   
 

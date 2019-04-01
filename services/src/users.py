@@ -115,7 +115,7 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, st
   return uObj
 
 def GetPaginatedUserData(appObj, request, outputFN, storeConnection):
-  return storeConnection.getPaginatedResult("users",  appObj.getPaginatedParamValues(request), request, outputFN)
+  return storeConnection.getPaginatedResult("users",  appObj.getPaginatedParamValues(request), outputFN)
 
 def getIdentityDict(appObj, personGUID, storeConnection):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
