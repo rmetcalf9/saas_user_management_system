@@ -183,6 +183,16 @@ def t_supportsDifferentObjectTypes(testClass, objectStoreType):
   (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("TestType2", "123")
   testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString2, objectDICT, [  ], msg='object was not added')
 
+def t_secondSaveObjectSendStringObjectVer(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  def someFn(connectionContext):
+    return storeConnection.saveJSONObject("Test", "123", JSONString, None)
+  savedVer = storeConnection.executeInsideTransaction(someFn)
+  
+  def someFn2(connectionContext):
+    savedVer2 = storeConnection.saveJSONObject("Test", "123", JSONString, str(savedVer))
+  storeConnection.executeInsideTransaction(someFn2)
+  
 #*************************************
 #   UpdateJSONObject Tests
 #*************************************
@@ -301,6 +311,19 @@ def t_updateUpdatesCorrectObjecTypet(testClass, objectStoreType):
   (objectDICT, ObjectVersion, creationDate, lastUpdateDate) = storeConnection.getObjectJSON("TestType2", "123")
   testClass.assertJSONStringsEqualWithIgnoredKeys(JSONString, objectDICT, [  ], msg='object with different key was updated')
 
+def t_updateMissingVersionAssumedSafe(testClass, objectStoreType):
+  storeConnection = objectStoreType.getConnectionContext()
+  def someFn(connectionContext):
+    return storeConnection.saveJSONObject("Test", "123", JSONString, None)
+  savedVer = storeConnection.executeInsideTransaction(someFn)
+
+  def updateFn(obj, connectionContext):
+    return JSONString2
+  def someFn(connectionContext):
+    newVer = connectionContext.updateJSONObject("Test", "123", updateFn, None)
+  storeConnection.executeInsideTransaction(someFn)
+  
+  
 #*************************************
 #   RemoveJSONObject Tests
 #*************************************

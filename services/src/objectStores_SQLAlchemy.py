@@ -78,7 +78,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
       return newObjectVersion
     if objectVersion is None:
       raise TryingToCreateExistingObjectException
-    if firstRow.objectVersion != objectVersion:
+    if str(firstRow.objectVersion) != str(objectVersion):
       raise WrongObjectVersionException
     newObjectVersion = firstRow.objectVersion + 1
     query = self.objectStore.objDataTable.update(whereclause=(

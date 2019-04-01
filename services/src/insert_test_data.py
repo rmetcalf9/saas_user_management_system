@@ -139,6 +139,8 @@ def addUserRole(UserID, TenantName, role):
   #only works with existing tenant. When we need to add tenant will expand code
   tenantRoleDict = getTenantRoleDictFromTenantRoles(AuthProvidersDICT["TenantRoles"], TenantName)
   tenantRoleDict["ThisTenantRoles"].append(role)
+  #print("\ninsert data addUserRole Got:******************************")
+  #print(AuthProvidersDICT)
   tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/users/" + UserID, AuthProvidersDICT, [200])
   print(".")
 

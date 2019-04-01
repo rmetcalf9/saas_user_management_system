@@ -104,7 +104,7 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, st
     "known_as": known_as,
     "other_data": other_data
   }
-
+  
   def updUser(user, storeConnection):
     if user is None:
       raise userNotFoundException
