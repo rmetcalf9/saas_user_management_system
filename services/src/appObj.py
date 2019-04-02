@@ -82,7 +82,7 @@ class appObjClass(parAppObj):
 
   def init(self, env, serverStartTime, testingMode = False):
     self.getPaginatedParamValues = getPaginatedParamValues
-    self.scheduler = BackgroundScheduler()
+    self.scheduler = BackgroundScheduler(timezone="UTC")
     self.defaultUserGUID = str(uuid.uuid4())
     if testingMode:
       print("Warning testing mode active - proper encryption is not being used")

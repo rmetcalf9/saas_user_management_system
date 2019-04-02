@@ -1,3 +1,4 @@
+#!/bin/bash
 
 
 echo 'Copying from adminfrontend to frontend'

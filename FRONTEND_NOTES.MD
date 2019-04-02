@@ -2,13 +2,25 @@
 
 The frontend is the userinterface for the management system
 
+## Endpoint Setup
+
+ | Type of Access      | run_all_parts_on_dev_machine       | Container on dev machine (expose port 80) | container via Kong redirects | Nice Test URL                             |
+ |---|
+ | login Webpage       | http://host:8081/                  | http://host:80/frontend/#/                |                              | http://host:X/frontend/#/                 |
+ | login Admin Webpage | http://host:8082/                  | http://host:80/adminfrontend/#/           |                              | http://host:X/adminfrontend/#/usersystem  |
+ | public login API    | http://host:8098/api/public/login/ | http://host:80/api/public/login/          |                              | http://host:X/api/public/login/serverinfo |
+ | authed admin API    | http://host:5098/api/authed/admin/ | http://host:80/api/authed/admin/          |                              |                                           |
+
+
 Endpoints setup in Kong
+
  | Endpoint in Kong | Endpoint mapped to on server | Notes |
  |---|---|---|
  | /vx/public | /public | |
  | /vx/authed | /authed | Verifies JWT Tokens |
 
 Nginx paths: (In docker container nginx servers on single port)
+
  | Nginx External Path | Mapped to |
  |---|---|
  | /public/web/frontend | frontend dist folder |
