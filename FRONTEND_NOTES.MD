@@ -6,12 +6,14 @@ The frontend is the userinterface for the management system
 
  | Type of Access      | run_all_parts_on_dev_machine       | Container on dev machine (expose port 80) | container via Kong redirects | Nice Test URL                             |
  |---|---|---|---|---|
- | login Webpage       | http://host:8081/                  | http://host:80/frontend/#/                |                              | http://host:X/frontend/#/                 |
- | login Admin Webpage | http://host:8082/                  | http://host:80/adminfrontend/#/           |                              | http://host:X/adminfrontend/#/usersystem  |
+ | login Webpage       | http://host:8081/                  | http://host:80/public/web/frontend/#/                |                              | http://host:X/frontend/#/                 |
+ | login Admin Webpage | http://host:8082/                  | http://host:80/public/web/adminfrontend/#/           |                              | http://host:X/adminfrontend/#/usersystem  |
  | public login API    | http://host:8098/api/public/login/ | http://host:80/api/public/login/          |                              | http://host:X/api/public/login/serverinfo |
  | authed admin API    | http://host:5098/api/authed/admin/ | http://host:80/api/authed/admin/          |                              |                                           |
 
-
+Note: due to Python limitations the API switchs from /api/public to /public/api because python needs it one way and Kong security needs it the other way round. This is only for the api section and dosen't affect the web.
+ 
+ 
 Endpoints setup in Kong
 
  | Endpoint in Kong | Endpoint mapped to on server | Notes |

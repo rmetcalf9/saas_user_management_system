@@ -10,14 +10,17 @@ import axios from 'axios'
 import { Cookies } from 'quasar'
 
 function getAPIPrefixPossibilities (currentURL, tenantName) {
+  // See https://github.com/rmetcalf9/saas_user_management_system/blob/master/FRONTEND_NOTES.MD
   // TODO how do we know what vx should be?
   console.log('TODO Work out on prod vx based on current url and tenantName: ', currentURL, tenantName)
   return [
-    { prefix: '/vx/', kong: true },
-    { prefix: 'http://somefunnyhostname.com:5098/', kong: false },
-    { prefix: 'http://localhost:8082/', kong: false },
-    { prefix: 'http://somefunnyhostname.com:8098/', kong: false },
-    { prefix: 'http://127.0.0.1:8098/', kong: false }
+    { prefix: '/vx/', kong: true }, // container via Kong redirects
+    { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
+    { prefix: 'http://127.0.0.1:8098/', kong: false }, // home run all parts on dec machine
+    { prefix: 'http://somefunnyhostname.com:5080/', kong: false }, // work container on dev machine
+    { prefix: 'http://127.0.0.1:80/', kong: false } // home container on dev machine
+    // { prefix: 'http://localhost:8082/', kong: false },
+    // { prefix: 'http://somefunnyhostname.com:8098/', kong: false }
   ]
 }
 
@@ -204,8 +207,10 @@ function moveToLoginService (thisQuasarPath, message = undefined) {
 
   var locationToGoTo = ''
   if (window.location.pathname.includes('/public/web/adminfrontend/')) {
+    // running both in container and kong mode have /public/web/adminfrontend/ prefix so we can just replace adminfrontend with frontend to get url
     locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat
   } else {
+    // running on a dev machine is more complex as we need to switch over to anohter port
     var hostLookup = [
       {a: 'localhost:8082', b: 'localhost:8081'},
       {a: 'cat-sdts.metcarob-home.com:8082', b: 'cat-sdts.metcarob-home.com:8081'},
