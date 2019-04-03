@@ -19,6 +19,6 @@ RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pc
 COPY . /ext_volume
 
 ##docker build . -t metcarob/saas_user_management_systemtest:latest
-##docker run --rm --network pythontestingnetwork -e EXPECTED_CONTAINER_VERSION=x --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
+##docker run --rm --network pythontestingnetwork -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
 
 ##docker run --rm --network pythontestingnetwork --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest curl saas_user_management_system:8098/apidocs/
