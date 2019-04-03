@@ -20,6 +20,7 @@ steps:
     commands:
       - pip3 install -r ./src/requirements.txt
       - pip3 install -r ./testContainer/requirements.txt
+      - export SKIPSQLALCHEMYTESTS=Y
       - nosetests --rednose ./test
 
   compile_frontend:

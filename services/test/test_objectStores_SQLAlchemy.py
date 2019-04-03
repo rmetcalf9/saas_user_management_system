@@ -14,6 +14,13 @@ import pytz
 
 import test_objectStores_GenericTests as genericTests
 
+import os
+SKIPSQLALCHEMYTESTS=False
+if ('SKIPSQLALCHEMYTESTS' in os.environ):
+  if os.environ["SKIPSQLALCHEMYTESTS"]=="Y":
+    SKIPSQLALCHEMYTESTS=True
+
+
 JSONString = {
   'AA': "AA",
   'BB': "BB",
@@ -76,6 +83,9 @@ def differentPrefixesDontShareData(testClass, objectStoreType, objectStoreType2)
 
 class test_objectStoresSQLAlchemy(testHelperSuperClass):
   def test_genericTests(self):
+    if SKIPSQLALCHEMYTESTS:
+      print("Skipping SQLAlchemyTests")
+      return
     def getObjFn(ConfigDict):
       obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
       obj.resetDataForTest()
@@ -84,6 +94,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
 
   #Different prefixes don't share data
   def test_differentPrefixesDontShareData(self):
+    if SKIPSQLALCHEMYTESTS:
+      print("Skipping SQLAlchemyTests")
+      return
     obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
     obj.resetDataForTest()
     obj2 = ObjectStore_SQLAlchemy(ConfigDict_withPrefix, appObj)
@@ -92,6 +105,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     
   #Test rollback single transaction
   def test_rollbackTransactionIsSuccessful_InsertOnly(self):
+    if SKIPSQLALCHEMYTESTS:
+      print("Skipping SQLAlchemyTests")
+      return
     obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
     obj.resetDataForTest()
     
@@ -118,6 +134,9 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
       
     obj.executeInsideConnectionContext(dbfn)
   def test_rollbackTransactionIsSuccessful_UpdateOnly(self):
+    if SKIPSQLALCHEMYTESTS:
+      print("Skipping SQLAlchemyTests")
+      return
     obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
     obj.resetDataForTest()
     
