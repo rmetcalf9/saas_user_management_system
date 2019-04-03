@@ -15,7 +15,7 @@ steps:
 
   unit_test:
     description: Make sure all the unit tests pass
-    image: metcarob/docker-ws-caller:0.3.6
+    image: metcarob/docker-ws-caller:0.3.8
     working_directory: ${{main_clone}}/services
     commands:
       - pip3 install -r ./src/requirements.txt
