@@ -14,11 +14,11 @@ DOCKER_IMAGENAME=saas_user_managmenet_system
 cd ${GITROOT}
 
 echo "Ensuring there are no local changes"
-#if [[ `${CMD_GIT} status --porcelain` ]]; then
-#  echo ""
-#  echo "Error - there are local changes commit these before continuing"
-#  exit 1
-#fi
+if [[ `${CMD_GIT} status --porcelain` ]]; then
+  echo ""
+  echo "Error - there are local changes commit these before continuing"
+  exit 1
+fi
 
 VERSIONFILE=${GITROOT}/VERSION
 echo "Version file is ${VERSIONFILE}"
