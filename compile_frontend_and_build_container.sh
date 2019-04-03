@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Not used by codefresh as I am using build container instead
+
 #working directory is always saas_user_management_system root
 GITROOT=$(pwd)
 DOCKER_USERNAME=metcarob
@@ -43,7 +45,6 @@ RES=$?
 if [ ${RES} -ne 0 ]; then
   exit 1
 fi
-
 
 echo "Build docker container (VERSIONNUM=${VERSIONNUM})"
 #This file does no version bumping

@@ -1,0 +1,81 @@
+version: '1.0'
+steps:
+
+  #This file describes the deployment process for saas_user_management_system
+  #If version is x.y.z (xy and z are numbers)
+  # x is the major version
+
+
+  setup_variables:
+    description: Sets variables for future steps
+    image: alpine:latest
+    working_directory: ${{main_clone}}
+    commands:
+      - cf_export RJM_VERSION=$(cat ./VERSION)
+
+  unit_test:
+    description: Make sure all the unit tests pass
+    image: metcarob/docker-ws-caller:0.3.6
+    working_directory: ${{main_clone}}/services
+    commands:
+      - pip3 install -r ./src/requirements.txt
+      - pip3 install -r ./testContainer/requirements.txt
+      - nosetests --rednose ./test
+
+  compile_frontend:
+    description: Compile the frontend quasar application
+    image: metcarob/docker_build_quasar_app:0.0.2
+    working_directory: ${{main_clone}}
+    commands:
+      - build_quasar_app ./frontend
+      
+  compile_adminfrontend:
+    description: Compile the adminfrontend quasar application
+    image: metcarob/docker_build_quasar_app:0.0.2
+    working_directory: ${{main_clone}}
+    commands:
+      - build_quasar_app ./adminfrontend
+      
+  build_the_image:
+    working_directory: ${{main_clone}}
+    type: build
+    image_name: metcarob/saas_user_management_system
+    tag: ${{RJM_VERSION}}
+      
+  build_the_test_image:
+    working_directory: ${{main_clone}}/service/testContainer
+    type: build
+    image_name: metcarob/saas_user_management_system
+    tag: develop
+    dockerfile: ./Dockerfile
+
+  container_level_tests:
+    type: composition
+    title: Container level tests
+    composition:
+      version: '2'
+      services:
+        saas_user_management_system:
+          image: ${{build_the_image}}
+          environment:
+            - APIAPP_APIURL=http://saas_user_management_system:80/api
+            - APIAPP_APIDOCSURL=http://saas_user_management_system:80/apidocs
+            - APIAPP_FRONTENDURL=http://saas_user_management_system:80/frontend
+            - APIAPP_MASTERPASSWORDFORPASSHASH=ABCCC
+            - APIAPP_DEFAULTHOMEADMINUSERNAME=admin
+            - APIAPP_DEFAULTHOMEADMINPASSWORD=admin
+    composition_candidates:
+      saas_user_management_systemtest:
+        image: ${{build_the_test_image}}
+        command: /ext_volume/run_tests_with_wait.sh
+        environment:
+          - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
+          
+  push_to_dockerhub:
+    type: push
+    title: Push to Docker hub
+    description: description
+    candidate: ${{build_the_image}}
+    tag: ${{RJM_VERSION}}
+    image_name: metcarob/saas_user_management_system
+    registry: dockerhub
