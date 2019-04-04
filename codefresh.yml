@@ -12,6 +12,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - cf_export RJM_VERSION=$(cat ./VERSION)
+      - cf_export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
 
   unit_test:
     description: Make sure all the unit tests pass
