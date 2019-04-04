@@ -44,7 +44,7 @@ steps:
     tag: ${{RJM_VERSION}}
       
   build_the_test_image:
-    working_directory: ${{main_clone}}/service/testContainer
+    working_directory: ${{main_clone}}/services/testContainer
     type: build
     image_name: metcarob/saas_user_management_system
     tag: develop
