@@ -193,6 +193,16 @@ class ObjectStore_SQLAlchemy(ObjectStore):
       self.objectPrefix = ConfigDict["objectPrefix"]
     else:
       self.objectPrefix = ""
+    
+    #debugging https://github.com/PyMySQL/PyMySQL/blob/master/pymysql/connections.py
+    connect_args = {
+      "ssl": {
+        "ca": "rds-combined-ca-bundle.pem",
+        "capath": "/home/robert/otherGit/Personal_Infrastructure/memset_cloud/data_to_backup/code_site/drupal_sites/default"
+      }
+    }
+      
+    #self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0, connect_args=connect_args)
     self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0)
     
     metadata = MetaData()

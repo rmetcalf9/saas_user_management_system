@@ -81,3 +81,19 @@ steps:
     tag: ${{RJM_VERSION}}
     image_name: metcarob/saas_user_management_system
     registry: dockerhub
+
+##TODO Run container
+#export RJM_VERSION=0.0.10
+#export RJM_VERSION_UNDERSCORE=$(echo ${RJM_VERSION} | tr '.' '_')
+
+#docker service create --name saas_user_management_system_${RJM_VERSION_UNDERSCORE} \
+#--secret saas_user_management_system_objectstore_config \
+#--secret saas_user_management_system_objectstore_hashpw \
+#--secret saas_user_management_system_objectstore_adminpw \
+#-e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config \
+#-e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw \
+#-e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
+#-e APIAPP_DEFAULTHOMEADMINUSERNAME=admin \
+#metcarob/saas_user_management_system:${RJM_VERSION}
+
+
