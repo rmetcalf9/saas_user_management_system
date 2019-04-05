@@ -28,22 +28,7 @@ _term() {
 
 trap _term SIGTERM
 
-#Find all params that start with API_APP and end with FILE and create mirror vars
-AA=$(env | awk -F "=" '{print $1}' | grep "APIAPP_.*FILE$")
-for i in ${AA}; do
-  NEWVARNAME=${i::-4}
-  FILETOREAD=$(eval echo \$${i})
-  echo "${i} set so ${FILETOREAD} to be read and contents saved in var ${NEWVARNAME}"
-  if [ ! -f ${FILETOREAD} ]; then
-    echo "ERROR ${FILETOREAD} dosen't exist - continuing without setting env variable"
-  else
-    eval export ${NEWVARNAME}=$(cat ${FILETOREAD})
-  fi
-  #Check lines
-  #RES=$(eval echo \$${NEWVARNAME})
-  #echo "RES=${RES}"
-done
-
+#APIAPP*_FILE Now done in python app
 
 ##TODO Evaluate params from incomming variables
 #VARSTOUPDATE=$(env | grep "^APIAPP_")
