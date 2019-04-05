@@ -11,6 +11,7 @@ steps:
     image: alpine:latest
     working_directory: ${{main_clone}}
     commands:
+      - export RJM_VERSION=$(cat ./VERSION)
       - cf_export RJM_VERSION=$(cat ./VERSION)
       - cf_export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
       - cf_export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
