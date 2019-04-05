@@ -38,7 +38,8 @@ RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pc
     mkdir ${APIAPP_FRONTEND_FRONTEND} && \
     mkdir ${APIAPP_FRONTEND_ADMINFRONTEND} && \
     mkdir /var/log/uwsgi && \
-    pip3 install uwsgi
+    pip3 install uwsgi && \
+    wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -O /rds-combined-ca-bundle.pem
 
 COPY ./services/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirements.txt

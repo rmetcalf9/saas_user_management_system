@@ -56,7 +56,7 @@ if [ ${RES} -ne 0 ]; then
   echo "Docker build failed"
   exit 1
 fi
-docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}
+docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild
 RES=$?
 if [ ${RES} -ne 0 ]; then
   echo ""

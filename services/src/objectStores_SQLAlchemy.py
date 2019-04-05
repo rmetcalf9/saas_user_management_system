@@ -222,7 +222,7 @@ class ObjectStore_SQLAlchemy(ObjectStore):
         # I found the same lenght restriction exists on an index
         Column('id', Integer, primary_key=True),
         Column('type', String(50), index=True),
-        Column('key', String(140), index=True),
+        Column('key', String(140), index=True), #MariaDB has smaller limit on inexes
         #Column('objectDICT', JSON), #MariaDB has not implemented JSON data type
         Column('objectDICT', Text),
         Column('objectVersion', BigInteger),
