@@ -31,6 +31,7 @@ APIAPP_OBJECTSTORECONFIG:
   "Type":"SQLAlchemy",
   "connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man",
   "objectPrefix":""   (Optional)
+  "ssl_ca":"/home/robert/dbtestTmp/rds-combined-ca-bundle.pem"   (Optional)
 }
 ```
 

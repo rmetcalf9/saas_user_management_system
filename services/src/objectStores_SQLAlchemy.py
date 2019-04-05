@@ -1,8 +1,10 @@
 from objectStores_base import ObjectStore, ObjectStoreConnectionContext, StoringNoneObjectAfterUpdateOperationException, WrongObjectVersionException, ObjectStoreConfigError, MissingTransactionContextException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException, SuppliedObjectVersionWhenCreatingException, artificalRequestWithPaginationArgs
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON, func, UniqueConstraint, and_
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, BigInteger, DateTime, JSON, func, UniqueConstraint, and_, Text
 import pytz
 ##import datetime
 from dateutil.parser import parse
+import os
+import json
 
 from makeDictJSONSerializable import getRJMJSONSerializableDICT, getNormalDICTFromRJMJSONSerializableDICT
 
@@ -64,7 +66,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
         type=objectType,
         key=objectKey, 
         objectVersion=newObjectVersion, 
-        objectDICT=getRJMJSONSerializableDICT(JSONString),
+        objectDICT=json.dumps(getRJMJSONSerializableDICT(JSONString)),
         creationDate=curTime,
         lastUpdateDate=curTime,
         creationDate_iso8601=curTime.isoformat(),
@@ -88,7 +90,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
         )
       )).values(
       objectVersion=newObjectVersion, 
-      objectDICT=getRJMJSONSerializableDICT(JSONString),
+      objectDICT=json.dumps(getRJMJSONSerializableDICT(JSONString)),
       lastUpdateDate=curTime,
       lastUpdateDate_iso8601=curTime.isoformat()
     )
@@ -115,7 +117,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     creationDate = dt.astimezone(pytz.utc)
     dt = parse(row['lastUpdateDate_iso8601'])
     lastUpdateDate = dt.astimezone(pytz.utc)
-    return getNormalDICTFromRJMJSONSerializableDICT(row['objectDICT']), row['objectVersion'], creationDate, lastUpdateDate
+    return json.loads(getNormalDICTFromRJMJSONSerializableDICT(row['objectDICT'])), row['objectVersion'], creationDate, lastUpdateDate
   
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate
@@ -194,16 +196,22 @@ class ObjectStore_SQLAlchemy(ObjectStore):
     else:
       self.objectPrefix = ""
     
-    #debugging https://github.com/PyMySQL/PyMySQL/blob/master/pymysql/connections.py
-    connect_args = {
-      "ssl": {
-        "ca": "rds-combined-ca-bundle.pem",
-        "capath": "/home/robert/otherGit/Personal_Infrastructure/memset_cloud/data_to_backup/code_site/drupal_sites/default"
+    connect_args = None
+    if "ssl_ca" in ConfigDict:
+      print("ssl_ca:", ConfigDict['ssl_ca'])
+      if not os.path.isfile(ConfigDict['ssl_ca']):
+        raise Exception("Supplied ssl_ca dosen't exist")
+      connect_args = {
+        "ssl": {'ca': ConfigDict['ssl_ca']}
       }
-    }
-      
-    #self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0, connect_args=connect_args)
-    self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0)
+    
+    #My experiment for SSL https://code.metcarob.com/node/249
+    #debugging https://github.com/PyMySQL/PyMySQL/blob/master/pymysql/connections.py
+    
+    if connect_args is None:
+      self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0)
+    else:
+      self.engine = create_engine(ConfigDict["connectionString"], pool_recycle=3600, pool_size=40, max_overflow=0, connect_args=connect_args)
     
     metadata = MetaData()
     #(objDICT, objectVersion, creationDate, lastUpdateDate)
@@ -213,9 +221,10 @@ class ObjectStore_SQLAlchemy(ObjectStore):
         #Tired intorudcing a seperate primary key and using key column as index but
         # I found the same lenght restriction exists on an index
         Column('id', Integer, primary_key=True),
-        Column('type', String(300), index=True),
-        Column('key', String(300), index=True),
-        Column('objectDICT', JSON),
+        Column('type', String(50), index=True),
+        Column('key', String(140), index=True),
+        #Column('objectDICT', JSON), #MariaDB has not implemented JSON data type
+        Column('objectDICT', Text),
         Column('objectVersion', BigInteger),
         Column('creationDate', DateTime(timezone=True)), 
         Column('lastUpdateDate', DateTime(timezone=True)),
