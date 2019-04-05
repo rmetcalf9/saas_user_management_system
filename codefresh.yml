@@ -13,14 +13,15 @@ steps:
     commands:
       - cf_export RJM_VERSION=$(cat ./VERSION)
       - cf_export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
+      - cf_export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
 
   unit_test:
     description: Make sure all the unit tests pass
     image: metcarob/docker-ws-caller:0.3.8
     working_directory: ${{main_clone}}/services
     commands:
-      - pip3 install -r ./src/requirements.txt
-      - pip3 install -r ./testContainer/requirements.txt
+      - pip3 install --no-cache-dir -r ./src/requirements.txt
+      - pip3 install --no-cache-dir -r ./testContainer/requirements.txt
       - export SKIPSQLALCHEMYTESTS=Y
       - nosetests --rednose ./test
 
@@ -85,6 +86,7 @@ steps:
 ##TODO Run container
 #export RJM_VERSION=0.0.10
 #export RJM_VERSION_UNDERSCORE=$(echo ${RJM_VERSION} | tr '.' '_')
+#docker pull metcarob/saas_user_management_system:${RJM_VERSION}
 
 #docker service create --name saas_user_management_system_${RJM_VERSION_UNDERSCORE} \
 #--secret saas_user_management_system_objectstore_config \
