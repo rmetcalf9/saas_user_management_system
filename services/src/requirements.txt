@@ -2,7 +2,7 @@ flask==1.0.2
 flask_restplus==0.11.0
 pytz==2018.4
 sortedcontainers==1.5.9
-baseapp_for_restapi_backend_with_swagger==0.4.3
+baseapp_for_restapi_backend_with_swagger==0.4.4
 bcrypt==3.1.5
 pyjwt==1.7.1
 apscheduler==3.5.3
