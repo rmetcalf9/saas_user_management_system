@@ -15,6 +15,7 @@ steps:
       - cf_export RJM_VERSION=$(cat ./VERSION)
       - cf_export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
       - cf_export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
+      - cf_export RJM_WS_NAME=$(echo "saas_user_management")
 
   unit_test:
     description: Make sure all the unit tests pass
@@ -83,6 +84,52 @@ steps:
     tag: ${{RJM_VERSION}}
     image_name: metcarob/saas_user_management_system
     registry: dockerhub
+
+  #Deploy new container to my website swarm
+  deploy_to_metcarob_swarm:
+      image: codefresh/remote-docker
+      working_directory: ${{main_clone}}
+      commands:
+        - rdocker ${{RDOCKER_HOST}} docker service create --name ${{RJM_WS_NAME}}_${{RJM_VERSION_UNDERSCORE}} 
+            --network main_net 
+            --secret saas_user_management_system_objectstore_config 
+            --secret saas_user_management_system_objectstore_hashpw 
+            --secret saas_user_management_system_objectstore_adminpw 
+            -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config 
+            -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw 
+            -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw 
+            -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin 
+            metcarob/saas_user_management_system:${{RJM_VERSION}} 
+      environment:
+        - SSH_KEY=${{SSH_KEY_COMMAS}}
+        - SSH_PORT=${{SSH_PORT}}
+        - SPLIT_CHAR=${{SPLIT_CHAR}}
+
+  # Connect test endpoint to new container
+  configure_kong_test_endpoint_to_connect_to_container:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
+        metcarob/docker-ws-caller:0.3.8
+        http://kong:8001
+        ${{RJM_WS_NAME}}_TEST_v${VERSION%%.*} http ${{RJM_WS_NAME}}_${{RJM_VERSION_UNDERSCORE}} 8098 /
+        https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}} null null null true
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
+
+  # Test test endpoint including version test
+  run_container_tests_against_test_endpoint:
+    image: ${{build_the_test_image}}
+    working_directory: ${{main_clone}}/server
+    commands:
+      - nosetests --rednose /ext_volume
+    environment:
+      - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION_UNDERSCORE}}
+      - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
+
 
 ##TODO Run container
 #export RJM_VERSION=0.0.16
