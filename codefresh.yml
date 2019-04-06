@@ -85,11 +85,12 @@ steps:
     registry: dockerhub
 
 ##TODO Run container
-#export RJM_VERSION=0.0.15
+#export RJM_VERSION=0.0.16
 #export RJM_VERSION_UNDERSCORE=$(echo ${RJM_VERSION} | tr '.' '_')
 #docker pull metcarob/saas_user_management_system:${RJM_VERSION}
 
 #docker service create --name saas_user_management_system_${RJM_VERSION_UNDERSCORE} \
+#--network main_net \
 #--secret saas_user_management_system_objectstore_config \
 #--secret saas_user_management_system_objectstore_hashpw \
 #--secret saas_user_management_system_objectstore_adminpw \
