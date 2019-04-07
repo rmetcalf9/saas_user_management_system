@@ -4,9 +4,8 @@ import pytz
 ##import datetime
 from dateutil.parser import parse
 import os
-import json
 
-from makeDictJSONSerializable import getRJMJSONSerializableDICT, getNormalDICTFromRJMJSONSerializableDICT
+from makeDictJSONSerializable import getJSONtoPutInStore, getObjFromJSONThatWasPutInStore
 
 
 objectStoreHardCodedVersionInteger = 1
@@ -66,7 +65,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
         type=objectType,
         key=objectKey, 
         objectVersion=newObjectVersion, 
-        objectDICT=json.dumps(getRJMJSONSerializableDICT(JSONString)),
+        objectDICT=getJSONtoPutInStore(JSONString),
         creationDate=curTime,
         lastUpdateDate=curTime,
         creationDate_iso8601=curTime.isoformat(),
@@ -90,7 +89,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
         )
       )).values(
       objectVersion=newObjectVersion, 
-      objectDICT=json.dumps(getRJMJSONSerializableDICT(JSONString)),
+      objectDICT=getJSONtoPutInStore(JSONString),
       lastUpdateDate=curTime,
       lastUpdateDate_iso8601=curTime.isoformat()
     )
@@ -117,7 +116,9 @@ class ConnectionContext(ObjectStoreConnectionContext):
     creationDate = dt.astimezone(pytz.utc)
     dt = parse(row['lastUpdateDate_iso8601'])
     lastUpdateDate = dt.astimezone(pytz.utc)
-    return json.loads(getNormalDICTFromRJMJSONSerializableDICT(row['objectDICT'])), row['objectVersion'], creationDate, lastUpdateDate
+    convertedObjectDICT = getObjFromJSONThatWasPutInStore(row['objectDICT'])
+    
+    return convertedObjectDICT, row['objectVersion'], creationDate, lastUpdateDate
   
   
   #Return value is objectDICT, ObjectVersion, creationDate, lastUpdateDate

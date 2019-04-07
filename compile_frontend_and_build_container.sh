@@ -35,6 +35,19 @@ function build_quasar_app {
   fi
 }  
 
+docker image inspect ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild > /dev/null
+RES=$?
+if [ ${RES} -eq 0 ]; then
+  docker rmi ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild
+  RES2=$?
+  if [ ${RES2} -ne 0 ]; then
+    echo "Image exists and delete failed"
+    exit 1
+  fi
+fi
+
+
+
 build_quasar_app frontend
 RES=$?
 if [ ${RES} -ne 0 ]; then
@@ -49,18 +62,11 @@ fi
 echo "Build docker container (VERSIONNUM=${VERSIONNUM})"
 #This file does no version bumping
 cd ${GITROOT}
-eval docker build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
+eval docker build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild
 RES=$?
 if [ ${RES} -ne 0 ]; then
   echo ""
   echo "Docker build failed"
-  exit 1
-fi
-docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild
-RES=$?
-if [ ${RES} -ne 0 ]; then
-  echo ""
-  echo "Docker tag failed"
   exit 1
 fi
 

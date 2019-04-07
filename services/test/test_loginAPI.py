@@ -15,23 +15,8 @@ from constants import masterTenantName, masterTenantDefaultDescription, masterTe
 invalidTenantName="invalidtenantname"
 
 class test_api(testHelperAPIClient):
-  def loginAsDefaultUser(self):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
-    self.assertEqual(result.status_code, 200)
-    resultJSON = json.loads(result.get_data(as_text=True))
-    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
-    
-    loginJSON = {
-      "authProviderGUID": masterAuthProviderGUID,
-      "credentialJSON": { 
-        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
-        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
-       }
-    }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
-    self.assertEqual(result2.status_code, 200)
-    return json.loads(result2.get_data(as_text=True))
-
+  pass
+  
 class test_loginapi_norm(test_api):    
   def test_loginInvalidTenantFails(self):
     result = self.testClient.get(self.loginAPIPrefix + '/' + invalidTenantName + '/authproviders')

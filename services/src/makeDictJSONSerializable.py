@@ -1,5 +1,6 @@
 #Some types of object are not JSON serialbizle
 # this class swaps them for RJM objects which are
+import json
 
 standardTypeTagString = "rj5mt3ypebdf3ase_TYPE"
 
@@ -8,7 +9,16 @@ def getRJMJSONSerializableDICT(normalDICT):
   
 def getNormalDICTFromRJMJSONSerializableDICT(RJMDICT):
   return _recursiveConvertFromRJMToNormal(RJMDICT)
+  
+def getJSONtoPutInStore(origObj):
+  #print("Putting in:", type(origObj), ":", origObj)
+  return json.dumps(getRJMJSONSerializableDICT(origObj))
 
+def getObjFromJSONThatWasPutInStore(jsonFromStore):
+  jsonDict = json.loads(jsonFromStore)
+  normalDict = getNormalDICTFromRJMJSONSerializableDICT(jsonDict)
+  #print("Getting out:", type(normalDict), ":", jsonFromStore)
+  return normalDict
 
 def _recursiveConvertFromNormalToRJM(anyObj):
   if isinstance(anyObj,dict):

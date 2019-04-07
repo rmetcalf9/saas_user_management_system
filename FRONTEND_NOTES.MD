@@ -4,15 +4,17 @@ The frontend is the userinterface for the management system
 
 ## Endpoint Setup
 
- | Type of Access      | run_all_parts_on_dev_machine       | Container on dev machine (expose port 80) | container via Kong redirects | Nice Test URL                             |
+ | Type of Access      | run_all_parts_on_dev_machine       | Container on dev machine (expose port 80)   | container via Kong redirects | Nice Test URL                                    |
  |---|---|---|---|---|
- | login Webpage       | http://host:8081/                  | http://host:80/public/web/frontend/#/                |                              | http://host:X/frontend/#/                 |
- | login Admin Webpage | http://host:8082/                  | http://host:80/public/web/adminfrontend/#/           |                              | http://host:X/adminfrontend/#/usersystem  |
- | public login API    | http://host:8098/api/public/login/ | http://host:80/api/public/login/          |                              | http://host:X/api/public/login/serverinfo |
- | authed admin API    | http://host:5098/api/authed/admin/ | http://host:80/api/authed/admin/          |                              |                                           |
+ | login Webpage       | http://host:8081/                  | http://host:80/public/web/frontend/#/       | https://api.metcarob.com/saas_user_management/test/v0/public/web/frontend/      | http://host:X/frontend/#/                 |
+ | login Admin Webpage | http://host:8082/                  | http://host:80/public/web/adminfrontend/#/  | https://api.metcarob.com/saas_user_management/test/v0/public/web/adminfrontend/ | http://host:X/adminfrontend/#/usersystem  |
+ | public login API    | http://host:8098/api/public/login/ | http://host:80/api/public/login/            |                              | http://host:X/api/public/login/serverinfo |
+ | authed admin API    | http://host:8098/api/authed/admin/ | http://host:80/api/authed/admin/            |                              |                                           |
+ | API Docs            | http://host:8098/apidocs/          | http://host:80/public/web/apidocs/          | https://api.metcarob.com/saas_user_management/test/v0/public/web/apidocs/       |                                           |
 
 Note: due to Python limitations the API switchs from /api/public to /public/api because python needs it one way and Kong security needs it the other way round. This is only for the api section and dosen't affect the web.
- 
+
+Remove /test/ for prod endpoint 
  
 Endpoints setup in Kong
 

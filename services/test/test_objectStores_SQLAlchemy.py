@@ -1,6 +1,5 @@
-#from TestHelperSuperClass import testHelperAPIClient, env
 from appObj import appObj
-from TestHelperSuperClass import testHelperSuperClass
+from TestHelperSuperClass import testHelperSuperClass, SQLAlchemy_LocalDBConfigDict, SQLAlchemy_LocalDBConfigDict_withPrefix
 from objectStores_base import WrongObjectVersionException, UnallowedMutationException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
 from objectStores_SQLAlchemy import ObjectStore_SQLAlchemy
 import copy
@@ -40,15 +39,6 @@ JSONString2 = {
   }
 }
 
-ConfigDict = {
-  "Type":"SQLAlchemy",
-  "connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man"
-}
-ConfigDict_withPrefix = {
-  "Type":"SQLAlchemy",
-  "connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man",
-  "objectPrefix":"testPrefix"
-}
 
 class dummyException(Exception):
   pass
@@ -86,20 +76,20 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    def getObjFn(ConfigDict):
-      obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    def getObjFn(SQLAlchemy_LocalDBConfigDict):
+      obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
       obj.resetDataForTest()
       return obj
-    genericTests.runAllGenericTests(self, getObjFn, ConfigDict)
+    genericTests.runAllGenericTests(self, getObjFn, SQLAlchemy_LocalDBConfigDict)
 
   #Different prefixes don't share data
   def test_differentPrefixesDontShareData(self):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
     obj.resetDataForTest()
-    obj2 = ObjectStore_SQLAlchemy(ConfigDict_withPrefix, appObj)
+    obj2 = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict_withPrefix, appObj)
     obj2.resetDataForTest()
     differentPrefixesDontShareData(self, obj, obj2)
     
@@ -108,7 +98,7 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
     obj.resetDataForTest()
     
     def dbfn(storeConnection):
@@ -137,7 +127,7 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    obj = ObjectStore_SQLAlchemy(ConfigDict, appObj)
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
     obj.resetDataForTest()
     
     def dbfn(storeConnection):

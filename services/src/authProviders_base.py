@@ -22,6 +22,11 @@ class authProvider():
       raise Exception("ERROR No Type supplied when creating authProvider")
     if not 'AllowUserCreation' in dataDict:
       dataDict['AllowUserCreation'] = False
+      
+    ##type check
+    #if type(dataDict["saltForPasswordHashing"]) is not str:
+    #  print('dataDict["saltForPasswordHashing"]:',dataDict["saltForPasswordHashing"])
+    #  raise Exception("Auth Provider salt invalid - bad data from object store")
     self.dataDict = dataDict
     self._authSpercificInit()
     self.guid = guid

@@ -25,6 +25,11 @@ class authProviderInternal(authProvider):
       #print(type(password))
       raise Exception('Password passed to hashPassword must be bytes')
       #password = bytes(password, 'utf-8')
+    #raise Exception(type(salt))
+    if (type(salt)) is not bytes:
+      print ("ERROR Type of SALT is ", type(salt))
+      print ("  - salt:", salt)
+      raise Exception('Salt passed to hashPassword must be bytes')
     combo_password = password + salt + str.encode(masterSecretKey)
     hashed_password = appObj.bcrypt.hashpw(combo_password, salt)
     return hashed_password

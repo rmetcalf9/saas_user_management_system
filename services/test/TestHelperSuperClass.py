@@ -18,6 +18,9 @@ from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
 
+from objectStores import createObjectStoreInstance
+
+
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   return auth
@@ -58,6 +61,13 @@ env = {
   'APIAPP_GATEWAYINTERFACETYPE': 'none',
   'APIAPP_GATEWAYINTERFACECONFIG': '{"jwtSecret":"some_secretxx"}'
 }
+
+SQLAlchemy_LocalDBConfigDict = {
+  "Type":"SQLAlchemy",
+  "connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man"
+}
+SQLAlchemy_LocalDBConfigDict_withPrefix = copy.deepcopy(SQLAlchemy_LocalDBConfigDict)
+SQLAlchemy_LocalDBConfigDict_withPrefix["objectPrefix"] ="testPrefix"
 
 def get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes():
   #bytes(password, 'utf-8')
@@ -154,24 +164,29 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
   ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
   return ret
 
-    
-#helper class with setup for an APIClient
-class testHelperAPIClient(testHelperSuperClass):
+
+class testClassWithTestClient(testHelperSuperClass):
   testClient = None
   standardStartupTime = pytz.timezone('Europe/London').localize(datetime.datetime(2018,1,1,13,46,0,0))
 
   loginAPIPrefix = '/api/public/login'
   adminAPIPrefix = '/api/authed/admin'
 
-  
+  def _getEnvironment(self):
+    raise Exception("Should be overridden")
+    
   def setUp(self):
     # curDatetime = datetime.datetime.now(pytz.utc)
     # for testing always pretend the server started at a set datetime
-    appObj.init(env, self.standardStartupTime, testingMode = True)
+    self.pre_setUpHook()
+    appObj.init(self._getEnvironment(), self.standardStartupTime, testingMode = True)
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):
     self.testClient = None
+    
+  def pre_setUpHook(self):
+    pass
 
   def decodeToken(self, JWTToken): 
     return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
@@ -274,4 +289,50 @@ class testHelperAPIClient(testHelperSuperClass):
     authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
     authProvCreateWithUserCreation['AllowUserCreation'] = AuthUserCreation
     return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
+    
+  def loginAsDefaultUser(self):
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    
+    loginJSON = {
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
+       }
+    }
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    return json.loads(result2.get_data(as_text=True))
+
+
+#helper class with setup for an APIClient
+class testHelperAPIClient(testClassWithTestClient):
+  def _getEnvironment(self):
+    return env
+
+import os
+SKIPSQLALCHEMYTESTS=False
+if ('SKIPSQLALCHEMYTESTS' in os.environ):
+  if os.environ["SKIPSQLALCHEMYTESTS"]=="Y":
+    SKIPSQLALCHEMYTESTS=True
+
+envUsingDevDatabase = copy.deepcopy(env)
+envUsingDevDatabase['APIAPP_OBJECTSTORECONFIG']='{"Type":"SQLAlchemy","connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man"}'
+
+class testHelperAPIClientUsingSQLAlchemy(testClassWithTestClient):
+  def pre_setUpHook(self):
+    if SKIPSQLALCHEMYTESTS:
+      print("Skipping SQLAlchemyTests")
+      return
+    #App object isn't instalised so we need to make an object to reset the data for the test
+    objectStore = createObjectStoreInstance(appObj, self._getEnvironment())
+    objectStore.resetDataForTest()
+
+  def _getEnvironment(self):
+    if SKIPSQLALCHEMYTESTS:
+      return env
+    return envUsingDevDatabase
 

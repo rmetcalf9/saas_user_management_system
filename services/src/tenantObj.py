@@ -11,6 +11,9 @@ class tenantClass():
   def __init__(self, JSONRetrievedFromStore, objectVersion):
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
     self._objectVersion = objectVersion
+    
+    #print(self._mainDict)
+    #raise Exception("STOP CHECK")
   
   #Need to convert authProviders into a list as in _mainDict it is a dict for indexing
   def getJSONRepresenation(self):

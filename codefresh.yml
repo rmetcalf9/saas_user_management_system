@@ -127,7 +127,7 @@ steps:
     commands:
       - nosetests --rednose /ext_volume
     environment:
-      - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION_UNDERSCORE}}
+      - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
       - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
 
   configure_kong_prod_endpoint:
