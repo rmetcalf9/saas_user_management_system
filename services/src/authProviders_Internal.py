@@ -4,9 +4,42 @@ from constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authF
 from base64 import b64decode, b64encode
 
 def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, username, password, tenantAuthProvSalt):
+  #print("getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse called with:")
+  #print(" - username:",username, ': (', type(username), ')')
+  #print(" - password:",password, ': (', type(password), ')')
+  #print(" - tenantAuthProvSalt:",tenantAuthProvSalt, ': (', type(tenantAuthProvSalt), ')')
+
   masterSecretKey = (username + ":" + password + ":AG44").encode()
   saltToUse = b64decode(tenantAuthProvSalt)
-  return appObj.bcrypt.hashpw(masterSecretKey, saltToUse)
+  res = appObj.bcrypt.hashpw(masterSecretKey, saltToUse)
+  #print(" result:",res, ': (', type(res), ')')
+  
+  return res
+
+def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
+  #USed for debugging - not in main code as would be security risk
+  #print("_INT_hashPassword call with:")
+  #print(" - APIAPP_MASTERPASSWORDFORPASSHASH:", APIAPP_MASTERPASSWORDFORPASSHASH, ' (', type(APIAPP_MASTERPASSWORDFORPASSHASH), ')')
+  #print(" - password:", password, ' (', type(password), ')')
+  #print(" - salt:", salt, ' (', type(salt), ')')
+  
+  masterSecretKey = (masterInternalAuthTypePassword + "f" + APIAPP_MASTERPASSWORDFORPASSHASH)
+  if (type(password)) is not bytes:
+    #print(type(password))
+    raise Exception('Password passed to hashPassword must be bytes')
+    #password = bytes(password, 'utf-8')
+  #raise Exception(type(salt))
+  if (type(salt)) is not bytes:
+    print ("ERROR Type of SALT is ", type(salt))
+    print ("  - salt:", salt)
+    raise Exception('Salt passed to hashPassword must be bytes')
+  combo_password = password + salt + str.encode(masterSecretKey)
+  hashed_password = bcryptObj.hashpw(combo_password, salt)
+  
+  #print("Resulting hashed password:")
+  #print("hashed_password:", hashed_password, ' (', type(APIAPP_MASTERPASSWORDFORPASSHASH), ')')
+  
+  return hashed_password
 
 class authProviderInternal(authProvider):
   def _authSpercificInit(self):
@@ -19,26 +52,13 @@ class authProviderInternal(authProvider):
     #print(self.getConfig()['userSufix'])
     return credentialDICT['username'] + self.getConfig()['userSufix'] + uniqueKeyCombinator + self.getType()
 
-  def hashPassword(self, appObj, password, salt):
-    masterSecretKey = (masterInternalAuthTypePassword + "f" + appObj.APIAPP_MASTERPASSWORDFORPASSHASH)
-    if (type(password)) is not bytes:
-      #print(type(password))
-      raise Exception('Password passed to hashPassword must be bytes')
-      #password = bytes(password, 'utf-8')
-    #raise Exception(type(salt))
-    if (type(salt)) is not bytes:
-      print ("ERROR Type of SALT is ", type(salt))
-      print ("  - salt:", salt)
-      raise Exception('Salt passed to hashPassword must be bytes')
-    combo_password = password + salt + str.encode(masterSecretKey)
-    hashed_password = appObj.bcrypt.hashpw(combo_password, salt)
-    return hashed_password
-  
   def _getAuthData(self, appObj, credentialDICT):
+    #print("_getAuthData call with:")
+    #print(" credentialDICT['password']:",credentialDICT['password'], ' (', type(credentialDICT['password']), ')')
     self.__normalizeCredentialDICT(credentialDICT)
     salt = appObj.bcrypt.gensalt()
     objToStore = {
-      "password": self.hashPassword(appObj, credentialDICT['password'], salt),
+      "password": _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], salt),
       "salt": salt
     }
     return objToStore
@@ -51,11 +71,13 @@ class authProviderInternal(authProvider):
       credentialDICT['password'] = bytes(credentialDICT['password'], 'utf-8')
     
   def _auth(self, appObj, obj, credentialDICT):
+    #print("_getAuthData call with:")
+    #print(" credentialDICT['password']:",credentialDICT['password'], ' (', type(credentialDICT['password']), ')')
     if 'password' not in credentialDICT:
       raise InvalidAuthConfigException
     self.__normalizeCredentialDICT(credentialDICT)
 
-    hashedPass = self.hashPassword(appObj, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])
+    hashedPass = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])
     if hashedPass != obj["AuthProviderJSON"]['password']:
       raise authFailedException
 
