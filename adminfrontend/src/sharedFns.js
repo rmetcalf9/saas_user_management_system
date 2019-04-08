@@ -17,8 +17,8 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
     { prefix: '/vx/', kong: true }, // container via Kong redirects
     { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
     { prefix: 'http://127.0.0.1:8098/', kong: false }, // home run all parts on dec machine
-    { prefix: 'http://somefunnyhostname.com:5080/', kong: false }, // work container on dev machine
-    { prefix: 'http://127.0.0.1:80/', kong: false } // home container on dev machine
+    { prefix: 'http://somefunnyhostname.com:5080/', kong: true }, // work container on dev machine
+    { prefix: 'http://127.0.0.1:80/', kong: true } // home container on dev machine
     // { prefix: 'http://localhost:8082/', kong: false },
     // { prefix: 'http://somefunnyhostname.com:8098/', kong: false }
   ]
