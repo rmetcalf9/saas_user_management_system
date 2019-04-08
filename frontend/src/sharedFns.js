@@ -9,18 +9,73 @@ import callbackHelper from './callbackHelper'
 import axios from 'axios'
 import { Cookies } from 'quasar'
 
+/*
+Example values of currentURL:
+https://api.metcarob.com/saas_user_management/test/v0/public/web/adminfrontend/#/usersystem/users
+https://api.metcarob.com/saas_user_management/v0/public/web/adminfrontend/#/usersystem/users
+http://somefunnyhostname.com:5080/public/web/adminfrontend/#/usersystem/users
+
+*/
+function getProdVer (currentURL) {
+  var searchStr = '/saas_user_management/test/v'
+  var testPos = currentURL.indexOf(searchStr)
+  var searchStr2 = '/public/web/'
+  if (testPos !== -1) {
+    var midArg = currentURL.substring(currentURL.indexOf(searchStr) + searchStr.length)
+    var secondPos = midArg.indexOf(searchStr2)
+    if (secondPos === -1) {
+      return {
+        prod: false
+      }
+    }
+    return {
+      prod: true,
+      ver: parseInt(midArg.substring(0, secondPos)),
+      test: true,
+      prefix: currentURL.substring(0, currentURL.indexOf(searchStr)) + searchStr + parseInt(midArg.substring(0, secondPos)) + '/'
+    }
+  } else {
+    searchStr = '/saas_user_management/v'
+    testPos = currentURL.indexOf(searchStr)
+    if (testPos !== -1) {
+      midArg = currentURL.substring(currentURL.indexOf(searchStr) + searchStr.length)
+      secondPos = midArg.indexOf(searchStr2)
+      if (secondPos === -1) {
+        return {
+          prod: false
+        }
+      }
+      return {
+        prod: true,
+        ver: parseInt(midArg.substring(0, secondPos)),
+        test: false,
+        prefix: currentURL.substring(0, currentURL.indexOf(searchStr)) + searchStr + parseInt(midArg.substring(0, secondPos)) + '/'
+      }
+    }
+  }
+  return {
+    prod: false
+  }
+}
+
 function getAPIPrefixPossibilities (currentURL, tenantName) {
   // See https://github.com/rmetcalf9/saas_user_management_system/blob/master/FRONTEND_NOTES.MD
   // TODO how do we know what vx should be?
-  console.log('TODO Work out on prod vx based on current url and tenantName: ', currentURL, tenantName)
+  var prodVer = getProdVer(currentURL)
+  if (prodVer.prod === false) {
+    console.log('NON prod detected url and tenantName: ', currentURL, tenantName)
+    return [
+      { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
+      { prefix: 'http://127.0.0.1:8098/', kong: false }, // home run all parts on dec machine
+      { prefix: 'http://somefunnyhostname.com:5080/', kong: true }, // work container on dev machine
+      { prefix: 'http://127.0.0.1:80/', kong: true } // home container on dev machine
+      // { prefix: 'http://localhost:8082/', kong: false },
+      // { prefix: 'http://somefunnyhostname.com:8098/', kong: false }
+    ]
+  }
+  console.log('prod detected url and tenantName: ', currentURL, tenantName)
   return [
-    { prefix: '/vx/', kong: true }, // container via Kong redirects
-    { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
-    { prefix: 'http://127.0.0.1:8098/', kong: false }, // home run all parts on dec machine
-    { prefix: 'http://somefunnyhostname.com:5080/', kong: true }, // work container on dev machine
-    { prefix: 'http://127.0.0.1:80/', kong: true } // home container on dev machine
-    // { prefix: 'http://localhost:8082/', kong: false },
-    // { prefix: 'http://somefunnyhostname.com:8098/', kong: false }
+    { prefix: prodVer.prefix, kong: true } // container via Kong redirects
   ]
 }
 

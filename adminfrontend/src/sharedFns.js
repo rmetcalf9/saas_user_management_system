@@ -19,8 +19,8 @@ http://somefunnyhostname.com:5080/public/web/adminfrontend/#/usersystem/users
 function getProdVer (currentURL) {
   var searchStr = '/saas_user_management/test/v'
   var testPos = currentURL.indexOf(searchStr)
+  var searchStr2 = '/public/web/'
   if (testPos !== -1) {
-    var searchStr2 = '/public/web/'
     var midArg = currentURL.substring(currentURL.indexOf(searchStr) + searchStr.length)
     var secondPos = midArg.indexOf(searchStr2)
     if (secondPos === -1) {
@@ -30,16 +30,16 @@ function getProdVer (currentURL) {
     }
     return {
       prod: true,
-      ver: parseInt(midArg.substring(0,secondPos)),
-      test: true
+      ver: parseInt(midArg.substring(0, secondPos)),
+      test: true,
+      prefix: currentURL.substring(0, currentURL.indexOf(searchStr)) + searchStr + parseInt(midArg.substring(0, secondPos)) + '/'
     }
   } else {
-    var searchStr = '/saas_user_management/v'
-    var testPos = currentURL.indexOf(searchStr)
+    searchStr = '/saas_user_management/v'
+    testPos = currentURL.indexOf(searchStr)
     if (testPos !== -1) {
-      var searchStr2 = '/public/web/'
-      var midArg = currentURL.substring(currentURL.indexOf(searchStr) + searchStr.length)
-      var secondPos = midArg.indexOf(searchStr2)
+      midArg = currentURL.substring(currentURL.indexOf(searchStr) + searchStr.length)
+      secondPos = midArg.indexOf(searchStr2)
       if (secondPos === -1) {
         return {
           prod: false
@@ -47,8 +47,9 @@ function getProdVer (currentURL) {
       }
       return {
         prod: true,
-        ver: parseInt(midArg.substring(0,secondPos)),
-        test: false
+        ver: parseInt(midArg.substring(0, secondPos)),
+        test: false,
+        prefix: currentURL.substring(0, currentURL.indexOf(searchStr)) + searchStr + parseInt(midArg.substring(0, secondPos)) + '/'
       }
     }
   }
@@ -74,7 +75,7 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
   }
   console.log('prod detected url and tenantName: ', currentURL, tenantName)
   return [
-    { prefix: '/v' + prodVer.toString().trim() + '/', kong: true } // container via Kong redirects
+    { prefix: prodVer.prefix, kong: true } // container via Kong redirects
   ]
 }
 
