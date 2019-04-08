@@ -60,7 +60,7 @@ CMD ["/run_app_docker.sh"]
 #  and when it first starts it won't check the health until the interval so I can't have
 #  a higher value without increasing the startup time
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://127.0.0.1:80/frontend/index.html?healthcheck=true || exit 1
+  CMD curl -f http://127.0.0.1:80/public/web/frontend/index.html?healthcheck=true || exit 1
 
 ##docker run --network pythontestingnetwork --rm --name saas_user_management_system -e APIAPP_APIURL=${EXTURL}:${EXTPORT80}/api -e APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT80}/apidocs -e APIAPP_FRONTENDURL=${EXTURL}:${EXTPORT80}/frontend -e APIAPP_MASTERPASSWORDFORPASSHASH=ABC -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin -e APIAPP_DEFAULTHOMEADMINPASSWORD=admin -p 80:80 -d metcarob/saas_user_managmenet_system:latest
 

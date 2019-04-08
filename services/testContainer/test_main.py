@@ -21,3 +21,10 @@ class test_containerAPI(unittest.TestCase):
     self.assertEqual(result.status_code, 200, msg="Wrong status code recieved from " + baseURL + "/api/public/login/serverinfo")
     resultJSON = json.loads(result.text)
     self.assertEqual(resultJSON['Server']['Version'], os.environ['EXPECTED_CONTAINER_VERSION'])
+
+  #TODO Test apidocs url works
+  
+  #TODO Test http://somefunnyhostname.com:5080/public/web/apidocs/swaggerui/bower/swagger-ui/dist/droid-sans.css works
+    
+   
+    

@@ -43,7 +43,7 @@ docker service create --name ${RJM_RUNNING_SERVICE_NAME} \
 -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
 -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin \
 -e APIAPP_APIURL=${EXTURL}:${EXTPORT80}/api \
--e APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT80}/apidocs \
+-e APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT80}/public/web/apidocs \
 -e APIAPP_FRONTENDURL=${EXTURL}:${EXTPORT80}/public/web/frontend \
 --publish 80:80 \
 ${RJM_IMAGE_TO_RUN}
