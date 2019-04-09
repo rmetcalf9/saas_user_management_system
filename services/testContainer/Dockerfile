@@ -18,7 +18,13 @@ RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pc
 
 COPY . /ext_volume
 
-##docker build . -t metcarob/saas_user_management_systemtest:latest
-##docker run --rm --network pythontestingnetwork -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
 
-##docker run --rm --network pythontestingnetwork --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest curl saas_user_management_system:8098/apidocs/
+##Steps to run tests on local machine
+## use run_localbuild_contianer.sh to start the service then run the following commands:
+##docker build . -t metcarob/saas_user_management_systemtest:latest
+##export BASEURL_TO_TEST = "saas_user_management_system_0_0_19_localbuild"
+##docker run --rm --network main_net -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
+
+
+##Other test
+##docker run --rm --network main_net --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest curl http://saas_user_management_system_0_0_19_localbuild:80/public/web/apidocs/
