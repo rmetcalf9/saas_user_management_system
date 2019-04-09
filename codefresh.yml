@@ -100,8 +100,8 @@ steps:
             -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw 
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin 
             -e APIAPP_APIURL=https://api.metcarob.com/api
-            -e APIAPP_APIDOCSURL=https://api.metcarob.com/public/web/apidocs
-            -e APIAPP_FRONTENDURL=https://api.metcarob.com/public/web/frontend
+            -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v0/public/web/apidocs
+            -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v0/public/web/frontend
             metcarob/saas_user_management_system:${{RJM_VERSION}} 
       environment:
         - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -146,7 +146,7 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} 80 /
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_WS_NAME}}_v${{RJM_VERSION_UNDERSCORE}} 80 /
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}} null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
