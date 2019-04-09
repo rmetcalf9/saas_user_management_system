@@ -99,6 +99,9 @@ steps:
             -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw 
             -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw 
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin 
+            -e APIAPP_APIURL=https://api.metcarob.com/api
+            -e APIAPP_APIDOCSURL=https://api.metcarob.com/public/web/apidocs
+            -e APIAPP_FRONTENDURL=https://api.metcarob.com/public/web/frontend
             metcarob/saas_user_management_system:${{RJM_VERSION}} 
       environment:
         - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -121,6 +124,8 @@ steps:
       - SPLIT_CHAR=${{SPLIT_CHAR}}
 
   # Test test endpoint including version test
+  ## This is tried a number of times with an increasing delay.
+  ## This gives the docker service time to start and become healthy
   run_container_tests_against_test_endpoint:
     image: ${{build_the_test_image}}
     working_directory: ${{main_clone}}/server
@@ -129,6 +134,10 @@ steps:
     environment:
       - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
       - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
+    retry:
+      maxAttempts: 3
+      delay: 30
+      exponentialFactor: 2
 
   configure_kong_prod_endpoint:
     image: codefresh/remote-docker
