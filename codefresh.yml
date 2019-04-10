@@ -12,10 +12,15 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - export RJM_VERSION=$(cat ./VERSION)
-      - cf_export RJM_VERSION=$(cat ./VERSION)
-      - cf_export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
-      - cf_export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
-      - cf_export RJM_WS_NAME=$(echo "saas_user_management")
+      - export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
+      - export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
+      - export RJM_WS_NAME=$(echo "saas_user_management")
+      - export RJM_DOCKER_SERVICE_NAME=${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}
+      - cf_export RJM_VERSION=${RJM_VERSION}
+      - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
+      - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
+      - cf_export RJM_WS_NAME=${RJM_WS_NAME}
+      - cf_export RJM_DOCKER_SERVICE_NAME=${RJM_DOCKER_SERVICE_NAME}
 
   unit_test:
     description: Make sure all the unit tests pass
@@ -109,6 +114,7 @@ steps:
         - SPLIT_CHAR=${{SPLIT_CHAR}}
 
   # Connect test endpoint to new container
+  ## This connects directly to the container - no upstreams in use for the test endpoint
   configure_kong_test_endpoint_to_connect_to_container:
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
@@ -139,6 +145,9 @@ steps:
       delay: 30
       exponentialFactor: 2
 
+  #Deploys the prod kong endpoint
+  ## the serivce target is not the container, instead it is the upstream
+  ## this won't work until the upstream is in place
   configure_kong_prod_endpoint:
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
@@ -146,7 +155,7 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_WS_NAME}}_v${{RJM_VERSION_UNDERSCORE}} 80 /
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} 80 /
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}} null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
