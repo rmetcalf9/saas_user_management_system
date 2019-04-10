@@ -153,21 +153,22 @@ steps:
       - SSH_PORT=${{SSH_PORT}}
       - SPLIT_CHAR=${{SPLIT_CHAR}}
 
+  configure_kong_prod_upstream:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_upstream 
+        metcarob/docker-ws-caller:0.3.8
+        http://kong:8001
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}
+        ${{RJM_WS_NAME}}_${{RJM_VERSION_UNDERSCORE}}:80
+        remove_other_targets
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
 
-##Steps to run containe manually to test
-#export RJM_VERSION=0.0.16
-#export RJM_VERSION_UNDERSCORE=$(echo ${RJM_VERSION} | tr '.' '_')
-#docker pull metcarob/saas_user_management_system:${RJM_VERSION}
+# Possible future steps - test main endpoint and fail back if it is not working
 
-#docker service create --name saas_user_management_system_${RJM_VERSION_UNDERSCORE} \
-#--network main_net \
-#--secret saas_user_management_system_objectstore_config \
-#--secret saas_user_management_system_objectstore_hashpw \
-#--secret saas_user_management_system_objectstore_adminpw \
-#-e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config \
-#-e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw \
-#-e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
-#-e APIAPP_DEFAULTHOMEADMINUSERNAME=admin \
-#metcarob/saas_user_management_system:${RJM_VERSION}
 
 
