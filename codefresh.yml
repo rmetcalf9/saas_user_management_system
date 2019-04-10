@@ -107,8 +107,8 @@ steps:
             -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw 
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin 
             -e APIAPP_APIURL=https://api.metcarob.com/api
-            -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v0/public/web/apidocs
-            -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v0/public/web/frontend
+            -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/apidocs
+            -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/frontend
             metcarob/saas_user_management_system:${{RJM_VERSION}} 
       environment:
         - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -117,15 +117,29 @@ steps:
 
   # Connect test endpoint to new container
   ## This connects directly to the container - no upstreams in use for the test endpoint
-  configure_kong_test_endpoint_to_connect_to_container:
+  configure_kong_test_PUBLIC_endpoint_to_connect_to_container:
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_TEST_v${{RJM_MAJOR_VERSION}} http ${{RJM_DOCKER_SERVICE_NAME}} 80 /
-        https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}} null null null true
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_NAME}} 80 /public/
+        https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/public null null null true
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
+
+  configure_kong_test_AUTHED_endpoint_to_connect_to_container:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
+        metcarob/docker-ws-caller:0.3.8
+        http://kong:8001
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_NAME}} 80 /authed/
+        https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/authed null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
@@ -150,15 +164,29 @@ steps:
   #Deploys the prod kong endpoint
   ## the serivce target is not the container, instead it is the upstream
   ## this won't work until the upstream is in place
-  configure_kong_prod_endpoint:
+  configure_kong_prod_PUBLIC_endpoint:
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_KONG_UPSTREAM_NAME}} 80 /
-        https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}} null null null true
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_PUBLIC http ${{RJM_KONG_UPSTREAM_NAME}} 80 /public/
+        https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/public null null null true
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
+
+  configure_kong_prod_AUTHED_endpoint:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
+        metcarob/docker-ws-caller:0.3.8
+        http://kong:8001
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED http ${{RJM_KONG_UPSTREAM_NAME}} 80 /authed/
+        https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/authed null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
