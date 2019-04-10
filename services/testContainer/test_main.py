@@ -45,5 +45,12 @@ class test_containerAPI(unittest.TestCase):
   def test_WeCanGetToSwaggerUIStaticFiles(self):
     self.callGetService(baseURL + "/public/web/apidocs/swaggerui/bower/swagger-ui/dist/droid-sans.css", [200])
     
-   
+  def test_adminfrontendMainPage(self):
+    self.callGetService(baseURL + "/public/web/adminfrontend/", [200])
+    self.callGetService(baseURL + "/public/web/adminfrontend/#/usersystem/", [200])
+
+  def test_frontendMainPage(self):
+    self.callGetService(baseURL + "/public/web/frontend/", [200]) #This gives us Quasar 404 page but still a 200 response
+    self.callGetService(baseURL + "/public/web/frontend/#/usersystem/", [200])
+    
     
