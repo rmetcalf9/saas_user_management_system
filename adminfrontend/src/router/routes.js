@@ -2,6 +2,19 @@ import stores from '../store/index.js'
 import { Cookies } from 'quasar'
 import shared from '../sharedFns.js'
 
+function directToLoginPage (to, from, next) {
+  var thisQuasarPath = to.path
+  var logoutClickCurRoute = stores().state.globalDataStore.logoutClickCurRoute
+  if (typeof (logoutClickCurRoute) !== 'undefined') {
+    if (logoutClickCurRoute !== null) {
+      thisQuasarPath = logoutClickCurRoute
+    }
+  }
+  stores().commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', null)
+
+  shared.moveToLoginService(thisQuasarPath)
+}
+
 function checkLoginNeeded (to, from, next) {
   stores().commit('globalDataStore/updateTenantName', to.params.tenantName)
 
@@ -19,22 +32,18 @@ function checkLoginNeeded (to, from, next) {
     return
   }
 
-  var thisQuasarPath = to.path
-  var logoutClickCurRoute = stores().state.globalDataStore.logoutClickCurRoute
-  if (typeof (logoutClickCurRoute) !== 'undefined') {
-    if (logoutClickCurRoute !== null) {
-      thisQuasarPath = logoutClickCurRoute
-    }
-  }
-  stores().commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', null)
-
-  shared.moveToLoginService(thisQuasarPath)
+  directToLoginPage(to, from, next)
 }
 
 function beforeEnterMainIndexChildPage (to, from, next, pageTitle) {
   // console.log('beforeEnterMainIndexChildPage')
   stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
   return checkLoginNeeded(to, from, next)
+}
+
+function logoutPageFn (to, from, next, pageTitle) {
+  stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
+  directToLoginPage(to, from, next)
 }
 
 const routes = [
@@ -54,7 +63,7 @@ const routes = [
       { path: 'persons', component: () => import('pages/Persons.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Persons') } },
       { path: 'persons/:selPerGUID', component: () => import('pages/Person.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Person') } },
       { path: 'usersettings', component: () => import('pages/UserSettings.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'User Settings') } },
-      { path: 'logout', beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Logout') } }
+      { path: 'logout', beforeEnter: function fn (to, from, next) { logoutPageFn(to, from, next, 'Logout') } }
     ]
   }
 ]
