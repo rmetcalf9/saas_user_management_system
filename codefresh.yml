@@ -16,11 +16,13 @@ steps:
       - export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
       - export RJM_WS_NAME=$(echo "saas_user_management")
       - export RJM_DOCKER_SERVICE_NAME=${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}
+      - export RJM_KONG_UPSTREAM_NAME=${RJM_WS_NAME}_${RJM_MAJOR_VERSION}
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
       - cf_export RJM_WS_NAME=${RJM_WS_NAME}
       - cf_export RJM_DOCKER_SERVICE_NAME=${RJM_DOCKER_SERVICE_NAME}
+      - cf_export RJM_KONG_UPSTREAM_NAME=${RJM_KONG_UPSTREAM_NAME}
 
   unit_test:
     description: Make sure all the unit tests pass
@@ -95,7 +97,7 @@ steps:
       image: codefresh/remote-docker
       working_directory: ${{main_clone}}
       commands:
-        - rdocker ${{RDOCKER_HOST}} docker service create --name ${{RJM_WS_NAME}}_${{RJM_VERSION_UNDERSCORE}} 
+        - rdocker ${{RDOCKER_HOST}} docker service create --name ${{RJM_DOCKER_SERVICE_NAME}} 
             --network main_net 
             --secret saas_user_management_system_objectstore_config 
             --secret saas_user_management_system_objectstore_hashpw 
@@ -122,7 +124,7 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_TEST_v${{RJM_MAJOR_VERSION}} http ${{RJM_WS_NAME}}_${{RJM_VERSION_UNDERSCORE}} 80 /
+        ${{RJM_WS_NAME}}_TEST_v${{RJM_MAJOR_VERSION}} http ${{RJM_DOCKER_SERVICE_NAME}} 80 /
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}} null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -155,7 +157,7 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} 80 /
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}} http ${{RJM_KONG_UPSTREAM_NAME}} 80 /
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}} null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -169,8 +171,8 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_upstream 
         metcarob/docker-ws-caller:0.3.8
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}
-        ${{RJM_WS_NAME}}_${{RJM_VERSION_UNDERSCORE}}:80
+        ${{RJM_KONG_UPSTREAM_NAME}}
+        ${{RJM_DOCKER_SERVICE_NAME}}:80
         remove_other_targets
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
