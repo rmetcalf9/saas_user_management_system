@@ -17,16 +17,22 @@ steps:
       - export RJM_WS_NAME=$(echo "saas_user_management")
       - export RJM_DOCKER_SERVICE_NAME=${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}
       - export RJM_KONG_UPSTREAM_NAME=${RJM_WS_NAME}_${RJM_MAJOR_VERSION}
+      - export JWT_COOKIE_NAME='"jwt-auth-token"'
+      - export AUTHED_ACL_WHITELIST='"saas_user_management"'
+      - export AUTHED_ACL_BLACKLIST='"a b c d"'
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
       - cf_export RJM_WS_NAME=${RJM_WS_NAME}
       - cf_export RJM_DOCKER_SERVICE_NAME=${RJM_DOCKER_SERVICE_NAME}
       - cf_export RJM_KONG_UPSTREAM_NAME=${RJM_KONG_UPSTREAM_NAME}
+      - cf_export JWT_COOKIE_NAME=${JWT_COOKIE_NAME}
+      - cf_export AUTHED_ACL_WHITELIST=${AUTHED_ACL_WHITELIST}
+      - cf_export AUTHED_ACL_BLACKLIST=${AUTHED_ACL_BLACKLIST}
 
   unit_test:
     description: Make sure all the unit tests pass
-    image: metcarob/docker-ws-caller:0.3.8
+    image: metcarob/docker-ws-caller:0.3.9
     working_directory: ${{main_clone}}/services
     commands:
       - pip3 install --no-cache-dir -r ./src/requirements.txt
@@ -122,7 +128,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.3.8
+        metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/public null null null true
@@ -136,7 +142,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.3.8
+        metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/authed null null null true
@@ -169,7 +175,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.3.8
+        metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_PUBLIC http ${{RJM_KONG_UPSTREAM_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/public null null null true
@@ -183,10 +189,27 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.3.8
+        metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED http ${{RJM_KONG_UPSTREAM_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/authed null null null true
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
+
+  #endpoints are secured the first time they are created. This will add the plugins only if they are not there
+  secure_kong_prod_AUTHED_endpoint:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
+        metcarob/docker-ws-caller:0.3.9
+        http://kong:8001
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED
+        ${{JWT_COOKIE_NAME}}
+        ${{AUTHED_ACL_WHITELIST}}
+        ${{AUTHED_ACL_BLACKLIST}}
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
@@ -197,7 +220,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_upstream 
-        metcarob/docker-ws-caller:0.3.8
+        metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_KONG_UPSTREAM_NAME}}
         ${{RJM_DOCKER_SERVICE_NAME}}:80
