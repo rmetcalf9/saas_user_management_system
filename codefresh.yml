@@ -19,7 +19,7 @@ steps:
       - export RJM_KONG_UPSTREAM_NAME=${RJM_WS_NAME}_${RJM_MAJOR_VERSION}
       - export JWT_COOKIE_NAME="jwt-auth-token"
       - export AUTHED_ACL_WHITELIST="saas_user_management"
-      - export AUTHED_ACL_BLACKLIST="a b c d"
+      - export AUTHED_ACL_BLACKLIST=""
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
