@@ -17,18 +17,18 @@ steps:
       - export RJM_WS_NAME=$(echo "saas_user_management")
       - export RJM_DOCKER_SERVICE_NAME=${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}
       - export RJM_KONG_UPSTREAM_NAME=${RJM_WS_NAME}_${RJM_MAJOR_VERSION}
-      - export JWT_COOKIE_NAME='"jwt-auth-token"'
-      - export AUTHED_ACL_WHITELIST='"saas_user_management"'
-      - export AUTHED_ACL_BLACKLIST='"a b c d"'
+      - export JWT_COOKIE_NAME="jwt-auth-token"
+      - export AUTHED_ACL_WHITELIST="saas_user_management"
+      - export AUTHED_ACL_BLACKLIST="a b c d"
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
       - cf_export RJM_WS_NAME=${RJM_WS_NAME}
       - cf_export RJM_DOCKER_SERVICE_NAME=${RJM_DOCKER_SERVICE_NAME}
       - cf_export RJM_KONG_UPSTREAM_NAME=${RJM_KONG_UPSTREAM_NAME}
-      - cf_export JWT_COOKIE_NAME=${JWT_COOKIE_NAME}
-      - cf_export AUTHED_ACL_WHITELIST=${AUTHED_ACL_WHITELIST}
-      - cf_export AUTHED_ACL_BLACKLIST=${AUTHED_ACL_BLACKLIST}
+      - cf_export JWT_COOKIE_NAME="${JWT_COOKIE_NAME}"
+      - cf_export AUTHED_ACL_WHITELIST="${AUTHED_ACL_WHITELIST}"
+      - cf_export AUTHED_ACL_BLACKLIST="${AUTHED_ACL_BLACKLIST}"
 
   unit_test:
     description: Make sure all the unit tests pass
@@ -207,9 +207,9 @@ steps:
         metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED
-        ${{JWT_COOKIE_NAME}}
-        ${{AUTHED_ACL_WHITELIST}}
-        ${{AUTHED_ACL_BLACKLIST}}
+        "${{JWT_COOKIE_NAME}}"
+        "${{AUTHED_ACL_WHITELIST}}"
+        "${{AUTHED_ACL_BLACKLIST}}"
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
