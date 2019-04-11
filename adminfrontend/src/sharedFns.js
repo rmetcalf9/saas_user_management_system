@@ -188,6 +188,8 @@ function callAPI (
   if (authed) {
     // Possible optiomzation - check if jwt token has expired and go direct to refresh call
     config.headers['jwt-auth-token'] = jwtTokenData.JWTToken
+    // Kong can only read Authorization header- https://docs.konghq.com/hub/kong-inc/jwt/
+    config.headers['Authorization'] = 'Bearer ' + jwtTokenData.JWTToken
   }
 
   axios(config).then(
