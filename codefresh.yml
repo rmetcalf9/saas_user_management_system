@@ -108,6 +108,8 @@ steps:
             --secret saas_user_management_system_objectstore_config 
             --secret saas_user_management_system_objectstore_hashpw 
             --secret saas_user_management_system_objectstore_adminpw 
+            --secret saas_user_management_system_gateway_config
+            -e APIAPP_GATEWAYINTERFACECONFIGFILE=/run/secrets/saas_user_management_system_gateway_config
             -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config 
             -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw 
             -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw 
@@ -151,22 +153,39 @@ steps:
       - SSH_PORT=${{SSH_PORT}}
       - SPLIT_CHAR=${{SPLIT_CHAR}}
 
+  #endpoints are secured the first time they are created. This will add the plugins only if they are not there
+  secure_kong_test_AUTHED_endpoint_to_connect_to_container:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
+        metcarob/docker-ws-caller:0.4.1
+        http://kong:8001
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED
+        \"${{JWT_COOKIE_NAME}}\"
+        \"${{AUTHED_ACL_WHITELIST}}\"
+        \"${{AUTHED_ACL_BLACKLIST}}\"
+        \"kong_iss\"
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
+
   # Test test endpoint including version test
   ## This is tried a number of times with an increasing delay.
   ## This gives the docker service time to start and become healthy
-  #Skipping until I check out this evening
-  #run_container_tests_against_test_endpoint:
-  #  image: ${{build_the_test_image}}
-  #  working_directory: ${{main_clone}}/server
-  #  commands:
-  #    - nosetests --rednose /ext_volume
-  #  environment:
-  #    - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
-  #    - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
-  #  retry:
-  #    maxAttempts: 3
-  #    delay: 30
-  #    exponentialFactor: 1
+  run_container_tests_against_test_endpoint:
+    image: ${{build_the_test_image}}
+    working_directory: ${{main_clone}}/server
+    commands:
+      - nosetests --rednose /ext_volume
+    environment:
+      - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
+      - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
+    retry:
+      maxAttempts: 3
+      delay: 30
+      exponentialFactor: 1
 
   #Deploys the prod kong endpoint
   ## the serivce target is not the container, instead it is the upstream
