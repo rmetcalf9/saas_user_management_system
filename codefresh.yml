@@ -207,9 +207,9 @@ steps:
         metcarob/docker-ws-caller:0.3.9
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED
-        "${{JWT_COOKIE_NAME}}"
-        "${{AUTHED_ACL_WHITELIST}}"
-        "${{AUTHED_ACL_BLACKLIST}}"
+        \"${{JWT_COOKIE_NAME}}\"
+        \"${{AUTHED_ACL_WHITELIST}}\"
+        \"${{AUTHED_ACL_BLACKLIST}}\"
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
