@@ -164,7 +164,7 @@ steps:
       - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
     retry:
       maxAttempts: 3
-      delay: 30
+      delay: 15
       exponentialFactor: 2
 
   #Deploys the prod kong endpoint
