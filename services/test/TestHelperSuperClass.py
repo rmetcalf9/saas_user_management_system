@@ -58,8 +58,7 @@ env = {
   'APIAPP_JWT_TOKEN_TIMEOUT': '60',
   'APIAPP_REFRESH_TOKEN_TIMEOUT': '240',
   'APIAPP_REFRESH_SESSION_TIMEOUT': '2400',
-  'APIAPP_GATEWAYINTERFACETYPE': 'none',
-  'APIAPP_GATEWAYINTERFACECONFIG': '{"jwtSecret":"some_secretxx"}'
+  'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none", "jwtSecret":"some_secretxx"}'
 }
 
 SQLAlchemy_LocalDBConfigDict = {

@@ -4,8 +4,7 @@
 
 class gatewayInterfaceBaseClass():
   typeName = None
-  def __init__(self, typeName, config):
-    self.typeName =  typeName
+  def __init__(self, config):
     self._setup(config)
 
   def _setup(self, config):

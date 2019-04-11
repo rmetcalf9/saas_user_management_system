@@ -87,7 +87,6 @@ All components are designed to be deployed in a single container and a codefresh
 APIAPP_MASTERPASSWORDFORPASSHASH - Must be set for security
 APIAPP_DEFAULTHOMEADMINUSERNAME -
 APIAPP_DEFAULTHOMEADMINPASSWORD  -
-APIAPP_GATEWAYINTERFACETYPE
 APIAPP_GATEWAYINTERFACECONFIG
 APIAPP_JWT_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for Defaulted to 5 minutes
 APIAPP_REFRESH_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for, must be greater than APIAPP_JWT_TOKEN_TIMEOUT. Defaulted to 10 minutes
