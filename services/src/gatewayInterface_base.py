@@ -27,3 +27,7 @@ class gatewayInterfaceBaseClass():
 
   def _GetJWTTokenSecret(self, UserID):
     raise Exception('_GetJWTTokenSecret Not Overridden')
+
+  #Passed the dict and adds any extra claims for the gateway
+  def enrichJWTClaims(self, JWTDict):
+    return JWTDict

@@ -335,3 +335,11 @@ class testHelperAPIClientUsingSQLAlchemy(testClassWithTestClient):
       return env
     return envUsingDevDatabase
 
+kongISS = "saas_kong_iss"
+envUsingKongGateway = copy.deepcopy(env)
+envUsingKongGateway['APIAPP_GATEWAYINTERFACECONFIG']='{"Type": "kong", "jwtSecret":"some_secretxx", "kongISS": "' + kongISS + '"}'
+
+class testHelperAPIClientUsingKongStaticGateway(testClassWithTestClient):
+  def _getEnvironment(self):
+    return envUsingKongGateway
+

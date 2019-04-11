@@ -41,7 +41,7 @@ export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 #export APIAPP_REFRESH_TOKEN_TIMEOUT=30  #30 seconds, default is 2 hours
 ##export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"Memory\"}"
 ####export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SQLAlchemy\", \"connectionString\":\"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man_rad\"}"
-##export APIAPP_GATEWAYINTERFACECONFIG "{\"Type\": \"none\", \"jwtSecret\":\"some_secretxx\"}"
+##export APIAPP_GATEWAYINTERFACECONFIG "{\"Type\": \"none\", \"jwtSecret\":\"some_secretxx\", "kongISS": "kong_iss"}"
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/VERSION ]; then

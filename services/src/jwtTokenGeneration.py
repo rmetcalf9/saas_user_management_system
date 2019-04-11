@@ -12,6 +12,7 @@ def generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID):
   JWTDict['authedPersonGuid'] = personGUID
   JWTDict['iss'] = jwtSecretAndKey['key']
   JWTDict['exp'] = expiryTime
+  JWTDict = appObj.gateway.enrichJWTClaims(JWTDict)
   encodedJWT = jwt.encode(JWTDict, b64decode(jwtSecretAndKey['secret']), algorithm='HS256')
   return {'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }
 

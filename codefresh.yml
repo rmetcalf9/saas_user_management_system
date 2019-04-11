@@ -128,7 +128,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.0
+        metcarob/docker-ws-caller:0.4.1
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/public null null null true
@@ -142,7 +142,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.0
+        metcarob/docker-ws-caller:0.4.1
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/authed null null null true
@@ -176,7 +176,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.0
+        metcarob/docker-ws-caller:0.4.1
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_PUBLIC http ${{RJM_KONG_UPSTREAM_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/public null null null true
@@ -190,7 +190,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.0
+        metcarob/docker-ws-caller:0.4.1
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED http ${{RJM_KONG_UPSTREAM_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/authed null null null true
@@ -205,12 +205,13 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
-        metcarob/docker-ws-caller:0.4.0
+        metcarob/docker-ws-caller:0.4.1
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED
         \"${{JWT_COOKIE_NAME}}\"
         \"${{AUTHED_ACL_WHITELIST}}\"
         \"${{AUTHED_ACL_BLACKLIST}}\"
+        \"kong_iss\"
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
@@ -221,7 +222,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_upstream 
-        metcarob/docker-ws-caller:0.4.0
+        metcarob/docker-ws-caller:0.4.1
         http://kong:8001
         ${{RJM_KONG_UPSTREAM_NAME}}
         ${{RJM_DOCKER_SERVICE_NAME}}:80
