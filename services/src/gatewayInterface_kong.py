@@ -9,14 +9,10 @@ InvalidKongGatewayInterfaceConfigException = customExceptionClass('APIAPP_GATEWA
 
 
 class gatewayInterfaceClass(base):
-  jwtSecret = None
   kongISS = None
   def _setup(self, config):
-    if 'jwtSecret' not in config:
-      raise InvalidKongGatewayInterfaceConfigException
-    else:
-      print('Kong gateway with static JWTSecret and single consumer')
-      self.jwtSecret = config['jwtSecret']
+    if 'jwtSecret' in config:
+      raise Exception("ERROR jwtSecret should not be in kong gateway options")
 
     #Special key for kong to use
     if 'kongISS' not in config:
@@ -24,15 +20,6 @@ class gatewayInterfaceClass(base):
       raise InvalidKongGatewayInterfaceConfigException
     else:
       self.kongISS = config['kongISS']
-
-  def _CheckUserInitAndReturnJWTSecretAndKey(self, UserID):
-    return { 'key': UserID, 'secret': self.jwtSecret }
-    
-  def _ShouldJWTTokensBeVerified(self):
-    return True
-
-  def _GetJWTTokenSecret(self, UserID):
-    return self.jwtSecret
 
   def enrichJWTClaims(self, JWTDict):
     JWTDict['kong_iss'] = self.kongISS

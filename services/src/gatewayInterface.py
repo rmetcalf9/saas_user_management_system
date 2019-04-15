@@ -9,7 +9,7 @@ from constants import customExceptionClass
 InvalidGatewayInterfaceConfigException = customExceptionClass('APIAPP_GATEWAYINTERFACECONFIG value is not valid')
 InvalidGatewayInterfaceTypeSpecifiedException = customExceptionClass('APIAPP_GATEWAYINTERFACECONFIG invalid Type')
 
-def getGatewayInterface(env):
+def getGatewayInterface(env, appObj):
   APIAPP_GATEWAYINTERFACETYPE = readFromEnviroment(env, 'APIAPP_GATEWAYINTERFACECONFIG', '{"Type": "none"}', None)
   
   gatewayInterfaceTypeConfigDict = None
@@ -28,9 +28,9 @@ def getGatewayInterface(env):
   
   
   if gatewayInterfaceTypeConfigDict["Type"] == 'none':
-    return gi_none(gatewayInterfaceTypeConfigDict)
+    return gi_none(gatewayInterfaceTypeConfigDict, appObj)
   if gatewayInterfaceTypeConfigDict["Type"] == 'kong':
-    return gi_kong(gatewayInterfaceTypeConfigDict)
+    return gi_kong(gatewayInterfaceTypeConfigDict, appObj)
     
   print("Gatewat interface type " + gatewayInterfaceTypeConfigDict["Type"] + " not found")
   raise InvalidGatewayInterfaceTypeSpecifiedException

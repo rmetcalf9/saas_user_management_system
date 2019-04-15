@@ -16,12 +16,12 @@ class RefreshTokenManager():
 
   
     
-  def generateRefreshTokenFirstTime(self, appObj, userAuthInformationWithoutJWTorRefreshToken, userDict, jwtSecretAndKey, personGUID):
+  def generateRefreshTokenFirstTime(self, appObj, userAuthInformationWithoutJWTorRefreshToken, userDict, key, personGUID):
     token = generateRandomRefreshToken(appObj)
     dataToStoreWithRefreshToken = {
       'userAuthInformationWithoutJWTorRefreshToken': copy.deepcopy(userAuthInformationWithoutJWTorRefreshToken),
       'userDict': userDict, 
-      'jwtSecretAndKey': jwtSecretAndKey, 
+      'key': key, 
       'personGUID': personGUID,
       'refreshSessionExpiry': appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_SESSION_TIMEOUT))
     }
@@ -49,7 +49,13 @@ class RefreshTokenManager():
     
     
     userAuthInfo = copy.deepcopy(val['userAuthInformationWithoutJWTorRefreshToken'])
-    userAuthInfo['jwtData'] = generateJWTToken(appObj, val['userDict'], val['jwtSecretAndKey'], val['personGUID'])
+    userAuthInfo['jwtData'] = generateJWTToken(
+      appObj, 
+      val['userDict'], 
+      appObj.APIAPP_JWTSECRET, 
+      val['key'], 
+      val['personGUID']
+    )
     userAuthInfo['refresh'] = {
       'token': token,
       'TokenExpiry': expiryTime

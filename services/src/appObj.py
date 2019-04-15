@@ -26,11 +26,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
+from base64 import b64encode
+
 class appObjClass(parAppObj):
   objectStore = None
   APIAPP_MASTERPASSWORDFORPASSHASH = None
   APIAPP_DEFAULTHOMEADMINUSERNAME = None
   APIAPP_DEFAULTHOMEADMINPASSWORD = None
+  APIAPP_JWTSECRET = None
   APIAPP_JWT_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_SESSION_TIMEOUT = None
@@ -48,6 +51,19 @@ class appObjClass(parAppObj):
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
     
     super(appObjClass, self).init(env, serverStartTime, testingMode)
+    self.APIAPP_JWTSECRET = readFromEnviroment(env, 'APIAPP_JWTSECRET', 'NOSECRETSET435gtvsfd5etrfc4resferfe', None).strip()
+    if self.APIAPP_JWTSECRET == 'NOSECRETSET435gtvsfd5etrfc4resferfe':
+      #random_secret_str = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(32))
+      #self.jwtSecret = b64encode(random_secret_str.encode("utf-8"))
+      self.APIAPP_JWTSECRET = None
+    else:
+      #base64 encode incomming secret string
+      self.APIAPP_JWTSECRET = b64encode(self.APIAPP_JWTSECRET.encode("utf-8"))
+      
+    #This app always needs a JWT key
+    if self.APIAPP_JWTSECRET is None:
+      print("ERROR - APIAPP_JWTSECRET should always be set")
+      raise invalidConfigurationException
     
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None).strip()
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None).strip()
@@ -76,7 +92,7 @@ class appObjClass(parAppObj):
         storeConnection.executeInsideTransaction(someFn)
     self.objectStore.executeInsideConnectionContext(dbChangingFn)
 
-    self.gateway = getGatewayInterface(env)
+    self.gateway = getGatewayInterface(env, self)
     self.refreshTokenManager = RefreshTokenManager(self)
 
     self.scheduler.start()

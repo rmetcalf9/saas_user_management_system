@@ -24,12 +24,11 @@ class DecodedTokenClass():
   _tokenData = None
   
   def __init__(self, appObj, jwttoken):
-    if (appObj.gateway.ShouldJWTTokensBeVerified()):
-      UserID = decodeJWTToken(jwttoken, None, False)['iss']
-      jwtSecret = appObj.gateway.GetJWTTokenSecret(UserID)
-      self._tokenData = decodeJWTToken(jwttoken, jwtSecret, True)
-    else:
-      self._tokenData = decodeJWTToken(jwttoken, None, False)
+    if appObj.APIAPP_JWTSECRET is None:
+      raise Exception('Unable to verify JWT token as APIAPP_JWTSECRET is not set')
+    UserID = decodeJWTToken(jwttoken, None, False)['iss']
+    jwtSecret = appObj.APIAPP_JWTSECRET
+    self._tokenData = decodeJWTToken(jwttoken, jwtSecret, True)
 
   def hasRole(self, tenant, role):
     if tenant not in self._tokenData['TenantRoles']:

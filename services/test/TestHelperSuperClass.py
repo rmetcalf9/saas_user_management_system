@@ -47,6 +47,7 @@ sampleInternalAuthProv001_CREATE = {
 
 env = {
   'APIAPP_MODE': 'DOCKER',
+  'APIAPP_JWTSECRET': 'DOsaddsaCKER',
   'APIAPP_VERSION': 'TEST-3.3.3',
   'APIAPP_FRONTEND': '_',
   'APIAPP_APIURL': 'http://apiurlxxx',
@@ -58,7 +59,7 @@ env = {
   'APIAPP_JWT_TOKEN_TIMEOUT': '60',
   'APIAPP_REFRESH_TOKEN_TIMEOUT': '240',
   'APIAPP_REFRESH_SESSION_TIMEOUT': '2400',
-  'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none", "jwtSecret":"some_secretxx"}'
+  'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none"}'
 }
 
 SQLAlchemy_LocalDBConfigDict = {
@@ -188,7 +189,8 @@ class testClassWithTestClient(testHelperSuperClass):
     pass
 
   def decodeToken(self, JWTToken): 
-    return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
+    return jwt.decode(JWTToken, b64decode(appObj.APIAPP_JWTSECRET), algorithms=['HS256'])
+    #return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
   def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername, storeConnection):
     masterTenant = GetTenant(masterTenantName, storeConnection, 'a','b','c')
@@ -230,12 +232,8 @@ class testClassWithTestClient(testHelperSuperClass):
 
 
   def generateJWTToken(self, userDict):
-    jwtSecretAndKey = {
-      'secret': appObj.gateway.GetJWTTokenSecret(userDict['UserID']),
-      'key': userDict['UserID']
-    }
     personGUID = appObj.testingDefaultPersonGUID
-    return generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID)['JWTToken']
+    return generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID)['JWTToken']
     
   def getTenantDICT(self, tenantName):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})
@@ -337,7 +335,7 @@ class testHelperAPIClientUsingSQLAlchemy(testClassWithTestClient):
 
 kongISS = "saas_kong_iss"
 envUsingKongGateway = copy.deepcopy(env)
-envUsingKongGateway['APIAPP_GATEWAYINTERFACECONFIG']='{"Type": "kong", "jwtSecret":"some_secretxx", "kongISS": "' + kongISS + '"}'
+envUsingKongGateway['APIAPP_GATEWAYINTERFACECONFIG']='{"Type": "kong", "kongISS": "' + kongISS + '"}'
 
 class testHelperAPIClientUsingKongStaticGateway(testClassWithTestClient):
   def _getEnvironment(self):

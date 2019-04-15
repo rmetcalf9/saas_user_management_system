@@ -9,13 +9,12 @@ class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
     userDict = {
       'UserID': 'abc'
     }
-    jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict['UserID'])
 
     personGUID = "FAKE"
-    res = generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID)
+    res = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID)
     generatedJWTToken = res['JWTToken']
     
-    jwtSecret = appObj.gateway.GetJWTTokenSecret(userDict['UserID'])
+    jwtSecret = appObj.APIAPP_JWTSECRET
     decodedToken = decodeJWTToken(generatedJWTToken, jwtSecret, True)
 
     print("decodedToken:",decodedToken)

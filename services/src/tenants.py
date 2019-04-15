@@ -264,7 +264,6 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     for x in userDict["TenantRoles"][tenantName]:
       thisTenantRoles.append(x)
 
-  jwtSecretAndKey = appObj.gateway.CheckUserInitAndReturnJWTSecretAndKey(userDict['UserID'])
   resDict['userGuid'] = userDict['UserID']
   resDict['authedPersonGuid'] = authUserObj['personGUID']
   resDict['ThisTenantRoles'] = thisTenantRoles #Only roles valid for the current tenant are returned
@@ -282,8 +281,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   }
 
   #These two sections are rebuilt every refresh
-  resDict['jwtData'] = generateJWTToken(appObj, userDict, jwtSecretAndKey, authUserObj['personGUID'])
-  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, jwtSecretAndKey, authUserObj['personGUID'])
+  resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authUserObj['personGUID'])
+  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authUserObj['personGUID'])
 
   return resDict
 

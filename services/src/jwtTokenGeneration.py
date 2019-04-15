@@ -5,15 +5,19 @@ import jwt
 from base64 import b64decode
 import json
 
-def generateJWTToken(appObj, userDict, jwtSecretAndKey, personGUID):
+def generateJWTToken(appObj, userDict, secret, key, personGUID):
   expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_JWT_TOKEN_TIMEOUT))
+  if secret is None:
+    raise Exception("Trying to generate a JWT Token without a secret being set")
+  if key is None:
+    raise Exception("Trying to generate a JWT Token without a key being set")
   
   JWTDict = copy.deepcopy(userDict)
   JWTDict['authedPersonGuid'] = personGUID
-  JWTDict['iss'] = jwtSecretAndKey['key']
+  JWTDict['iss'] = key
   JWTDict['exp'] = expiryTime
   JWTDict = appObj.gateway.enrichJWTClaims(JWTDict)
-  encodedJWT = jwt.encode(JWTDict, b64decode(jwtSecretAndKey['secret']), algorithm='HS256')
+  encodedJWT = jwt.encode(JWTDict, b64decode(secret), algorithm='HS256')
   return {'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }
 
 def decodeJWTToken(token, secret, verify):
