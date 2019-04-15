@@ -17,6 +17,8 @@ from tenantObj import tenantClass
 from objectStores_base import WrongObjectVersionExceptionClass
 import copy
 import base64
+from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
+
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
   if 'AuthProviders' in content:
@@ -145,7 +147,7 @@ def registerAPI(appObj):
       try:
         def dbfn(storeConnection):
           outputFN = defOutput
-          return storeConnection.getPaginatedResult("tenants", appObj.getPaginatedParamValues(request), outputFN)
+          return storeConnection.getPaginatedResult("tenants", getPaginatedParamValues(request), outputFN)
         return appObj.objectStore.executeInsideConnectionContext(dbfn)
       except:
         raise InternalServerError   

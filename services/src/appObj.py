@@ -17,7 +17,6 @@ from adminAPI import registerAPI as registerAdminApi
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
 from objectStores import createObjectStoreInstance
-import bcrypt
 from gatewayInterface import getGatewayInterface
 import uuid
 from constants import customExceptionClass
@@ -27,44 +26,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
-def getPaginatedParamValues(request):
-  pagesizemax = 500
-  offset = request.args.get('offset')
-  if offset is None:
-    offset = 0
-  else:
-    offset = int(offset)
-  pagesize = request.args.get('pagesize')
-  if pagesize is None:
-    pagesize = 100
-  else:
-    pagesize = int(pagesize)
-  if pagesize > pagesizemax:
-    pagesize = pagesizemax
-  
-  sort = request.args.get('sort')
-  query = request.args.get('query')
-  return {
-    'offset': offset,
-    'pagesize': pagesize,
-    'query': query,
-    'sort': sort,
-  }
-
-
-#Encryption operations make unit tests run slow
-# if app is in testing more this dummy class
-# skips the hashing stages (dosen't matter for unit tests)
-class testOnlybcrypt():
-  def gensalt():
-    return b'$2b$12$lXti32XD6LkwYUnLw.1vh.'
-  def hashpw(combo_password, salt):
-    return combo_password
-
 class appObjClass(parAppObj):
-  curDateTimeOverrideForTesting = None
-  serverStartTime = None
-  version = None
   objectStore = None
   APIAPP_MASTERPASSWORDFORPASSHASH = None
   APIAPP_DEFAULTHOMEADMINUSERNAME = None
@@ -72,28 +34,20 @@ class appObjClass(parAppObj):
   APIAPP_JWT_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_SESSION_TIMEOUT = None
-  bcrypt = bcrypt
   gateway = None
   defaultUserGUID = None
   testingDefaultPersonGUID = None
   refreshTokenManager = None
   scheduler = None
-  getPaginatedParamValues = None
 
   def init(self, env, serverStartTime, testingMode = False):
-    self.getPaginatedParamValues = getPaginatedParamValues
     self.scheduler = BackgroundScheduler(timezone="UTC")
     self.defaultUserGUID = str(uuid.uuid4())
     if testingMode:
-      print("Warning testing mode active - proper encryption is not being used")
-      self.bcrypt = testOnlybcrypt
       self.defaultUserGUID = conDefaultUserGUID
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
     
-    self.curDateTimeOverrideForTesting = None
-    self.serverStartTime = serverStartTime
-    self.version = readFromEnviroment(env, 'APIAPP_VERSION', None, None)
-    super(appObjClass, self).init(env)
+    super(appObjClass, self).init(env, serverStartTime, testingMode)
     
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None).strip()
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None).strip()
@@ -133,13 +87,6 @@ class appObjClass(parAppObj):
     registerAdminApi(self)
     self.flastRestPlusAPIObject.title = "SAAS User Management"
     self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
-
-  def setTestingDateTime(self, val):
-    self.curDateTimeOverrideForTesting = val
-  def getCurDateTime(self):
-    if self.curDateTimeOverrideForTesting is None:
-      return datetime.datetime.now(pytz.timezone("UTC"))
-    return self.curDateTimeOverrideForTesting
 
   def stopThread(self):
     ##print("stopThread Called")

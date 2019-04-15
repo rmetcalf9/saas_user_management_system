@@ -7,6 +7,7 @@ from constants import customExceptionClass
 from objectStores_base import WrongObjectVersionExceptionClass
 from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
 from authsCommon import getAuthRecord, DeleteAuthRecord
+from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information
@@ -119,5 +120,5 @@ def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
   return personObj
   
 def GetPaginatedPersonData(appObj, request, outputFN, storeConnection):
-  return storeConnection.getPaginatedResult("Persons",  appObj.getPaginatedParamValues(request), outputFN)
+  return storeConnection.getPaginatedResult("Persons",  getPaginatedParamValues(request), outputFN)
 
