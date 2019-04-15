@@ -39,6 +39,8 @@ docker service create --name ${RJM_RUNNING_SERVICE_NAME} \
 --secret saas_user_management_system_objectstore_hashpw \
 --secret saas_user_management_system_objectstore_adminpw \
 --secret saas_user_management_system_gateway_config \
+--secret saas_jwtsecret \
+-e APIAPP_JWTSECRETFILE=/run/secrets/saas_jwtsecret \
 -e APIAPP_GATEWAYINTERFACECONFIGFILE=/run/secrets/saas_user_management_system_gateway_config \
 -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config \
 -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw \

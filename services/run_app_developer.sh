@@ -28,6 +28,7 @@ fi
 APP_DIR=.
 
 export APIAPP_MODE=DEVELOPER
+export APIAPP_JWTSECRET="gldskajld435sFFkfjlkfdsj"
 export APIAPP_FRONTEND=_
 export APIAPP_APIURL=${EXTURL}:${EXTPORT}/api
 export APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT}/apidocs
