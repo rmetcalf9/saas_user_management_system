@@ -1,7 +1,7 @@
 from TestHelperSuperClass import testHelperAPIClientUsingKongStaticGateway, kongISS
+from baseapp_for_restapi_backend_with_swagger import decodeJWTToken
 
 from jwtTokenGeneration import generateJWTToken
-from apiSecurity import decodeJWTToken
 from appObj import appObj
 
 class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
@@ -16,6 +16,7 @@ class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
     generatedJWTToken = res['JWTToken']
     
     jwtSecret = appObj.APIAPP_JWTSECRET
+    
     decodedToken = decodeJWTToken(generatedJWTToken, jwtSecret, True)
 
     print("decodedToken:",decodedToken)

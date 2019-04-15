@@ -23,18 +23,14 @@ from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from apiSecurity import apiSecurityCheck
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
-
-from base64 import b64encode
 
 class appObjClass(parAppObj):
   objectStore = None
   APIAPP_MASTERPASSWORDFORPASSHASH = None
   APIAPP_DEFAULTHOMEADMINUSERNAME = None
   APIAPP_DEFAULTHOMEADMINPASSWORD = None
-  APIAPP_JWTSECRET = None
   APIAPP_JWT_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_SESSION_TIMEOUT = None
@@ -52,14 +48,6 @@ class appObjClass(parAppObj):
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
     
     super(appObjClass, self).init(env, serverStartTime, testingMode)
-    self.APIAPP_JWTSECRET = readFromEnviroment(env, 'APIAPP_JWTSECRET', 'NOSECRETSET435gtvsfd5etrfc4resferfe', None).strip()
-    if self.APIAPP_JWTSECRET == 'NOSECRETSET435gtvsfd5etrfc4resferfe':
-      #random_secret_str = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(32))
-      #self.jwtSecret = b64encode(random_secret_str.encode("utf-8"))
-      self.APIAPP_JWTSECRET = None
-    else:
-      #base64 encode incomming secret string
-      self.APIAPP_JWTSECRET = b64encode(self.APIAPP_JWTSECRET.encode("utf-8"))
       
     #This app always needs a JWT key
     if self.APIAPP_JWTSECRET is None:
@@ -114,7 +102,4 @@ class appObjClass(parAppObj):
     self.stopThread()
     super(appObjClass, self).exit_gracefully(signum, frame)
     
-  def apiSecurityCheck(self, request, tenant, requiredRoleList, headersToSearch, cookiesToSearch):
-    return apiSecurityCheck(request, tenant, requiredRoleList, headersToSearch, cookiesToSearch, self.APIAPP_JWTSECRET)
-
 appObj = appObjClass()
