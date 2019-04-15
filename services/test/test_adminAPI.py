@@ -45,7 +45,7 @@ class test_securityTests(test_api):
   def test_jwtWithNoRoles(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([])
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 401, result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 403, result.get_data(as_text=True))
 
   def test_jwtWithOnlyAccountRole(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole])
@@ -55,7 +55,7 @@ class test_securityTests(test_api):
   def test_jwtWithOnlyAdminRole(self): 
     jwtToken = self.makeJWTTokenWithMasterTenantRoles([masterTenantDefaultSystemAdminRole])
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: jwtToken})
-    self.assertEqual(result.status_code, 401, result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 403, msg="expected Forbidden but got something else - " + result.get_data(as_text=True))
 
   def test_jwtWorksAsCookie(self): 
     self.testClient.set_cookie('localhost', jwtCookieName, self.getNormalJWTToken())

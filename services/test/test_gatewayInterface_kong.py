@@ -1,6 +1,7 @@
 from TestHelperSuperClass import testHelperAPIClientUsingKongStaticGateway, kongISS
 
-from jwtTokenGeneration import generateJWTToken, decodeJWTToken
+from jwtTokenGeneration import generateJWTToken
+from apiSecurity import decodeJWTToken
 from appObj import appObj
 
 class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):

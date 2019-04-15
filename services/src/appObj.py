@@ -23,6 +23,7 @@ from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apiSecurity import apiSecurityCheck
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
 
@@ -112,5 +113,8 @@ class appObjClass(parAppObj):
   def exit_gracefully(self, signum, frame):
     self.stopThread()
     super(appObjClass, self).exit_gracefully(signum, frame)
+    
+  def apiSecurityCheck(self, request, tenant, requiredRoleList, headersToSearch, cookiesToSearch):
+    return apiSecurityCheck(request, tenant, requiredRoleList, headersToSearch, cookiesToSearch, self.APIAPP_JWTSECRET)
 
 appObj = appObjClass()

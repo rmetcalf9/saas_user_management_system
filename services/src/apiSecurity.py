@@ -1,33 +1,76 @@
-from jwtTokenGeneration import decodeJWTToken
 from constants import DefaultHasAccountRole
+from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest, InternalServerError, NotFound, Conflict
+import jwt
+from base64 import b64decode
 
 #Test to see if caller is allowed access to this API
 
-# hasaccount role must always be present for the tenant for access to be verified
+def _getFromHeader(request, headers):
+  for h in headers:
+    if h in request.headers:
+      token = request.headers.get(h)
+      return token
+  return None
+  
+def _getFromLoginCookie(request, cookies):
+  for c in cookies:
+    if c in request.cookies:
+      cookie = request.cookies.get(c)
+      try:
+        a = unquote(cookie)
+        a = json.loads(a)
+        if 'jwtData' in a.keys():
+          if 'JWTToken' in a['jwtData']:
+            return a['jwtData']['JWTToken']
+      except:
+        pass
+  return None
 
-#Return PArams (1,2,3)
-# 1 = True to allow user through (login is valid and role is present)
-# 2 = When True this includes the decoded token
-# 3 = Forbidden? True if the users token is ok but the role is missing, false otherwise
-def verifyAPIAccessUserLoginRequired(appObj, tenantFromPath, jwttoken, rolesToCheck = []):
-  if jwttoken is None:
-    return False, None, False
-  decodedToken = DecodedTokenClass(appObj, jwttoken)
-  if not decodedToken.hasRole(tenantFromPath, DefaultHasAccountRole):
-    return False, None, False
-  for k in rolesToCheck:
-    if not decodedToken.hasRole(tenantFromPath, k):
-      return False, None, True #Requested role is missing
-  return True, decodedToken, False
+def _getFromNormCookie(request, cookies):
+  for c in cookies:
+    if c in request.cookies:
+      return request.cookies.get(c)
 
+def apiSecurityCheck(request, tenant, requiredRoleList, headersToSearch, cookiesToSearch, jwtSecret):
+  jwtToken = _getFromHeader(request, headersToSearch)
+  if jwtToken is None:
+    jwtToken = _getFromLoginCookie(request, cookiesToSearch)
+    if jwtToken is None:
+      jwtToken = _getFromNormCookie(request, cookiesToSearch)
+      if jwtToken is None:
+        raise Unauthorized("No JWT Token in header or cookie")
+  
+  try:
+    decodedJWTToken = DecodedTokenClass(jwtSecret, jwtToken)
+  except jwt.InvalidSignatureError:
+    raise Unauthorized("InvalidSignatureError")
+  except jwt.ExpiredSignatureError:
+    raise Unauthorized("ExpiredSignatureError")
+  except Exception as err:
+    raise Unauthorized("Problem with token - " + err)
+
+  for x in requiredRoleList:
+    if not decodedJWTToken.hasRole(tenant, x):
+      raise Forbidden("Missing required Role")
+
+  return decodedJWTToken
+
+def decodeJWTToken(token, secret, verify):
+  if verify:
+    return jwt.decode(token, b64decode(secret), algorithms=['HS256'])
+  return jwt.decode(token, verify=False)
+
+  
 class DecodedTokenClass():
   _tokenData = None
   
-  def __init__(self, appObj, jwttoken):
-    if appObj.APIAPP_JWTSECRET is None:
+  def __init__(self, jwtSecret, jwttoken):
+    if jwtSecret is None:
       raise Exception('Unable to verify JWT token as APIAPP_JWTSECRET is not set')
+      
+    #Does two decodes, one without verification
+    ## this means we can read the userID
     UserID = decodeJWTToken(jwttoken, None, False)['iss']
-    jwtSecret = appObj.APIAPP_JWTSECRET
     self._tokenData = decodeJWTToken(jwttoken, jwtSecret, True)
 
   def hasRole(self, tenant, role):

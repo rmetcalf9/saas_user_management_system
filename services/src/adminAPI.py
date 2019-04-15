@@ -2,12 +2,10 @@
 from flask import request
 from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest, InternalServerError, NotFound, Conflict
-from apiSecurity import verifyAPIAccessUserLoginRequired
-from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName
+from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole
 from apiSharedModels import getTenantModel, getUserModel
 from urllib.parse import unquote
 import json
-from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
 from authsCommon import getAuthRecord
 from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
@@ -90,40 +88,20 @@ def requiredInPayload(content, fieldList):
     if a not in content:
       raise BadRequest(a + ' not in payload')
 
+#401 = unauthorized -> Goes back to refresh or login makes sense to retry
+#403 = forbidden -> Will not re-prompt for login dosn't make sense to retry
 def verifySecurityOfAdminAPICall(appObj, request, tenant):
   #Admin api can only be called from masterTenant
   if tenant != masterTenantName:
     raise Unauthorized("Supplied tenant is not the master tenant")
-  
-  jwtToken = None
-  if jwtHeaderName in request.headers:
-    jwtToken = request.headers.get(jwtHeaderName)
-  elif jwtCookieName in request.cookies:
-    jwtToken = request.cookies.get(jwtCookieName)
-  elif loginCookieName in request.cookies:
-    a = request.cookies.get(loginCookieName)
-    a = unquote(a)
-    a = json.loads(a)
-    if 'jwtData' in a.keys():
-      if 'JWTToken' in a['jwtData']:
-        jwtToken = a['jwtData']['JWTToken']
-  if jwtToken is None:
-    raise Unauthorized("No JWT Token in header or cookie")
-  forbidden = False
-  try:
-    (verified, decodedTokenObj, forbidden) = verifyAPIAccessUserLoginRequired(appObj, tenant, jwtToken, [masterTenantDefaultSystemAdminRole])
-  except InvalidSignatureError:
-    raise Unauthorized("InvalidSignatureError")
-  except ExpiredSignatureError:
-    raise Unauthorized("ExpiredSignatureError")
-  except Exception:
-    raise Unauthorized("Problem with token")
-    
-  if (forbidden):
-    raise Forbidden("Forbidden")
-  if not verified:
-    raise Unauthorized("not verified")
-  return decodedTokenObj
+  return appObj.apiSecurityCheck(
+    request, 
+    tenant, 
+    [DefaultHasAccountRole, masterTenantDefaultSystemAdminRole], 
+    [jwtHeaderName], 
+    [jwtCookieName, loginCookieName]
+  )
+
   
 def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')

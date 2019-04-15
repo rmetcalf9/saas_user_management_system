@@ -19,8 +19,3 @@ def generateJWTToken(appObj, userDict, secret, key, personGUID):
   JWTDict = appObj.gateway.enrichJWTClaims(JWTDict)
   encodedJWT = jwt.encode(JWTDict, b64decode(secret), algorithm='HS256')
   return {'JWTToken': encodedJWT.decode('utf-8'), 'TokenExpiry': expiryTime.isoformat() }
-
-def decodeJWTToken(token, secret, verify):
-  if verify:
-    return jwt.decode(token, b64decode(secret), algorithms=['HS256'])
-  return jwt.decode(token, verify=False)
