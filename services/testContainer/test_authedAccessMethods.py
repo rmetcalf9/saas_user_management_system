@@ -28,7 +28,21 @@ class test_authedAccessMethods(unittest.TestCase):
     cookies = {}
     tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + containerTestCommon.securityTestAPIEndpoint, [200], None, headers, cookies)
 
+  def test_testAuthorizationJWTHeader(self):
+    if containerTestCommon.runningViaKong:
+      print("Skipping test_testNormalJWTHeader as this won't work via Kong - Kong can not read custom headers")
+      return
+    loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
+    jwtToken = loginDICT['jwtData']['JWTToken']
+    
+    headers = {"Authorization": "Bearer " + jwtToken}
+    cookies = {}
+    tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + containerTestCommon.securityTestAPIEndpoint, [200], None, headers, cookies)
+
   def test_testNormalJWTCookie(self):
+    if containerTestCommon.runningViaKong:
+      print("Skipping test_testNormalJWTHeader as this won't work via Kong - Kong can not read custom headers")
+      return
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
     jwtToken = loginDICT['jwtData']['JWTToken']
     
