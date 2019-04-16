@@ -195,6 +195,7 @@ steps:
     environment:
       - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
       - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
+      - RUNNINGVIAKONG="TRUE"
     retry:
       maxAttempts: 3
       delay: 30

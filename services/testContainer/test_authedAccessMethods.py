@@ -18,6 +18,9 @@ import copy_of_main_constants_do_not_edit as constants
 
 class test_authedAccessMethods(unittest.TestCase):
   def test_testNormalJWTHeader(self):
+    if containerTestCommon.runningViaKong:
+      print("Skipping test_testNormalJWTHeader as this won't work via Kong - Kong can not read custom headers")
+      return
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
     jwtToken = loginDICT['jwtData']['JWTToken']
     

@@ -16,6 +16,10 @@ adminAPIPrefix = '/authed/api/admin'
 baseURL="http://saas_user_management_system:80"
 if ('BASEURL_TO_TEST' in os.environ):
   baseURL=os.environ['BASEURL_TO_TEST']
+runningViaKong = False  
+if ('RUNNINGVIAKONG' in os.environ):
+  runningViaKong=True
+
 
 BASE = [0,1,2,3,4]
 LOGIN = 0
