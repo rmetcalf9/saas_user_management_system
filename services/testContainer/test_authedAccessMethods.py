@@ -24,7 +24,7 @@ class test_authedAccessMethods(unittest.TestCase):
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
     jwtToken = loginDICT['jwtData']['JWTToken']
     
-    headers = {'jwt-auth-token': jwtToken}
+    headers = {constants.jwtHeaderName: jwtToken}
     cookies = {}
     tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + "/tenants", [200], None, headers, cookies)
 
@@ -33,7 +33,7 @@ class test_authedAccessMethods(unittest.TestCase):
     jwtToken = loginDICT['jwtData']['JWTToken']
     
     headers = {}
-    cookies = {'jwt-auth-token': jwtToken}
+    cookies = {constants.jwtCookieName: jwtToken}
     tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + "/tenants", [200], None, headers, cookies)
    
   #Have not been able to implement this test   
