@@ -89,6 +89,8 @@ steps:
         command: /ext_volume/run_tests_with_wait.sh
         environment:
           - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
+          - APIAPP_DEFAULTHOMEADMINUSERNAME=admin
+          - APIAPP_DEFAULTHOMEADMINPASSWORD=admin
           
   push_to_dockerhub:
     type: push

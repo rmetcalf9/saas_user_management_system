@@ -33,6 +33,14 @@ if [ ${RES} -ne 1 ]; then
   exit 1
 fi
 
+#Removed 
+##-e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config \
+##-e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
+#and added
+##-e APIAPP_DEFAULTHOMEADMINPASSWORD=admin \
+# to enable container tests to run and login as admin
+
+
 docker service create --name ${RJM_RUNNING_SERVICE_NAME} \
 --network main_net \
 --secret saas_user_management_system_objectstore_config \
@@ -42,9 +50,8 @@ docker service create --name ${RJM_RUNNING_SERVICE_NAME} \
 --secret saas_jwtsecret \
 -e APIAPP_JWTSECRETFILE=/run/secrets/saas_jwtsecret \
 -e APIAPP_GATEWAYINTERFACECONFIGFILE=/run/secrets/saas_user_management_system_gateway_config \
--e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config \
 -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw \
--e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
+-e APIAPP_DEFAULTHOMEADMINPASSWORD=admin \
 -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin \
 -e APIAPP_APIURL=${EXTURL}:${EXTPORT80}/api \
 -e APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT80}/public/web/apidocs \

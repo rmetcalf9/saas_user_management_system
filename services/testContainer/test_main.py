@@ -1,35 +1,24 @@
 #Script to test a running container
 import unittest
-import requests
 import os
 import json
-
-baseURL="http://saas_user_management_system:80"
-if ('BASEURL_TO_TEST' in os.environ):
-  baseURL=os.environ['BASEURL_TO_TEST']
+from containerTestCommon import baseURL, callGetService
+import containerTestCommon
 
 class test_containerAPI(unittest.TestCase):
 #Actual tests below
-  def  callGetService(self, url, expectedResultList):
-    result = requests.get(url)
-    for a in expectedResultList:
-      if result.status_code == a:
-        return result
-    self.assertFalse(True, msg="Got response " + str(result.status_code) + " from " + url + " expected one of " + str(expectedResultList))
-    
-    return result
+
 
 
 
   def test_WeCanGetToSwaggerFileForAPIDocs(self):
-    self.callGetService(baseURL + "/public/web/apidocs/swagger.json", [200])
+    callGetService(containerTestCommon.APIDOCS, "/swagger.json", [200], None, None, None)
   def test_WeCanGetToAPIDocsURL(self):
-    self.callGetService(baseURL + "/public/web/apidocs/", [200])
+    callGetService(containerTestCommon.APIDOCS, "/", [200], None, None, None)
 
   def test_ContainerVersionMatchesEnviromentVariable(self):
     self.assertTrue('EXPECTED_CONTAINER_VERSION' in os.environ, msg="EXPECTED_CONTAINER_VERSION missing from enviroment")
-    result = self.callGetService(baseURL + "/public/api/login/serverinfo", [200])
-    resultJSON = json.loads(result.text)
+    resultJSON, status = callGetService(containerTestCommon.LOGIN, "/serverinfo", [200], None, None, None)
     self.assertEqual(resultJSON['Server']['Version'], os.environ['EXPECTED_CONTAINER_VERSION'])
 
   #TODO Test apidocs url retrieved from serverinfo works
@@ -43,14 +32,14 @@ class test_containerAPI(unittest.TestCase):
   #  self.assertEqual(resultJSON['Server']['APIAPP_APIDOCSURL'], baseURL + "/public/web/apidocs")
     
   def test_WeCanGetToSwaggerUIStaticFiles(self):
-    self.callGetService(baseURL + "/public/web/apidocs/swaggerui/bower/swagger-ui/dist/droid-sans.css", [200])
+    callGetService(containerTestCommon.APIDOCS, "/swaggerui/bower/swagger-ui/dist/droid-sans.css", [200], None, None, None)
     
   def test_adminfrontendMainPage(self):
-    self.callGetService(baseURL + "/public/web/adminfrontend/", [200])
-    self.callGetService(baseURL + "/public/web/adminfrontend/#/usersystem/", [200])
+    callGetService(containerTestCommon.ADMINFRONTEND, "/", [200], None, None, None)
+    callGetService(containerTestCommon.ADMINFRONTEND, "/#/usersystem/", [200], None, None, None)
 
   def test_frontendMainPage(self):
-    self.callGetService(baseURL + "/public/web/frontend/", [200]) #This gives us Quasar 404 page but still a 200 response
-    self.callGetService(baseURL + "/public/web/frontend/#/usersystem/", [200])
+    callGetService(containerTestCommon.FRONTEND, "/", [200], None, None, None) #This gives us Quasar 404 page but still a 200 response
+    callGetService(containerTestCommon.FRONTEND, "/#/usersystem/", [200], None, None, None)
     
     
