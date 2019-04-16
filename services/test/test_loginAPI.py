@@ -9,7 +9,7 @@ import copy
 from users import CreateUser, associateUserWithPerson
 
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
-
+import constants
 
 
 invalidTenantName="invalidtenantname"
@@ -68,7 +68,7 @@ class test_loginapi_norm(test_api):
     expectedResult = {
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore",
-      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole],
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole],
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
@@ -82,7 +82,7 @@ class test_loginapi_norm(test_api):
       'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
       'iss': 'FORCED-CONSTANT-TESTING-GUID', 
       'TenantRoles': {
-        'usersystem': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+        'usersystem': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole]
       }, 
       'exp': 1547292391,
       'authedPersonGuid': 'Ignore',

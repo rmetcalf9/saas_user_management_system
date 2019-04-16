@@ -1,5 +1,6 @@
 from TestHelperSuperClass import testHelperAPIClientUsingSQLAlchemy, env
 from constants import masterTenantName, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
+import constants
 import json
 from dateutil.parser import parse
 import pytz
@@ -39,7 +40,7 @@ class test_SQLAlchemyExtraTests(testHelperAPIClientUsingSQLAlchemy):
     expectedResult = {
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore",
-      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole],
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole],
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
@@ -53,7 +54,7 @@ class test_SQLAlchemyExtraTests(testHelperAPIClientUsingSQLAlchemy):
       'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
       'iss': 'FORCED-CONSTANT-TESTING-GUID', 
       'TenantRoles': {
-        'usersystem': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+        'usersystem': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole]
       }, 
       'exp': 1547292391,
       'authedPersonGuid': 'Ignore',

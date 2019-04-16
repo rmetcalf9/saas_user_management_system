@@ -6,6 +6,7 @@ masterTenantDefaultAuthProviderMenuText="Website account login"
 masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
 DefaultHasAccountRole="hasaccount"
+SecurityEndpointAccessRole="securityTest"
 
 conDefaultUserGUID = "FORCED-CONSTANT-TESTING-GUID"
 conTestingDefaultPersonGUID = "FORCED-CONSTANT-TESTING-PERSON-GUID"

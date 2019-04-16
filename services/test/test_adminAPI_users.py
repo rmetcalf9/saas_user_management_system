@@ -3,6 +3,7 @@ import pytz
 from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
 from appObj import appObj
 from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, conDefaultUserGUID
+import constants
 from test_adminAPI import test_api as parent_test_api
 import json
 import copy
@@ -14,13 +15,13 @@ defaultUserData = {
   'known_as': env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
   'TenantRoles': [{
     'TenantName': masterTenantName,
-    'ThisTenantRoles': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+    'ThisTenantRoles': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole]
   }],
   'other_data': {
     "createdBy": "init/CreateMasterTenant"
   },
   "associatedPersonGUIDs": ["FORCED-CONSTANT-TESTING-PERSON-GUID"],
-  'ObjectVersion': "3"
+  'ObjectVersion': "4"
 }
 
 class test_adminAPIUsers(parent_test_api):
@@ -60,7 +61,7 @@ class test_adminAPIUsers(parent_test_api):
     self.assertEqual(len(resultJSON['result'][0]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": masterTenantName,
-      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole]
     }]
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")
    
@@ -94,7 +95,7 @@ class test_adminAPIUsers(parent_test_api):
 
     expectedTenantRolesResult = [{
       "TenantName": masterTenantName,
-      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole]
     }]
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][0]["TenantRoles"],expectedTenantRolesResult, ["TenantRoles"], msg="Tenant Roles returned data wrong")

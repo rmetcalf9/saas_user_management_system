@@ -26,7 +26,7 @@ class test_authedAccessMethods(unittest.TestCase):
     
     headers = {constants.jwtHeaderName: jwtToken}
     cookies = {}
-    tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + "/tenants", [200], None, headers, cookies)
+    tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + containerTestCommon.securityTestAPIEndpoint, [200], None, headers, cookies)
 
   def test_testNormalJWTCookie(self):
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
@@ -34,7 +34,7 @@ class test_authedAccessMethods(unittest.TestCase):
     
     headers = {}
     cookies = {constants.jwtCookieName: jwtToken}
-    tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + "/tenants", [200], None, headers, cookies)
+    tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + containerTestCommon.securityTestAPIEndpoint, [200], None, headers, cookies)
    
   #Have not been able to implement this test   
   #def test_testComplicatedJWTCookie(self):
@@ -44,5 +44,5 @@ class test_authedAccessMethods(unittest.TestCase):
   #  print("loginDICT:",loginDICT)
   #  headers = {}
   #  cookies = {'usersystemUserCredentials': json.dumps(loginDICT)}
-  #  tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + "/tenants", [200], None, headers, cookies)
+  #  tenantDICT, call_result = containerTestCommon.callGetService(containerTestCommon.ADMIN,"/" + constants.masterTenantName + containerTestCommon.securityTestAPIEndpoint, [200], None, headers, cookies)
     

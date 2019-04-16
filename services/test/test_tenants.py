@@ -1,6 +1,7 @@
 from TestHelperSuperClass import testHelperAPIClient, env, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
+import constants
 from appObj import appObj
 from constants import authFailedException
 from persons import CreatePerson
@@ -63,7 +64,7 @@ class test_tenants(testHelperAPIClient):
       expectedRoles = {
         "UserID": 'somerandomguid',
         "TenantRoles": {
-          "usersystem": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole]
+          "usersystem": [masterTenantDefaultSystemAdminRole, constants.SecurityEndpointAccessRole, DefaultHasAccountRole]
          },
          "authedPersonGuid": "Ignore",
         "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],

@@ -14,6 +14,7 @@ from base64 import b64decode
 
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
+import constants
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
@@ -220,7 +221,7 @@ class testClassWithTestClient(testHelperSuperClass):
   #Returns a token with the admin user logged in
   def getNormalJWTToken(self):
     userIDForToken = appObj.defaultUserGUID
-    return self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole], userIDForToken)
+    return self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, constants.SecurityEndpointAccessRole], userIDForToken)
   
   
   def makeJWTTokenWithMasterTenantRoles(self, roles, UserID='abc123'):
@@ -286,21 +287,31 @@ class testClassWithTestClient(testHelperSuperClass):
     authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
     authProvCreateWithUserCreation['AllowUserCreation'] = AuthUserCreation
     return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
-    
-  def loginAsDefaultUser(self):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+
+  def getTenantInternalAuthProvDict(self, tenant):
+    result = self.testClient.get(self.loginAPIPrefix + '/' + tenant + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+    return resultJSON[ 'AuthProviders' ][0]
+    
+  def loginAsDefaultUser(self):
+    return self.loginAsUser(masterTenantName, self.getTenantInternalAuthProvDict(masterTenantName), env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'])
+    
+  def loginAsUser(self, tenant, authProviderDICT, username, password):
+    hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+      username, 
+      password, 
+      authProviderDICT['saltForPasswordHashing']
+    )
     
     loginJSON = {
-      "authProviderGUID": masterAuthProviderGUID,
+      "authProviderGUID": authProviderDICT['guid'],
       "credentialJSON": { 
-        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
-        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
+        "username": username, 
+        "password": hashedPassword
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenant + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 200)
     return json.loads(result2.get_data(as_text=True))
 

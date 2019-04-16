@@ -3,6 +3,7 @@ from flask import request
 from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest, InternalServerError, NotFound, Conflict
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole
+import constants
 from apiSharedModels import getTenantModel, getUserModel
 from urllib.parse import unquote
 import json
@@ -83,6 +84,11 @@ def getAuthModel(appObj):
     'AuthUserKey': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
   })
   
+def getSecurityTestResultModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('SecurityTestResultInfo', {
+    'result': fields.String(default='DEFAULT', description='Pass', required=True)
+  })
+  
 def requiredInPayload(content, fieldList):
   for a in fieldList:
     if a not in content:
@@ -90,14 +96,17 @@ def requiredInPayload(content, fieldList):
 
 #401 = unauthorized -> Goes back to refresh or login makes sense to retry
 #403 = forbidden -> Will not re-prompt for login dosn't make sense to retry
-def verifySecurityOfAdminAPICall(appObj, request, tenant):
+def verifySecurityOfAdminAPICall(appObj, request, tenant, systemAdminRole=masterTenantDefaultSystemAdminRole):
   #Admin api can only be called from masterTenant
   if tenant != masterTenantName:
     raise Unauthorized("Supplied tenant is not the master tenant")
+
+  print("verifySecurityOfAdminAPICall - Check incl:" + systemAdminRole)
+  
   return appObj.apiSecurityCheck(
     request, 
     tenant, 
-    [DefaultHasAccountRole, masterTenantDefaultSystemAdminRole], 
+    [DefaultHasAccountRole, systemAdminRole], 
     [jwtHeaderName], 
     [jwtCookieName, loginCookieName]
   )
@@ -106,6 +115,22 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant):
 def registerAPI(appObj):
   nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
 
+  @nsAdmin.route('/<string:tenant>/securityTestEndpoint')
+  class securityTesting(Resource):
+    '''Admin'''
+    @nsAdmin.doc('admin')
+    @nsAdmin.marshal_with(getSecurityTestResultModel(appObj))
+    @nsAdmin.response(200, 'Success', model=getSecurityTestResultModel(appObj))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @appObj.addStandardSortParams(nsAdmin)
+    def get(self, tenant):
+      '''Get list of tenants'''
+      verifySecurityOfAdminAPICall(appObj, request, tenant, constants.SecurityEndpointAccessRole)
+      return {
+        'result': 'pass'
+      }
+  
   @nsAdmin.route('/<string:tenant>/tenants')
   class tenantsInfo(Resource):
   

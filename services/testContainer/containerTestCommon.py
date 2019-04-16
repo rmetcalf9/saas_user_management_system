@@ -7,6 +7,8 @@ import bcrypt
 from base64 import b64decode
 import copy
 
+securityTestAPIEndpoint = '/securityTestEndpoint'
+
 #THESE ARE DIFFERENT THAN IN TEST HELPER SUPERCLASS
 ## They are reversed because container test go through nginx which switches them abound
 loginAPIPrefix = '/public/api/login'

@@ -1,5 +1,6 @@
 # Code to handle tenant objects
 from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException, personDosentExistException
+import constants
 import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
 from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
@@ -45,7 +46,8 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
     'init/CreateMasterTenant', 
     storeConnection
   )
-  AddUserRole(appObj, userID, masterTenantName, masterTenantDefaultSystemAdminRole, storeConnection)
+  AddUserRole(appObj, userID, masterTenantName, constants.masterTenantDefaultSystemAdminRole, storeConnection)
+  AddUserRole(appObj, userID, masterTenantName, constants.SecurityEndpointAccessRole, storeConnection)
 
   person = None
   if testingMode:
