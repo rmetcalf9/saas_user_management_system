@@ -1,5 +1,4 @@
-from appObj import appObj
-from TestHelperSuperClass import testHelperSuperClass, SQLAlchemy_LocalDBConfigDict, SQLAlchemy_LocalDBConfigDict_withPrefix
+from TestHelperSuperClass import testHelperSuperClass, SQLAlchemy_LocalDBConfigDict, SQLAlchemy_LocalDBConfigDict_withPrefix, getObjectStoreExternalFns
 from objectStores_base import WrongObjectVersionException, UnallowedMutationException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
 from objectStores_SQLAlchemy import ObjectStore_SQLAlchemy
 import copy
@@ -76,12 +75,8 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    def getObjFn(SQLAlchemy_LocalDBConfigDict):
-      fns = {
-        'getCurDateTime': appObj.getCurDateTime,
-        'getPaginatedResult': appObj.getPaginatedResult
-      }    
-      obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
+    def getObjFn(SQLAlchemy_LocalDBConfigDict): 
+      obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, getObjectStoreExternalFns())
       obj.resetDataForTest()
       return obj
     genericTests.runAllGenericTests(self, getObjFn, SQLAlchemy_LocalDBConfigDict)
@@ -90,14 +85,10 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
   def test_differentPrefixesDontShareData(self):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
-      return
-    fns = {
-      'getCurDateTime': appObj.getCurDateTime,
-      'getPaginatedResult': appObj.getPaginatedResult
-    }    
-    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
+      return  
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, getObjectStoreExternalFns())
     obj.resetDataForTest()
-    obj2 = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict_withPrefix, fns)
+    obj2 = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict_withPrefix, getObjectStoreExternalFns())
     obj2.resetDataForTest()
     differentPrefixesDontShareData(self, obj, obj2)
     
@@ -105,12 +96,8 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
   def test_rollbackTransactionIsSuccessful_InsertOnly(self):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
-      return
-    fns = {
-      'getCurDateTime': appObj.getCurDateTime,
-      'getPaginatedResult': appObj.getPaginatedResult
-    }          
-    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
+      return        
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, getObjectStoreExternalFns())
     obj.resetDataForTest()
     
     def dbfn(storeConnection):
@@ -139,11 +126,7 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    fns = {
-      'getCurDateTime': appObj.getCurDateTime,
-      'getPaginatedResult': appObj.getPaginatedResult
-    }    
-    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, getObjectStoreExternalFns())
     obj.resetDataForTest()
     
     def dbfn(storeConnection):

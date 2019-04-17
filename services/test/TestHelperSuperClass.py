@@ -73,6 +73,12 @@ def get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes():
   #bytes(password, 'utf-8')
   return bytes(env['APIAPP_DEFAULTHOMEADMINPASSWORD'], 'utf-8')
 
+def getObjectStoreExternalFns():
+  return {
+    'getCurDateTime': appObj.getCurDateTime,
+    'getPaginatedResult': appObj.getPaginatedResult
+  }    
+
 
 class testHelperSuperClass(unittest.TestCase):
   def checkGotRightException(self, context, ExpectedException):

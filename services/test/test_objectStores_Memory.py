@@ -1,6 +1,5 @@
 #from TestHelperSuperClass import testHelperAPIClient, env
-from appObj import appObj
-from TestHelperSuperClass import testHelperSuperClass
+from TestHelperSuperClass import testHelperSuperClass, getObjectStoreExternalFns
 from objectStores_base import WrongObjectVersionException, UnallowedMutationException, TriedToDeleteMissingObjectException, TryingToCreateExistingObjectException
 from objectStores_Memory import ObjectStore_Memory
 import copy
@@ -19,11 +18,7 @@ ConfigDict = {}
 class test_objectStoresMemory(testHelperSuperClass):
   def test_genericTests(self):
     def getObjFn(ConfigDict):
-      fns = {
-        'getCurDateTime': appObj.getCurDateTime,
-        'getPaginatedResult': appObj.getPaginatedResult
-      }    
-      return ObjectStore_Memory(ConfigDict, fns)
+      return ObjectStore_Memory(ConfigDict, getObjectStoreExternalFns())
     genericTests.runAllGenericTests(self, getObjFn, ConfigDict)
   '''
   def test_saveFailsWithInvalidObjectVersionFirstSave(self):
