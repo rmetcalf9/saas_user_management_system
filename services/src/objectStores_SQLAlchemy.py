@@ -56,7 +56,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     #print("_saveJSONObject:" + objectType + ":" + objectKey + ":", objectVersion)
     #if firstRow is not None:
     #  print(" firstRow:", firstRow)
-    curTime = self.objectStore.appObj.getCurDateTime()
+    curTime = self.objectStore.externalFns['getCurDateTime']()
     if firstRow is None:
       if objectVersion is not None:
         raise SuppliedObjectVersionWhenCreatingException
@@ -172,7 +172,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
                           # but invalid figure will be always be one over as we fetch one past in all cases
         fetching = False
   
-    return self.objectStore.appObj.getPaginatedResult(
+    return self.objectStore.externalFns['getPaginatedResult'](
       srcData,
       outputFN,
       artificalRequestWithPaginationArgs(paginatedParamValues),
@@ -188,8 +188,8 @@ class ObjectStore_SQLAlchemy(ObjectStore):
   objDataTable = None
   verTable = None
   objectPrefix = None
-  def __init__(self, ConfigDict, appObj):
-    super(ObjectStore_SQLAlchemy, self).__init__(appObj)
+  def __init__(self, ConfigDict, externalFns):
+    super(ObjectStore_SQLAlchemy, self).__init__(externalFns)
     if "connectionString" not in ConfigDict:
       raise ObjectStoreConfigError("APIAPP_OBJECTSTORECONFIG SQLAlchemy ERROR - Expected connectionString")
     if "objectPrefix" in ConfigDict:
@@ -242,12 +242,12 @@ class ObjectStore_SQLAlchemy(ObjectStore):
     )
     metadata.create_all(self.engine)
     
-    self._INT_setupOrUpdateVer(appObj)
+    self._INT_setupOrUpdateVer(externalFns)
   
   #AppObj passed in as None
-  def _INT_setupOrUpdateVer(self, appObj):
+  def _INT_setupOrUpdateVer(self, externalFns):
     def someFn(connectionContext):
-      curTime = appObj.getCurDateTime()
+      curTime = externalFns['getCurDateTime']()
       query = self.verTable.select()
       result = connectionContext._INT_execute(query)
       if result.rowcount != 1:

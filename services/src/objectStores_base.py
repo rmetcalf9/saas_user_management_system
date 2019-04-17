@@ -34,13 +34,13 @@ TryingToCreateExistingObjectException = TryingToCreateExistingObjectExceptionCla
 '''
 Calling pattern for connection where obj is and instance of ObjectStore:
 
-storeConnection = obj.getConnectionContext(appObj)
+storeConnection = obj.getConnectionContext()
 def someFn(connectionContext):
   ##DO STUFF
 storeConnection.executeInsideTransaction(someFn)
 
 ##Alternative (depreciated)
-storeConnection = obj.getConnectionContext(appObj)
+storeConnection = obj.getConnectionContext()
 storeConnection.startTransaction()
 try:
   ##DO STUFF
@@ -175,9 +175,9 @@ class ObjectStoreConnectionContext():
     
 #Base class for object store
 class ObjectStore():
-  appObj = None
-  def __init__(self, appObj):
-    self.appObj = appObj
+  externalFns = None
+  def __init__(self, externalFns):
+    self.externalFns = externalFns
   
   #def getConnectionContext(self):
   #  return self._getConnectionContext()

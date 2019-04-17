@@ -19,12 +19,16 @@ from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPer
 from objectStores import createObjectStoreInstance
 from gatewayInterface import getGatewayInterface
 import uuid
+import json
 from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
+
+InvalidObjectStoreConfigInvalidJSONException = customExceptionClass('APIAPP_OBJECTSTORECONFIG value is not valid JSON')
+
 
 class appObjClass(parAppObj):
   objectStore = None
@@ -72,7 +76,23 @@ class appObjClass(parAppObj):
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
 
-    self.objectStore = createObjectStoreInstance(self, env)
+    objectStoreConfigJSON = readFromEnviroment(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None)
+    objectStoreConfigDict = None
+    try:
+      if objectStoreConfigJSON != '{}':
+        objectStoreConfigDict = json.loads(objectStoreConfigJSON)
+    except Exception as err:
+      print(err) # for the repr
+      print(str(err)) # for just the message
+      print(err.args) # the arguments that the exception has been called with. 
+      raise(InvalidObjectStoreConfigInvalidJSONException)
+    
+    fns = {
+      'getCurDateTime': self.getCurDateTime,
+      'getPaginatedResult': self.getPaginatedResult
+    }
+    self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+
     def dbChangingFn(storeConnection):
       if GetTenant(masterTenantName, storeConnection, 'a','b','c') is None:
         print("********No master tenant found - creating********")

@@ -19,7 +19,11 @@ ConfigDict = {}
 class test_objectStoresMemory(testHelperSuperClass):
   def test_genericTests(self):
     def getObjFn(ConfigDict):
-      return ObjectStore_Memory(ConfigDict, appObj)
+      fns = {
+        'getCurDateTime': appObj.getCurDateTime,
+        'getPaginatedResult': appObj.getPaginatedResult
+      }    
+      return ObjectStore_Memory(ConfigDict, fns)
     genericTests.runAllGenericTests(self, getObjFn, ConfigDict)
   '''
   def test_saveFailsWithInvalidObjectVersionFirstSave(self):

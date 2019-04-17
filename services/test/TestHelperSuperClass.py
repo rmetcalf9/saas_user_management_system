@@ -5,7 +5,6 @@ import unittest
 import json
 from appObj import appObj
 import copy
-
 import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import from_iso8601
@@ -336,7 +335,11 @@ class testHelperAPIClientUsingSQLAlchemy(testClassWithTestClient):
       print("Skipping SQLAlchemyTests")
       return
     #App object isn't instalised so we need to make an object to reset the data for the test
-    objectStore = createObjectStoreInstance(appObj, self._getEnvironment())
+    fns = {
+      'getCurDateTime': appObj.getCurDateTime,
+      'getPaginatedResult': appObj.getPaginatedResult
+    }    
+    objectStore = createObjectStoreInstance(json.loads(self._getEnvironment()['APIAPP_OBJECTSTORECONFIG']), fns)
     objectStore.resetDataForTest()
 
   def _getEnvironment(self):

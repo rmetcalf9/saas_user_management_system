@@ -77,7 +77,11 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
       print("Skipping SQLAlchemyTests")
       return
     def getObjFn(SQLAlchemy_LocalDBConfigDict):
-      obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
+      fns = {
+        'getCurDateTime': appObj.getCurDateTime,
+        'getPaginatedResult': appObj.getPaginatedResult
+      }    
+      obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
       obj.resetDataForTest()
       return obj
     genericTests.runAllGenericTests(self, getObjFn, SQLAlchemy_LocalDBConfigDict)
@@ -87,9 +91,13 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
+    fns = {
+      'getCurDateTime': appObj.getCurDateTime,
+      'getPaginatedResult': appObj.getPaginatedResult
+    }    
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
     obj.resetDataForTest()
-    obj2 = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict_withPrefix, appObj)
+    obj2 = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict_withPrefix, fns)
     obj2.resetDataForTest()
     differentPrefixesDontShareData(self, obj, obj2)
     
@@ -98,7 +106,11 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
+    fns = {
+      'getCurDateTime': appObj.getCurDateTime,
+      'getPaginatedResult': appObj.getPaginatedResult
+    }          
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
     obj.resetDataForTest()
     
     def dbfn(storeConnection):
@@ -127,7 +139,11 @@ class test_objectStoresSQLAlchemy(testHelperSuperClass):
     if SKIPSQLALCHEMYTESTS:
       print("Skipping SQLAlchemyTests")
       return
-    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, appObj)
+    fns = {
+      'getCurDateTime': appObj.getCurDateTime,
+      'getPaginatedResult': appObj.getPaginatedResult
+    }    
+    obj = ObjectStore_SQLAlchemy(SQLAlchemy_LocalDBConfigDict, fns)
     obj.resetDataForTest()
     
     def dbfn(storeConnection):

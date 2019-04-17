@@ -17,7 +17,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     
   def _saveJSONObject(self, objectType, objectKey, JSONString, objectVersion):
     dictForObjectType = self.objectType._INT_getDictForObjectType(objectType)
-    curTimeValue = self.objectType.appObj.getCurDateTime()
+    curTimeValue = self.objectType.externalFns['getCurDateTime']()
     newObjectVersion = None
     if objectKey not in dictForObjectType:
       if objectVersion is not None:
@@ -71,7 +71,7 @@ class ConnectionContext(ObjectStoreConnectionContext):
     srcData = []
     if objectType in self.objectType.objectData:
       srcData = self.objectType.objectData[objectType]
-    return self.objectType.appObj.getPaginatedResult(
+    return self.objectType.externalFns['getPaginatedResult'](
       srcData,
       outputFN,
       artificalRequestWithPaginationArgs(paginatedParamValues),
@@ -81,8 +81,8 @@ class ConnectionContext(ObjectStoreConnectionContext):
 # Class that will store objects in memory only
 class ObjectStore_Memory(ObjectStore):
   objectData = None
-  def __init__(self, configJSON, appObj):
-    super(ObjectStore_Memory, self).__init__(appObj)
+  def __init__(self, configJSON, externalFns):
+    super(ObjectStore_Memory, self).__init__(externalFns)
     self.objectData = dict()
     #Dict = (objDICT, objectVersion, creationDate, lastUpdateDate)
 
