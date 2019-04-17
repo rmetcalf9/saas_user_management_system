@@ -4,7 +4,7 @@
 import uuid
 from personObj import personClass
 from constants import customExceptionClass
-from objectStores_base import WrongObjectVersionExceptionClass
+from object_store_abstraction import WrongObjectVersionExceptionClass
 from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
 from authsCommon import getAuthRecord, DeleteAuthRecord
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues

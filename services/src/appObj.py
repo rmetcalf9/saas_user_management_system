@@ -16,7 +16,7 @@ from adminAPI import registerAPI as registerAdminApi
 
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
-from objectStores import createObjectStoreInstance
+from object_store_abstraction import createObjectStoreInstance
 from gatewayInterface import getGatewayInterface
 import uuid
 import json

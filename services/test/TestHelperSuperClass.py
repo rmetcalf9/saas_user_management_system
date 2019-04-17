@@ -18,7 +18,7 @@ from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
 
-from objectStores import createObjectStoreInstance
+from object_store_abstraction import createObjectStoreInstance
 
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):

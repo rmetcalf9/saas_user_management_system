@@ -13,7 +13,7 @@ from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssoc
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict, deleteAuthAndUnassiciateFromPerson
 from tenantObj import tenantClass
-from objectStores_base import WrongObjectVersionExceptionClass
+from object_store_abstraction import WrongObjectVersionExceptionClass
 import copy
 import base64
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
