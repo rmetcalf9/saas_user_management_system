@@ -45,7 +45,6 @@ if [ ${RES} -ne 0 ]; then
   echo "Failed to push to git. You need to run the following commands manually to complete:"f
   echo " git push"
   echo " git push --tags"
-  echo " ${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}"
   exit 1
 fi
 
