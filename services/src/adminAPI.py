@@ -335,6 +335,8 @@ def registerAPI(appObj):
             raise BadRequest(err.text)
           if (err.id=='InvalidUserIDException'):
             raise BadRequest(err.text)
+          if (err.id=='InvalidKnownAsException'):
+            raise BadRequest(err.text)
           raise Exception('InternalServerError')
         except:
           raise InternalServerError
