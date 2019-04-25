@@ -333,6 +333,8 @@ def registerAPI(appObj):
         except customExceptionClass as err:
           if (err.id=='TryingToCreateDuplicateUserException'):
             raise BadRequest(err.text)
+          if (err.id=='InvalidUserIDException'):
+            raise BadRequest(err.text)
           raise Exception('InternalServerError')
         except:
           raise InternalServerError
