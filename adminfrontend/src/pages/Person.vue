@@ -22,7 +22,7 @@
       <q-item-main >
         <q-item-tile label>Linked User Records ({{ numberOfAssociatedUsers }})</q-item-tile>
         <q-item-tile sublabel v-for="curUser in personData.associatedUsers" :key=curUser.UserID>
-          <a :href="'/#/' + $route.params.tenantName + '/users/' + curUser.UserID">{{ curUser.UserID }}</a>&nbsp;
+          <a :href="curPathPartBeforeHash + '#/' + $route.params.tenantName + '/users/' + curUser.UserID">{{ curUser.UserID }}</a>&nbsp;
           <q-btn
             color="negative"
             size="xs"
@@ -146,6 +146,7 @@ export default {
     AuthAddInternal
   },
   data () {
+    var currentURL = new URL(window.location.href)
     return {
       personData: getEmptyPersonData(),
       editPersonModalDialogData: {
@@ -154,7 +155,8 @@ export default {
         ObjectVersion: ''
       },
       editPersonModalDialogVisible: false,
-      futureRefreshRequested: false
+      futureRefreshRequested: false,
+      curPathPartBeforeHash: currentURL.pathname
     }
   },
   methods: {

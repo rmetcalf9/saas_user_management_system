@@ -35,7 +35,7 @@
     <q-item>
       <q-item-main >
         <q-item-tile label>Linked Person Records ({{ userData['associatedPersonGUIDs'].length }})</q-item-tile>
-        <q-item-tile sublabel v-for="curPersonGUID in userData.associatedPersonGUIDs" :key=curPersonGUID><a :href="'/#/' + $route.params.tenantName + '/persons/' + curPersonGUID">{{ curPersonGUID }}</a></q-item-tile>
+        <q-item-tile sublabel v-for="curPersonGUID in userData.associatedPersonGUIDs" :key=curPersonGUID><a :href="curPathPartBeforeHash + '#/' + $route.params.tenantName + '/persons/' + curPersonGUID">{{ curPersonGUID }}</a></q-item-tile>
       </q-item-main>
     </q-item>
     <q-item>
@@ -115,6 +115,7 @@ function getEmptyUserData () {
 export default {
   name: 'PageIndex',
   data () {
+    var currentURL = new URL(window.location.href)
     return {
       userData: getEmptyUserData(),
       editUserModalDialogData: {
@@ -122,7 +123,8 @@ export default {
         other_data: '',
         TenantRoles: ''
       },
-      editUserModalDialogVisible: false
+      editUserModalDialogVisible: false,
+      curPathPartBeforeHash: currentURL.pathname
     }
   },
   computed: {
