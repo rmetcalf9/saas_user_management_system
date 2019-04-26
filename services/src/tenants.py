@@ -8,7 +8,7 @@ from tenantObj import tenantClass
 import jwt
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
-from objectStores_base import WrongObjectVersionException
+from object_store_abstraction import WrongObjectVersionException
 from users import CreateUser, AddUserRole, associateUserWithPerson
 from userPersonCommon import getListOfUserIDsForPerson, GetUser
 from persons import GetPerson

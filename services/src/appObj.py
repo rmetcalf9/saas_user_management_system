@@ -13,18 +13,23 @@ import datetime
 
 from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
+from currentAuthAPI import registerAPI as registerCurAuthApi
 
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
-from objectStores import createObjectStoreInstance
+from object_store_abstraction import createObjectStoreInstance
 from gatewayInterface import getGatewayInterface
 import uuid
+import json
 from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
 invalidConfigurationException = customExceptionClass('Invalid Configuration')
+
+InvalidObjectStoreConfigInvalidJSONException = customExceptionClass('APIAPP_OBJECTSTORECONFIG value is not valid JSON')
+
 
 class appObjClass(parAppObj):
   objectStore = None
@@ -72,7 +77,23 @@ class appObjClass(parAppObj):
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
 
-    self.objectStore = createObjectStoreInstance(self, env)
+    objectStoreConfigJSON = readFromEnviroment(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None)
+    objectStoreConfigDict = None
+    try:
+      if objectStoreConfigJSON != '{}':
+        objectStoreConfigDict = json.loads(objectStoreConfigJSON)
+    except Exception as err:
+      print(err) # for the repr
+      print(str(err)) # for just the message
+      print(err.args) # the arguments that the exception has been called with. 
+      raise(InvalidObjectStoreConfigInvalidJSONException)
+    
+    fns = {
+      'getCurDateTime': self.getCurDateTime,
+      'getPaginatedResult': self.getPaginatedResult
+    }
+    self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+
     def dbChangingFn(storeConnection):
       if GetTenant(masterTenantName, storeConnection, 'a','b','c') is None:
         print("********No master tenant found - creating********")
@@ -90,6 +111,7 @@ class appObjClass(parAppObj):
     super(appObjClass, self).initOnce()
     registerLoginApi(self)
     registerAdminApi(self)
+    registerCurAuthApi(self)
     self.flastRestPlusAPIObject.title = "SAAS User Management"
     self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
 

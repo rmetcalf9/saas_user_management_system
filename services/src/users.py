@@ -9,6 +9,8 @@ import copy
 
 TryingToCreateDuplicateUserException = customExceptionClass('That username is already in use', 'TryingToCreateDuplicateUserException')
 UserAlreadyAssociatedWithThisPersonException = customExceptionClass('User Already Associated With This Person', 'UserAlreadyAssociatedWithThisPersonException')
+InvalidUserIDException = customExceptionClass('That userID is not valid', 'InvalidUserIDException')
+InvalidKnownAsException = customExceptionClass('That knownAs is not valid', 'InvalidKnownAsException')
 
 ##Creation functions
 ## All the functions that sets up the user, roles and asociates the user with a person
@@ -17,7 +19,15 @@ def CreateUser(appObj, userData, mainTenant, createdBy, storeConnection):
   #mainTenant is validated by adminAPI
   #print("UpdateUser createdBy:", createdBy)
   UserID = userData['user_unique_identifier']
+  if UserID is None:
+    raise InvalidUserIDException
+  if UserID == '':
+    raise InvalidUserIDException
   KnownAs = userData['known_as']
+  if KnownAs is None:
+    raise InvalidKnownAsException
+  if KnownAs == '':
+    raise InvalidKnownAsException
   OtherData = {}
   if "other_data" in userData:
     OtherData = userData['other_data']

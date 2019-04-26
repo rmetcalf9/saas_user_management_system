@@ -367,4 +367,33 @@ class test_adminAPIUsers(parent_test_api):
     #print(result.get_data(as_text=True))
     self.assertEqual(result.status_code, 404, msg="User still in system")    
 
+  def test_createNewUserWithBlankUserIDFails(self):
+    newUserDICT = {
+      "UserID": "",
+      "known_as": "testUserID",
+      "mainTenant": masterTenantName
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create user did not fail with correct code - " + result.get_data(as_text=True))
+    resultJSON = json.loads(result.get_data(as_text=True))
   
+  def test_createNewUserWithBlankKnownAsFails(self):
+    newUserDICT = {
+      "UserID": "saddfsadsf",
+      "known_as": "",
+      "mainTenant": masterTenantName
+    }
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(newUserDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Create user did not fail with correct code - " + result.get_data(as_text=True))
+    resultJSON = json.loads(result.get_data(as_text=True))
+      

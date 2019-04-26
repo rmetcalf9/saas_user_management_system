@@ -2,7 +2,7 @@ import stores from '../store/index.js'
 import { Cookies } from 'quasar'
 import shared from '../sharedFns.js'
 
-function directToLoginPage (to, from, next) {
+function directToFrontend (to, from, next, message = undefined, frontendPath = undefined) {
   var thisQuasarPath = to.path
   var logoutClickCurRoute = stores().state.globalDataStore.logoutClickCurRoute
   if (typeof (logoutClickCurRoute) !== 'undefined') {
@@ -12,7 +12,7 @@ function directToLoginPage (to, from, next) {
   }
   stores().commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', null)
 
-  shared.moveToLoginService(thisQuasarPath)
+  shared.moveToFrontendUI(thisQuasarPath, message, frontendPath)
 }
 
 function checkLoginNeeded (to, from, next) {
@@ -32,7 +32,7 @@ function checkLoginNeeded (to, from, next) {
     return
   }
 
-  directToLoginPage(to, from, next)
+  directToFrontend(to, from, next)
 }
 
 function beforeEnterMainIndexChildPage (to, from, next, pageTitle) {
@@ -43,7 +43,12 @@ function beforeEnterMainIndexChildPage (to, from, next, pageTitle) {
 
 function logoutPageFn (to, from, next, pageTitle) {
   stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
-  directToLoginPage(to, from, next)
+  directToFrontend(to, from, next)
+}
+function SecuritySettingsPageFn (to, from, next, pageTitle) {
+  stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
+
+  directToFrontend(to, from, next, undefined, '/SecuritySettings')
 }
 
 const routes = [
@@ -63,7 +68,8 @@ const routes = [
       { path: 'persons', component: () => import('pages/Persons.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Persons') } },
       { path: 'persons/:selPerGUID', component: () => import('pages/Person.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Person') } },
       { path: 'usersettings', component: () => import('pages/UserSettings.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'User Settings') } },
-      { path: 'logout', beforeEnter: function fn (to, from, next) { logoutPageFn(to, from, next, 'Logout') } }
+      { path: 'logout', beforeEnter: function fn (to, from, next) { logoutPageFn(to, from, next, 'Logout') } },
+      { path: 'SecuritySettings', beforeEnter: function fn (to, from, next) { SecuritySettingsPageFn(to, from, next, 'Security Settings') } }
     ]
   }
 ]
