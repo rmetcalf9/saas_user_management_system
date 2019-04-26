@@ -289,9 +289,27 @@ function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = u
   }
 }
 
+function callAuthedAPI (commit, state, path, method, postdata, callback, curPath, headers, refreshFns, apiType, tenantName, apiPrefix) {
+  var cookie = Cookies.get('usersystemUserCredentials')
+
+  if (refreshFns.isRefreshInProgressFN()) {
+    console.log('Preventing call in action.js because refresh is in progress')
+    var callback2 = {
+      ok: function (response) {
+        callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+      },
+      error: callback.error
+    }
+    commit('RECORD_REFRESH_STORED_RESPONSE', callback2)
+  } else {
+    callAPI(refreshFns, tenantName, apiPrefix, true, '/admin/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+  }
+}
+
 export default {
   TryToConnectToAPI: TryToConnectToAPI,
   getAPIPathToCall: getAPIPathToCall,
   callAPI: callAPI,
+  callAuthedAPI: callAuthedAPI,
   moveToFrontendUI: moveToFrontendUI
 }
