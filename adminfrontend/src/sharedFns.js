@@ -283,8 +283,8 @@ function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = u
   if (typeof (message) !== 'undefined') {
     window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress) + '&usersystem_message=' + encodeURIComponent(message)
   } else {
-    console.log('locationToGoTo:', locationToGoTo)
-    console.log('usersystem_returnaddress:', encodeURIComponent(returnAddress))
+    // console.log('locationToGoTo:', locationToGoTo)
+    // console.log('usersystem_returnaddress:', encodeURIComponent(returnAddress))
     window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress)
   }
 }
