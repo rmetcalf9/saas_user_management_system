@@ -41,7 +41,7 @@ function readServerInfo (state, commit, currentHREF, callback) {
   shared.TryToConnectToAPI(currentHREF, state.tenantName, callback2, '/login/serverinfo')
 }
 
-function _getRefreshFunctions (commit, state, callback) {
+function _getRefreshFunctions (commit, state) {
   return {
     startRefreshFN: function () {
       commit('START_REFRESH')
@@ -72,7 +72,7 @@ export const callAdminAPI = ({ dispatch, commit, state }, params) => {
     return
   }
 
-  var refreshFns = _getRefreshFunctions(commit, state, params.callback)
+  var refreshFns = _getRefreshFunctions(commit, state)
 
   if (state.apiPrefix === null) {
     var callback = {

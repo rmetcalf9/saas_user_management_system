@@ -302,7 +302,7 @@ function callAuthedAPI (commit, state, path, method, postdata, callback, curPath
     }
     commit('RECORD_REFRESH_STORED_RESPONSE', callback2)
   } else {
-    callAPI(refreshFns, tenantName, apiPrefix, true, '/admin/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+    callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
   }
 }
 

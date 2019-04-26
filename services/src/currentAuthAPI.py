@@ -41,5 +41,5 @@ def registerAPI(appObj):
       '''Get list of tenants'''
       verifySecurityOfAPICall(appObj, request, tenant)
       return {
-        'result': 'pass'
+        'TODO': 'TODO'
       }

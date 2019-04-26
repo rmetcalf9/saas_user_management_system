@@ -24,3 +24,16 @@ export const setMessageToDisplay = (state, message) => {
 export const setMessageDisplayed = (state) => {
   state.messagePendingDisplay = null
 }
+export function START_REFRESH (state) {
+  state.refeshTokenInProgress = true
+  state.refeshTokenInfoStoredResponses = []
+}
+export function END_REFRESH (state) {
+  state.refeshTokenInProgress = false
+}
+export function RECORD_REFRESH_STORED_RESPONSE (state, callback) {
+  state.refeshTokenInfoStoredResponses.push(callback)
+}
+export function REFRESH_STORED_RESPONSE_PROCESS_COMPLETE (state) {
+  state.refeshTokenInfoStoredResponses = []
+}

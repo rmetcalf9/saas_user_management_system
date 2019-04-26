@@ -1,5 +1,7 @@
 // Frontend GlobalStore State
 export default {
+  refeshTokenInProgress: false,
+  refeshTokenInfoStoredResponses: [],
   apiPrefix: null,
   tenantInfo: null,
   tenant: null,

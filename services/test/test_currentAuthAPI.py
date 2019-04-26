@@ -21,6 +21,7 @@ class test_securityTests(testHelperAPIClient):
     resultJSON = json.loads(result.get_data(as_text=True))
 
     expectedResult = {
+      'TODO': 'TODO'
     }
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [], msg='Did not get expected result')
