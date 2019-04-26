@@ -231,13 +231,13 @@ function callAPI (
             refreshFns.endRefreshFN()
           },
           error: function (response) {
-            moveToLoginService(curPath, 'Session refresh failed')
+            moveToFrontendUI(curPath, 'Session refresh failed')
             // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
           }
         }
         updateCookieWithRefreshToken(refreshFns.refreshCompleteFN, callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
       } else {
-        moveToLoginService(curPath, 'Logged out due to inactivity')
+        moveToFrontendUI(curPath, 'Logged out due to inactivity')
         // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
       }
     }
@@ -254,7 +254,10 @@ function getAlteredHost (origHost, hostLookupList) {
   return 'UNKNOWN'
 }
 
-function moveToLoginService (thisQuasarPath, message = undefined) {
+function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = undefined) {
+  if (typeof (frontendPath) === 'undefined') {
+    frontendPath = ''
+  }
   if (thisQuasarPath.startsWith('/')) {
     thisQuasarPath = thisQuasarPath.substr(1)
   }
@@ -265,7 +268,7 @@ function moveToLoginService (thisQuasarPath, message = undefined) {
   var locationToGoTo = ''
   if (window.location.pathname.includes('/public/web/adminfrontend/')) {
     // running both in container and kong mode have /public/web/adminfrontend/ prefix so we can just replace adminfrontend with frontend to get url
-    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat
+    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat + frontendPath
   } else {
     // running on a dev machine is more complex as we need to switch over to anohter port
     var hostLookup = [
@@ -273,13 +276,15 @@ function moveToLoginService (thisQuasarPath, message = undefined) {
       {a: 'cat-sdts.metcarob-home.com:8082', b: 'cat-sdts.metcarob-home.com:8081'},
       {a: 'somefunnyhostname.com:5082', b: 'somefunnyhostname.com:5081'}
     ]
-    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + quasarPathForTenenat
+    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + quasarPathForTenenat + frontendPath
   }
   var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + thisQuasarPath
 
   if (typeof (message) !== 'undefined') {
     window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress) + '&usersystem_message=' + encodeURIComponent(message)
   } else {
+    console.log('locationToGoTo:', locationToGoTo)
+    console.log('usersystem_returnaddress:', encodeURIComponent(returnAddress))
     window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress)
   }
 }
@@ -288,5 +293,5 @@ export default {
   TryToConnectToAPI: TryToConnectToAPI,
   getAPIPathToCall: getAPIPathToCall,
   callAPI: callAPI,
-  moveToLoginService: moveToLoginService
+  moveToFrontendUI: moveToFrontendUI
 }

@@ -81,7 +81,7 @@
     <q-modal v-model="editPersonModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
-            <q-btn
+          <q-btn
             color="primary"
             flat
             round

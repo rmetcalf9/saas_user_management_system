@@ -6,15 +6,25 @@ function isValueHeld (a) {
   return true
 }
 
-function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
-  if (isValueHeld(from.query.usersystem_returnaddress)) {
-    var decoded = decodeURIComponent(from.query.usersystem_returnaddress)
-    // console.log('Frontend router got return address:', decoded)
-    stores().commit('globalDataStore/updateUsersystemReturnaddress', decoded)
+function _getDecodedValueFromQuery (to, from, valueName) {
+  if (isValueHeld(from.query[valueName])) {
+    return decodeURIComponent(from.query[valueName])
+  } else if (isValueHeld(to.query[valueName])) {
+    return decodeURIComponent(to.query[valueName])
   }
-  if (isValueHeld(from.query.usersystem_message)) {
-    var decoded2 = decodeURIComponent(from.query.usersystem_message)
-    stores().commit('globalDataStore/setMessageToDisplay', decoded2)
+  return undefined
+}
+
+function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
+  // console.log('_ensurePassedTenenatIsLoaded FROM', from)
+  // console.log('_ensurePassedTenenatIsLoaded TO', to)
+  var a = _getDecodedValueFromQuery(to, from, 'usersystem_returnaddress')
+  if (typeof (a) !== 'undefined') {
+    stores().commit('globalDataStore/updateUsersystemReturnaddress', a)
+  }
+  var b = _getDecodedValueFromQuery(to, from, 'usersystem_message')
+  if (typeof (b) !== 'undefined') {
+    stores().commit('globalDataStore/setMessageToDisplay', b)
   }
   if (stores().state.globalDataStore.tenantInfo !== null) {
     if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {
@@ -25,7 +35,9 @@ function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
   console.log('Loaded store differs from param, redirecting')
   next({
     path: '/' + to.params.tenantName,
-    query: { usersystem_redirect: to.fullPath }
+    query: {
+      usersystem_redirect: to.fullPath
+    }
   })
 }
 
@@ -58,6 +70,11 @@ const routes = [
   {
     path: '/:tenantName/AuthProvider/internal',
     component: () => import('pages/AuthProvider_internal.vue'),
+    beforeEnter: ensurePassedTenantIsLoaded
+  },
+  {
+    path: '/:tenantName/SecuritySettings',
+    component: () => import('pages/SecuritySettings.vue'),
     beforeEnter: ensurePassedTenantIsLoaded
   }
 ]
