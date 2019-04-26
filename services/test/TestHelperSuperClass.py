@@ -177,6 +177,7 @@ class testClassWithTestClient(testHelperSuperClass):
 
   loginAPIPrefix = '/api/public/login'
   adminAPIPrefix = '/api/authed/admin'
+  currentAuthAPIPrefix = '/api/authed/currentAuth'
 
   def _getEnvironment(self):
     raise Exception("Should be overridden")

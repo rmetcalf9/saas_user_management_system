@@ -13,6 +13,7 @@ import datetime
 
 from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
+from currentAuthAPI import registerAPI as registerCurAuthApi
 
 from tenants import GetTenant, CreateMasterTenant
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
@@ -110,6 +111,7 @@ class appObjClass(parAppObj):
     super(appObjClass, self).initOnce()
     registerLoginApi(self)
     registerAdminApi(self)
+    registerCurAuthApi(self)
     self.flastRestPlusAPIObject.title = "SAAS User Management"
     self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
 

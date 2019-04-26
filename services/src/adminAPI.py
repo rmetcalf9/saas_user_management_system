@@ -101,8 +101,6 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant, systemAdminRole=master
   if tenant != masterTenantName:
     raise Unauthorized("Supplied tenant is not the master tenant")
 
-  print("verifySecurityOfAdminAPICall - Check incl:" + systemAdminRole)
-  
   return appObj.apiSecurityCheck(
     request, 
     tenant, 
