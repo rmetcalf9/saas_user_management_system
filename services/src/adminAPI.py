@@ -4,7 +4,7 @@ from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized, Forbidden, BadRequest, InternalServerError, NotFound, Conflict
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole
 import constants
-from apiSharedModels import getTenantModel, getUserModel
+from apiSharedModels import getTenantModel, getUserModel, getPersonModel
 from urllib.parse import unquote
 import json
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
@@ -46,21 +46,6 @@ def getCreatePersonModel(appObj):
   return appObj.flastRestPlusAPIObject.model('CreatePersonInfo', {
   })
 
-def getPersonModel(appObj):
-  personAuthsModel = appObj.flastRestPlusAPIObject.model('PersonAuthsInfo', {
-    'AuthUserKey': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
-    'AuthProviderType': fields.String(default='DEFAULT', description='Type of AuthProvider for this Auth'),
-    'AuthProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider for this Auth'),
-    'tenantName': fields.String(default='DEFAULT', description='Name of the Tenant this auth is associated with')
-  })
-  return appObj.flastRestPlusAPIObject.model('PersonInfo', {
-    'guid': fields.String(default='DEFAULT', description='Unique identifier of Person'),
-    'associatedUsers': fields.List(fields.Nested(getUserModel(appObj))),
-    'personAuths': fields.List(fields.Nested(personAuthsModel)),
-    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
-    'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
-    'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
-  })
 
 def getUserPersonLinkModel(appObj):
   return appObj.flastRestPlusAPIObject.model('UserPersonLinkInfo', {

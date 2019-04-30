@@ -37,3 +37,19 @@ def getUserModel(appObj):
     'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
     'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
   })
+
+def getPersonModel(appObj):
+  personAuthsModel = appObj.flastRestPlusAPIObject.model('PersonAuthsInfo', {
+    'AuthUserKey': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
+    'AuthProviderType': fields.String(default='DEFAULT', description='Type of AuthProvider for this Auth'),
+    'AuthProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider for this Auth'),
+    'tenantName': fields.String(default='DEFAULT', description='Name of the Tenant this auth is associated with')
+  })
+  return appObj.flastRestPlusAPIObject.model('PersonInfo', {
+    'guid': fields.String(default='DEFAULT', description='Unique identifier of Person'),
+    'associatedUsers': fields.List(fields.Nested(getUserModel(appObj))),
+    'personAuths': fields.List(fields.Nested(personAuthsModel)),
+    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates'),
+    'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
+    'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
+  })
