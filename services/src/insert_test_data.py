@@ -6,6 +6,7 @@ import os
 import bcrypt
 from base64 import b64decode
 import copy
+import time
 
 
 env = os.environ
@@ -27,28 +28,43 @@ def callService(api, url, method, dataDICT, expectedResponses):
   result = None
   targetURL = BASE[api] + url
   headers = {}
+  data = None
   if loginDICT is not None:
     #print(loginDICT['jwtData']['JWTToken'])
     headers[jwtHeaderName] = loginDICT['jwtData']['JWTToken']
+  requestsFn = None
   if method=='get':
-    result = requests.get(
-      targetURL,
-      headers=headers
-    )
+    requestsFn = requests.get
   if method=='post':
     headers['content-type'] = 'application/json'
-    result = requests.post(
-      targetURL,
-      data=json.dumps(dataDICT),
-      headers=headers
-    )
+    data=json.dumps(dataDICT)
+    requestsFn = requests.post
   if method=='put':
     headers['content-type'] = 'application/json'
-    result = requests.put(
-      targetURL,
-      data=json.dumps(dataDICT),
-      headers=headers
-    )
+    data=json.dumps(dataDICT)
+    requestsFn = requests.put
+
+  numTries = 0
+  unsucessful = True
+  while unsucessful:
+    unsucessful = False
+    if numTries > 0:
+      print(" Call failed (try " + str(numTries) + ") - retrying...")
+      time.sleep(1)
+    numTries = numTries + 1
+    try:
+      result = requestsFn(
+        targetURL,
+        data=data,
+        headers=headers
+      )
+    except Exception as err:
+      unsucessful = True
+      if numTries > 60:
+        print("We have been trying too many times - giving up")
+        raise err 
+      
+
   if result.status_code not in expectedResponses:
     print("Sending " + method + " to ", targetURL)
     if dataDICT is not None:

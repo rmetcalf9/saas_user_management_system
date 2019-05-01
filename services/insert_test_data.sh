@@ -8,8 +8,9 @@ fi
 
 echo "Insert Test Data"
 if [[ $# -eq 1 ]]; then
-  echo "Sleeping for ${1} seconds to allow services to start"
-  sleep ${1}
+  echo "Wait paramater ignored as insert_test_data will now retry"
+  #echo "Sleeping for ${1} seconds to allow services to start"
+  #sleep ${1}
 fi
 
 export APIAPP_MODE=DEVELOPER
