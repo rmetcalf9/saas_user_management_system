@@ -86,8 +86,9 @@ class authProviderInternal(authProvider):
       raise InvalidAuthConfigException
     return {
       "user_unique_identifier": credentialDICT['username'] + self.getConfig()['userSufix'], #used for username - needs to be unique across all auth provs
-      "known_as": credentialDICT['username'], #used to display in UI for the user name
+      "known_as": self.getDefaultKnownAs(credentialDICT), #used to display in UI for the user name
       "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
     }
 
-  
+  def _getDefaultKnownAs(self, credentialDICT):
+    return credentialDICT['username']

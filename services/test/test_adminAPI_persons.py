@@ -19,6 +19,7 @@ defaultPersonData = {
     "AuthProviderGUID": "574a7b51-110d-4fcd-b4a4-868884922109", 
     "AuthProviderType": "internal", 
     "AuthUserKey": "AdminTestSet" + internalUSerSufix + uniqueKeyCombinator +"internal",
+    "known_as": "AdminTestSet",
     "tenantName": masterTenantName
   }]
 }

@@ -48,6 +48,7 @@ def _getAuthInfoForKeyForPersonObj(appObj, authKey, storeConnection):
   authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey, storeConnection)
   return {
     "AuthUserKey": authRecordDict["AuthUserKey"],
+    "known_as": authRecordDict["known_as"],
     "AuthProviderType": authRecordDict["AuthProviderType"],  
     "AuthProviderGUID": authRecordDict["AuthProviderGUID"],
     "tenantName": authRecordDict["tenantName"]

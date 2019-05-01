@@ -11,7 +11,9 @@
       </div>
       <div class="row">
         <div v-for="curVal in currentTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
-          {{ curVal }}
+          <AuthSecuritySettingsInternal
+            :authData="curVal"
+          />
         </div>
       </div>
     </div>
@@ -30,6 +32,7 @@
 <script>
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
+import AuthSecuritySettingsInternal from '../components/authSecuritySettingsInternal'
 
 function getEmptyUserSettingsData () {
   return {
@@ -42,6 +45,9 @@ function getEmptyUserSettingsData () {
 
 export default {
   name: 'SecuritySettings',
+  components: {
+    AuthSecuritySettingsInternal
+  },
   data () {
     return {
       UserSettingsData: getEmptyUserSettingsData()

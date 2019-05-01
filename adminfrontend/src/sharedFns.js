@@ -273,8 +273,10 @@ function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = u
     // running on a dev machine is more complex as we need to switch over to anohter port
     var hostLookup = [
       {a: 'localhost:8082', b: 'localhost:8081'},
+      {a: 'localhost:8081', b: 'localhost:8081'},
       {a: 'cat-sdts.metcarob-home.com:8082', b: 'cat-sdts.metcarob-home.com:8081'},
-      {a: 'somefunnyhostname.com:5082', b: 'somefunnyhostname.com:5081'}
+      {a: 'somefunnyhostname.com:5082', b: 'somefunnyhostname.com:5081'},
+      {a: 'somefunnyhostname.com:5081', b: 'somefunnyhostname.com:5081'}
     ]
     locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + quasarPathForTenenat + frontendPath
   }

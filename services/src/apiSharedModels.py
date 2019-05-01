@@ -41,6 +41,7 @@ def getUserModel(appObj):
 def getPersonModel(appObj):
   personAuthsModel = appObj.flastRestPlusAPIObject.model('PersonAuthsInfo', {
     'AuthUserKey': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
+    'known_as': fields.String(default='DEFAULT', description='User friendly identifier for Auth'),
     'AuthProviderType': fields.String(default='DEFAULT', description='Type of AuthProvider for this Auth'),
     'AuthProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider for this Auth'),
     'tenantName': fields.String(default='DEFAULT', description='Name of the Tenant this auth is associated with')

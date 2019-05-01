@@ -61,6 +61,7 @@ class authProvider():
 
     mainObjToStore = {
       "AuthUserKey": key,
+      "known_as": self.getDefaultKnownAs(credentialDICT),
       "AuthProviderType": self.dataDict["Type"],
       "AuthProviderGUID": self.guid,
       "AuthProviderJSON": self._getAuthData(appObj, credentialDICT),
@@ -82,11 +83,16 @@ class authProvider():
   def _getTypicalAuthData(self, credentialDICT):
     return {
       "user_unique_identifier": str(uuid.uuid4()), #used for username - needs to be unique across all auth provs
-      "known_as": 'autoCreatedUser', #used to display in UI for the user name
+      "known_as": self.getDefaultKnownAs(credentialDICT), #used to display in UI for the user name
       "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
     }
 
   def getTypicalAuthData(self, credentialDICT):
     return self._getTypicalAuthData(credentialDICT)
    
-    
+  # Normally overridden
+  def _getDefaultKnownAs(self, credentialDICT):
+    return 'autoCreatedUser'
+
+  def getDefaultKnownAs(self, credentialDICT):
+    return self._getDefaultKnownAs(credentialDICT)

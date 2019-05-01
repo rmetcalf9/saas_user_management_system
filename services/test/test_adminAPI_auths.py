@@ -212,6 +212,7 @@ class test_adminAPIAuths(parent_test_api):
       }], 
       'personAuths': [{
         'AuthUserKey': "AdminTestSet" + internalUSerSufix + uniqueKeyCombinator + "internal", 
+        'known_as': "AdminTestSet", 
         'AuthProviderType': 'internal', 
         'AuthProviderGUID': newAuthDICT["authProviderGUID"], 
         'tenantName': 'usersystem'

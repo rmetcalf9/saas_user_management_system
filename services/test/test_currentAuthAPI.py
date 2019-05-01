@@ -39,6 +39,7 @@ class test_securityTests(testHelperAPIClient):
         "AuthProviderGUID": "9a649f23-e8b4-42ba-b613-9bac7911980b", 
         "AuthProviderType": "internal", 
         "AuthUserKey": "AdminTestSet@internalDataStore_`@\\/'internal", 
+        "known_as": "AdminTestSet", 
         "tenantName": "usersystem"
        }]
     }
