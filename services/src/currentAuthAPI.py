@@ -52,8 +52,9 @@ def registerAPI(appObj):
       def someFn(connectionContext):
         return GetPerson(appObj, decodedJWTToken.getPersonID(), connectionContext), GetUser(appObj, decodedJWTToken.getUserID(), connectionContext)
       personObj, userObj = appObj.objectStore.executeInsideTransaction(someFn)
+      if personObj is None:
+        raise Exception("Valid JWT Token but person not found")
       
-      print()
       return {
         'loggedInPerson': personObj.getJSONRepresenation(),
         'loggedInUser': userObj.getJSONRepresenation()

@@ -122,7 +122,7 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
-function updateCookieWithRefreshToken (refreshCompleteFN, callback, apiPrefix, tenantName, jwtTokenData, refreshTokenData) {
+function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtTokenData, refreshTokenData) {
   var config = {
     method: 'POST',
     url: getAPIPathToCall(apiPrefix, false, '/login/' + tenantName + '/refresh'),
@@ -133,12 +133,7 @@ function updateCookieWithRefreshToken (refreshCompleteFN, callback, apiPrefix, t
 
   axios(config).then(
     (response) => {
-      // Save new token data to cookie (expires in 1 day)
-      Cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
-
-      // callback ok
       callback.ok(response)
-      refreshCompleteFN()
     },
     (response) => {
       callback.error(response)
@@ -225,18 +220,27 @@ function callAPI (
         refreshFns.startRefreshFN()
         var callback2 = {
           ok: function (response) {
-            // callAPI with new jwtTokenData value and refresh value - ignore response
+            // Save new token data to cookie (expires in 1 day)
+            Cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+
+            // callback ok
+            refreshFns.endRefreshFN()
+            refreshFns.refreshCompleteFN()
+
             var cookie = Cookies.get('usersystemUserCredentials')
             callAPI(refreshFns, tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
-            refreshFns.endRefreshFN()
           },
           error: function (response) {
+            // Refresh may have been in progress when page changed so make sure it is stopped
+            refreshFns.endRefreshFN()
             moveToFrontendUI(curPath, 'Session refresh failed')
             // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
           }
         }
-        updateCookieWithRefreshToken(refreshFns.refreshCompleteFN, callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
+        updateCookieWithRefreshToken(callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
       } else {
+        // Refresh may have been in progress when page changed so make sure it is stopped
+        refreshFns.endRefreshFN()
         moveToFrontendUI(curPath, 'Logged out due to inactivity')
         // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
       }
