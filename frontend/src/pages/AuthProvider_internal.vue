@@ -74,6 +74,7 @@ import {
   Loading
 } from 'quasar'
 import bcrypt from 'bcryptjs'
+import frontendFns from '../frontendFns.js'
 
 export default {
   name: 'AuthProvider_internal',
@@ -102,22 +103,7 @@ export default {
       return (this.passwordERRORMessage !== 'Password')
     },
     passwordERRORMessage () {
-      if (/[A-Z]/.test(this.createAccountDialogModel.password) !== true) {
-        return 'Password must contain at least one uppercase letter'
-      }
-      if (/[a-z]/.test(this.createAccountDialogModel.password) !== true) {
-        return 'Password must contain at least one lowercase letter'
-      }
-      if (/\d/.test(this.createAccountDialogModel.password) !== true) {
-        return 'Password must contain at least one number'
-      }
-      if (this.createAccountDialogModel.password.length < 5) {
-        return 'Password must be at least 5 characters'
-      }
-      if (this.createAccountDialogModel.password !== this.createAccountDialogModel.password2) {
-        return 'Passwords must match'
-      }
-      return 'Password'
+      return frontendFns.passwordERRORMessage(this.createAccountDialogModel.password, this.createAccountDialogModel.password2)
     }
   },
   methods: {
