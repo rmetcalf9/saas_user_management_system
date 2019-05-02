@@ -18,6 +18,13 @@ export const updateSelectedAuthProvGUID = (state, selectedAuthProvGUID) => {
 export const updateUsersystemReturnaddress = (state, usersystemReturnaddress) => {
   state.usersystemReturnaddress = usersystemReturnaddress
 }
+export const updateUsersystemReturnaddressInternal = (state, usersystemReturnaddressInternal) => {
+  state.usersystemReturnaddressInternal = usersystemReturnaddressInternal
+}
+export const clearUsersystemReturnaddressInternal = (state) => {
+  state.usersystemReturnaddressInternal = null
+}
+
 export const setMessageToDisplay = (state, message) => {
   state.messagePendingDisplay = message
 }

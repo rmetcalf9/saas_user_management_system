@@ -63,7 +63,7 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
   // TODO how do we know what vx should be?
   var prodVer = getProdVer(currentURL)
   if (prodVer.prod === false) {
-    console.log('NON prod detected url and tenantName: ', currentURL, tenantName)
+    console.log('NON prod detected url and tenantName: ', currentURL, ': tenantName:', tenantName)
     return [
       { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
       { prefix: 'http://127.0.0.1:8098/', kong: false }, // home run all parts on dec machine
@@ -164,7 +164,9 @@ function callAPI (
   refreshTokenData,
   refreshAlreadyTried = false,
   curPath = undefined,
-  headers = undefined
+  headers = undefined,
+  sessionInFromFrontendUI = false,
+  frontendRecordReturnAddressFn = null
 ) {
   if (authed) {
     if (jwtTokenData === null) {
@@ -233,7 +235,7 @@ function callAPI (
           error: function (response) {
             // Refresh may have been in progress when page changed so make sure it is stopped
             refreshFns.endRefreshFN()
-            moveToFrontendUI(curPath, 'Session refresh failed')
+            moveToFrontendUI(curPath, 'Session refresh failed', '', sessionInFromFrontendUI, frontendRecordReturnAddressFn)
             // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
           }
         }
@@ -241,7 +243,7 @@ function callAPI (
       } else {
         // Refresh may have been in progress when page changed so make sure it is stopped
         refreshFns.endRefreshFN()
-        moveToFrontendUI(curPath, 'Logged out due to inactivity')
+        moveToFrontendUI(curPath, 'Logged out due to inactivity', '', sessionInFromFrontendUI, frontendRecordReturnAddressFn)
         // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh tried - goto login and display Logged out due to inactivity')
       }
     }
@@ -258,21 +260,22 @@ function getAlteredHost (origHost, hostLookupList) {
   return 'UNKNOWN'
 }
 
-function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = undefined) {
+function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = undefined, movingFromFrontendUI = false, frontendRecordReturnAddressFn = null) {
   if (typeof (frontendPath) === 'undefined') {
     frontendPath = ''
   }
+
   if (thisQuasarPath.startsWith('/')) {
     thisQuasarPath = thisQuasarPath.substr(1)
   }
 
-  var quasarPathForTenenat = '#/' + thisQuasarPath.substr(0, thisQuasarPath.indexOf('/'))
-  thisQuasarPath = '#/' + thisQuasarPath
+  var quasarPathForTenenat = '/' + thisQuasarPath.substr(0, thisQuasarPath.indexOf('/'))
+  thisQuasarPath = '/' + thisQuasarPath
 
   var locationToGoTo = ''
   if (window.location.pathname.includes('/public/web/adminfrontend/')) {
     // running both in container and kong mode have /public/web/adminfrontend/ prefix so we can just replace adminfrontend with frontend to get url
-    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + quasarPathForTenenat + frontendPath
+    locationToGoTo = window.location.protocol + '//' + window.location.host + window.location.pathname.replace('/public/web/adminfrontend/', '/public/web/frontend/') + '#' + quasarPathForTenenat + frontendPath
   } else {
     // running on a dev machine is more complex as we need to switch over to anohter port
     var hostLookup = [
@@ -282,33 +285,49 @@ function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = u
       {a: 'somefunnyhostname.com:5082', b: 'somefunnyhostname.com:5081'},
       {a: 'somefunnyhostname.com:5081', b: 'somefunnyhostname.com:5081'}
     ]
-    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + quasarPathForTenenat + frontendPath
+    locationToGoTo = window.location.protocol + '//' + getAlteredHost(window.location.host, hostLookup) + window.location.pathname + '#' + quasarPathForTenenat + frontendPath
   }
-  var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + thisQuasarPath
+  if (movingFromFrontendUI) {
+    // We are already at frontend URI, all we need to do is set INTERNAL return and move internally
+    // this prevents stores being reset
+    frontendRecordReturnAddressFn(thisQuasarPath, message, quasarPathForTenenat)
+    return
+  }
+
+  var returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + '#' + thisQuasarPath
+  var newHREF = locationToGoTo
+  var addedParam = false
+  addedParam = true
+  newHREF = newHREF + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress)
 
   if (typeof (message) !== 'undefined') {
-    window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress) + '&usersystem_message=' + encodeURIComponent(message)
-  } else {
-    // console.log('locationToGoTo:', locationToGoTo)
-    // console.log('usersystem_returnaddress:', encodeURIComponent(returnAddress))
-    window.location.href = locationToGoTo + '?usersystem_returnaddress=' + encodeURIComponent(returnAddress)
+    if (addedParam) {
+      newHREF = newHREF + '&'
+    } else {
+      newHREF = newHREF + '?'
+    }
+    newHREF = newHREF + 'usersystem_message=' + encodeURIComponent(message)
   }
+
+  // console.log('locationToGoTo:', locationToGoTo)
+  // console.log('usersystem_returnaddress:', encodeURIComponent(returnAddress))
+  window.location.href = newHREF
 }
 
-function callAuthedAPI (commit, state, path, method, postdata, callback, curPath, headers, refreshFns, apiType, tenantName, apiPrefix) {
+function callAuthedAPI (commit, state, path, method, postdata, callback, curPath, headers, refreshFns, apiType, tenantName, apiPrefix, sessionInFromFrontendUI = false, frontendRecordReturnAddressFn = null) {
   var cookie = Cookies.get('usersystemUserCredentials')
 
   if (refreshFns.isRefreshInProgressFN()) {
     console.log('Preventing call in action.js because refresh is in progress')
     var callback2 = {
       ok: function (response) {
-        callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+        callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers, sessionInFromFrontendUI, frontendRecordReturnAddressFn)
       },
       error: callback.error
     }
     commit('RECORD_REFRESH_STORED_RESPONSE', callback2)
   } else {
-    callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers)
+    callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers, sessionInFromFrontendUI, frontendRecordReturnAddressFn)
   }
 }
 

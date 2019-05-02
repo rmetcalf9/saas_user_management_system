@@ -174,22 +174,24 @@ export default {
         gotLogin = true
       }
       if (gotLogin) {
-        if (TTT.$store.state.globalDataStore.usersystemReturnaddress === null) {
-          Notify.create('Error - Webapplication failed to provide return address')
+        var returnAddressToUse = null
+        if (frontendFns.isSet(TTT.$store.state.globalDataStore.usersystemReturnaddressInternal)) {
+          TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+          var a = TTT.$store.state.globalDataStore.usersystemReturnaddressInternal
+          TTT.$store.commit('globalDataStore/clearUsersystemReturnaddressInternal')
+          TTT.$router.replace(a)
           return
-        }
-        if (typeof (TTT.$store.state.globalDataStore.usersystemReturnaddress) === 'undefined') {
-          Notify.create('Error - Webapplication failed to provide return address (undefined)')
-          return
-        }
-        if (TTT.$store.state.globalDataStore.usersystemReturnaddress === 'undefined') {
-          Notify.create('Error - Webapplication failed to provide return address (undefined string)')
-          return
+        } else {
+          if (!frontendFns.isSet(TTT.$store.state.globalDataStore.usersystemReturnaddress)) {
+            Notify.create('Error - Webapplication failed to provide return address')
+            return
+          }
+          returnAddressToUse = TTT.$store.state.globalDataStore.usersystemReturnaddress
         }
         // Expires in one day
         TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
-        console.log('Redirecting back to main site:', TTT.$store.state.globalDataStore.usersystemReturnaddress)
-        window.location.href = TTT.$store.state.globalDataStore.usersystemReturnaddress
+        console.log('Redirecting back to main site:', returnAddressToUse)
+        window.location.href = returnAddressToUse
       } else {
         console.log('response:', response.data.possibleUsers)
         var items = []

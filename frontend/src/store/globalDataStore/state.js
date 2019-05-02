@@ -7,5 +7,6 @@ export default {
   tenant: null,
   selectedAuthProvGUID: null,
   usersystemReturnaddress: null,
+  usersystemReturnaddressInternal: null,
   messagePendingDisplay: null
 }

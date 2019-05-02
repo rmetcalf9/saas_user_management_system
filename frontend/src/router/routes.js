@@ -18,6 +18,7 @@ function _getDecodedValueFromQuery (to, from, valueName) {
 function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
   // console.log('_ensurePassedTenenatIsLoaded FROM', from)
   // console.log('_ensurePassedTenenatIsLoaded TO', to)
+  // console.log('_ensurePassedTenenatIsLoaded internal ra:', stores().state.globalDataStore.usersystemReturnaddressInternal)
   var a = _getDecodedValueFromQuery(to, from, 'usersystem_returnaddress')
   if (typeof (a) !== 'undefined') {
     stores().commit('globalDataStore/updateUsersystemReturnaddress', a)

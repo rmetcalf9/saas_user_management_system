@@ -93,7 +93,8 @@ export default {
         postdata: null,
         callback: callback,
         curPath: this.$router.history.current.path,
-        headers: undefined
+        headers: undefined,
+        router: this.$router
       })
     }
   },

@@ -18,6 +18,20 @@ function passwordERRORMessage (passwordd, passwordd2) {
   return 'Password'
 }
 
+function isSet (value) {
+  if (value === null) {
+    return false
+  }
+  if (typeof (value) === 'undefined') {
+    return false
+  }
+  if (value === 'undefined') {
+    return false
+  }
+  return true
+}
+
 export default {
-  passwordERRORMessage: passwordERRORMessage
+  passwordERRORMessage: passwordERRORMessage,
+  isSet: isSet
 }

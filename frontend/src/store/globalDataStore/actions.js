@@ -62,6 +62,12 @@ export const callCurrentAuthAPI = ({ dispatch, commit, state }, params) => {
   }
   var refreshFns = _getRefreshFunctions(commit, state)
 
+  var _recordReturnURL = function (url, message, frontendPathToGoTo) {
+    commit('updateUsersystemReturnaddressInternal', url)
+    commit('setMessageToDisplay', message)
+    params.router.replace(frontendPathToGoTo)
+  }
+
   if (state.apiPrefix === null) {
     callbackHelper.callbackWithSimpleError(params.callback, 'apiPrefix not set - this should never happen')
     return
@@ -71,7 +77,7 @@ export const callCurrentAuthAPI = ({ dispatch, commit, state }, params) => {
   // if (state.apiPrefix === null) {
   //   var callback = {
   //     ok: function (response) {
-  //       shared.callAuthedAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers, refreshFns, 'admin', state.tenantName, state.apiPrefix)
+  //       shared.callAuthedAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers, refreshFns, 'admin', state.tenantName, state.apiPrefix, true, _recordReturnURL)
   //     },
   //     error: params.callback.error
   //   }
@@ -79,5 +85,5 @@ export const callCurrentAuthAPI = ({ dispatch, commit, state }, params) => {
   //   return
   // }
 
-  shared.callAuthedAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers, refreshFns, 'currentAuth', state.tenant, state.apiPrefix)
+  shared.callAuthedAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers, refreshFns, 'currentAuth', state.tenant, state.apiPrefix, true, _recordReturnURL)
 }

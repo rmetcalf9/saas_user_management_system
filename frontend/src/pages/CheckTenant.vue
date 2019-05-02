@@ -47,6 +47,7 @@ export default {
       TTT.$router.replace('/')
       return
     }
+    // console.log('CheckTenant.vue ra:', TTT.$store.state.globalDataStore.usersystemReturnaddressInternal)
     this.$store.dispatch('globalDataStore/checkAuthProviders', {
       tenantName: this.$route.params.tenantName,
       callback: callback,
