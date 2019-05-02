@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, env
+from TestHelperSuperClass import testHelperAPIClient, env, getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, objectVersionHeaderName
 import json
 import copy
@@ -61,11 +61,13 @@ class test_securityTests(testHelperAPIClient):
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["loggedInUser"], expectedUserResult, ["creationDateTime", "lastUpdateDateTime"], msg='Did not get expected User result')
 
-  def test_authOperaiton_internal_resetPassword(self):
+  def test_authOperaiton_internal_resetPassword_to_same_errors(self):
     result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+
+    newHashedPassword = self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
 
     resetPasswordCmd = {
       "authProviderGUID": masterAuthProviderGUID,
@@ -73,7 +75,36 @@ class test_securityTests(testHelperAPIClient):
         "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
       },
-      "operationData": {},
+      "operationData": {"newPassword": newHashedPassword },
+      "operationName": "ResetPassword"
+    }
+    result = self.testClient.post(
+      self.currentAuthAPIPrefix + '/' + masterTenantName + '/currentAuthInfo', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(resetPasswordCmd), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Reset password failed - " + result.get_data(as_text=True))
+
+  def test_authOperaiton_internal_resetPassword(self):
+    newPassword = 'ABC123dfsfdfd'
+
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+
+    #Log in with orig password
+    self.loginAsUser(masterTenantName, resultJSON[ 'AuthProviders' ][0], env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'])
+
+    newHashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], newPassword, resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
+    resetPasswordCmd = {
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
+      },
+      "operationData": {"newPassword": newHashedPassword },
       "operationName": "ResetPassword"
     }
     result = self.testClient.post(
@@ -84,5 +115,5 @@ class test_securityTests(testHelperAPIClient):
     )
     self.assertEqual(result.status_code, 200, msg="Reset password failed - " + result.get_data(as_text=True))
 
-    #TODO Log in with new password
-
+    #Log in with new password
+    self.loginAsUser(masterTenantName, resultJSON[ 'AuthProviders' ][0], env['APIAPP_DEFAULTHOMEADMINUSERNAME'], newPassword)

@@ -4,10 +4,11 @@
 from constants import authFailedException, customExceptionClass
 import uuid
 from persons import associatePersonWithAuthCalledWhenAuthIsCreated
-from authsCommon import getAuthRecord, SaveAuthRecord
+from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
+InvalidOperationException = customExceptionClass('Invalid Operation','InvalidOperationException')
 
 #person.py also uses userAuths
   
@@ -15,7 +16,9 @@ class authProvider():
   dataDict = None #See checks in init
   guid = None
   tenantName = None
+  operationFunctions = None
   def __init__(self, dataDict, guid, tenantName):
+    self.operationFunctions = dict()
     if not 'ConfigJSON' in dataDict:
       raise Exception("ERROR No ConfigJSON supplied when creating authProvider")
     if not 'Type' in dataDict:
@@ -108,19 +111,23 @@ class authProvider():
     #for processing operations that change the auth record. This requires existing credentials. 
     # one example of an auth operaiton is 'resetpassword' for the internal ath
     
+    if operationName not in self.operationFunctions:
+      raise InvalidOperationException
+    
     #Get the auth object - this will raise an exception is the credentials are wrong
     ##Problem to do the auth we need to know the username
     ## but it is not a field in the JWT token
     ## IT is in the response to currentAuthInfo so the webapp can retrieve it from there and supply it correctly in credentials
-    obj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection)
+    authObj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection)
     
-    (resultValue, alteredAuthObj) = self._executeAuthOperation(appObj, authObj, storeConnection, operationName, operationDICT)
+    for x in self.operationFunctions[operationName]['requiredDictElements']:
+      if x not in operationDICT:
+        raise customExceptionClass('Missing operation paramater - ' + x,'OperationParamMissingException')
+    (resultValue, alteredAuthObj) = self.operationFunctions[operationName]['fn'](appObj, authObj, storeConnection, operationName, operationDICT)
     
     #Save changed auth data back to object store
-    UpdateAuthRecord(appObj, self._makeKey(credentialDICT), obj, objectVersion, storeConnection)
+    UpdateAuthRecord(appObj, self._makeKey(credentialDICT), alteredAuthObj, objectVersion, storeConnection)
     
-    return retVal
+    return resultValue
     
-  def _executeAuthOperation(self, appObj, authObj, storeConnection, operationName, operationDICT):
-    raise NotOverriddenException
 

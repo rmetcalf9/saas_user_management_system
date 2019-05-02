@@ -1,9 +1,10 @@
 #currentAuth API
 from flask import request
 from flask_restplus import Resource, fields
-from constants import jwtHeaderName, jwtCookieName, loginCookieName
+from constants import jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
 from apiSharedModels import getPersonModel, getUserModel
 from tenants import ExecuteAuthOperation
+from werkzeug.exceptions import BadRequest
 '''
 The currentAuth API includes functionality availiable for authed users
 
@@ -94,5 +95,15 @@ def registerAPI(appObj):
         return {
           'Result': 'OK'
         }, 200
-      return appObj.objectStore.executeInsideTransaction(dbfn)
+        
+      try:
+        return appObj.objectStore.executeInsideTransaction(dbfn)
+      except customExceptionClass as excep:
+        if (excep.id=='InvalidOperationException'):
+          raise Exception("Invalid operation for this auth type (" + operationName + ")")
+        if (excep.id=='OperationParamMissingException'):
+          raise BadRequest(excep.text)
+        if (excep.id=='authopException'):
+          raise BadRequest(excep.text)
+        raise excep
 

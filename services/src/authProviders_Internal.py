@@ -2,6 +2,7 @@
 from authProviders_base import authProvider, InvalidAuthConfigException
 from constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
 from base64 import b64decode, b64encode
+from constants import customExceptionClass
 
 def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, username, password, tenantAuthProvSalt):
   #print("getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse called with:")
@@ -42,6 +43,13 @@ def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, sal
   return hashed_password
 
 class authProviderInternal(authProvider):
+  def __init__(self, dataDict, guid, tenantName):
+    super().__init__(dataDict, guid, tenantName)
+    self.operationFunctions['ResetPassword'] = {
+      'fn': self._executeAuthOperation_resetPassword,
+      'requiredDictElements': ['newPassword']
+    }
+  
   def _authSpercificInit(self):
     if 'userSufix' not in self.getConfig():
       raise InvalidAuthConfigException
@@ -92,3 +100,17 @@ class authProviderInternal(authProvider):
 
   def _getDefaultKnownAs(self, credentialDICT):
     return credentialDICT['username']
+
+
+  def _executeAuthOperation_resetPassword(self, appObj, authObj, storeConnection, operationName, operationDICT):
+    if (type(operationDICT["newPassword"])) is not bytes:
+      operationDICT["newPassword"] = bytes(operationDICT["newPassword"], 'utf-8')
+
+    newHashedPassword = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, operationDICT["newPassword"], authObj['AuthProviderJSON']['salt'])
+    if newHashedPassword == authObj['AuthProviderJSON']['password']:
+      raise customExceptionClass('ERROR - New password matches origional','authopException')
+
+    authObj['AuthProviderJSON']['password'] = newHashedPassword
+    resultValue = {}
+    return resultValue, authObj
+    
