@@ -159,6 +159,13 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
   
   return GetUser(appObj, userData['user_unique_identifier'], storeConnection)
 
+def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenantName, authProvGUID):
+  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
+  if tenantObj is None:
+    raise tenantDosentExistException
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection)
+  authProvObj.executeAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT)
+
 def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT, storeConnection):
   tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
   if tenantObj is None:

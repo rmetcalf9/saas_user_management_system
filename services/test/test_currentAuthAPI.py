@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient
+from TestHelperSuperClass import testHelperAPIClient, env
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, objectVersionHeaderName
 import json
 import copy
@@ -60,4 +60,29 @@ class test_securityTests(testHelperAPIClient):
     }
     
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["loggedInUser"], expectedUserResult, ["creationDateTime", "lastUpdateDateTime"], msg='Did not get expected User result')
-    
+
+  def test_authOperaiton_internal_resetPassword(self):
+    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
+
+    resetPasswordCmd = {
+      "authProviderGUID": masterAuthProviderGUID,
+      "credentialJSON": { 
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
+      },
+      "operationData": {},
+      "operationName": "ResetPassword"
+    }
+    result = self.testClient.post(
+      self.currentAuthAPIPrefix + '/' + masterTenantName + '/currentAuthInfo', 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(resetPasswordCmd), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200, msg="Reset password failed - " + result.get_data(as_text=True))
+
+    #TODO Log in with new password
+

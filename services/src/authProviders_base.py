@@ -52,6 +52,9 @@ class authProvider():
   def _authSpercificInit(self):
     raise NotOverriddenException
 
+  def _getAuthData(self):
+    raise NotOverriddenException
+
   def AddAuth(self, appObj, credentialDICT, personGUID, storeConnection):
     key = self._makeKey(credentialDICT)
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, key, storeConnection)
@@ -72,11 +75,15 @@ class authProvider():
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
 
-  def Auth(self, appObj, credentialDICT, storeConnection):
+  def AuthReturnAll(self, appObj, credentialDICT, storeConnection):
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
       raise authFailedException
     self._auth(appObj, obj, credentialDICT)
+    return obj, objVer, creationDateTime, lastUpdateDateTime
+
+  def Auth(self, appObj, credentialDICT, storeConnection):
+    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection)
     return obj
 
   # Normally overridden
@@ -96,3 +103,24 @@ class authProvider():
 
   def getDefaultKnownAs(self, credentialDICT):
     return self._getDefaultKnownAs(credentialDICT)
+
+  def executeAuthOperation(self, appObj, credentialDICT, storeConnection, operationName, operationDICT):
+    #for processing operations that change the auth record. This requires existing credentials. 
+    # one example of an auth operaiton is 'resetpassword' for the internal ath
+    
+    #Get the auth object - this will raise an exception is the credentials are wrong
+    ##Problem to do the auth we need to know the username
+    ## but it is not a field in the JWT token
+    ## IT is in the response to currentAuthInfo so the webapp can retrieve it from there and supply it correctly in credentials
+    obj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection)
+    
+    (resultValue, alteredAuthObj) = self._executeAuthOperation(appObj, authObj, storeConnection, operationName, operationDICT)
+    
+    #Save changed auth data back to object store
+    UpdateAuthRecord(appObj, self._makeKey(credentialDICT), obj, objectVersion, storeConnection)
+    
+    return retVal
+    
+  def _executeAuthOperation(self, appObj, authObj, storeConnection, operationName, operationDICT):
+    raise NotOverriddenException
+

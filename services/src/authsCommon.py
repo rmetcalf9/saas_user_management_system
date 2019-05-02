@@ -7,7 +7,10 @@ def getAuthRecord(appObj, key, storeConnection):
 
 def SaveAuthRecord(appObj, key, obj, storeConnection):
   storeConnection.saveJSONObject("userAuths",  key.upper(), obj)
-  
+
+def UpdateAuthRecord(appObj, key, obj, objectVersion, storeConnection):
+  storeConnection.updateJSONObject("userAuths", key.upper(), obj, objectVersion)
+
 #only called from person as person auth link needs to be removed
 def DeleteAuthRecord(appObj, key, storeConnection):
   storeConnection.removeJSONObject("userAuths", key.upper())
