@@ -50,13 +50,15 @@
 </template>
 
 <script>
-import { Notify } from 'quasar'
+import { Notify, Loading } from 'quasar'
+import callbackHelper from '../callbackHelper'
 import frontendFns from '../frontendFns.js'
 
 export default {
   // name: 'AuthSecuritySettingsInternal',
   props: [
-    'authData'
+    'authData',
+    'loggedInPerson'
   ],
   data () {
     return {
@@ -90,7 +92,39 @@ export default {
         return
       }
       this.resetPasswordDialogVisible = false
-      Notify.create({color: 'positive', detail: 'TODO'})
+
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          Notify.create({color: 'positive', detail: 'Password reset sucessful'})
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create('Reset Password failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      Loading.show()
+      console.log('authData:', this.authData)
+      console.log('loggedInPerson:', this.loggedInPerson)
+      // var passwordhash = bcrypt.hashSync(this.createAccountDialogModel.username + ':' + this.createAccountDialogModel.password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
+      var postData = {
+        authProviderGUID: this.authData.internalAuthProv.guid,
+        credentialJSON: {
+          username: 'this.createAccountDialogModel.username',
+          password: 'passwordhash'
+        },
+        operationName: 'ResetPassword',
+        operationData: {}
+      }
+      this.$store.dispatch('globalDataStore/callCurrentAuthAPI', {
+        path: '/currentAuthInfo',
+        method: 'post',
+        postdata: postData,
+        callback: callback,
+        curPath: this.$router.history.current.path,
+        headers: undefined,
+        router: this.$router
+      })
     },
     cancelResetPasswordDialog () {
       this.resetPasswordDialogVisible = false

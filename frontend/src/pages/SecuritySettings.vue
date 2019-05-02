@@ -13,7 +13,10 @@
         <div v-for="curVal in currentTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
           <AuthSecuritySettingsInternal
             :authData="curVal"
+            :loggedInPerson="UserSettingsData.loggedInUser"
           />
+        <div>UserSettingsData: {{ UserSettingsData }}</div>
+        <div>Cookie: {{ TMPTODEL }}</div>
         </div>
       </div>
     </div>
@@ -30,7 +33,7 @@
 </template>
 
 <script>
-import { Notify, Loading } from 'quasar'
+import { Notify, Loading, Cookies } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import AuthSecuritySettingsInternal from '../components/authSecuritySettingsInternal'
 
@@ -39,6 +42,8 @@ function getEmptyUserSettingsData () {
     loggedInPerson: {
       personAuths: [
       ]
+    },
+    loggedInUser: {
     }
   }
 }
@@ -54,6 +59,9 @@ export default {
     }
   },
   computed: {
+    TMPTODEL () {
+      return Cookies.get('usersystemUserCredentials')
+    },
     currentTenantAuthsWithAuthProvData () {
       var TTT = this
       return TTT.UserSettingsData.loggedInPerson.personAuths.filter(function (a) { return a.tenantName === TTT.$store.state.globalDataStore.tenantInfo.Name }).map(
