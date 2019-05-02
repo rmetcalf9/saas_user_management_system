@@ -23,6 +23,9 @@ import uuid
 import json
 from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
+from persons import GetPerson
+from userPersonCommon import GetUser
+
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -123,5 +126,18 @@ class appObjClass(parAppObj):
   def exit_gracefully(self, signum, frame):
     self.stopThread()
     super(appObjClass, self).exit_gracefully(signum, frame)
-    
+
+  def apiSecurityCheck(self, request, tenant, requiredRoleList, headersToSearch, cookiesToSearch):
+    decodedJWTToken = super(appObjClass, self).apiSecurityCheck(request, tenant, requiredRoleList, headersToSearch, cookiesToSearch)
+    def someFn(connectionContext):
+      return GetPerson(appObj, decodedJWTToken.getPersonID(), connectionContext), GetUser(appObj, decodedJWTToken.getUserID(), connectionContext)
+    personObj, userObj = appObj.objectStore.executeInsideTransaction(someFn)
+    if (personObj is None):
+      raise Exception('Invlaid person in token')
+    if (userObj is None):
+      raise Exception('Invlaid user in token')
+    decodedJWTToken.personObj = personObj
+    decodedJWTToken.userObj = userObj    
+    return decodedJWTToken
+
 appObj = appObjClass()

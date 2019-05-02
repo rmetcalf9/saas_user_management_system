@@ -3,8 +3,6 @@ from flask import request
 from flask_restplus import Resource, fields
 from constants import jwtHeaderName, jwtCookieName, loginCookieName
 from apiSharedModels import getPersonModel, getUserModel
-from persons import GetPerson
-from userPersonCommon import GetUser
 '''
 The currentAuth API includes functionality availiable for authed users
 
@@ -49,13 +47,8 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of tenants'''
       decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
-      def someFn(connectionContext):
-        return GetPerson(appObj, decodedJWTToken.getPersonID(), connectionContext), GetUser(appObj, decodedJWTToken.getUserID(), connectionContext)
-      personObj, userObj = appObj.objectStore.executeInsideTransaction(someFn)
-      if personObj is None:
-        raise Exception("Valid JWT Token but person not found")
-      
+
       return {
-        'loggedInPerson': personObj.getJSONRepresenation(),
-        'loggedInUser': userObj.getJSONRepresenation()
+        'loggedInPerson': decodedJWTToken.personObj.getJSONRepresenation(),
+        'loggedInUser': decodedJWTToken.userObj.getJSONRepresenation()
       }
