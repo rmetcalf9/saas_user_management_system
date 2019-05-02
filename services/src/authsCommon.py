@@ -1,5 +1,8 @@
 def getAuthRecord(appObj, key, storeConnection):
   authRecord, objVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("userAuths", key.upper())
+  if authRecord is not None:
+    if 'known_as' not in authRecord:
+      authRecord['known_as'] = str(authRecord['AuthUserKey'])
   return authRecord, objVer, creationDateTime, lastUpdateDateTime
 
 def SaveAuthRecord(appObj, key, obj, storeConnection):
