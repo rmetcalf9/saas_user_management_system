@@ -15,8 +15,6 @@
             :authData="curVal"
             :loggedInPerson="UserSettingsData.loggedInUser"
           />
-        <div>UserSettingsData: {{ UserSettingsData }}</div>
-        <div>Cookie: {{ TMPTODEL }}</div>
         </div>
       </div>
     </div>

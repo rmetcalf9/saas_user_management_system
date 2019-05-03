@@ -53,6 +53,14 @@
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import frontendFns from '../frontendFns.js'
+import bcrypt from 'bcryptjs'
+
+function getUsernameFromAuthUserKey (authUserKey, authProvData) {
+  // console.log('getUsernameFromAuthUserKey TODO')
+  // console.log('authUserKey:', authUserKey)
+  // console.log('authProvData:', authProvData)
+  return authUserKey.substr(0, authUserKey.search(JSON.parse(authProvData.ConfigJSON).userSufix))
+}
 
 export default {
   // name: 'AuthSecuritySettingsInternal',
@@ -104,17 +112,17 @@ export default {
         }
       }
       Loading.show()
-      console.log('authData:', this.authData)
-      console.log('loggedInPerson:', this.loggedInPerson)
-      // var passwordhash = bcrypt.hashSync(this.createAccountDialogModel.username + ':' + this.createAccountDialogModel.password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
+      var username = getUsernameFromAuthUserKey(this.authData.AuthUserKey, this.authData.internalAuthProv)
+      var passwordhash = bcrypt.hashSync(username + ':' + this.dialogData.current_password + ':AG44', atob(this.authData.internalAuthProv.saltForPasswordHashing))
+      var newPasswordhash = bcrypt.hashSync(username + ':' + this.dialogData.password + ':AG44', atob(this.authData.internalAuthProv.saltForPasswordHashing))
       var postData = {
         authProviderGUID: this.authData.internalAuthProv.guid,
         credentialJSON: {
-          username: 'this.createAccountDialogModel.username',
-          password: 'passwordhash'
+          username: username,
+          password: passwordhash
         },
         operationName: 'ResetPassword',
-        operationData: {}
+        operationData: {newPassword: newPasswordhash}
       }
       this.$store.dispatch('globalDataStore/callCurrentAuthAPI', {
         path: '/currentAuthInfo',

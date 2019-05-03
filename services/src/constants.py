@@ -11,7 +11,7 @@ SecurityEndpointAccessRole="securityTest"
 conDefaultUserGUID = "FORCED-CONSTANT-TESTING-GUID"
 conTestingDefaultPersonGUID = "FORCED-CONSTANT-TESTING-PERSON-GUID"
 
-
+#This is also used in frontend quasar app
 uniqueKeyCombinator="_`@\/'"
 
 masterInternalAuthTypePassword="dsF4F.D32654.....3D5g"
