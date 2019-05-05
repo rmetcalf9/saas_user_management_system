@@ -74,6 +74,11 @@ const routes = [
     beforeEnter: ensurePassedTenantIsLoaded
   },
   {
+    path: '/:tenantName/AuthProvider/google',
+    component: () => import('pages/AuthProvider_google.vue'),
+    beforeEnter: ensurePassedTenantIsLoaded
+  },
+  {
     path: '/:tenantName/SecuritySettings',
     component: () => import('pages/SecuritySettings.vue'),
     beforeEnter: ensurePassedTenantIsLoaded

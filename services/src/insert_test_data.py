@@ -84,6 +84,16 @@ def callPostService(api,url, POSTdict, expectedResponses):
 def callPutService(api,url, PUTdict, expectedResponses):
   return callService(api,url, "put", PUTdict, expectedResponses)
 
+#Called when there is an error in the process
+def errorInProcess(errMessage):
+  print("Error in process - halting")
+  print(" Msg:", errMessage)
+  print("")
+  print("Press Enter to exit")
+  a = input()
+  exit(1)
+  
+
 print("Start of script to insert test data")
 
 AuthProvidersDICT,res = callGetService(LOGIN, "/" + masterTenantName + "/authproviders", [200])
@@ -109,9 +119,19 @@ authProvCreationDICT = {
     "guid": None,
     "Type": "internal",
     "AllowUserCreation": True,
-    "MenuText": "Default Menu Text",
+    "MenuText": "Login with Local Account",
     "IconLink": "string",
     "ConfigJSON": "{\"userSufix\": \"@testUserSufix\"}",
+    "saltForPasswordHashing": None
+}
+
+authProvGoogleCreationDICT = {
+    "guid": None,
+    "Type": "google",
+    "AllowUserCreation": True,
+    "MenuText": "Login with Google",
+    "IconLink": "string",
+    "ConfigJSON": "{}",
     "saltForPasswordHashing": None
 }
 
@@ -188,6 +208,18 @@ def addInternalAuth(personGUID, tenantName, authProvider, username, password):
       print(resDICT)
       raise Exception()
   print('.')
+
+def addAuthProvider(tenantName, authDict):
+  tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantName, [200])
+  tenantDICT["AuthProviders"].append(authDict)
+  tenantDICT2, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantDICT['Name'], tenantDICT, [200])
+  if (res==400):
+    if (resDICT['message'] == 'Auth PRov exists'):
+      print('Skipping add auth prov to tenant ' + tenantName)
+    else:
+      print(resDICT)
+      errorInProcess("Error")
+  return tenantDICT2
   
 print("Setting up admin2 auth connected to two users - adminTest and normalTest")
 createUserUsingAdminAPI("adminTest", "adminTest", masterTenantName)
@@ -197,6 +229,9 @@ personDICT = createPersonUsingAdminAPI()
 linkUserAndPerson("adminTest", personDICT['guid'])
 linkUserAndPerson("normalTest", personDICT['guid'])
 addInternalAuth(personDICT['guid'], masterTenantName, MainAuthProvider, 'admin2', 'admin2')
+
+print("Adding google auth to master tenant")
+addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
 
 print("Creating allowUserCreation tenants with users created with register method")
 for cur in range(4):
@@ -208,7 +243,7 @@ for cur in range(4):
     if (resDICT['message'] == 'Tenant Already Exists'):
       print('Skipping tenant create as it already exists')
     else:
-      raise Exception()
+      errorInProcess("Error")
       
   tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], [200])
   if len(tenantDICT["AuthProviders"]) == 0:
@@ -227,7 +262,7 @@ for cur in range(4):
       if (resDICT['message'] == 'That username is already in use'):
         print('Ignoring user create error as it already exists')
       else:
-        raise Exception()
+        errorInProcess("Error")
     
 
 print("Creating more tenants without any users or auths")
@@ -240,9 +275,21 @@ for cur in range(15):
     if (resDICT['message'] == 'Tenant Already Exists'):
       print('Skipping tenant create as it already exists')
     else:
-      raise Exception()
+      errorInProcess("Error")
 
-
+print("Creating teat tenant with internal and google auth")
+creationDICT = copy.deepcopy(tenantCreationDICT)
+creationDICT['Name'] = creationDICT['Name'] + "_googleAuthWithInternal"
+resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
+if (res==400):
+  if (resDICT['message'] == 'Tenant Already Exists'):
+    print('Skipping tenant create as it already exists')
+  else:
+    print(resDICT)
+    errorInProcess("Error")
+else:
+  addAuthProvider(creationDICT['Name'], authProvCreationDICT)
+  addAuthProvider(creationDICT['Name'], authProvGoogleCreationDICT)
 
 print("End")
 
