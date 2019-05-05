@@ -1,11 +1,14 @@
 #Provides auth provider functions
 from authProviders_Internal import authProviderInternal
+from authProviders_Google import authProviderGoogle
 from uuid import uuid4
 from base64 import b64encode
 
 def authProviderFactory(dataDict, guid, tenantName):
   if dataDict["Type"]=='internal':
     return authProviderInternal(dataDict, guid, tenantName)
+  if dataDict["Type"]=='google':
+    return authProviderGoogle(dataDict, guid, tenantName)
   return None
   
 def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, configJSON):
