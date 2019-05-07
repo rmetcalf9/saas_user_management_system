@@ -22,7 +22,7 @@ class authProviderGoogle(authProvider):
     
     #Only load the static data once
     if not self.hasStaticData():
-      print('Static data not present loading')
+      #print('Static data not present loading')
       staticDataValue = {
         'secretJSONDownloadedFromGoogle': loadStaticData(dataDict['ConfigJSON']['clientSecretJSONFile'])
       }
