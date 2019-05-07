@@ -40,6 +40,7 @@ sampleInternalAuthProv001_CREATE = {
   "MenuText": "Default Menu Text",
   "IconLink": "string",
   "ConfigJSON": "{\"userSufix\": \"" + internalUSerSufix + "\"}",
+  "StaticlyLoadedData": {},
   "saltForPasswordHashing": None
 } 
 

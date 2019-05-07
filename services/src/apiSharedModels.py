@@ -10,6 +10,7 @@ def getTenantModel(appObj):
     'MenuText': fields.String(default='click here', description='Item text used in login method selection screen'),
     'IconLink': fields.String(default=None, description='Image link used in login method selection screen'),
     'ConfigJSON': fields.String(default=None, description='Extra configuration required per auth type'),
+    'StaticlyLoadedData': fields.Raw(description='Other data loaded for this auth type'),
     'saltForPasswordHashing': fields.String(default=None, description='Salt that can be used for password hashing (Depends on auth method)')
   })
   return appObj.flastRestPlusAPIObject.model('TenantInfo', {

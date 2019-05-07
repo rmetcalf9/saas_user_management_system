@@ -25,6 +25,7 @@ from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 from persons import GetPerson
 from userPersonCommon import GetUser
+from authProviders_base import resetStaticData as authProviders_resetStaticData
 
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -49,6 +50,7 @@ class appObjClass(parAppObj):
   scheduler = None
 
   def init(self, env, serverStartTime, testingMode = False):
+    authProviders_resetStaticData()
     self.scheduler = BackgroundScheduler(timezone="UTC")
     self.defaultUserGUID = str(uuid.uuid4())
     if testingMode:

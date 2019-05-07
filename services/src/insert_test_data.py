@@ -131,9 +131,12 @@ authProvGoogleCreationDICT = {
     "AllowUserCreation": True,
     "MenuText": "Login with Google",
     "IconLink": "string",
-    "ConfigJSON": "{}",
+    "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../googleauth_client_secret.json\"}",
     "saltForPasswordHashing": None
 }
+
+#print(authProvGoogleCreationDICT)
+#errorInProcess("DD")
 
 registeruserDICT = {
   "authProviderGUID": "TODO",

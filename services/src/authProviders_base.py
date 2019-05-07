@@ -11,6 +11,18 @@ tryingToCreateDuplicateAuthException = customExceptionClass('That username is al
 InvalidOperationException = customExceptionClass('Invalid Operation','InvalidOperationException')
 
 #person.py also uses userAuths
+
+#Auth provider objects are created on demand by each request
+# for the google auth this means it will read it's file every time
+# a static data object is kept for each authProvider (stored via guid)
+# to allow for data to be kept between calls
+class staticDataClass():
+  data = {}
+  def resetStaticData(self):
+    self.data.clear()
+staticDataClassInstance = staticDataClass()
+def resetStaticData():
+  staticDataClassInstance.resetStaticData()
   
 class authProvider():
   dataDict = None #See checks in init
@@ -35,12 +47,27 @@ class authProvider():
     self.guid = guid
     self.tenantName = tenantName
     
+
+  def getStaticData(self):
+    #print('getStaticData for:', self.guid)
+    if self.guid not in staticDataClassInstance.data:
+      return {}
+    return staticDataClassInstance.data[self.guid]
+  def setStaticData(self, dataValue):
+    staticDataClassInstance.data[self.guid] = dataValue
+  def hasStaticData(self):
+    #print('Checking has static data for:', self.guid)
+    #print('staticDataClassInstance.data:',staticDataClassInstance.data)
+    return self.guid in staticDataClassInstance.data
+  
   def getType(self):
     return self.dataDict['Type']
   def getConfig(self):
     return self.dataDict['ConfigJSON']
   def getAllowUserCreation(self):
     return self.dataDict['AllowUserCreation']
+  def getPublicStaticDataDict(self):
+    return {}
 
   #Return the unique identifier for a particular auth
   def _makeKey(self, credentialDICT):
