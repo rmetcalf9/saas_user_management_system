@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="fixed-center">
-      TODO Log in with Google
+      TODO Log in with Google<BR />
+      AuthProvInfo: {{ authProvInfo }}
     </div>
   </div>
 </template>
@@ -10,6 +11,7 @@
 </style>
 
 <script>
+// Notes: https://developers.google.com/identity/sign-in/web/server-side-flow
 import {
   Notify
 } from 'quasar'
