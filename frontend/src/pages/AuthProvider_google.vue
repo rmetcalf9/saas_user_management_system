@@ -44,8 +44,8 @@ export default {
       this.$store.commit('globalDataStore/setMessageDisplayed')
     }
     this.$gapi.load('auth2', function () {
-      var auth2 = this.$gapi.auth2.init({
-        client_id: this.authProvInfo.StaticlyLoadedData.client_id
+      var auth2 = TTT.$gapi.auth2.init({
+        client_id: TTT.authProvInfo.StaticlyLoadedData.client_id
         // Scopes to request in addition to 'profile' and 'email'
         // scope: 'additional_scope'
       })
