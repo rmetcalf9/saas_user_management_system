@@ -3,6 +3,12 @@ from authProviders_base import authProvider, InvalidAuthConfigException
 import constants
 import json
 
+##from google_auth_oauthlib.flow import InstalledAppFlow
+##from oauth2client.client import flow_from_clientsecrets
+from oauth2client import client
+# https://google-auth.readthedocs.io/en/latest/index.html?highlight=google-auth
+# https://developers.google.com/api-client-library/python/guide/aaa_oauth
+
 def loadStaticData(fileName):
   try:
     ##print('authProviderGoogle loadStaticData')
@@ -11,11 +17,44 @@ def loadStaticData(fileName):
   except FileNotFoundError:
     raise constants.customExceptionClass('Google secret file not found - ' + fileName,'InvalidAuthConfigException')
 
+'''
+Eample
+{
+"code": "AAA",
+"creds": {
+"access_token": "XXX", 
+"client_id": "XXX", 
+"client_secret": "XXX", 
+"refresh_token": "XXX", 
+"token_expiry": "2019-05-08T14:55:14Z", 
+"token_uri": "https://oauth2.googleapis.com/token", 
+"user_agent": null, 
+"revoke_uri": "https://oauth2.googleapis.com/revoke", 
+"id_token": {
+  "iss": "https://accounts.google.com", 
+  "azp": "???.apps.googleusercontent.com", 
+  "aud": "???.apps.googleusercontent.com", 
+  "sub": "56454656465454", 
+  "email": "rmetcalf9@googlemail.com", 
+  "email_verified": true, 
+  "at_hash": "???", 
+  "name": "Robert Metcalf", 
+  "picture": "https://lh6.googleusercontent.com/dsaddsaffs/s96-c/photo.jpg", 
+  "given_name": "Robert", 
+  "family_name": "Metcalf", 
+  "locale": "en-GB", 
+  "iat": 342543, 
+  "exp": 324324
+}, 
+}
+'''
+def credentialDictGet_email(credentialDICT):
+  return credentialDICT["creds"]["id_token"]["email"]
 
 class authProviderGoogle(authProvider):
   secretJSONDownloadedFromGoogle = None
-  def __init__(self, dataDict, guid, tenantName):
-    super().__init__(dataDict, guid, tenantName)
+  def __init__(self, dataDict, guid, tenantName, tenantObj):
+    super().__init__(dataDict, guid, tenantName, tenantObj)
 
     if 'clientSecretJSONFile' not in dataDict['ConfigJSON']:
       raise InvalidAuthConfigException
@@ -24,7 +63,16 @@ class authProviderGoogle(authProvider):
     if not self.hasStaticData():
       #print('Static data not present loading')
       staticDataValue = {
-        'secretJSONDownloadedFromGoogle': loadStaticData(dataDict['ConfigJSON']['clientSecretJSONFile'])
+        'secretJSONDownloadedFromGoogle': loadStaticData(dataDict['ConfigJSON']['clientSecretJSONFile']),
+#        'flow': flow_from_clientsecrets(
+#          dataDict['ConfigJSON']['clientSecretJSONFile'],
+#          scope='https://www.googleapis.com/auth/userinfo.email',
+#          redirect_uri='https://localhost'
+#        )
+#        'flow': InstalledAppFlow.from_client_secrets_file(
+#          dataDict['ConfigJSON']['clientSecretJSONFile'], 
+#          scopes=['https://www.googleapis.com/auth/userinfo.email']
+#        )
       }
       self.setStaticData(staticDataValue)
       if self.getStaticData()['secretJSONDownloadedFromGoogle'] is None:
@@ -34,6 +82,7 @@ class authProviderGoogle(authProvider):
         raise constants.customExceptionClass('Google secret file invliad (missing web)','InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]:
         raise constants.customExceptionClass('Google secret file invliad (missing client_id)','InvalidAuthConfigException')
+        
     #else:
     #  print('authProviderGoogle static data present NOT loading')
 
@@ -43,6 +92,13 @@ class authProviderGoogle(authProvider):
     #  'requiredDictElements': ['newPassword']
     #}
 
+  def _makeKey(self, credentialDICT):
+    if 'code' not in credentialDICT:
+      raise InvalidAuthConfigException
+    if 'creds' not in credentialDICT:
+      raise InvalidAuthConfigException
+    return credentialDictGet_email(credentialDICT) + constants.uniqueKeyCombinator + self.guid
+
   def __getClientID(self):
     return self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"]
 
@@ -51,3 +107,40 @@ class authProviderGoogle(authProvider):
 
   def getPublicStaticDataDict(self):
     return {"client_id": self.__getClientID()}
+
+  def _enrichCredentialDictForAuth(self, credentialDICT):
+    credentials = None
+    try:
+      ##credentials = self.getStaticData()['flow'].run_console()
+      ##credentials = self.getStaticData()['flow'].step2_exchange(credentialDICT['code'])
+      ##credentials = client.credentials_from_clientsecrets_and_code(
+      ##  self.dataDict['ConfigJSON']['clientSecretJSONFile'],
+      ##  ['profile', 'email'],
+      ##  credentialDICT['code']
+      ##)
+      credentials = client.credentials_from_code(
+        client_id = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"],
+        client_secret  = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_secret"],
+        scope = ['profile', 'email'],
+        code = credentialDICT['code']
+      )
+      
+    except Exception as err:
+      print(err) # for the repr
+      print(str(err)) # for just the message
+      print(err.args) # the arguments that the exception has been called with.
+      raise constants.authFailedException
+
+    #print("credentials:", credentials.to_json())
+    #raise Exception('Call to google to get code')
+    return {
+      "code": credentialDICT["code"],
+      "creds": json.loads(credentials.to_json())
+    }
+
+  def _AuthActionToTakeWhenThereIsNoRecord(self):
+    if not self.getAllowUserCreation():
+      return
+    if not self.tenantObj.getAllowUserCreation():
+      return
+    print("Passed checks - will do thingy")

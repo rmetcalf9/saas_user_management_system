@@ -9,6 +9,7 @@ from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
 InvalidOperationException = customExceptionClass('Invalid Operation','InvalidOperationException')
+NotOverriddenException = Exception('Not Overridden')
 
 #person.py also uses userAuths
 
@@ -29,7 +30,9 @@ class authProvider():
   guid = None
   tenantName = None
   operationFunctions = None
-  def __init__(self, dataDict, guid, tenantName):
+  tenantObj = None
+  def __init__(self, dataDict, guid, tenantName, tenantObj):
+    self.tenantObj = tenantObj
     self.operationFunctions = dict()
     if not 'ConfigJSON' in dataDict:
       raise Exception("ERROR No ConfigJSON supplied when creating authProvider")
@@ -108,12 +111,21 @@ class authProvider():
   def AuthReturnAll(self, appObj, credentialDICT, storeConnection):
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
-      raise authFailedException
+      self._AuthActionToTakeWhenThereIsNoRecord()
+      #Assuming action results in an auth record
+      obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
+      if obj is None:
+        #Still no auth record so return failure
+        raise authFailedException
     self._auth(appObj, obj, credentialDICT)
     return obj, objVer, creationDateTime, lastUpdateDateTime
+    
+  def _AuthActionToTakeWhenThereIsNoRecord(self):
+    raise authFailedException
 
   def Auth(self, appObj, credentialDICT, storeConnection):
-    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection)
+    enrichedCredentialDICT = self._enrichCredentialDictForAuth(credentialDICT)
+    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection)
     return obj
 
   # Normally overridden
@@ -156,5 +168,10 @@ class authProvider():
     UpdateAuthRecord(appObj, self._makeKey(credentialDICT), alteredAuthObj, objectVersion, storeConnection)
     
     return resultValue
-    
+  
+  #some auth types will need credentials enriched
+  ## e.g. for google Auth we recieve a Code, we will need to enrich that to get
+  ## a refresh token, access token and a key
+  def _enrichCredentialDictForAuth(self, credentialDICT):
+    return credentialDICT
 

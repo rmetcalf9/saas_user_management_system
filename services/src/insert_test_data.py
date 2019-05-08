@@ -9,6 +9,21 @@ import copy
 import time
 
 
+creationStats = {
+  'empty_tenants': 15,
+  'allowUserCreation_tenants': {
+    'num': 4,
+    'num_users': 10
+  }
+}
+creationStats = {
+  'empty_tenants': 5,
+  'allowUserCreation_tenants': {
+    'num': 2,
+    'num_users': 3
+  }
+}
+
 env = os.environ
 BASE = [0,1]
 LOGIN = 0
@@ -237,7 +252,7 @@ print("Adding google auth to master tenant")
 addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
 
 print("Creating allowUserCreation tenants with users created with register method")
-for cur in range(4):
+for cur in range(creationStats['allowUserCreation_tenants']['num']):
   print("Allow User Tenant ", cur)
   creationDICT = copy.deepcopy(tenantCreationDICT)
   creationDICT['Name'] = creationDICT['Name'] + str(cur)
@@ -254,7 +269,7 @@ for cur in range(4):
     addAuthProvDICT["AuthProviders"].append(authProvCreationDICT)
     tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], addAuthProvDICT, [200])
     
-  for curUser in range(10):
+  for curUser in range(creationStats['allowUserCreation_tenants']['num_users']):
     print(" - user ", curUser)
     creationDICT = copy.deepcopy(registeruserDICT)
     creationDICT['authProviderGUID'] = tenantDICT["AuthProviders"][0]['guid']
@@ -269,7 +284,7 @@ for cur in range(4):
     
 
 print("Creating more tenants without any users or auths")
-for cur in range(15):
+for cur in range(creationStats['empty_tenants']):
   print("Allow User Tenant ", cur)
   creationDICT = copy.deepcopy(tenantCreationDICT)
   creationDICT['Name'] = creationDICT['Name'] + "_nouser_" + str(cur)

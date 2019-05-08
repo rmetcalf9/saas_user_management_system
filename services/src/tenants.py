@@ -212,12 +212,12 @@ def GetTenant(tenantName, storeConnection, a,b,c):
   return tenantClass(a, aVer)
   
 def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection):
-  tenant = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
-  if tenant is None:
+  tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
+  if tenantObj is None:
     raise tenantDosentExistException
-  AuthProvider = authProviderFactory(tenant.getAuthProvider(authProviderGUID),authProviderGUID, tenantName)
+  AuthProvider = authProviderFactory(tenantObj.getAuthProvider(authProviderGUID),authProviderGUID, tenantName, tenantObj)
   if AuthProvider is None:
-    print("Can't find auth provider with type \"" + tenant.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenant.getName())
+    print("Can't find auth provider with type \"" + tenantObj.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenantObj.getName())
     raise authProviderTypeNotFoundException
   return AuthProvider
   
