@@ -14,7 +14,7 @@
 <script>
 // Notes: https://developers.google.com/identity/sign-in/web/server-side-flow
 import {
-  Notify
+  Notify, Loading
 } from 'quasar'
 
 export default {
@@ -32,13 +32,40 @@ export default {
     }
   },
   methods: {
-    signInCallback (response) {
-      console.log('response:', response)
-      Notify.create({color: 'negative', detail: 'TODO Process signin callback'})
+    signInCallback (responseFromGoogle) {
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          Notify.create({color: 'negative', detail: 'TODO Process signin callback'})
+        },
+        error: function (response) {
+          TTT.displayErrorToUserAndMoveToLoginSelectionScreen('Login Failed')
+        }
+      }
+      var loginRequestPostData = {
+        credentialJSON: responseFromGoogle,
+        authProviderGUID: TTT.$store.state.globalDataStore.selectedAuthProvGUID
+      }
+      TTT.$store.dispatch('globalDataStore/callLoginAPI', {
+        method: 'POST',
+        path: '/authproviders',
+        callback: callback,
+        postdata: loginRequestPostData
+      })
+    },
+    signInError (err) {
+      this.displayErrorToUserAndMoveToLoginSelectionScreen('TODO Process err: ' + err)
+    },
+    displayErrorToUserAndMoveToLoginSelectionScreen (message) {
+      Loading.hide()
+      Notify.create({color: 'negative', detail: message})
+      this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
     }
   },
   mounted: function () {
     var TTT = this
+    Loading.show()
     if (this.$store.state.globalDataStore.messagePendingDisplay !== null) {
       Notify.create({color: 'negative', detail: this.$store.state.globalDataStore.messagePendingDisplay})
       this.$store.commit('globalDataStore/setMessageDisplayed')
@@ -48,8 +75,8 @@ export default {
         client_id: TTT.authProvInfo.StaticlyLoadedData.client_id
         // Scopes to request in addition to 'profile' and 'email'
         // scope: 'additional_scope'
-      })
-      auth2.grantOfflineAccess().then(TTT.signInCallback)
+      }, TTT.signInError, TTT.signInError)
+      auth2.grantOfflineAccess().then(TTT.signInCallback, TTT.signInError)
     })
   }
 }
