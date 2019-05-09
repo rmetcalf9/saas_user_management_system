@@ -81,6 +81,7 @@ class authProvider():
   def _AddAuthForIdentity(self, credentialDICT):
     raise NotOverriddenException
 
+  #check the auth and if it is not valid raise authFailedException
   def _auth(self, appObj, obj, credentialDICT):
     raise NotOverriddenException
 
