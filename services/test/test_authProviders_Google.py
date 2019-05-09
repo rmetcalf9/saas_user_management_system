@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient
+from TestHelperSuperClass import testHelperAPIClient, tenantWithNoAuthProviders
 from appObj import appObj
 from tenants import GetTenant
 import constants
@@ -22,6 +22,37 @@ googleAuthProv001_CREATE = {
   "ConfigJSON": "{\"clientSecretJSONFile\": \"" + os.path.dirname(os.path.realpath(__file__)) + "/../" + client_cliental_json_filename + "\"}",
   "saltForPasswordHashing": None
 }
+
+exampleEnrichedCredentialJSON = {
+  "code": "AAA",
+  "creds": {
+    "access_token": "XXX", 
+    "client_id": "XXX", 
+    "client_secret": "XXX", 
+    "refresh_token": "XXX", 
+    "token_expiry": "2019-05-08T14:55:14Z", 
+    "token_uri": "https://oauth2.googleapis.com/token", 
+    "user_agent": None, 
+    "revoke_uri": "https://oauth2.googleapis.com/revoke", 
+    "id_token": {
+      "iss": "https://accounts.google.com", 
+      "azp": "???.apps.googleusercontent.com", 
+      "aud": "???.apps.googleusercontent.com", 
+      "sub": "56454656465454", 
+      "email": "rmetcalf9@googlemail.com", 
+      "email_verified": True, 
+      "at_hash": "???", 
+      "name": "Robert Metcalf", 
+      "picture": "https://lh6.googleusercontent.com/dsaddsaffs/s96-c/photo.jpg", 
+      "given_name": "Robert", 
+      "family_name": "Metcalf", 
+      "locale": "en-GB", 
+      "iat": 342543, 
+      "exp": 324324
+    }, 
+  }
+}
+
 googleAuthProv001_CREATE_missingClientSecretParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
 googleAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(googleAuthProv001_CREATE)
@@ -41,18 +72,21 @@ class test_api(testHelperAPIClient):
     self.assertEqual(result.status_code, 200, msg="Failed to add auth - " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
   
-  def setupGoogleAuthOnMainTenantForTests(self):
+  def setupGoogleAuthOnMainTenantForTests(self, override_JSON = googleAuthProv001_CREATE, tenantName = constants.masterTenantName):
     result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-
-    self.addAuthProvider(resultJSON['result'][0], googleAuthProv001_CREATE)
+    for x in resultJSON['result']:
+      if x['Name'] == tenantName:
+        self.addAuthProvider(x, override_JSON)
     
     result2 = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result2.status_code, 200)
     resultJSON2 = json.loads(result2.get_data(as_text=True))
-
-    return resultJSON2
+    for x in resultJSON2['result']:
+      if x['Name'] == tenantName:
+        return x
+    return None
   
 class test_addGoogleAuthProviderToMasterTenant(test_api):    
   def test_createAuth(self):
@@ -61,9 +95,9 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     expectedResult = copy.deepcopy(googleAuthProv001_CREATE)
     expectedResult["StaticlyLoadedData"] = {"client_id": "someGoogleID.apps.googleusercontent.com"}
 
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["result"][0]["AuthProviders"][1], expectedResult, ["guid","saltForPasswordHashing","StaticlyLoadedData"], msg='JSON of google Auth provider not right')
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["result"][0]["AuthProviders"][1]["StaticlyLoadedData"], expectedResult["StaticlyLoadedData"], ["client_id"], msg='StaticallyLoadedData Mismatch')
-    if not resultJSON2["result"][0]["AuthProviders"][1]["StaticlyLoadedData"]["client_id"].endswith(".apps.googleusercontent.com"):
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1], expectedResult, ["guid","saltForPasswordHashing","StaticlyLoadedData"], msg='JSON of google Auth provider not right')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1]["StaticlyLoadedData"], expectedResult["StaticlyLoadedData"], ["client_id"], msg='StaticallyLoadedData Mismatch')
+    if not resultJSON2["AuthProviders"][1]["StaticlyLoadedData"]["client_id"].endswith(".apps.googleusercontent.com"):
       self.assertFalse(True,msg="Invalid Client ID")
 
   def test_createAuthMissingclientSecretJSONFileParam(self):
@@ -120,8 +154,9 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
   def test_authFailsWithNoGoogleAuthsAccepted(self):
     #Test authentication via google.
     ## Must use mocks
+    
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
-    googleAuthProvider = resultJSON2["result"][0]["AuthProviders"][1]
+    googleAuthProvider = resultJSON2["AuthProviders"][1]
     
     loginJSON = {
       "credentialJSON":{
@@ -129,15 +164,33 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
       },
       "authProviderGUID":googleAuthProvider['guid']
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + constants.masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
-    self.assertEqual(result2.status_code, 200)
-    result2JSON = json.loads(result2.get_data(as_text=True))
+    result2 = None
+    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
+      result2 = self.testClient.post(self.loginAPIPrefix + '/' + constants.masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+      self.assertEqual(result2.status_code, 401)
+      result2JSON = json.loads(result2.get_data(as_text=True))
 
-    expectedResult = {
-      "userGuid": "FORCED-CONSTANT-TESTING-GUID",
-      "authedPersonGuid": "Ignore",
-      "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole],
-      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
+  def test_authWithUserCreation(self):
+    #Test authentication via google.
+    ## Must use mocks
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, False, True)
+
+    googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
+    googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
+    resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
+    googleAuthProvider = resultJSON2["AuthProviders"][1]
+    
+    loginJSON = {
+      "credentialJSON":{
+        "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
+      },
+      "authProviderGUID":googleAuthProvider['guid']
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
+    result2 = None
+    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
+      result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenantDict['Name'] + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+      self.assertEqual(result2.status_code, 200, msg="recieved " + result2.get_data(as_text=True))
+      result2JSON = json.loads(result2.get_data(as_text=True))
+
+    self.assertTrue(False, msg="TODO Check user exists in system")
 
