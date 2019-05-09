@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
+from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, AddAuth
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, objectVersionHeaderName
 import json
 import copy
@@ -6,10 +6,6 @@ from tenants import CreatePerson, GetTenant, _getAuthProvider
 from appObj import appObj
 from authProviders import authProviderFactory
 from authProviders_base import getAuthRecord
-
-def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
-  return auth
 
 
 class test_api(testHelperAPIClient):
@@ -405,7 +401,8 @@ class test_funcitonal(test_api):
         authProvDict,
         authProvGUID,
         tenantWithNoAuthProviders['Name'],
-        None
+        None,
+        appObj
       )
       authTypeConfigDict = {'username': 'AA'}
       authRecordKey = AuthProvider._makeKey(authTypeConfigDict)

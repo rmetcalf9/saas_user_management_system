@@ -20,9 +20,8 @@ from users import associateUserWithPerson
 
 from object_store_abstraction import createObjectStoreInstance
 
-
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   return auth
 
 internalUSerSufix = "@internalDataStore"
@@ -267,7 +266,17 @@ class testClassWithTestClient(testHelperSuperClass):
     self.assertEqual(resultJSON["ObjectVersion"],"1")
     
     return resultJSON
-    
+  
+  def updateTenant(self, tenantDICT):
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantDICT['Name'], 
+      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
+      data=json.dumps(tenantDICT), 
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 200)
+    return json.loads(result.get_data(as_text=True))
+  
   def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
     tenantJSON = self.createTenantForTesting(tenantDICT)
     tenantWithAuthProviders = copy.deepcopy(tenantDICT)
@@ -277,16 +286,7 @@ class testClassWithTestClient(testHelperSuperClass):
     tenantWithAuthProviders['AuthProviders'] = a
     tenantWithAuthProviders['ObjectVersion'] = tenantJSON['ObjectVersion']
     
-    #print("tenantJSON:",tenantJSON)
-    #print("tenantWithAuthProviders:",tenantWithAuthProviders)
-    result = self.testClient.put(
-      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantWithAuthProviders['Name'], 
-      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantWithAuthProviders), 
-      content_type='application/json'
-    )
-    self.assertEqual(result.status_code, 200)
-    return json.loads(result.get_data(as_text=True))
+    return self.updateTenant(tenantWithAuthProviders)
 
   def setupTenantForTesting(self, tenantBase, tenantUserCreation, AuthUserCreation):
     tenantWithUserCreation = copy.deepcopy(tenantBase)

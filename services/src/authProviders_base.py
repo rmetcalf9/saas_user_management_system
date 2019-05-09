@@ -31,7 +31,9 @@ class authProvider():
   tenantName = None
   operationFunctions = None
   tenantObj = None
-  def __init__(self, dataDict, guid, tenantName, tenantObj):
+  appObj = None
+  def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
+    self.appObj = appObj
     self.tenantObj = tenantObj
     self.operationFunctions = dict()
     if not 'ConfigJSON' in dataDict:
@@ -79,13 +81,13 @@ class authProvider():
   def _AddAuthForIdentity(self, credentialDICT):
     raise NotOverriddenException
 
-  def _auth(self, appObj, credentialDICT):
+  def _auth(self, appObj, obj, credentialDICT):
     raise NotOverriddenException
 
   def _authSpercificInit(self):
     raise NotOverriddenException
 
-  def _getAuthData(self):
+  def _getAuthData(self, appObj, credentialDICT):
     raise NotOverriddenException
 
   def AddAuth(self, appObj, credentialDICT, personGUID, storeConnection):
@@ -111,7 +113,7 @@ class authProvider():
   def AuthReturnAll(self, appObj, credentialDICT, storeConnection):
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
-      self._AuthActionToTakeWhenThereIsNoRecord()
+      self._AuthActionToTakeWhenThereIsNoRecord(credentialDICT, storeConnection)
       #Assuming action results in an auth record
       obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
       if obj is None:
@@ -120,7 +122,7 @@ class authProvider():
     self._auth(appObj, obj, credentialDICT)
     return obj, objVer, creationDateTime, lastUpdateDateTime
     
-  def _AuthActionToTakeWhenThereIsNoRecord(self):
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     raise authFailedException
 
   def Auth(self, appObj, credentialDICT, storeConnection):
@@ -172,6 +174,7 @@ class authProvider():
   #some auth types will need credentials enriched
   ## e.g. for google Auth we recieve a Code, we will need to enrich that to get
   ## a refresh token, access token and a key
+  ## This will raise authFailedException if the credentials are invalid (hence can't be enriched)
   def _enrichCredentialDictForAuth(self, credentialDICT):
     return credentialDICT
 

@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException, personDosentExistException
+from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException, personDosentExistException, userCreationNotAllowedException
 import constants
 import uuid
 from authProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
@@ -18,7 +18,6 @@ UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With T
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
 UnknownUserIDException = customExceptionClass('Unknown UserID', 'UnknownUserIDException')
 authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not found', 'authProviderTypeNotFoundException')
-userCreationNotAllowedException = customExceptionClass('User Creaiton Not Allowed', 'userCreationNotAllowedException')
 
 #only called on intial setup Creates a master tenant with single internal auth provider
 def CreateMasterTenant(appObj, testingMode, storeConnection):
@@ -65,7 +64,8 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
   authData = _getAuthProvider(
     appObj, masterTenantName, 
     masterTenantInternalAuthProvider['guid'],
-    storeConnection
+    storeConnection,
+    None
   ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection)
 
   #mainUserIdentity with authData
@@ -147,7 +147,7 @@ def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
 def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection):
   if not tenantObj.getAllowUserCreation():
     raise userCreationNotAllowedException
-  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection)
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   if not authProvObj.getAllowUserCreation():
     raise userCreationNotAllowedException
   
@@ -163,7 +163,7 @@ def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName,
   tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
   if tenantObj is None:
     raise tenantDosentExistException
-  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection)
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   authProvObj.executeAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT)
 
 def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT, storeConnection):
@@ -173,7 +173,7 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT,
   personObj = GetPerson(appObj, personGUID, storeConnection)
   if personObj is None:
     raise personDosentExistException
-  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection)
+  authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   
   return authData
@@ -211,11 +211,12 @@ def GetTenant(tenantName, storeConnection, a,b,c):
     return a
   return tenantClass(a, aVer)
   
-def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection):
-  tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
+def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):
   if tenantObj is None:
-    raise tenantDosentExistException
-  AuthProvider = authProviderFactory(tenantObj.getAuthProvider(authProviderGUID),authProviderGUID, tenantName, tenantObj)
+    tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
+    if tenantObj is None:
+      raise tenantDosentExistException
+  AuthProvider = authProviderFactory(tenantObj.getAuthProvider(authProviderGUID),authProviderGUID, tenantName, tenantObj, appObj)
   if AuthProvider is None:
     print("Can't find auth provider with type \"" + tenantObj.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenantObj.getName())
     raise authProviderTypeNotFoundException
@@ -241,7 +242,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'other_data': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
-  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection)
+  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None)
   authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection)
   if authUserObj is None:
     raise Exception

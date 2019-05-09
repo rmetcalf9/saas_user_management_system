@@ -50,11 +50,41 @@ Eample
 '''
 def credentialDictGet_email(credentialDICT):
   return credentialDICT["creds"]["id_token"]["email"]
+def credentialDictGet_emailVerfied(credentialDICT):
+  return credentialDICT["creds"]["id_token"]["email_verified"]
+def credentialDictGet_known_as(credentialDICT):
+  return credentialDICT["creds"]["id_token"]["given_name"]
+def credentialDictGet_unique_user_id(credentialDICT):
+  return credentialDICT["creds"]["id_token"]["sub"]
 
 class authProviderGoogle(authProvider):
-  secretJSONDownloadedFromGoogle = None
-  def __init__(self, dataDict, guid, tenantName, tenantObj):
-    super().__init__(dataDict, guid, tenantName, tenantObj)
+  def _getTypicalAuthData(self, credentialDICT):
+    return {
+      "user_unique_identifier": credentialDictGet_email(credentialDICT) + constants.uniqueKeyCombinator + self.guid, #used for username - needs to be unique across all auth provs
+      "known_as": credentialDictGet_known_as(credentialDICT), #used to display in UI for the user name
+      "other_data": {
+        "email": credentialDICT["creds"]["id_token"]["email"],
+        "email_verified": credentialDICT["creds"]["id_token"]["email_verified"],
+        "name": credentialDICT["creds"]["id_token"]["name"],
+        "picture": credentialDICT["creds"]["id_token"]["picture"],
+        "given_name": credentialDICT["creds"]["id_token"]["given_name"],
+        "family_name": credentialDICT["creds"]["id_token"]["family_name"],
+        "locale": credentialDICT["creds"]["id_token"]["locale"]
+      } #Other data like name full name that can be provided - will vary between auth providers
+    }
+  def _getAuthData(self, appObj, credentialDICT):
+    return {
+      "email": credentialDICT["creds"]["id_token"]["email"],
+      "email_verified": credentialDICT["creds"]["id_token"]["email_verified"],
+      "name": credentialDICT["creds"]["id_token"]["name"],
+      "picture": credentialDICT["creds"]["id_token"]["picture"],
+      "given_name": credentialDICT["creds"]["id_token"]["given_name"],
+      "family_name": credentialDICT["creds"]["id_token"]["family_name"],
+      "locale": credentialDICT["creds"]["id_token"]["locale"]
+    }
+  
+  def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
+    super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
 
     if 'clientSecretJSONFile' not in dataDict['ConfigJSON']:
       raise InvalidAuthConfigException
@@ -97,7 +127,7 @@ class authProviderGoogle(authProvider):
       raise InvalidAuthConfigException
     if 'creds' not in credentialDICT:
       raise InvalidAuthConfigException
-    return credentialDictGet_email(credentialDICT) + constants.uniqueKeyCombinator + self.guid
+    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + self.guid
 
   def __getClientID(self):
     return self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"]
@@ -138,9 +168,24 @@ class authProviderGoogle(authProvider):
       "creds": json.loads(credentials.to_json())
     }
 
-  def _AuthActionToTakeWhenThereIsNoRecord(self):
-    if not self.getAllowUserCreation():
-      return
-    if not self.tenantObj.getAllowUserCreation():
-      return
-    print("Passed checks - will do thingy")
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+    #if not self.getAllowUserCreation():
+    #  return
+    #if not self.tenantObj.getAllowUserCreation():
+    #  return
+    #Allow user creation checks preformed in RegisterUser call
+    #print("Passed checks - will do thingy:")
+    try:
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authPRoviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+    except constants.customExceptionClass as err:
+      if err.id == 'userCreationNotAllowedException':
+        return #Do nothing
+      raise err
+    #print("Email:", credentialDictGet_email(credentialDICT))
+    #print("Email Veffied:", credentialDictGet_emailVerfied(credentialDICT))
+    #print("known_as:", credentialDictGet_known_as(credentialDICT))
+
+  #check the auth and if it is not valid raise authFailedException
+  def _auth(self, appObj, obj, credentialDICT):
+    #not required as auths are checked at the enrichment stage
+    pass

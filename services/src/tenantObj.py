@@ -27,7 +27,7 @@ class tenantClass():
         # so we do it here
         tmp = copy.deepcopy(self.getAuthProvider(guid))
         tmp['ConfigJSON'] = json.dumps(tmp['ConfigJSON'])
-        tmp['StaticlyLoadedData'] = authProviderFactory(self.getAuthProvider(guid), guid, self.getName(), self).getPublicStaticDataDict()
+        tmp['StaticlyLoadedData'] = authProviderFactory(self.getAuthProvider(guid), guid, self.getName(), self, None).getPublicStaticDataDict()
         ap.append(tmp)
       self._jsonRepersentation['AuthProviders'] = ap
       self._jsonRepersentation['ObjectVersion'] = self._objectVersion

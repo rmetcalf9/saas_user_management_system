@@ -43,8 +43,8 @@ def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, sal
   return hashed_password
 
 class authProviderInternal(authProvider):
-  def __init__(self, dataDict, guid, tenantName, tenantObj):
-    super().__init__(dataDict, guid, tenantName, tenantObj)
+  def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
+    super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
     self.operationFunctions['ResetPassword'] = {
       'fn': self._executeAuthOperation_resetPassword,
       'requiredDictElements': ['newPassword']

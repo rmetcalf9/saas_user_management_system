@@ -145,7 +145,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     #Get Tenant will call auth provider for the first time
     #resetStaticData() #uncommenting this line should cause this test to error since the static data will be loaded from file
     with patch("authProviders_Google.loadStaticData", return_value={'web':{'client_id':'DummyClientID'}}) as mock_loadStaticData:
-      a = authProviderFactory(googleAuthProv, googleAuthProv['guid'], constants.masterTenantName, None)
+      a = authProviderFactory(googleAuthProv, googleAuthProv['guid'], constants.masterTenantName, None, appObj)
       if a==None:
         self.assertTrue(False, msg="authProviderFactory didn't create object")
     
@@ -173,7 +173,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
   def test_authWithUserCreation(self):
     #Test authentication via google.
     ## Must use mocks
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, False, True)
+    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
 
     googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
     googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
@@ -192,5 +192,16 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
       self.assertEqual(result2.status_code, 200, msg="recieved " + result2.get_data(as_text=True))
       result2JSON = json.loads(result2.get_data(as_text=True))
 
-    self.assertTrue(False, msg="TODO Check user exists in system")
+    #Turn off auto user creation
+    tenantDict2 = self.getTenantDICT(tenantDict['Name'])
+    tenantDict2['AllowUserCreation'] = False
+    tenantDict3 = self.updateTenant(tenantDict2)
+
+    #Try and login - should not need to create so will suceed
+    result3 = None
+    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
+      result3 = self.testClient.post(self.loginAPIPrefix + '/' + tenantDict['Name'] + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+      self.assertEqual(result3.status_code, 200, msg="recieved " + result3.get_data(as_text=True))
+      result3JSON = json.loads(result3.get_data(as_text=True))
+
 

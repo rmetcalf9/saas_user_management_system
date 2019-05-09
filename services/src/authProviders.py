@@ -4,11 +4,11 @@ from authProviders_Google import authProviderGoogle
 from uuid import uuid4
 from base64 import b64encode
 
-def authProviderFactory(dataDict, guid, tenantName, tenantObj):
+def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
   if dataDict["Type"]=='internal':
-    return authProviderInternal(dataDict, guid, tenantName, tenantObj)
+    return authProviderInternal(dataDict, guid, tenantName, tenantObj, appObj)
   if dataDict["Type"]=='google':
-    return authProviderGoogle(dataDict, guid, tenantName, tenantObj)
+    return authProviderGoogle(dataDict, guid, tenantName, tenantObj, appObj)
   return None
   
 def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, configJSON):
@@ -23,7 +23,7 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
     "ConfigJSON": configJSON,  #Type spercific config
     "saltForPasswordHashing": saltForPasswordHashing
   }
-  createdAuthProvObject = authProviderFactory(authProvDataDict, 'invalidGUID', 'invalidTenantName', None) #Check we can create an auth provider
+  createdAuthProvObject = authProviderFactory(authProvDataDict, 'invalidGUID', 'invalidTenantName', None, appObj) #Check we can create an auth provider
   return authProvDataDict
 
 def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON):

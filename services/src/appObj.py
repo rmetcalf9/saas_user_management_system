@@ -15,7 +15,7 @@ from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
 from currentAuthAPI import registerAPI as registerCurAuthApi
 
-from tenants import GetTenant, CreateMasterTenant
+from tenants import GetTenant, CreateMasterTenant, RegisterUser
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
 from object_store_abstraction import createObjectStoreInstance
 from gatewayInterface import getGatewayInterface
@@ -48,6 +48,7 @@ class appObjClass(parAppObj):
   testingDefaultPersonGUID = None
   refreshTokenManager = None
   scheduler = None
+  RegisterUserFn = RegisterUser #First argument to registerUser is appObj
 
   def init(self, env, serverStartTime, testingMode = False):
     authProviders_resetStaticData()
