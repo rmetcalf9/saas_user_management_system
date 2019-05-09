@@ -5,6 +5,7 @@
       Client_ID: {{ authProvInfo.StaticlyLoadedData.client_id }}<BR />
       AuthProvInfo: {{ authProvInfo }}
     </div>
+    <processLoginResponse ref="processLoginResponseInstance"></processLoginResponse>
   </div>
 </template>
 
@@ -16,9 +17,13 @@
 import {
   Notify, Loading
 } from 'quasar'
+import processLoginResponse from '../components/processLoginResponse'
 
 export default {
   name: 'AuthProvider_internal',
+  components: {
+    'processLoginResponse': processLoginResponse
+  },
   data () {
     return {
     }
@@ -34,18 +39,18 @@ export default {
   methods: {
     signInCallback (responseFromGoogle) {
       var TTT = this
+      var loginRequestPostData = {
+        credentialJSON: responseFromGoogle,
+        authProviderGUID: TTT.$store.state.globalDataStore.selectedAuthProvGUID
+      }
       var callback = {
         ok: function (response) {
           Loading.hide()
-          Notify.create({color: 'negative', detail: 'TODO Process signin callback'})
+          TTT.$refs.processLoginResponseInstance.processLoginOKResponse(response, loginRequestPostData)
         },
         error: function (response) {
           TTT.displayErrorToUserAndMoveToLoginSelectionScreen('Login Failed')
         }
-      }
-      var loginRequestPostData = {
-        credentialJSON: responseFromGoogle,
-        authProviderGUID: TTT.$store.state.globalDataStore.selectedAuthProvGUID
       }
       TTT.$store.dispatch('globalDataStore/callLoginAPI', {
         method: 'POST',

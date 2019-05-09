@@ -60,7 +60,7 @@ def credentialDictGet_unique_user_id(credentialDICT):
 class authProviderGoogle(authProvider):
   def _getTypicalAuthData(self, credentialDICT):
     return {
-      "user_unique_identifier": credentialDictGet_email(credentialDICT) + constants.uniqueKeyCombinator + self.guid, #used for username - needs to be unique across all auth provs
+      "user_unique_identifier": credentialDictGet_email(credentialDICT) + '@' + self.guid, #used for username - needs to be unique across all auth provs
       "known_as": credentialDictGet_known_as(credentialDICT), #used to display in UI for the user name
       "other_data": {
         "email": credentialDICT["creds"]["id_token"]["email"],

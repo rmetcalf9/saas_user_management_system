@@ -12,6 +12,12 @@
       <div class="row">
         <div v-for="curVal in currentTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
           <AuthSecuritySettingsInternal
+            v-if="curVal.auth.AuthProviderType === 'internal'"
+            :authData="curVal"
+            :loggedInPerson="UserSettingsData.loggedInUser"
+          />
+          <AuthSecuritySettingsGoogle
+            v-if="curVal.auth.AuthProviderType === 'google'"
             :authData="curVal"
             :loggedInPerson="UserSettingsData.loggedInUser"
           />
@@ -34,6 +40,7 @@
 import { Notify, Loading, Cookies } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import AuthSecuritySettingsInternal from '../components/authSecuritySettingsInternal'
+import AuthSecuritySettingsGoogle from '../components/authSecuritySettingsGoogle'
 
 function getEmptyUserSettingsData () {
   return {
@@ -49,7 +56,8 @@ function getEmptyUserSettingsData () {
 export default {
   name: 'SecuritySettings',
   components: {
-    AuthSecuritySettingsInternal
+    'AuthSecuritySettingsInternal': AuthSecuritySettingsInternal,
+    'AuthSecuritySettingsGoogle': AuthSecuritySettingsGoogle
   },
   data () {
     return {
