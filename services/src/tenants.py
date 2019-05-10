@@ -10,7 +10,7 @@ from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from object_store_abstraction import WrongObjectVersionException
 from users import CreateUser, AddUserRole, associateUserWithPerson
-from userPersonCommon import getListOfUserIDsForPerson, GetUser
+from userPersonCommon import getListOfUserIDsForPerson, GetUser, getListOfUserIDsForPersonNoTenantCheck
 from persons import GetPerson
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
@@ -242,7 +242,11 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'other_data': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
-  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None)
+  tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
+  if tenantObj is None:
+    raise tenantDosentExistException
+
+  authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
   authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection)
   if authUserObj is None:
     raise Exception
@@ -251,7 +255,25 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
   if len(possibleUserIDs)==0:
-    raise PersonHasNoAccessToAnyIdentitiesException
+    if not tenantObj.getAllowUserCreation():
+      raise PersonHasNoAccessToAnyIdentitiesException
+    if not authProvider.getAllowUserCreation():
+      raise PersonHasNoAccessToAnyIdentitiesException
+    if authProvider.requireRegisterCallToAutocreateUser():
+      raise PersonHasNoAccessToAnyIdentitiesException
+    #print("No possible identities returned - this means there is no has account role - we should add it")
+    
+    #Person may have many users, but if we can create accounts for this tenant we can add the account to all users
+    # and give the person logging in a choice
+    #We don't do a tenant check because all it's doing is restricting the returned users to users who already have a hasaccount role
+    userIDList = getListOfUserIDsForPersonNoTenantCheck(appObj, authUserObj['personGUID'], storeConnection)
+    for curUserID in userIDList:
+      AddUserRole(appObj, curUserID, tenantName, constants.DefaultHasAccountRole, storeConnection)
+    
+    possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
+    if len(possibleUserIDs)==0:
+      #This should never happen as we just added the has account role
+      raise PersonHasNoAccessToAnyIdentitiesException
   if requestedUserID is None:
     if len(possibleUserIDs)==1:
       requestedUserID = possibleUserIDs[0]

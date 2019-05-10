@@ -179,3 +179,7 @@ class authProvider():
   def _enrichCredentialDictForAuth(self, credentialDICT):
     return credentialDICT
 
+  #Overidden for auth provider types that require a seperate call to the register function to create a user
+  def requireRegisterCallToAutocreateUser(self):
+    return False
+

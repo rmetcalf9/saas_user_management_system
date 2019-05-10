@@ -296,16 +296,43 @@ class testClassWithTestClient(testHelperSuperClass):
     authProvCreateWithUserCreation = copy.deepcopy(authProvDict) #sampleInternalAuthProv001_CREATE sampleInternalAuthProv001_CREATE_WithAllowUserCreation
     return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
 
-  def getTenantInternalAuthProvDict(self, tenant):
+  def getTenantSpercificAuthProvDict(self, tenant, type):
     result = self.testClient.get(self.loginAPIPrefix + '/' + tenant + '/authproviders')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-    return resultJSON[ 'AuthProviders' ][0]
-    
+    for x in resultJSON[ 'AuthProviders' ]:
+      if x['Type'] == type:
+        return x
+    raise Exception("Could not find " + str(type) + " auth provider in tenant " + str(tenant))
+
+  def getTenantInternalAuthProvDict(self, tenant):
+    return self.getTenantSpercificAuthProvDict(tenant, 'internal')
+
+  def registerInternalUser(self, tenantName, username, password, authProvider):
+    hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+      username, 
+      password, 
+      authProvider['saltForPasswordHashing']
+    )
+    registerJSON = {
+      "authProviderGUID": authProvider['guid'],
+      "credentialJSON": { 
+        "username": username, 
+        "password": hashedPassword
+       }
+    }
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantName + '/register', 
+      data=json.dumps(registerJSON), 
+      content_type='application/json'
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+    return json.loads(registerResult.get_data(as_text=True))
+
   def loginAsDefaultUser(self):
     return self.loginAsUser(masterTenantName, self.getTenantInternalAuthProvDict(masterTenantName), env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'])
     
-  def loginAsUser(self, tenant, authProviderDICT, username, password):
+  def loginAsUser(self, tenant, authProviderDICT, username, password, expectedResults = [200]):
     hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       username, 
       password, 
@@ -320,9 +347,12 @@ class testClassWithTestClient(testHelperSuperClass):
        }
     }
     result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenant + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
-    self.assertEqual(result2.status_code, 200)
-    return json.loads(result2.get_data(as_text=True))
-
+    for x in expectedResults:
+      if result2.status_code == x:
+        return json.loads(result2.get_data(as_text=True))
+    print(result2.get_data(as_text=True))
+    self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
+    return None
 
 #helper class with setup for an APIClient
 class testHelperAPIClient(testClassWithTestClient):

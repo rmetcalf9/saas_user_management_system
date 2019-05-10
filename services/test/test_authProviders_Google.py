@@ -22,6 +22,8 @@ googleAuthProv001_CREATE = {
   "ConfigJSON": "{\"clientSecretJSONFile\": \"" + os.path.dirname(os.path.realpath(__file__)) + "/../" + client_cliental_json_filename + "\"}",
   "saltForPasswordHashing": None
 }
+googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
+googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
 
 exampleEnrichedCredentialJSON = {
   "code": "AAA",
@@ -58,7 +60,25 @@ googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
 googleAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJSONFile\": \"badNonExistantFile.json\"}"
 
-class test_api(testHelperAPIClient):
+class google_auth_test_api_helper_functions(testHelperAPIClient):
+  def loginWithGoogle(self, tenantName, authProviderDICT, expectedResults):
+    loginJSON = {
+      "credentialJSON":{
+        "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
+      },
+      "authProviderGUID":authProviderDICT['guid']
+    }
+    result2 = None
+    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
+      result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+
+    for x in expectedResults:
+      if x == result2.status_code:
+        return json.loads(result2.get_data(as_text=True))
+    self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
+    return None
+
+class test_api(google_auth_test_api_helper_functions):
   def addAuthProvider(self, currentTenantJSON, authProviderDICT):
     tenantJSON = copy.deepcopy(currentTenantJSON)
     tenantJSON['AuthProviders'].append(copy.deepcopy(authProviderDICT))
@@ -150,7 +170,9 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
         self.assertTrue(False, msg="authProviderFactory didn't create object")
     
     mock_loadStaticData.assert_not_called()
-    
+  
+
+  
   def test_authFailsWithNoGoogleAuthsAccepted(self):
     #Test authentication via google.
     ## Must use mocks
@@ -158,50 +180,57 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
     googleAuthProvider = resultJSON2["AuthProviders"][1]
     
-    loginJSON = {
-      "credentialJSON":{
-        "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
-      },
-      "authProviderGUID":googleAuthProvider['guid']
-    }
-    result2 = None
-    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
-      result2 = self.testClient.post(self.loginAPIPrefix + '/' + constants.masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
-      self.assertEqual(result2.status_code, 401)
-      result2JSON = json.loads(result2.get_data(as_text=True))
+    result2JSON = self.loginWithGoogle(constants.masterTenantName, googleAuthProvider, [401])
+    
 
   def test_authWithUserCreation(self):
     #Test authentication via google.
     ## Must use mocks
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
 
-    googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
-    googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
     googleAuthProvider = resultJSON2["AuthProviders"][1]
     
-    loginJSON = {
-      "credentialJSON":{
-        "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
-      },
-      "authProviderGUID":googleAuthProvider['guid']
-    }
-    result2 = None
-    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
-      result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenantDict['Name'] + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
-      self.assertEqual(result2.status_code, 200, msg="recieved " + result2.get_data(as_text=True))
-      result2JSON = json.loads(result2.get_data(as_text=True))
-
+    result2JSON = self.loginWithGoogle(tenantDict['Name'], googleAuthProvider, [200])
+    
     #Turn off auto user creation
     tenantDict2 = self.getTenantDICT(tenantDict['Name'])
     tenantDict2['AllowUserCreation'] = False
     tenantDict3 = self.updateTenant(tenantDict2)
 
     #Try and login - should not need to create so will suceed
-    result3 = None
-    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
-      result3 = self.testClient.post(self.loginAPIPrefix + '/' + tenantDict['Name'] + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
-      self.assertEqual(result3.status_code, 200, msg="recieved " + result3.get_data(as_text=True))
-      result3JSON = json.loads(result3.get_data(as_text=True))
+    result3JSON = self.loginWithGoogle(tenantDict['Name'], googleAuthProvider, [200])
 
 
+  #Test user with google auth in one tenant can't log into a tenant they don't have access too
+  def test_CrossTenantLoginsDisallowed(self):
+    #Second tenant has allow user creation set to FALSE for this test to work - otherwise account is just auto created
+    tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
+    tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, False, googleAuthProv001_CREATE_withAllowCreate)
+
+    #Login as user on tenant where they have an account - this will cause the account to be autocreated
+    result2JSON = self.loginWithGoogle(tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
+
+    #Login as user on tenant where they have an account and ensure success
+    result2JSON = self.loginWithGoogle(tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
+
+    #Login as user on tenant where they have an account and ensure failure (no autocreation will occur)
+    result2JSON = self.loginWithGoogle(tenantWhereUserHasNoAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasNoAccountDict['Name'], 'google'), [401])
+
+
+  #Test user with google auth creates a new account on second tenant the same user record is returned
+  def test_AutocreateingGoogleAccountsInDifferentTenantsShareSameUser(self):
+    tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenant2D = copy.deepcopy(tenantWithNoAuthProviders)
+    tenant2D['Name'] = 'secondTestTenant'
+    tenant2 = self.createTenantWithAuthProvider(tenant2D, True, googleAuthProv001_CREATE_withAllowCreate)
+
+    result2JSON = self.loginWithGoogle(tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
+
+    result3JSON = self.loginWithGoogle(tenant2['Name'], self.getTenantSpercificAuthProvDict(tenant2['Name'], 'google'), [200])
+
+    self.assertEqual(result2JSON['userGuid'],result3JSON['userGuid'],msg="Different user accounts returned")
+    self.assertEqual(result2JSON['authedPersonGuid'],result3JSON['authedPersonGuid'],msg="Different person accounts used")
+    

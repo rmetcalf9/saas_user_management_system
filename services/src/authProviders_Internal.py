@@ -114,3 +114,5 @@ class authProviderInternal(authProvider):
     resultValue = {}
     return resultValue, authObj
     
+  def requireRegisterCallToAutocreateUser(self):
+    return True

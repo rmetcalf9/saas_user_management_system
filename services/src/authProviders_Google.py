@@ -127,7 +127,7 @@ class authProviderGoogle(authProvider):
       raise InvalidAuthConfigException
     if 'creds' not in credentialDICT:
       raise InvalidAuthConfigException
-    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + self.guid
+    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'google'
 
   def __getClientID(self):
     return self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"]
@@ -176,7 +176,7 @@ class authProviderGoogle(authProvider):
     #Allow user creation checks preformed in RegisterUser call
     #print("Passed checks - will do thingy:")
     try:
-      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authPRoviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing

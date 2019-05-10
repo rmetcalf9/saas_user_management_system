@@ -343,9 +343,39 @@ class test_loginapi_norm(test_api):
     self.assertEqual(result2.status_code, 400, 'Login failed - ' + result2.get_data(as_text=True))
 
   def test_attemptToLoginTenantWherePersonHasInternalAuthOnAnotherTenant(self):
+    #accounts are not autocreated for internal auth so it is not nessecary to set allow user creation to false
     tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
     tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+    
+    username = "someuname"
+    password = "somepword"
+    
+    #Register user on tenant where they have an account
+    registerResultJSON = self.registerInternalUser(
+      tenantWhereUserHasAccountDict['Name'], 
+      username,
+      password, 
+      self.getTenantInternalAuthProvDict(tenantWhereUserHasAccountDict['Name'])
+    )
+
+    #Login as user on tenant where they have an account and ensure success
+    self.loginAsUser(
+      tenantWhereUserHasAccountDict['Name'], 
+      self.getTenantInternalAuthProvDict(tenantWhereUserHasAccountDict['Name']), 
+      username, 
+      password
+    )
+    
+    #Login as user on tenant where they have no account and ensure failure
+    self.loginAsUser(
+      tenantWhereUserHasNoAccountDict['Name'], 
+      self.getTenantInternalAuthProvDict(tenantWhereUserHasNoAccountDict['Name']), 
+      username, 
+      password,
+      [401]
+    )
+
     #self.assertTrue(False)
 

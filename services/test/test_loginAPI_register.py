@@ -1,6 +1,6 @@
 from test_loginAPI import test_api as parent_test_api
 #from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
-from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env, internalUSerSufix, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env, internalUSerSufix, sampleInternalAuthProv001_CREATE_WithAllowUserCreation, getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 import json
 from appObj import appObj
 import datetime
@@ -10,7 +10,8 @@ import pytz
 import copy
 from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole
 
-class test_loginapi_register(parent_test_api):  
+class test_loginapi_register(parent_test_api):
+
   def test_registerNewUser(self):
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
@@ -20,22 +21,9 @@ class test_loginapi_register(parent_test_api):
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
     userName = "testSetUserName"
+    password = "delkjgn4rflkjwned"
     
-    registerJSON = {
-      "authProviderGUID": createdAuthProvGUID,
-      "credentialJSON": { 
-        "username": userName, 
-        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
-       }
-    }
-
-    registerResult = self.testClient.put(
-      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/register', 
-      data=json.dumps(registerJSON), 
-      content_type='application/json'
-    )
-    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
-    registerResultJSON = json.loads(registerResult.get_data(as_text=True))
+    registerResultJSON = self.registerInternalUser(tenantWithNoAuthProviders['Name'], userName, password, tenantDict['AuthProviders'][0])
     
     expectedUserDICT = {
       "UserID": userName + internalUSerSufix,
@@ -54,20 +42,13 @@ class test_loginapi_register(parent_test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersonGUIDs'], msg='Incorrect response from registration')
     self.assertEqual(len(registerResultJSON['associatedPersonGUIDs']),1)
 
-    loginJSON = {
-      "authProviderGUID": createdAuthProvGUID,
-      "credentialJSON": { 
-        "username": userName, 
-        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(createdAuthSalt)
-       }
-    }
-    loginResult = self.testClient.post(
-      self.loginAPIPrefix + '/' + tenantWithNoAuthProviders['Name'] + '/authproviders', 
-      data=json.dumps(loginJSON), 
-      content_type='application/json'
+    loginResultJSON = self.loginAsUser(
+      tenantWithNoAuthProviders['Name'], 
+      self.getTenantInternalAuthProvDict(tenantWithNoAuthProviders['Name']), 
+      userName, 
+      password
     )
-    self.assertEqual(loginResult.status_code, 200, msg="Unable to login as newly registered user - " + loginResult.get_data(as_text=True))
-    loginResultJSON = json.loads(loginResult.get_data(as_text=True))
+
     self.assertFalse('other_data' in loginResultJSON)
     
     #Test other_data is filled in. This is only returned in the admin API get function so can't use login api to view
