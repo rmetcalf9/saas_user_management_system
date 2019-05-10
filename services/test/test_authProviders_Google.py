@@ -25,7 +25,8 @@ googleAuthProv001_CREATE = {
 googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
 
-exampleEnrichedCredentialJSON = {
+googleLoginAccounts = []
+googleLoginAccounts.append({
   "code": "AAA",
   "creds": {
     "access_token": "XXX", 
@@ -53,7 +54,11 @@ exampleEnrichedCredentialJSON = {
       "exp": 324324
     }, 
   }
-}
+})
+googleLoginAccounts.append(copy.deepcopy(googleLoginAccounts[0]))
+googleLoginAccounts[1]['creds']['id_token']['sub'] = "56454656465455"
+googleLoginAccounts[1]['creds']['id_token']['email'] = "rmetcalf92@googlemail.com"
+googleLoginAccounts[1]['creds']['id_token']['name'] = "Robert2 Metcalf2"
 
 googleAuthProv001_CREATE_missingClientSecretParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
@@ -61,7 +66,7 @@ googleAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(googleAuthProv001_CR
 googleAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJSONFile\": \"badNonExistantFile.json\"}"
 
 class google_auth_test_api_helper_functions(testHelperAPIClient):
-  def loginWithGoogle(self, tenantName, authProviderDICT, expectedResults):
+  def loginWithGoogle(self, accNum, tenantName, authProviderDICT, expectedResults):
     loginJSON = {
       "credentialJSON":{
         "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
@@ -69,7 +74,7 @@ class google_auth_test_api_helper_functions(testHelperAPIClient):
       "authProviderGUID":authProviderDICT['guid']
     }
     result2 = None
-    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=exampleEnrichedCredentialJSON) as mock_loadStaticData:
+    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=googleLoginAccounts[accNum]) as mock_loadStaticData:
       result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
 
     for x in expectedResults:
@@ -180,7 +185,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
     googleAuthProvider = resultJSON2["AuthProviders"][1]
     
-    result2JSON = self.loginWithGoogle(constants.masterTenantName, googleAuthProvider, [401])
+    result2JSON = self.loginWithGoogle(0, constants.masterTenantName, googleAuthProvider, [401])
     
 
   def test_authWithUserCreation(self):
@@ -191,7 +196,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
     googleAuthProvider = resultJSON2["AuthProviders"][1]
     
-    result2JSON = self.loginWithGoogle(tenantDict['Name'], googleAuthProvider, [200])
+    result2JSON = self.loginWithGoogle(0, tenantDict['Name'], googleAuthProvider, [200])
     
     #Turn off auto user creation
     tenantDict2 = self.getTenantDICT(tenantDict['Name'])
@@ -199,7 +204,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenantDict3 = self.updateTenant(tenantDict2)
 
     #Try and login - should not need to create so will suceed
-    result3JSON = self.loginWithGoogle(tenantDict['Name'], googleAuthProvider, [200])
+    result3JSON = self.loginWithGoogle(0, tenantDict['Name'], googleAuthProvider, [200])
 
 
   #Test user with google auth in one tenant can't log into a tenant they don't have access too
@@ -211,13 +216,13 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, False, googleAuthProv001_CREATE_withAllowCreate)
 
     #Login as user on tenant where they have an account - this will cause the account to be autocreated
-    result2JSON = self.loginWithGoogle(tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
+    result2JSON = self.loginWithGoogle(0, tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
 
     #Login as user on tenant where they have an account and ensure success
-    result2JSON = self.loginWithGoogle(tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
+    result2JSON = self.loginWithGoogle(0, tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
 
     #Login as user on tenant where they have an account and ensure failure (no autocreation will occur)
-    result2JSON = self.loginWithGoogle(tenantWhereUserHasNoAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasNoAccountDict['Name'], 'google'), [401])
+    result2JSON = self.loginWithGoogle(0, tenantWhereUserHasNoAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasNoAccountDict['Name'], 'google'), [401])
 
 
   #Test user with google auth creates a new account on second tenant the same user record is returned
@@ -227,10 +232,20 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenant2D['Name'] = 'secondTestTenant'
     tenant2 = self.createTenantWithAuthProvider(tenant2D, True, googleAuthProv001_CREATE_withAllowCreate)
 
-    result2JSON = self.loginWithGoogle(tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
+    result2JSON = self.loginWithGoogle(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
 
-    result3JSON = self.loginWithGoogle(tenant2['Name'], self.getTenantSpercificAuthProvDict(tenant2['Name'], 'google'), [200])
+    result3JSON = self.loginWithGoogle(0, tenant2['Name'], self.getTenantSpercificAuthProvDict(tenant2['Name'], 'google'), [200])
 
     self.assertEqual(result2JSON['userGuid'],result3JSON['userGuid'],msg="Different user accounts returned")
     self.assertEqual(result2JSON['authedPersonGuid'],result3JSON['authedPersonGuid'],msg="Different person accounts used")
     
+    
+  def test_TwoUsersGetDifferentUserAndPErsonIDs(self):
+    tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+
+    acc1LoginJSON = self.loginWithGoogle(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
+    acc2LoginJSON = self.loginWithGoogle(1, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
+
+    self.assertNotEqual(acc1LoginJSON['userGuid'],acc2LoginJSON['userGuid'],msg="user accounts returned should not be the same")
+    self.assertNotEqual(acc1LoginJSON['authedPersonGuid'],acc2LoginJSON['authedPersonGuid'],msg="person accounts used should not be the same")
+
