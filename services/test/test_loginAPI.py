@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
+from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 import unittest
 import json
 from appObj import appObj
@@ -341,4 +341,11 @@ class test_loginapi_norm(test_api):
     }
     result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
     self.assertEqual(result2.status_code, 400, 'Login failed - ' + result2.get_data(as_text=True))
+
+  def test_attemptToLoginTenantWherePersonHasInternalAuthOnAnotherTenant(self):
+    tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+    tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
+    tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+    #self.assertTrue(False)
 

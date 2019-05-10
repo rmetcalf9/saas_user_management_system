@@ -42,8 +42,8 @@ sampleInternalAuthProv001_CREATE = {
   "StaticlyLoadedData": {},
   "saltForPasswordHashing": None
 } 
-
-
+sampleInternalAuthProv001_CREATE_WithAllowUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+sampleInternalAuthProv001_CREATE_WithAllowUserCreation['AllowUserCreation'] = True
 
 env = {
   'APIAPP_MODE': 'DOCKER',
@@ -288,11 +288,12 @@ class testClassWithTestClient(testHelperSuperClass):
     
     return self.updateTenant(tenantWithAuthProviders)
 
-  def setupTenantForTesting(self, tenantBase, tenantUserCreation, AuthUserCreation):
+  def createTenantWithAuthProvider(self, tenantBase, tenantUserCreation, authProvDict):
+    #This will create a new tenant, add an auth provider and optionally toggle tenant user creation
     tenantWithUserCreation = copy.deepcopy(tenantBase)
-    tenantWithUserCreation['AllowUserCreation'] = tenantUserCreation
-    authProvCreateWithUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
-    authProvCreateWithUserCreation['AllowUserCreation'] = AuthUserCreation
+    if tenantUserCreation is not None:
+      tenantWithUserCreation['AllowUserCreation'] = tenantUserCreation
+    authProvCreateWithUserCreation = copy.deepcopy(authProvDict) #sampleInternalAuthProv001_CREATE sampleInternalAuthProv001_CREATE_WithAllowUserCreation
     return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
 
   def getTenantInternalAuthProvDict(self, tenant):

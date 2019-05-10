@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
-from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
+from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 from appObj import appObj
 from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, conDefaultUserGUID
 import constants
@@ -29,7 +29,7 @@ class test_adminAPIUsers(parent_test_api):
   def test_getUserListThreeTenantsAndMutipleUsers(self):
     testDateTime = datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
 
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
@@ -170,7 +170,7 @@ class test_adminAPIUsers(parent_test_api):
   
   #delete user test
   def test_deleteUser(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
 
@@ -323,7 +323,7 @@ class test_adminAPIUsers(parent_test_api):
     #Create a user with it's person
     # delete the person record (deleting person records on their own won't result in user getting deleted)
     # then delete the user record
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
 

@@ -1,6 +1,6 @@
 from test_loginAPI import test_api as parent_test_api
 #from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE
-from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env, internalUSerSufix
+from TestHelperSuperClass import tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, env, internalUSerSufix, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 import json
 from appObj import appObj
 import datetime
@@ -14,7 +14,7 @@ class test_loginapi_register(parent_test_api):
   def test_registerNewUser(self):
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
   
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
@@ -96,7 +96,7 @@ class test_loginapi_register(parent_test_api):
 
 
   def test_registerNewUserTenantFail(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, False, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, False, sampleInternalAuthProv001_CREATE)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -119,7 +119,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
   def test_registerNewUserAuthProvFail(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, False)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -142,7 +142,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(registerResult.status_code, 401, msg="Registration passed but should have failed")
 
   def test_registerWithBadCredentialJSON(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -165,7 +165,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(registerResult.status_code, 400, msg="Bad credential JSON not rejected")
 
   def test_registerTwoUsersWithSameNameSecondShouldFail(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -194,7 +194,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(resultJSON['message'], "That username is already in use", msg="Incorrect error message")
 
   def test_registerMutipleUsersWithDifferentNamesWorks(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -218,7 +218,7 @@ class test_loginapi_register(parent_test_api):
       self.assertEqual(registerResult.status_code, 201, msg="User not created")
     
   def test_ableToReuseDeletedUsername(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -253,7 +253,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(registerResult.status_code, 201, msg="creation after delete failed" + registerResult.get_data(as_text=True))
 
   def test_unableToLoginAsDeletedUser(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
     
@@ -302,7 +302,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(loginResult.status_code, 401, msg="Managed to login as a deleted user")
     
   def test_registerNewUserFailsWithDuplicateUsername(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
   
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
@@ -332,7 +332,7 @@ class test_loginapi_register(parent_test_api):
     self.assertEqual(registerResult.status_code, 400, msg="Registration of second user with same name did not fail")
 
   def test_registerNewUserFailsWithDuplicateUsernameDifferByCase(self):
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
   
     createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']

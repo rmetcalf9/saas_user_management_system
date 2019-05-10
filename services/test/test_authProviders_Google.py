@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, tenantWithNoAuthProviders
+from TestHelperSuperClass import testHelperAPIClient, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 from appObj import appObj
 from tenants import GetTenant
 import constants
@@ -173,7 +173,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
   def test_authWithUserCreation(self):
     #Test authentication via google.
     ## Must use mocks
-    tenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
 
     googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
     googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True

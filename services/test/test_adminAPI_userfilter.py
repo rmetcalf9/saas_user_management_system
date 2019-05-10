@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
-from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix
+from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, internalUSerSufix, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 from appObj import appObj
 from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 from test_adminAPI import test_api as parent_test_api
@@ -31,7 +31,7 @@ class test_adminAPIUserFilter(parent_test_api):
     
   def createUserUsingLoginRegisterAPI(self):
     if self.testTenantDict is None:
-      self.testTenantDict = self.setupTenantForTesting(tenantWithNoAuthProviders, True, True)
+      self.testTenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
 
     createdAuthProvGUID = self.testTenantDict['AuthProviders'][0]['guid']
     createdAuthSalt = self.testTenantDict['AuthProviders'][0]['saltForPasswordHashing']
