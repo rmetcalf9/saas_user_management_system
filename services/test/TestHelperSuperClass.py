@@ -38,7 +38,7 @@ sampleInternalAuthProv001_CREATE = {
   "AllowUserCreation": False,
   "AllowLink": False, 
   "AllowUnlink": False, 
-  "UnlinkText": 'Unlink', 
+  "LinkText": 'Link', 
   "MenuText": "Default Menu Text",
   "IconLink": "string",
   "ConfigJSON": "{\"userSufix\": \"" + internalUSerSufix + "\"}",

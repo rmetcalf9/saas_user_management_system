@@ -3,6 +3,11 @@
     <q-item-tile label>{{ authData.internalAuthProv.MenuText }}</q-item-tile>
     <q-item-tile sublabel>
       {{ authData.auth.known_as }}
+      <q-btn
+        push
+        v-if="authData.canUnlink"
+        @click="$emit('unlink')"
+      >Unlink</q-btn>
     </q-item-tile>
   </div>
 </template>

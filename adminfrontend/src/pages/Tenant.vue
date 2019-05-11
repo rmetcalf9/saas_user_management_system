@@ -1,5 +1,5 @@
 <template>
-  <q-page>{{ tenantData }}
+  <q-page>
     <q-page-sticky position="bottom-right" :offset="[50, 50]">
       <q-btn
         color="negative"
@@ -115,8 +115,8 @@
           <q-field helper="Allow a user to remove this auth method (As long as they have at least one other active)" label="Allow Unlink" :label-width="3">
             <q-toggle v-model="editAuthProvModalDialogData.AllowUnlink" />
           </q-field>
-          <q-field helper="Text to show in security settings UI" label="Unlink Text" :label-width="3">
-            <q-input v-model="editAuthProvModalDialogData.UnlinkText" />
+          <q-field helper="Text to show in security settings UI" label="Link Text" :label-width="3">
+            <q-input v-model="editAuthProvModalDialogData.LinkText" />
           </q-field>
           <q-field helper="Text to display in select auth dialog" label="Menu Text" :label-width="3">
             <q-input v-model="editAuthProvModalDialogData.MenuText" />
@@ -176,7 +176,7 @@ export default {
         { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: true, filter: false },
         { name: 'AllowLink', required: true, label: 'AllowLink', align: 'left', field: 'AllowLink', sortable: true, filter: false },
         { name: 'AllowUnlink', required: true, label: 'AllowUnlink', align: 'left', field: 'AllowUnlink', sortable: true, filter: false },
-        { name: 'UnlinkText', required: true, label: 'UnlinkText', align: 'left', field: 'UnlinkText', sortable: true, filter: false },
+        { name: 'LinkText', required: true, label: 'LinkText', align: 'left', field: 'LinkText', sortable: true, filter: false },
         { name: 'MenuText', required: true, label: 'MenuText', align: 'left', field: 'MenuText', sortable: true, filter: false },
         { name: 'IconLink', required: true, label: 'IconLink', align: 'left', field: 'IconLink', sortable: true, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
@@ -195,7 +195,7 @@ export default {
         AllowUserCreation: false,
         AllowLink: false,
         AllowUnlink: false,
-        UnlinkText: '',
+        LinkText: '',
         MenuText: '',
         IconLink: '',
         guid: '',
@@ -223,7 +223,7 @@ export default {
       this.editAuthProvModalDialogData.AllowUserCreation = false
       this.editAuthProvModalDialogData.AllowLink = false
       this.editAuthProvModalDialogData.AllowUnlink = false
-      this.editAuthProvModalDialogData.UnlinkText = 'Unlink'
+      this.editAuthProvModalDialogData.LinkText = 'Link'
       this.editAuthProvModalDialogData.MenuText = ''
       this.editAuthProvModalDialogData.IconLink = ''
       this.editAuthProvModalDialogData.guid = ''
@@ -239,7 +239,7 @@ export default {
       this.editAuthProvModalDialogData.AllowUserCreation = item.AllowUserCreation
       this.editAuthProvModalDialogData.AllowLink = item.AllowLink
       this.editAuthProvModalDialogData.AllowUnlink = item.AllowUnlink
-      this.editAuthProvModalDialogData.UnlinkText = item.UnlinkText
+      this.editAuthProvModalDialogData.LinkText = item.LinkText
       this.editAuthProvModalDialogData.MenuText = item.MenuText
       this.editAuthProvModalDialogData.IconLink = item.IconLink
       this.editAuthProvModalDialogData.guid = item.guid
@@ -281,8 +281,8 @@ export default {
         Notify.create({color: 'negative', detail: 'Menu text must be filled in'})
         return
       }
-      if (this.editAuthProvModalDialogData.UnlinkText === '') {
-        Notify.create({color: 'negative', detail: 'UnlinkText text must be filled in'})
+      if (this.editAuthProvModalDialogData.LinkText === '') {
+        Notify.create({color: 'negative', detail: 'LinkText text must be filled in'})
         return
       }
       // Check configJSON string is valid JSON
@@ -296,7 +296,7 @@ export default {
         AllowUserCreation: TTT.editAuthProvModalDialogData.AllowUserCreation,
         AllowLink: TTT.editAuthProvModalDialogData.AllowLink,
         AllowUnlink: TTT.editAuthProvModalDialogData.AllowUnlink,
-        UnlinkText: TTT.editAuthProvModalDialogData.UnlinkText,
+        LinkText: TTT.editAuthProvModalDialogData.LinkText,
         MenuText: TTT.editAuthProvModalDialogData.MenuText,
         IconLink: TTT.editAuthProvModalDialogData.IconLink,
         guid: TTT.editAuthProvModalDialogData.guid,

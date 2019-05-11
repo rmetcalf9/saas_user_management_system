@@ -86,7 +86,7 @@ class test_funcitonal(test_api):
       "AllowUserCreation": False, 
       "AllowLink": False, 
       "AllowUnlink": False, 
-      "UnlinkText": 'Unlink', 
+      "LinkText": 'Link', 
       "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}", "StaticlyLoadedData": {}, 
       "IconLink": None, 
       "MenuText": "Website account login", 
@@ -343,7 +343,7 @@ class test_funcitonal(test_api):
     resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
   
     newMenuTextToUse = 'Changed Menu Text'
-    newUnlinkTextToUse = 'newUnlinkTextToUse'
+    newLinkTextToUse = 'newLinkTextToUse'
     guidOfAuthProvToChange = resultJSON['AuthProviders'][0]['guid']
     tenantDictBeforeChange = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
     expectedDictAfterChange = copy.deepcopy(tenantDictBeforeChange)
@@ -352,13 +352,13 @@ class test_funcitonal(test_api):
         a['MenuText'] = newMenuTextToUse
         a['AllowLink'] = True
         a['AllowUnlink'] = True
-        a['UnlinkText'] = newUnlinkTextToUse
+        a['LinkText'] = newLinkTextToUse
 
     changedAuthProvs = [resultJSON['AuthProviders'][0],resultJSON['AuthProviders'][1]]
     changedAuthProvs[0]['MenuText'] = newMenuTextToUse
     changedAuthProvs[0]['AllowLink'] = True
     changedAuthProvs[0]['AllowUnlink'] = True
-    changedAuthProvs[0]['UnlinkText'] = newUnlinkTextToUse
+    changedAuthProvs[0]['LinkText'] = newLinkTextToUse
     changedTenantDICT = copy.deepcopy(tenantWithNoAuthProviders)
     changedTenantDICT['AuthProviders'] = changedAuthProvs
     changedTenantDICT['ObjectVersion'] = resultJSON['ObjectVersion']

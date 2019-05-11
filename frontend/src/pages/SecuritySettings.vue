@@ -12,6 +12,7 @@
               <AuthSecuritySettingsInternal
                 :authData="curVal"
                 :loggedInPerson="UserSettingsData.loggedInUser"
+                @unlink="unlinkClick(curVal)"
               />
             </q-item-main>
           </q-item>
@@ -20,6 +21,7 @@
               <AuthSecuritySettingsGoogle
                 :authData="curVal"
                 :loggedInPerson="UserSettingsData.loggedInUser"
+                @unlink="unlinkClick(curVal)"
               />
             </q-item-main>
           </q-item>
@@ -31,18 +33,15 @@
           <div v-for="curVal in unusedTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
             <q-item>
               <q-item-main>
-                {{ curVal }}
                 <q-btn
                   push
                   @click="linkClick"
-                >Link Text TODO</q-btn>
+                >{{ curVal.LinkText }}</q-btn>
               </q-item-main>
             </q-item>
           </div>
         </q-list>
       </div>
-    </div>
-    <div>
       <div class="row">
         <q-btn
           color="primary"
@@ -85,24 +84,28 @@ export default {
   computed: {
     currentTenantAuthsWithAuthProvData () {
       var TTT = this
-      return TTT.UserSettingsData.loggedInPerson.personAuths.filter(function (a) { return a.tenantName === TTT.$store.state.globalDataStore.tenantInfo.Name }).map(
+      var userAuthItems = TTT.UserSettingsData.loggedInPerson.personAuths.filter(function (a) { return a.tenantName === TTT.$store.state.globalDataStore.tenantInfo.Name })
+      var canAnyUnlink = (userAuthItems.length > 1)
+      return userAuthItems.map(
         function (a) {
+          var internalAuthProvObj = TTT.$store.state.globalDataStore.tenantInfo.AuthProviders.filter(function (b) {
+            return b.guid === a.AuthProviderGUID
+          })[0]
           return {
             AuthUserKey: a.AuthUserKey,
             auth: a,
-            internalAuthProv: TTT.$store.state.globalDataStore.tenantInfo.AuthProviders.filter(function (b) {
-              return b.guid === a.AuthProviderGUID
-            })[0]
+            internalAuthProv: internalAuthProvObj,
+            canUnlink: (canAnyUnlink && internalAuthProvObj.AllowUnlink)
           }
         }
       )
     },
     unusedTenantAuthsWithAuthProvData () {
       var TTT = this
-      console.log(this.UserSettingsData.loggedInPerson.personAuths.map(function (b) {
-        return b.AuthProviderGUID
-      }))
       return TTT.$store.state.globalDataStore.tenantInfo.AuthProviders.filter(function (b) {
+        if (!b.AllowLink) {
+          return false
+        }
         return !TTT.UserSettingsData.loggedInPerson.personAuths.map(function (c) {
           return c.AuthProviderGUID
         }).includes(b.guid)
@@ -110,8 +113,12 @@ export default {
     }
   },
   methods: {
+    unlinkClick (authData) {
+      console.log(authData)
+      Notify.create('TODO - unlink')
+    },
     linkClick () {
-      console.log('TODO')
+      Notify.create('TODO')
     },
     goBackClick () {
       window.location.href = this.$store.state.globalDataStore.usersystemReturnaddress

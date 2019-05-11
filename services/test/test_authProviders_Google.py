@@ -19,7 +19,7 @@ googleAuthProv001_CREATE = {
   "AllowUserCreation": False,
   "AllowLink": False, 
   "AllowUnlink": False, 
-  "UnlinkText": 'Unlink', 
+  "LinkText": 'Link', 
   "MenuText": "Log in with Google",
   "IconLink": "string",
   "ConfigJSON": "{\"clientSecretJSONFile\": \"" + os.path.dirname(os.path.realpath(__file__)) + "/../" + client_cliental_json_filename + "\"}",

@@ -57,7 +57,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
         authProvDict = tenantObj.getAuthProvider(x)
         self.assertEqual(authProvDict['AllowLink'], False, msg="AllowLink not defaulted properly")
         self.assertEqual(authProvDict['AllowUnlink'], False, msg="AllowUnlink not defaulted properly")
-        self.assertEqual(authProvDict['UnlinkText'], 'Unlink ' + authProvDict['Type'], msg="UnlinkText not defaulted properly")
+        self.assertEqual(authProvDict['LinkText'], 'Link ' + authProvDict['Type'], msg="LinkText not defaulted properly")
     appObj.objectStore.executeInsideTransaction(dbfn)
 
   def test_Issue42_ServiceCallWorksWithoutExtraFields(self):
@@ -67,7 +67,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     tenantDictForFailingTest = copy.deepcopy(tenantDict)
     del tenantDictForFailingTest["AuthProviders"][0]['AllowLink']
     del tenantDictForFailingTest["AuthProviders"][0]['AllowUnlink']
-    del tenantDictForFailingTest["AuthProviders"][0]['UnlinkText']
+    del tenantDictForFailingTest["AuthProviders"][0]['LinkText']
     
     #This tests editing an authProv - as this is editing existing this should fail
     tenantDict2 = self.updateTenant(tenantDictForFailingTest, [400])
@@ -75,7 +75,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     oldAuthProv = copy.deepcopy(sampleInternalAuthProv001_CREATE)
     del oldAuthProv['AllowLink']
     del oldAuthProv['AllowUnlink']
-    del oldAuthProv['UnlinkText']
+    del oldAuthProv['LinkText']
     tenantDict["AuthProviders"].append(oldAuthProv)
 
     #This tests editing an authProv

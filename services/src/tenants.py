@@ -32,7 +32,7 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
     False, 
     {"userSufix": "@internalDataStore"},
     storeConnection,
-    False, False, 'Unlink'
+    False, False, 'Link'
   )
   
   userID = appObj.defaultUserGUID
@@ -125,7 +125,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getExistingAuthProviderJSON(
         appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
-        authProv['AllowLink'], authProv['AllowUnlink'], authProv['UnlinkText']
+        authProv['AllowLink'], authProv['AllowUnlink'], authProv['LinkText']
       )
     else:
       if authProv['saltForPasswordHashing'] is not None:
@@ -133,7 +133,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getNewAuthProviderJSON(
         appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
-        authProv.get('AllowLink',False), authProv.get('AllowUnlink',False), authProv.get('UnlinkText','Unlink')
+        authProv.get('AllowLink',False), authProv.get('AllowUnlink',False), authProv.get('LinkText','Link')
       )
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
   
@@ -189,8 +189,8 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT,
   return authData
 
 
-def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON, storeConnection, AllowLink, AllowUnlink, UnlinkText):
-  authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText)
+def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON, storeConnection, AllowLink, AllowUnlink, LinkText):
+  authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText)
   def updTenant(tenant, transactionContext):
     if tenant is None:
       raise tenantDosentExistException
@@ -224,8 +224,8 @@ def GetTenant(tenantName, storeConnection, a,b,c):
       a['AuthProviders'][curAuthProv]['AllowLink'] = False
     if not 'AllowUnlink' in a['AuthProviders'][curAuthProv]:
       a['AuthProviders'][curAuthProv]['AllowUnlink'] = False
-    if not 'UnlinkText' in a['AuthProviders'][curAuthProv]:
-      a['AuthProviders'][curAuthProv]['UnlinkText'] = 'Unlink ' + a['AuthProviders'][curAuthProv]['Type']
+    if not 'LinkText' in a['AuthProviders'][curAuthProv]:
+      a['AuthProviders'][curAuthProv]['LinkText'] = 'Link ' + a['AuthProviders'][curAuthProv]['Type']
   return tenantClass(a, aVer)
   
 def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):

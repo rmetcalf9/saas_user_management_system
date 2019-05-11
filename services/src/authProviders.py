@@ -12,7 +12,7 @@ def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
   return None
   
 def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, 
-  configJSON, AllowLink, AllowUnlink, UnlinkText
+  configJSON, AllowLink, AllowUnlink, LinkText
 ):
   if not isinstance(configJSON,dict):
     raise Exception('ERROR ConfigJSON must be a dict')
@@ -24,28 +24,28 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
     "AllowUserCreation": AllowUserCreation,
     "AllowLink": AllowLink,
     "AllowUnlink": AllowUnlink,
-    "UnlinkText": UnlinkText,
+    "LinkText": LinkText,
     "ConfigJSON": configJSON,  #Type spercific config
     "saltForPasswordHashing": saltForPasswordHashing,
     "AllowLink": AllowLink,
     "AllowUnlink": AllowUnlink,
-    "UnlinkText": UnlinkText,
+    "LinkText": LinkText,
   }
   createdAuthProvObject = authProviderFactory(authProvDataDict, 'invalidGUID', 'invalidTenantName', None, appObj) #Check we can create an auth provider
   return authProvDataDict
 
-def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText):
+def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText):
   return _getAuthProviderJSON(
     appObj, 
     existingJSON['guid'], 
     existingJSON['saltForPasswordHashing'], 
-    menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText
+    menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText
   )
 
-def getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText):
+def getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText):
   return _getAuthProviderJSON(
     appObj, str(uuid4()), str(b64encode(appObj.bcrypt.gensalt()),'utf-8'), 
-    menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText
+    menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText
   )
 
   

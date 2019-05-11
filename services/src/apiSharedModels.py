@@ -9,7 +9,7 @@ def getTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND Tenant level to work)'),   
     'AllowLink': fields.Boolean(default=False,description='Allow user to add this as a secondary auth method'),
     'AllowUnlink': fields.Boolean(default=False,description='Allow user to remove this auth method (As long as they have others availiable)'),
-    'UnlinkText': fields.String(default='Unlink', description='Text to show on unlink button in Security settings UI'),
+    'LinkText': fields.String(default='Link', description='Text to show on link button in Security settings UI'),
     'MenuText': fields.String(default='click here', description='Item text used in login method selection screen'),
     'IconLink': fields.String(default=None, description='Image link used in login method selection screen'),
     'ConfigJSON': fields.String(default=None, description='Extra configuration required per auth type'),

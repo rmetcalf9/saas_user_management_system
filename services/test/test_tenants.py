@@ -43,7 +43,7 @@ class test_tenants(testHelperAPIClient):
         "AllowUserCreation": False,
         "AllowLink": False,
         "AllowUnlink": False,
-        "UnlinkText": 'Unlink',
+        "LinkText": 'Link',
         "ConfigJSON": {
           "userSufix": "@internalDataStore"
         }

@@ -8,6 +8,11 @@
           push
           @click="resetPasswordClick"
         >Reset Password</q-btn>
+      <q-btn
+        push
+        v-if="authData.canUnlink"
+        @click="$emit('unlink')"
+      >Unlink</q-btn>
       <q-modal v-model="resetPasswordDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
         <q-modal-layout>
           <q-toolbar slot="header">
