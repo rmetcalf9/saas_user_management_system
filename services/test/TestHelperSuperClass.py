@@ -270,15 +270,17 @@ class testClassWithTestClient(testHelperSuperClass):
     
     return resultJSON
   
-  def updateTenant(self, tenantDICT):
+  def updateTenant(self, tenantDICT, expectedResults):
     result = self.testClient.put(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantDICT['Name'], 
       headers={ jwtHeaderName: self.getNormalJWTToken()}, 
       data=json.dumps(tenantDICT), 
       content_type='application/json'
     )
-    self.assertEqual(result.status_code, 200)
-    return json.loads(result.get_data(as_text=True))
+    for x in expectedResults:
+        if result.status_code == x:
+          return json.loads(result.get_data(as_text=True))
+    self.assertTrue(False,msg="Wrong status code returned, expected one of " + str(expectedResults) + " got " + str(result.status_code) + ":" + result.get_data(as_text=True))
   
   def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
     tenantJSON = self.createTenantForTesting(tenantDICT)
@@ -289,7 +291,7 @@ class testClassWithTestClient(testHelperSuperClass):
     tenantWithAuthProviders['AuthProviders'] = a
     tenantWithAuthProviders['ObjectVersion'] = tenantJSON['ObjectVersion']
     
-    return self.updateTenant(tenantWithAuthProviders)
+    return self.updateTenant(tenantWithAuthProviders, [200])
 
   def createTenantWithAuthProvider(self, tenantBase, tenantUserCreation, authProvDict):
     #This will create a new tenant, add an auth provider and optionally toggle tenant user creation

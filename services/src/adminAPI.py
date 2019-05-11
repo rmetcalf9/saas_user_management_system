@@ -217,6 +217,9 @@ def registerAPI(appObj):
         if (err.id=='InvalidAuthConfigException'):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
+      except KeyError as err:
+        raise BadRequest(str(err))
+        #raise err
       except WrongObjectVersionExceptionClass as err:
         raise Conflict(err)
       except:

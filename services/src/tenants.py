@@ -121,6 +121,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       if authProv['saltForPasswordHashing'] != existingAuthProv['saltForPasswordHashing']:
         raise cantUpdateExistingAuthProvException
       #print("UpdateTenant:authProb'congigJSON':",authProv['ConfigJSON']," - ", type(authProv['ConfigJSON']))
+      #No defaults provided
       newAuthDICT = getExistingAuthProviderJSON(
         appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
@@ -132,7 +133,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getNewAuthProviderJSON(
         appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
-        authProv['AllowLink'], authProv['AllowUnlink'], authProv['UnlinkText']
+        authProv.get('AllowLink',False), authProv.get('AllowUnlink',False), authProv.get('UnlinkText','Unlink')
       )
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
   
