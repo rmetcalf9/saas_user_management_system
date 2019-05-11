@@ -63,14 +63,29 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
   def test_Issue42_ServiceCallWorksWithoutExtraFields(self):
     tenantDict = self.getTenantDICT(constants.masterTenantName)
     
-    #Remove the added fields from structure
-    tenantDictForFailingTest = copy.deepcopy(tenantDict)
-    del tenantDictForFailingTest["AuthProviders"][0]['AllowLink']
-    del tenantDictForFailingTest["AuthProviders"][0]['AllowUnlink']
-    del tenantDictForFailingTest["AuthProviders"][0]['LinkText']
+    #Before we start change all the fields to non-default values
+    tenantDictNonDefaultValues = copy.deepcopy(tenantDict)
+    tenantDictNonDefaultValues["AuthProviders"][0]['AllowLink'] = True
+    tenantDictNonDefaultValues["AuthProviders"][0]['AllowUnlink'] = True
+    tenantDictNonDefaultValues["AuthProviders"][0]['LinkText'] = 'nonDefaultLinkText'
+    tenantDictNonDefaultValuesRes = self.updateTenant(tenantDictNonDefaultValues, [200])
     
-    #This tests editing an authProv - as this is editing existing this should fail
-    tenantDict2 = self.updateTenant(tenantDictForFailingTest, [400])
+    
+    #Remove the added fields from structure (testing that we can edit without changing values)
+    tenantDictForEditTest = copy.deepcopy(tenantDictNonDefaultValuesRes)
+    del tenantDictForEditTest["AuthProviders"][0]['AllowLink']
+    del tenantDictForEditTest["AuthProviders"][0]['AllowUnlink']
+    del tenantDictForEditTest["AuthProviders"][0]['LinkText']
+    
+    #This tests editing an authProv - as this is editing existing this should default 
+    # data from existing values
+    tenantDict2 = self.updateTenant(tenantDictForEditTest, [200])
+    
+    print(tenantDict2)
+    
+    self.assertEqual(tenantDict2["AuthProviders"][0]['AllowLink'],True, msg="AllowLink was changed when it was not provided in update payload")
+    self.assertEqual(tenantDict2["AuthProviders"][0]['AllowUnlink'],True, msg="AllowUnlink was changed when it was not provided in update payload")
+    self.assertEqual(tenantDict2["AuthProviders"][0]['LinkText'],'nonDefaultLinkText', msg="LinkText was changed when it was not provided in update payload")
    
     oldAuthProv = copy.deepcopy(sampleInternalAuthProv001_CREATE)
     del oldAuthProv['AllowLink']
@@ -79,4 +94,4 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     tenantDict["AuthProviders"].append(oldAuthProv)
 
     #This tests editing an authProv
-    tenantDict3 = self.updateTenant(tenantDict, [200])
+    tenantDict3 = self.updateTenant(tenantDict2, [200])

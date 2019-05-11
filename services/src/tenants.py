@@ -125,7 +125,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getExistingAuthProviderJSON(
         appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
-        authProv['AllowLink'], authProv['AllowUnlink'], authProv['LinkText']
+        authProv.get('AllowLink',existingAuthProv['AllowLink']), authProv.get('AllowUnlink',existingAuthProv['AllowUnlink']), authProv.get('LinkText',existingAuthProv['LinkText'])
       )
     else:
       if authProv['saltForPasswordHashing'] is not None:
