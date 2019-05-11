@@ -343,15 +343,22 @@ class test_funcitonal(test_api):
     resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE,sampleInternalAuthProv001_CREATE])
   
     newMenuTextToUse = 'Changed Menu Text'
+    newUnlinkTextToUse = 'newUnlinkTextToUse'
     guidOfAuthProvToChange = resultJSON['AuthProviders'][0]['guid']
     tenantDictBeforeChange = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
     expectedDictAfterChange = copy.deepcopy(tenantDictBeforeChange)
     for a in expectedDictAfterChange['AuthProviders']:
       if a['guid']==guidOfAuthProvToChange:
         a['MenuText'] = newMenuTextToUse
+        a['AllowLink'] = True
+        a['AllowUnlink'] = True
+        a['UnlinkText'] = newUnlinkTextToUse
 
     changedAuthProvs = [resultJSON['AuthProviders'][0],resultJSON['AuthProviders'][1]]
     changedAuthProvs[0]['MenuText'] = newMenuTextToUse
+    changedAuthProvs[0]['AllowLink'] = True
+    changedAuthProvs[0]['AllowUnlink'] = True
+    changedAuthProvs[0]['UnlinkText'] = newUnlinkTextToUse
     changedTenantDICT = copy.deepcopy(tenantWithNoAuthProviders)
     changedTenantDICT['AuthProviders'] = changedAuthProvs
     changedTenantDICT['ObjectVersion'] = resultJSON['ObjectVersion']
@@ -365,7 +372,19 @@ class test_funcitonal(test_api):
     self.assertEqual(result.status_code, 200)    
     
     changedResultJSON = self.getTenantDICT(tenantWithNoAuthProviders['Name'])
-    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, expectedDictAfterChange, ["ObjectVersion"], msg='New Tenant JSON isn\'t the expected value')
+    self.assertJSONStringsEqualWithIgnoredKeys(changedResultJSON, expectedDictAfterChange, ["ObjectVersion", 'AuthProviders'], msg='New Tenant JSON isn\'t the expected value')
+    
+    self.assertEqual(len(changedResultJSON['AuthProviders']), len(expectedDictAfterChange['AuthProviders']), msg="Wrong number of authProviders in result")
+    
+    for x in changedResultJSON['AuthProviders']:
+      y = None
+      for z in expectedDictAfterChange['AuthProviders']:
+        if x['guid'] == z['guid']:
+          y = z
+      self.assertNotEqual(y,None, msg="Auth provider missing")
+      self.assertJSONStringsEqualWithIgnoredKeys(x, y, [], msg='Individual auth provider data wrong')
+      
+    
     self.assertEqual(resultJSON["ObjectVersion"],"2")
   
   def test_updateTenantDescription_TenantHasMutipleAuthProvsWhichShouldBeUnchanged(self):

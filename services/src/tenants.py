@@ -31,7 +31,8 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
     "internal", 
     False, 
     {"userSufix": "@internalDataStore"},
-    storeConnection
+    storeConnection,
+    False, False, 'Unlink'
   )
   
   userID = appObj.defaultUserGUID
@@ -120,11 +121,19 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       if authProv['saltForPasswordHashing'] != existingAuthProv['saltForPasswordHashing']:
         raise cantUpdateExistingAuthProvException
       #print("UpdateTenant:authProb'congigJSON':",authProv['ConfigJSON']," - ", type(authProv['ConfigJSON']))
-      newAuthDICT = getExistingAuthProviderJSON(appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], authProv['AllowUserCreation'], authProv['ConfigJSON'])
+      newAuthDICT = getExistingAuthProviderJSON(
+        appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
+        authProv['AllowUserCreation'], authProv['ConfigJSON'],
+        authProv['AllowLink'], authProv['AllowUnlink'], authProv['UnlinkText']
+      )
     else:
       if authProv['saltForPasswordHashing'] is not None:
         raise ShouldNotSupplySaltWhenCreatingAuthProvException
-      newAuthDICT = getNewAuthProviderJSON(appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], authProv['AllowUserCreation'], authProv['ConfigJSON'])
+      newAuthDICT = getNewAuthProviderJSON(
+        appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
+        authProv['AllowUserCreation'], authProv['ConfigJSON'],
+        authProv['AllowLink'], authProv['AllowUnlink'], authProv['UnlinkText']
+      )
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
   
   def updTenant(tenant, storeConnection):
@@ -179,8 +188,8 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT,
   return authData
 
 
-def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON, storeConnection):
-  authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON)
+def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreation, configJSON, storeConnection, AllowLink, AllowUnlink, UnlinkText):
+  authProviderJSON = getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText)
   def updTenant(tenant, transactionContext):
     if tenant is None:
       raise tenantDosentExistException

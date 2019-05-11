@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <q-page>{{ tenantData }}
     <q-page-sticky position="bottom-right" :offset="[50, 50]">
       <q-btn
         color="negative"
@@ -109,6 +109,15 @@
           <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
             <q-toggle v-model="editAuthProvModalDialogData.AllowUserCreation" />
           </q-field>
+          <q-field helper="Allow a user to add this auth method" label="Allow Link" :label-width="3">
+            <q-toggle v-model="editAuthProvModalDialogData.AllowLink" />
+          </q-field>
+          <q-field helper="Allow a user to remove this auth method (As long as they have at least one other active)" label="Allow Unlink" :label-width="3">
+            <q-toggle v-model="editAuthProvModalDialogData.AllowUnlink" />
+          </q-field>
+          <q-field helper="Text to show in security settings UI" label="Unlink Text" :label-width="3">
+            <q-input v-model="editAuthProvModalDialogData.UnlinkText" />
+          </q-field>
           <q-field helper="Text to display in select auth dialog" label="Menu Text" :label-width="3">
             <q-input v-model="editAuthProvModalDialogData.MenuText" />
           </q-field>
@@ -165,6 +174,9 @@ export default {
       tableColumns: [
         { name: 'Type', required: true, label: 'Type', align: 'left', field: 'Type', sortable: true, filter: false },
         { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: true, filter: false },
+        { name: 'AllowLink', required: true, label: 'AllowLink', align: 'left', field: 'AllowLink', sortable: true, filter: false },
+        { name: 'AllowUnlink', required: true, label: 'AllowUnlink', align: 'left', field: 'AllowUnlink', sortable: true, filter: false },
+        { name: 'UnlinkText', required: true, label: 'UnlinkText', align: 'left', field: 'UnlinkText', sortable: true, filter: false },
         { name: 'MenuText', required: true, label: 'MenuText', align: 'left', field: 'MenuText', sortable: true, filter: false },
         { name: 'IconLink', required: true, label: 'IconLink', align: 'left', field: 'IconLink', sortable: true, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
@@ -206,6 +218,9 @@ export default {
       this.editAuthProvModalDialogData.DeleteMode = false
       this.editAuthProvModalDialogData.Type = 'internal'
       this.editAuthProvModalDialogData.AllowUserCreation = false
+      this.editAuthProvModalDialogData.AllowLink = false
+      this.editAuthProvModalDialogData.AllowUnlink = false
+      this.editAuthProvModalDialogData.UnlinkText = 'Unlink'
       this.editAuthProvModalDialogData.MenuText = ''
       this.editAuthProvModalDialogData.IconLink = ''
       this.editAuthProvModalDialogData.guid = ''
@@ -219,6 +234,9 @@ export default {
       this.editAuthProvModalDialogData.DeleteMode = false
       this.editAuthProvModalDialogData.Type = item.Type
       this.editAuthProvModalDialogData.AllowUserCreation = item.AllowUserCreation
+      this.editAuthProvModalDialogData.AllowLink = item.AllowLink
+      this.editAuthProvModalDialogData.AllowUnlink = item.AllowUnlink
+      this.editAuthProvModalDialogData.UnlinkText = item.UnlinkText
       this.editAuthProvModalDialogData.MenuText = item.MenuText
       this.editAuthProvModalDialogData.IconLink = item.IconLink
       this.editAuthProvModalDialogData.guid = item.guid
@@ -260,6 +278,10 @@ export default {
         Notify.create({color: 'negative', detail: 'Menu text must be filled in'})
         return
       }
+      if (this.editAuthProvModalDialogData.UnlinkText === '') {
+        Notify.create({color: 'negative', detail: 'UnlinkText text must be filled in'})
+        return
+      }
       // Check configJSON string is valid JSON
       if (this.isConfigJSONInvalid) {
         Notify.create({color: 'negative', detail: 'ConfigJSON is not valid JSON'})
@@ -269,6 +291,9 @@ export default {
       var newAuthProvJSON = {
         Type: TTT.editAuthProvModalDialogData.Type,
         AllowUserCreation: TTT.editAuthProvModalDialogData.AllowUserCreation,
+        AllowLink: TTT.editAuthProvModalDialogData.AllowLink,
+        AllowUnlink: TTT.editAuthProvModalDialogData.AllowUnlink,
+        UnlinkText: TTT.editAuthProvModalDialogData.UnlinkText,
         MenuText: TTT.editAuthProvModalDialogData.MenuText,
         IconLink: TTT.editAuthProvModalDialogData.IconLink,
         guid: TTT.editAuthProvModalDialogData.guid,

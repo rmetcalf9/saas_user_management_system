@@ -11,7 +11,9 @@ def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
     return authProviderGoogle(dataDict, guid, tenantName, tenantObj, appObj)
   return None
   
-def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, configJSON):
+def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, 
+  configJSON, AllowLink, AllowUnlink, UnlinkText
+):
   if not isinstance(configJSON,dict):
     raise Exception('ERROR ConfigJSON must be a dict')
   authProvDataDict = {
@@ -20,27 +22,30 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
     "IconLink": iconLink,
     "Type":  Type,
     "AllowUserCreation": AllowUserCreation,
+    "AllowLink": AllowLink,
+    "AllowUnlink": AllowUnlink,
+    "UnlinkText": UnlinkText,
     "ConfigJSON": configJSON,  #Type spercific config
     "saltForPasswordHashing": saltForPasswordHashing,
-    "AllowLink": False,
-    "AllowUnlink": False,
-    "UnlinkText": 'Unlink',
+    "AllowLink": AllowLink,
+    "AllowUnlink": AllowUnlink,
+    "UnlinkText": UnlinkText,
   }
   createdAuthProvObject = authProviderFactory(authProvDataDict, 'invalidGUID', 'invalidTenantName', None, appObj) #Check we can create an auth provider
   return authProvDataDict
 
-def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON):
+def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText):
   return _getAuthProviderJSON(
     appObj, 
     existingJSON['guid'], 
     existingJSON['saltForPasswordHashing'], 
-    menuText, iconLink, Type, AllowUserCreation, configJSON
+    menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText
   )
 
-def getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON):
+def getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText):
   return _getAuthProviderJSON(
     appObj, str(uuid4()), str(b64encode(appObj.bcrypt.gensalt()),'utf-8'), 
-    menuText, iconLink, Type, AllowUserCreation, configJSON
+    menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, UnlinkText
   )
 
   
