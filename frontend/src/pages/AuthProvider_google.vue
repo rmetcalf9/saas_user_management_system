@@ -1,9 +1,7 @@
 <template>
   <div>
     <div class="fixed-center">
-      TODO Log in with Google<BR />
-      Client_ID: {{ authProvInfo.StaticlyLoadedData.client_id }}<BR />
-      AuthProvInfo: {{ authProvInfo }}
+      Log in with Google<BR />
     </div>
     <processLoginResponse ref="processLoginResponseInstance"></processLoginResponse>
   </div>
@@ -60,6 +58,7 @@ export default {
       })
     },
     signInError (err) {
+      console.log(err)
       this.displayErrorToUserAndMoveToLoginSelectionScreen('TODO Process err: ' + err)
     },
     displayErrorToUserAndMoveToLoginSelectionScreen (message) {

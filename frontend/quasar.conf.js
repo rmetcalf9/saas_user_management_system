@@ -49,6 +49,7 @@ module.exports = function (ctx) {
         'QPageContainer',
         'QPage',
         
+        
         'QToolbar',
         'QToolbarTitle',
         
@@ -64,6 +65,7 @@ module.exports = function (ctx) {
         'QItem',
         'QItemMain',
         'QItemSide',
+        'QItemTile',
         
         'QModal',
         'QModalLayout',

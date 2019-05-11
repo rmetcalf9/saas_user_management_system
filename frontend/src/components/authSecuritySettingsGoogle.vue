@@ -1,6 +1,9 @@
 <template>
   <div>
-    {{ authData.internalAuthProv.MenuText }}: {{ authData.auth.known_as }}
+    <q-item-tile label>{{ authData.internalAuthProv.MenuText }}</q-item-tile>
+    <q-item-tile sublabel>
+      {{ authData.auth.known_as }}
+    </q-item-tile>
   </div>
 </template>
 

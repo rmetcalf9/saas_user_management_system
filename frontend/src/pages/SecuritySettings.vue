@@ -4,24 +4,42 @@
       <div class="row">
         <h2>Security Settings</h2>
       </div>
-      <div class="row">
-        <div class="col">
-          <p>Your authentication methods:</p>
-        </div>
-      </div>
-      <div class="row">
+      <p>Your authentication methods:</p>
+      <q-list >
         <div v-for="curVal in currentTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
-          <AuthSecuritySettingsInternal
-            v-if="curVal.auth.AuthProviderType === 'internal'"
-            :authData="curVal"
-            :loggedInPerson="UserSettingsData.loggedInUser"
-          />
-          <AuthSecuritySettingsGoogle
-            v-if="curVal.auth.AuthProviderType === 'google'"
-            :authData="curVal"
-            :loggedInPerson="UserSettingsData.loggedInUser"
-          />
+          <q-item>
+            <q-item-main v-if="curVal.auth.AuthProviderType === 'internal'">
+              <AuthSecuritySettingsInternal
+                :authData="curVal"
+                :loggedInPerson="UserSettingsData.loggedInUser"
+              />
+            </q-item-main>
+          </q-item>
+          <q-item>
+            <q-item-main v-if="curVal.auth.AuthProviderType === 'google'">
+              <AuthSecuritySettingsGoogle
+                :authData="curVal"
+                :loggedInPerson="UserSettingsData.loggedInUser"
+              />
+            </q-item-main>
+          </q-item>
         </div>
+      </q-list>
+      <div v-if="unusedTenantAuthsWithAuthProvData.length > 0">
+        <p>Link new authentication methods:</p>
+        <q-list >
+          <div v-for="curVal in unusedTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
+            <q-item>
+              <q-item-main>
+                {{ curVal }}
+                <q-btn
+                  push
+                  @click="linkClick"
+                >Link Text TODO</q-btn>
+              </q-item-main>
+            </q-item>
+          </div>
+        </q-list>
       </div>
     </div>
     <div>
@@ -37,7 +55,7 @@
 </template>
 
 <script>
-import { Notify, Loading, Cookies } from 'quasar'
+import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import AuthSecuritySettingsInternal from '../components/authSecuritySettingsInternal'
 import AuthSecuritySettingsGoogle from '../components/authSecuritySettingsGoogle'
@@ -65,9 +83,6 @@ export default {
     }
   },
   computed: {
-    TMPTODEL () {
-      return Cookies.get('usersystemUserCredentials')
-    },
     currentTenantAuthsWithAuthProvData () {
       var TTT = this
       return TTT.UserSettingsData.loggedInPerson.personAuths.filter(function (a) { return a.tenantName === TTT.$store.state.globalDataStore.tenantInfo.Name }).map(
@@ -81,9 +96,23 @@ export default {
           }
         }
       )
+    },
+    unusedTenantAuthsWithAuthProvData () {
+      var TTT = this
+      console.log(this.UserSettingsData.loggedInPerson.personAuths.map(function (b) {
+        return b.AuthProviderGUID
+      }))
+      return TTT.$store.state.globalDataStore.tenantInfo.AuthProviders.filter(function (b) {
+        return !TTT.UserSettingsData.loggedInPerson.personAuths.map(function (c) {
+          return c.AuthProviderGUID
+        }).includes(b.guid)
+      })
     }
   },
   methods: {
+    linkClick () {
+      console.log('TODO')
+    },
     goBackClick () {
       window.location.href = this.$store.state.globalDataStore.usersystemReturnaddress
     },
