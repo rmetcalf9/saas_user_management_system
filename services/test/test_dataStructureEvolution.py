@@ -1,6 +1,7 @@
 from TestHelperSuperClass import testHelperAPIClient
 from appObj import appObj
-from constants import masterTenantName
+import constants
+from tenants import GetTenant
 
 from authsCommon import SaveAuthRecord, getAuthRecord
 
@@ -17,7 +18,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
         "AuthProviderGUID": 'xx',
         "AuthProviderJSON": 'x',
         "personGUID": 'personGUID',
-        "tenantName": masterTenantName
+        "tenantName": constants.masterTenantName
       }
 
       
@@ -30,5 +31,40 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
 
     appObj.objectStore.executeInsideTransaction(dbfn)
 
-    pass
+  def test_Issue42_AddingFieldsToAuthPRoviders(self):
+    def dbfn(storeConnection):
+      
+      PreviousTenantExample = {
+        'Name': 'PreviousTenantExample', 
+        'Description': 'Master Tenant for User Management System', 
+        'AllowUserCreation': False, 
+        'AuthProviders': {
+          '6b061b3e-eaf1-4653-b60f-2880a76255f2': {
+            'guid': '6b061b3e-eaf1-4653-b60f-2880a76255f2', 
+            'MenuText': 'Website account login', 
+            'IconLink': None, 
+            'Type': 'internal', 
+            'AllowUserCreation': False, 
+            'ConfigJSON': {
+              'userSufix': '@internalDataStore'
+            }, 
+            'saltForPasswordHashing': 'JDJiJDEyJGxYdGkzMlhENkxrd1lVbkx3LjF2aC4='
+          }
+        }
+      }
+      
+      storeConnection.saveJSONObject("tenants", PreviousTenantExample['Name'], PreviousTenantExample)
+      
+      tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, 'a','b','c')
+      self.assertNotEqual(tenantObj, None, msg="Tenant Object not found")
+      
+      for x in tenantObj.getAuthProviderGUIDList():
+        authProvDict = tenantObj.getAuthProvider(x)
+        self.assertEqual(authProvDict['AllowLink'], False, msg="AllowLink not defaulted properly")
+        self.assertEqual(authProvDict['AllowUnlink'], False, msg="AllowUnlink not defaulted properly")
+        self.assertEqual(authProvDict['UnlinkText'], 'Unlink ' + authProvDict['Type'], msg="UnlinkText not defaulted properly")
+      
+  
+    appObj.objectStore.executeInsideTransaction(dbfn)
+
 

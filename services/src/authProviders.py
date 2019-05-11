@@ -21,7 +21,10 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
     "Type":  Type,
     "AllowUserCreation": AllowUserCreation,
     "ConfigJSON": configJSON,  #Type spercific config
-    "saltForPasswordHashing": saltForPasswordHashing
+    "saltForPasswordHashing": saltForPasswordHashing,
+    "AllowLink": False,
+    "AllowUnlink": False,
+    "UnlinkText": 'Unlink',
   }
   createdAuthProvObject = authProviderFactory(authProvDataDict, 'invalidGUID', 'invalidTenantName', None, appObj) #Check we can create an auth provider
   return authProvDataDict

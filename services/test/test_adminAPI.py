@@ -79,8 +79,20 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], {"AllowUserCreation": False, "AuthProviders": "ignored", "Description": "Master Tenant for User Management System", "Name": "usersystem"}, ['AuthProviders',"ObjectVersion"])
     self.assertEqual(resultJSON["result"][0]["ObjectVersion"],"2")
 
+
     self.assertEqual(len(resultJSON["result"][0]['AuthProviders']),1,msg="Wrong number of auth providers")
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0]['AuthProviders'][0], {"AllowUserCreation": False, "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}", "StaticlyLoadedData": {}, "IconLink": None, "MenuText": "Website account login", "Type": "internal"}, ['guid', "saltForPasswordHashing"])
+
+    expectedResult = {
+      "AllowUserCreation": False, 
+      "AllowLink": False, 
+      "AllowUnlink": False, 
+      "UnlinkText": 'Unlink', 
+      "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}", "StaticlyLoadedData": {}, 
+      "IconLink": None, 
+      "MenuText": "Website account login", 
+      "Type": "internal"
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0]['AuthProviders'][0], expectedResult, ['guid', "saltForPasswordHashing"])
 
   def test_createTenant(self):
     result = self.testClient.post(

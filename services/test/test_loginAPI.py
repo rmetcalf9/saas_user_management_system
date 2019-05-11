@@ -39,6 +39,9 @@ class test_loginapi_norm(test_api):
         "MenuText": masterTenantDefaultAuthProviderMenuText, 
         "IconLink": masterTenantDefaultAuthProviderMenuIconLink, 
         "AllowUserCreation": False, 
+        "AllowLink": False, 
+        "AllowUnlink": False, 
+        "UnlinkText": 'Unlink', 
         "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
         "StaticlyLoadedData": {}
       }],

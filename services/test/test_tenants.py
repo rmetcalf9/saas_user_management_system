@@ -41,6 +41,9 @@ class test_tenants(testHelperAPIClient):
         "IconLink": masterTenantDefaultAuthProviderMenuIconLink,
         "Type":  "internal",
         "AllowUserCreation": False,
+        "AllowLink": False,
+        "AllowUnlink": False,
+        "UnlinkText": 'Unlink',
         "ConfigJSON": {
           "userSufix": "@internalDataStore"
         }

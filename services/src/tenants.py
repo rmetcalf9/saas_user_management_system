@@ -209,6 +209,13 @@ def GetTenant(tenantName, storeConnection, a,b,c):
   a, aVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",tenantName)
   if a is None:
     return a
+  for curAuthProv in a['AuthProviders']:
+    if not 'AllowLink' in a['AuthProviders'][curAuthProv]:
+      a['AuthProviders'][curAuthProv]['AllowLink'] = False
+    if not 'AllowUnlink' in a['AuthProviders'][curAuthProv]:
+      a['AuthProviders'][curAuthProv]['AllowUnlink'] = False
+    if not 'UnlinkText' in a['AuthProviders'][curAuthProv]:
+      a['AuthProviders'][curAuthProv]['UnlinkText'] = 'Unlink ' + a['AuthProviders'][curAuthProv]['Type']
   return tenantClass(a, aVer)
   
 def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):
