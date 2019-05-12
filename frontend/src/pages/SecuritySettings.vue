@@ -115,6 +115,26 @@ export default {
   methods: {
     unlinkClick (authData) {
       var TTT = this
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to unlink accout "' + authData.auth.known_as + '"',
+        ok: {
+          push: true,
+          label: 'Yes - Unlink'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).then(() => {
+        TTT.unlinkClickSure(authData)
+      })
+    },
+    unlinkClickSure (authData) {
+      var TTT = this
       var callback = {
         ok: function (response) {
           Loading.hide()
