@@ -158,4 +158,13 @@ class test_currentAuthUnlinkTests(currentAuthUnlinkSetups):
       [401]
     )
     
+    #Query current user info to make sure it still works:
+    result = self.testClient.get(
+      self.currentAuthAPIPrefix + '/' + masterTenantName + '/currentAuthInfo', 
+      headers={ jwtHeaderName: loginDICT['jwtData']['JWTToken']}
+    )
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    
 

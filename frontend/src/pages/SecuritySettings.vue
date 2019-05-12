@@ -114,8 +114,28 @@ export default {
   },
   methods: {
     unlinkClick (authData) {
-      console.log(authData)
-      Notify.create('TODO - unlink')
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          TTT.refreshUserSettingsData()
+          Notify.create({color: 'positive', detail: 'Authtype Unlinked'})
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create('Unlink request failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      Loading.show()
+      this.$store.dispatch('globalDataStore/callCurrentAuthAPI', {
+        path: '/loggedInUserAuths/delete',
+        method: 'post',
+        postdata: { AuthKey: authData.AuthUserKey },
+        callback: callback,
+        curPath: this.$router.history.current.path,
+        headers: undefined,
+        router: this.$router
+      })
     },
     linkClick () {
       Notify.create('TODO')

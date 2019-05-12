@@ -152,6 +152,11 @@ def registerAPI(appObj):
           raise BadRequest("Can only unlink own auths")
         
         tenantNameFromAuth = authObj['tenantName']
+        
+        # I am not 100% sure about this check
+        if tenant != tenantNameFromAuth:
+          raise BadRequest("Auth to be deleted is from a different tenant")
+          
         tenantObj = GetTenant(tenantNameFromAuth, storeConnection, 'a','b','c')
         authProviderDICT = tenantObj.getAuthProvider(authObj['AuthProviderGUID'])
         if authProviderDICT is None:
@@ -165,31 +170,3 @@ def registerAPI(appObj):
           'result': "OK"
         }, 200      
       return appObj.objectStore.executeInsideTransaction(someFn)
-      
-      #authProvider = _getAuthProvider(appObj, tenant, authProviderGUID, storeConnection, tenantObj)
-      #authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection)
-      #if authUserObj is None:
-      #  raise Exception
-      
-      #objectVersion = None
-      #if objectVersionHeaderName in request.headers:
-      #  objectVersion = request.headers.get(objectVersionHeaderName)
-      #if objectVersion is None:
-      #  raise BadRequest(objectVersionHeaderName + " header missing")
-      #try:
-      #  def someFn(connectionContext):
-      #    tenantObj = DeleteTenant(appObj, tenantName, objectVersion, connectionContext)
-      #    return tenantObj.getJSONRepresenation()
-      #  return appObj.objectStore.executeInsideTransaction(someFn)
-      #except customExceptionClass as err:
-      #  if (err.id=='tenantDosentExistException'):
-      #    raise BadRequest(err.text)
-      #  if (err.id=='cantDeleteMasterTenantException'):
-      #    raise BadRequest(err.text)
-      #  raise Exception('InternalServerError')
-      #except WrongObjectVersionExceptionClass as err:
-      #  raise Conflict(err)
-      #except:
-      #  raise InternalServerError 
-      
-
