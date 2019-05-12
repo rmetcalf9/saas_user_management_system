@@ -124,7 +124,6 @@ class test_currentAuthUnlinkTests(currentAuthUnlinkSetups):
     masterTenantDict = self.updateTenant(masterTenantDict, [200])
 
     loginDICT = self.loginAsDefaultUser()
-
     
     #create an auth to delete
     newAuthUsername = "newAuthUserNAmeDDD"
@@ -158,10 +157,19 @@ class test_currentAuthUnlinkTests(currentAuthUnlinkSetups):
       [401]
     )
     
-    #Query current user info to make sure it still works:
+    #Query current user info to make sure it still works - with existing login:
     result = self.testClient.get(
       self.currentAuthAPIPrefix + '/' + masterTenantName + '/currentAuthInfo', 
       headers={ jwtHeaderName: loginDICT['jwtData']['JWTToken']}
+    )
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    
+    #Query current user info to make sure it still works - with NEW login:
+    NEWloginDICT = self.loginAsDefaultUser()
+    result = self.testClient.get(
+      self.currentAuthAPIPrefix + '/' + masterTenantName + '/currentAuthInfo', 
+      headers={ jwtHeaderName: NEWloginDICT['jwtData']['JWTToken']}
     )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
