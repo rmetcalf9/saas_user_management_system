@@ -48,7 +48,9 @@ def getLoginResponseModel(appObj):
     'authedPersonGuid': fields.String(description='Unique identifier of person for use with Auth APIs'),
     'ThisTenantRoles': fields.List(fields.String(description='Role the user has been assigned for this tenant')),
     'known_as': fields.String(description='User friendly identifier for username'),
-    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True)
+    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
+    'currentlyUsedAuthProviderGuid': fields.String(description='GUID of auth provider used to login with'),
+    'currentlyUsedAuthKey': fields.String(description='Key of auth used to login with')
   })
 
 def getValidTenantObj(appObj, tenant, storeConnection):

@@ -3,8 +3,9 @@ from flask import request
 from flask_restplus import Resource, fields
 from constants import jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
 from apiSharedModels import getPersonModel, getUserModel
-from tenants import ExecuteAuthOperation
+from tenants import ExecuteAuthOperation, GetTenant
 from werkzeug.exceptions import BadRequest
+from authsCommon import getAuthRecord, DeleteAuthRecord
 '''
 The currentAuth API includes functionality availiable for authed users
 
@@ -30,7 +31,17 @@ def getExecuteAuthOperationModel(appObj):
   })
 def getExecuteAuthOperationResponseModel(appObj):
   return appObj.flastRestPlusAPIObject.model('Execute Auth Operation Response', {
-    'Result': fields.String(default='Failed', description='Should be OK')
+    'result': fields.String(default='Failed', description='Should be OK')
+  })
+
+def getDeleteAuthModelRequest(appObj):
+  return appObj.flastRestPlusAPIObject.model('DeleteAuthRequestModel', {
+    'AuthKey': fields.String(default='DEFAULT', description='Auth key to be deleted', required=True)
+  })
+
+def getDeleteAuthModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('DeleteAuthModel', {
+    'result': fields.String(default='DEFAULT', description='Pass', required=True)
   })
 
 
@@ -52,6 +63,11 @@ def verifySecurityOfAPICall(appObj, request, tenant):
     [jwtHeaderName], 
     [jwtCookieName, loginCookieName]
   )
+
+def requiredInPayload(content, fieldList):
+  for a in fieldList:
+    if a not in content:
+      raise BadRequest(a + ' not in payload')
 
   
 def registerAPI(appObj):
@@ -109,4 +125,71 @@ def registerAPI(appObj):
         if (excep.id=='authopException'):
           raise BadRequest(excep.text)
         raise excep
+
+  @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/delete')
+  class loggedInUserAuths_DELETE(Resource):
+    @nsCurAuth.doc('post Tenant')
+    @nsCurAuth.expect(getDeleteAuthModelRequest(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(200, 'Complete - Deleted')
+    @appObj.flastRestPlusAPIObject.marshal_with(getDeleteAuthModel(appObj), code=200, description='Auth Deleted')
+    @nsCurAuth.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant):
+      '''Delete Auth'''
+      decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
+      
+      content = request.get_json()
+      requiredInPayload(content, ['AuthKey'])
+      authKey = content["AuthKey"]
+      
+      def someFn(storeConnection):
+        authObj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey, storeConnection)
+        if authObj is None:
+          raise BadRequest("Auth with this key dosen't exist")
+        if authObj['AuthUserKey'] == decodedJWTToken._tokenData['currentlyUsedAuthKey']:
+          raise BadRequest("Can't unlinked auth used to authenticate")
+        if authObj['personGUID'] != decodedJWTToken._tokenData['authedPersonGuid']:
+          raise BadRequest("Can only unlink own auths")
+        
+        tenantNameFromAuth = authObj['tenantName']
+        tenantObj = GetTenant(tenantNameFromAuth, storeConnection, 'a','b','c')
+        authProviderDICT = tenantObj.getAuthProvider(authObj['AuthProviderGUID'])
+        if authProviderDICT is None:
+          raise BadRequest("Auth provider not found")
+        if not authProviderDICT['AllowUnlink']:
+          raise BadRequest("Auth provider dosn't allow unlinking")
+        
+        DeleteAuthRecord(appObj, authObj['AuthUserKey'], storeConnection)
+        
+        return {
+          'result': "OK"
+        }, 200      
+      return appObj.objectStore.executeInsideTransaction(someFn)
+      
+      #authProvider = _getAuthProvider(appObj, tenant, authProviderGUID, storeConnection, tenantObj)
+      #authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection)
+      #if authUserObj is None:
+      #  raise Exception
+      
+      #objectVersion = None
+      #if objectVersionHeaderName in request.headers:
+      #  objectVersion = request.headers.get(objectVersionHeaderName)
+      #if objectVersion is None:
+      #  raise BadRequest(objectVersionHeaderName + " header missing")
+      #try:
+      #  def someFn(connectionContext):
+      #    tenantObj = DeleteTenant(appObj, tenantName, objectVersion, connectionContext)
+      #    return tenantObj.getJSONRepresenation()
+      #  return appObj.objectStore.executeInsideTransaction(someFn)
+      #except customExceptionClass as err:
+      #  if (err.id=='tenantDosentExistException'):
+      #    raise BadRequest(err.text)
+      #  if (err.id=='cantDeleteMasterTenantException'):
+      #    raise BadRequest(err.text)
+      #  raise Exception('InternalServerError')
+      #except WrongObjectVersionExceptionClass as err:
+      #  raise Conflict(err)
+      #except:
+      #  raise InternalServerError 
+      
 

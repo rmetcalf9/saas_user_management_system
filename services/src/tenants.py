@@ -314,12 +314,14 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     for x in userDict["TenantRoles"][tenantName]:
       thisTenantRoles.append(x)
 
+  CurrentAuthUserKey = authUserObj['AuthUserKey']
   resDict['userGuid'] = userDict['UserID']
   resDict['authedPersonGuid'] = authUserObj['personGUID']
   resDict['ThisTenantRoles'] = thisTenantRoles #Only roles valid for the current tenant are returned
   resDict['known_as'] = userDict["known_as"]
   resDict['other_data'] = userDict["other_data"]
   resDict['currentlyUsedAuthProviderGuid'] = authProvider.guid
+  resDict['currentlyUsedAuthKey'] = CurrentAuthUserKey
 
   #This object is stored with the refresh token and the same value is always returned on each refresh
   tokenWithoutJWTorRefresh = {
@@ -329,11 +331,11 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     "ThisTenantRoles": resDict['ThisTenantRoles'],
     "known_as":  resDict['known_as'],
     "other_data":  resDict['other_data'],
-    "currentlyUsedAuthProviderGuid": resDict['currentlyUsedAuthProviderGuid']
+    "currentlyUsedAuthProviderGuid": resDict['currentlyUsedAuthProviderGuid'],
+    "currentlyUsedAuthKey": resDict['currentlyUsedAuthKey']
   }
 
   #These two sections are rebuilt every refresh
-  CurrentAuthUserKey = authUserObj['AuthUserKey']
   ##print("CurrentAuthUserKey:", CurrentAuthUserKey)
   resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)
   resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)

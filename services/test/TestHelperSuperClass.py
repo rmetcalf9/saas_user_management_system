@@ -334,7 +334,7 @@ class testClassWithTestClient(testHelperSuperClass):
       data=json.dumps(registerJSON), 
       content_type='application/json'
     )
-    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed - " + registerResult.get_data(as_text=True))
     return json.loads(registerResult.get_data(as_text=True))
 
   def loginAsDefaultUser(self):
@@ -361,6 +361,27 @@ class testClassWithTestClient(testHelperSuperClass):
     print(result2.get_data(as_text=True))
     self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
     return None
+
+  def getNewAuthDICT(self, userName="testUsername"):
+    masterTenant = self.getTenantDICT(masterTenantName)
+    
+    hashedpassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+      userName, 
+      env['APIAPP_DEFAULTHOMEADMINPASSWORD'], 
+      masterTenant["AuthProviders"][0]["saltForPasswordHashing"]
+    )
+    
+    newAuthDICT = {
+      "personGUID": "FORCED-CONSTANT-TESTING-PERSON-GUID",
+      "tenantName": masterTenantName,
+      "authProviderGUID": masterTenant["AuthProviders"][0]["guid"],
+      "credentialJSON": { 
+        "username": userName, 
+        "password": hashedpassword
+      }
+    }
+    return copy.deepcopy(newAuthDICT)
+
 
 #helper class with setup for an APIClient
 class testHelperAPIClient(testClassWithTestClient):

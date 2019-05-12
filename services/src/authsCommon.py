@@ -14,5 +14,6 @@ def UpdateAuthRecord(appObj, key, obj, objectVersion, storeConnection):
   storeConnection.updateJSONObject("userAuths", key.upper(), updFn, objectVersion)
 
 #only called from person as person auth link needs to be removed
+# - Update now called from unlink which deletes auths
 def DeleteAuthRecord(appObj, key, storeConnection):
   storeConnection.removeJSONObject("userAuths", key.upper())

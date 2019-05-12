@@ -11,19 +11,20 @@ import copy
 from constants import masterTenantName, jwtHeaderName, objectVersionHeaderName, DefaultHasAccountRole
 
 class test_loginapi_register(parent_test_api):
-
+  
   def test_registerNewUser(self):
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
   
-    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
-    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
-    
     userName = "testSetUserName"
     password = "delkjgn4rflkjwned"
     
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
     registerResultJSON = self.registerInternalUser(tenantWithNoAuthProviders['Name'], userName, password, tenantDict['AuthProviders'][0])
+    
     
     expectedUserDICT = {
       "UserID": userName + internalUSerSufix,

@@ -12,19 +12,6 @@ import base64
 
 
 class test_adminAPIAuths(parent_test_api):
-  def getNewAuthDICT(self, userName="testUsername"):
-    masterTenant = self.getTenantDICT(masterTenantName)
-    newAuthDICT = {
-      "personGUID": "FORCED-CONSTANT-TESTING-PERSON-GUID",
-      "tenantName": masterTenantName,
-      "authProviderGUID": masterTenant["AuthProviders"][0]["guid"],
-      "credentialJSON": { 
-        "username": userName, 
-        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(masterTenant["AuthProviders"][0]["saltForPasswordHashing"])
-      }
-    }
-    return copy.deepcopy(newAuthDICT)
-
   def canWeLoginWithInternalAuth(self, authProviderGUID, username, password, tenantName):
     loginJSON = {
       "authProviderGUID": authProviderGUID,

@@ -41,9 +41,10 @@ class test_SQLAlchemyExtraTests(testHelperAPIClientUsingSQLAlchemy):
       "userGuid": "FORCED-CONSTANT-TESTING-GUID",
       "authedPersonGuid": "Ignore",
       "ThisTenantRoles": [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole],
-      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
+      "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+      "currentlyUsedAuthKey": "AdminTestSet@internalDataStore_`@\\/'internal"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh' ])
+    self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ 'jwtData', 'authedPersonGuid', 'refresh', 'currentlyUsedAuthProviderGuid' ])
 
     expectedResult = {
     }
