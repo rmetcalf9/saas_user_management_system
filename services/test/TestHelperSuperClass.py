@@ -230,7 +230,10 @@ class testClassWithTestClient(testHelperSuperClass):
   #Returns a token with the admin user logged in
   def getNormalJWTToken(self):
     userIDForToken = appObj.defaultUserGUID
-    return self.makeJWTTokenWithMasterTenantRoles([DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, constants.SecurityEndpointAccessRole], userIDForToken)
+    return self.makeJWTTokenWithMasterTenantRoles(
+      [DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, constants.SecurityEndpointAccessRole], 
+      userIDForToken
+    )
   
   
   def makeJWTTokenWithMasterTenantRoles(self, roles, UserID='abc123'):
@@ -243,7 +246,7 @@ class testClassWithTestClient(testHelperSuperClass):
 
   def generateJWTToken(self, userDict):
     personGUID = appObj.testingDefaultPersonGUID
-    return generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID)['JWTToken']
+    return generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID, 'DummyCurrentlyAuthedGUID', 'DummyAuthKey')['JWTToken']
     
   def getTenantDICT(self, tenantName):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})

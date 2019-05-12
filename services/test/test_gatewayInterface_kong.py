@@ -12,20 +12,22 @@ class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
     }
 
     personGUID = "FAKE"
-    res = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID)
+    res = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID, 'DUMMYcurrentlyUsedAuthProviderGuid', 'DummyUserAuthKey')
     generatedJWTToken = res['JWTToken']
     
     jwtSecret = appObj.APIAPP_JWTSECRET
     
     decodedToken = decodeJWTToken(generatedJWTToken, jwtSecret, True)
 
-    print("decodedToken:",decodedToken)
+    ##print("decodedToken:",decodedToken)
     
     expectedDecodedToken = {
       'UserID': 'abc', 
       'authedPersonGuid': 'FAKE', 
       'iss': 'abc',
-      'kong_iss': kongISS
+      'kong_iss': kongISS,
+      'currentlyUsedAuthProviderGuid': 'DUMMYcurrentlyUsedAuthProviderGuid',
+      "currentlyUsedAuthKey": "DummyUserAuthKey"
     }
     
     self.assertJSONStringsEqualWithIgnoredKeys(decodedToken, expectedDecodedToken, [ 'exp' ], msg='Returned JWT Token is wrong')    

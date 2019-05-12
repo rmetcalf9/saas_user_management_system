@@ -134,7 +134,10 @@ authProvCreationDICT = {
     "guid": None,
     "Type": "internal",
     "AllowUserCreation": True,
-    "MenuText": "Login with Local Account",
+    "AllowLink": True,
+    "AllowUnlink": True,
+    "LinkText": 'Link Website Account',
+    "MenuText": "Login with Website Account",
     "IconLink": "string",
     "ConfigJSON": "{\"userSufix\": \"@testUserSufix\"}",
     "saltForPasswordHashing": None
@@ -144,6 +147,9 @@ authProvGoogleCreationDICT = {
     "guid": None,
     "Type": "google",
     "AllowUserCreation": True,
+    "AllowLink": True,
+    "AllowUnlink": True,
+    "LinkText": 'Link Google Account',
     "MenuText": "Login with Google",
     "IconLink": "string",
     "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../googleauth_client_secret.json\"}",
@@ -250,6 +256,15 @@ addInternalAuth(personDICT['guid'], masterTenantName, MainAuthProvider, 'admin2'
 
 print("Adding google auth to master tenant")
 addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
+
+print("Enabling Link and accounts with Master Tenant")
+tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + masterTenantName, [200])
+for x in tenantDICT["AuthProviders"]:
+  if x['Type'] == 'internal':
+    x["AllowUserCreation"] = True
+    x["AllowLink"] = True
+    x["AllowUnlink"] = True
+tenantDICT2, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantDICT['Name'], tenantDICT, [200])
 
 print("Creating allowUserCreation tenants with users created with register method")
 for cur in range(creationStats['allowUserCreation_tenants']['num']):

@@ -16,13 +16,15 @@ class RefreshTokenManager():
 
   
     
-  def generateRefreshTokenFirstTime(self, appObj, userAuthInformationWithoutJWTorRefreshToken, userDict, key, personGUID):
+  def generateRefreshTokenFirstTime(self, appObj, userAuthInformationWithoutJWTorRefreshToken, userDict, key, personGUID, currentlyUsedAuthProviderGuid, currentlyUsedAuthKey):
     token = generateRandomRefreshToken(appObj)
     dataToStoreWithRefreshToken = {
       'userAuthInformationWithoutJWTorRefreshToken': copy.deepcopy(userAuthInformationWithoutJWTorRefreshToken),
       'userDict': userDict, 
       'key': key, 
       'personGUID': personGUID,
+      'currentlyUsedAuthProviderGuid': currentlyUsedAuthProviderGuid,
+      'currentlyUsedAuthKey': currentlyUsedAuthKey,
       'refreshSessionExpiry': appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_SESSION_TIMEOUT))
     }
     self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, dataToStoreWithRefreshToken)
@@ -54,7 +56,9 @@ class RefreshTokenManager():
       val['userDict'], 
       appObj.APIAPP_JWTSECRET, 
       val['key'], 
-      val['personGUID']
+      val['personGUID'],
+      val['currentlyUsedAuthProviderGuid'],
+      val['currentlyUsedAuthKey']
     )
     userAuthInfo['refresh'] = {
       'token': token,

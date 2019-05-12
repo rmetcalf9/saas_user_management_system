@@ -95,7 +95,7 @@ export default {
             AuthUserKey: a.AuthUserKey,
             auth: a,
             internalAuthProv: internalAuthProvObj,
-            canUnlink: (canAnyUnlink && internalAuthProvObj.AllowUnlink)
+            canUnlink: (canAnyUnlink && internalAuthProvObj.AllowUnlink && (TTT.UserSettingsData.currentlyUsedAuthKey !== a.AuthUserKey))
           }
         }
       )

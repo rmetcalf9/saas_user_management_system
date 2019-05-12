@@ -93,9 +93,10 @@ class test_loginapi_norm(test_api):
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
       "other_data": {
         "createdBy": "init/CreateMasterTenant"
-      }
+      },
+      "currentlyUsedAuthKey": "AdminTestSet@internalDataStore_`@\\/'internal"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp', 'authedPersonGuid', 'associatedPersons' ])
+    self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp', 'authedPersonGuid', 'associatedPersons', 'currentlyUsedAuthProviderGuid' ])
     
     #Make sure passed expiry matches token expiry
     dt = parse(result2JSON['jwtData']['TokenExpiry'])

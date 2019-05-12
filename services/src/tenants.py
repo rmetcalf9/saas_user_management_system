@@ -256,7 +256,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'authedPersonGuid': None,
     'ThisTenantRoles': None,
     'known_as': None,
-    'other_data': None
+    'other_data': None,
+    'currentlyUsedAuthProviderGuid': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
   tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
@@ -318,6 +319,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   resDict['ThisTenantRoles'] = thisTenantRoles #Only roles valid for the current tenant are returned
   resDict['known_as'] = userDict["known_as"]
   resDict['other_data'] = userDict["other_data"]
+  resDict['currentlyUsedAuthProviderGuid'] = authProvider.guid
 
   #This object is stored with the refresh token and the same value is always returned on each refresh
   tokenWithoutJWTorRefresh = {
@@ -326,12 +328,15 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'authedPersonGuid': resDict['authedPersonGuid'],
     "ThisTenantRoles": resDict['ThisTenantRoles'],
     "known_as":  resDict['known_as'],
-    "other_data":  resDict['other_data']
+    "other_data":  resDict['other_data'],
+    "currentlyUsedAuthProviderGuid": resDict['currentlyUsedAuthProviderGuid']
   }
 
   #These two sections are rebuilt every refresh
-  resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authUserObj['personGUID'])
-  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authUserObj['personGUID'])
+  CurrentAuthUserKey = authUserObj['AuthUserKey']
+  ##print("CurrentAuthUserKey:", CurrentAuthUserKey)
+  resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)
+  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)
 
   return resDict
 

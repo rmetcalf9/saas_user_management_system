@@ -17,6 +17,8 @@ def getCurrentAuthModel(appObj):
     #'XX': fields.String(default='DEFAULT', description='Unique identifier of Auth'),
     'loggedInPerson': fields.Nested(getPersonModel(appObj)),
     'loggedInUser': fields.Nested(getUserModel(appObj)),
+    'currentlyUsedAuthProviderGuid': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider used for this session', required=True),
+    'currentlyUsedAuthKey': fields.String(default='DEFAULT', description='Unique identifier of Auth used for this session', required=True)    
   })
 
 def getExecuteAuthOperationModel(appObj):
@@ -67,10 +69,11 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of tenants'''
       decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
-
       return {
         'loggedInPerson': decodedJWTToken.personObj.getJSONRepresenation(),
-        'loggedInUser': decodedJWTToken.userObj.getJSONRepresenation()
+        'loggedInUser': decodedJWTToken.userObj.getJSONRepresenation(),
+        'currentlyUsedAuthProviderGuid': decodedJWTToken._tokenData['currentlyUsedAuthProviderGuid'],
+        'currentlyUsedAuthKey': decodedJWTToken._tokenData['currentlyUsedAuthKey']
       }
 
     @nsCurAuth.doc('post Auth Operation')

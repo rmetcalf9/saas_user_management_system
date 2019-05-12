@@ -19,6 +19,12 @@ class test_securityTests(testHelperAPIClient):
     result = self.testClient.get(self.currentAuthAPIPrefix + '/' + masterTenantName + '/currentAuthInfo', headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
+    
+    expectedAll = {
+      'currentlyUsedAuthProviderGuid': 'DummyCurrentlyAuthedGUID',
+      'currentlyUsedAuthKey': 'DummyAuthKey'
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedAll, ["loggedInPerson", "loggedInUser"], msg='Did not get expected Person result')
 
     expectedPersonResult = {
       "ObjectVersion": "1", 

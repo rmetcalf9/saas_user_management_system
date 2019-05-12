@@ -73,9 +73,10 @@ class test_tenants(testHelperAPIClient):
         "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
         "other_data": {
           "createdBy": "init/CreateMasterTenant"
-        }
+        },
+        "currentlyUsedAuthKey": "AdminTestSet@internalDataStore_`@\\/'internal"
       }
-      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['UserID', 'exp', 'iss', 'authedPersonGuid','associatedPersons'], msg="Returned roles incorrect")
+      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedRoles, ['currentlyUsedAuthProviderGuid', 'UserID', 'exp', 'iss', 'authedPersonGuid','associatedPersons'], msg="Returned roles incorrect")
     appObj.objectStore.executeInsideTransaction(someFn)
 
   def test_StandardUserInvalidPassword(self):
@@ -194,9 +195,12 @@ class test_tenants(testHelperAPIClient):
         "known_as": userID1,
         "other_data": {
           "createdBy": "test/createTwoUsersForOnePerson"
-        }
+        },
+        "currentlyUsedAuthKey": InternalAuthUsername + "@internalDataStore_`@\\/'internal"
       }
-      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 1")
+      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, 
+        ['exp','associatedPersons', 'currentlyUsedAuthProviderGuid'], msg="Failed to login to identity 1"
+      )
       
       UserIDandRoles = Login(
         appObj, masterTenantName, 
@@ -218,9 +222,12 @@ class test_tenants(testHelperAPIClient):
         "known_as": userID2,
         "other_data": {
           "createdBy": "test/createTwoUsersForOnePerson"
-        }
+        },
+        "currentlyUsedAuthKey": InternalAuthUsername + "@internalDataStore_`@\\/'internal"
       }
-      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
+      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, 
+        ['exp','associatedPersons', 'currentlyUsedAuthProviderGuid'], msg="Failed to login to identity 2"
+      )
       
     def dbfn(storeConnection):
       storeConnection.executeInsideTransaction(someFn)
@@ -267,9 +274,15 @@ class test_tenants(testHelperAPIClient):
         "known_as": userID,
         "other_data": {
           "createdBy": "test/CreateMasterTenant"
-        }
+        },
+        "currentlyUsedAuthKey": InternalAuthUsername1 + "@internalDataStore_`@\\/'internal"
       }
-      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp', 'associatedPersons'], msg="Failed to login to identity 1")
+      self.assertJSONStringsEqualWithIgnoredKeys(
+        self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), 
+        expectedJSONResponse, 
+        ['exp', 'associatedPersons', 'currentlyUsedAuthProviderGuid'], 
+        msg="Failed to login to identity 1"
+      )
       
       UserIDandRoles = Login(
         appObj, 
@@ -282,7 +295,13 @@ class test_tenants(testHelperAPIClient):
         connectionContext, 'a','b','c'
       )
       expectedJSONResponse['authedPersonGuid'] = person2['guid']
-      self.assertJSONStringsEqualWithIgnoredKeys(self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), expectedJSONResponse, ['exp','associatedPersons'], msg="Failed to login to identity 2")
+      expectedJSONResponse['currentlyUsedAuthKey'] = InternalAuthUsername2 + "@internalDataStore_`@\\/'internal"
+      
+      self.assertJSONStringsEqualWithIgnoredKeys(
+        self.decodeToken(UserIDandRoles['jwtData']['JWTToken']), 
+        expectedJSONResponse, ['exp','associatedPersons', 'currentlyUsedAuthProviderGuid'], 
+        msg="Failed to login to identity 2"
+      )
 
     def dbfn(storeConnection):
       storeConnection.executeInsideTransaction(someFn)
