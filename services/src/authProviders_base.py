@@ -4,7 +4,7 @@
 from constants import authFailedException, customExceptionClass
 import uuid
 from persons import associatePersonWithAuthCalledWhenAuthIsCreated
-from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord
+from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
 
 InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
@@ -24,7 +24,7 @@ class staticDataClass():
 staticDataClassInstance = staticDataClass()
 def resetStaticData():
   staticDataClassInstance.resetStaticData()
-  
+
 class authProvider():
   dataDict = None #See checks in init
   guid = None
@@ -110,7 +110,7 @@ class authProvider():
     SaveAuthRecord(appObj, key, mainObjToStore, storeConnection)
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
-
+    
   def AuthReturnAll(self, appObj, credentialDICT, storeConnection):
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:

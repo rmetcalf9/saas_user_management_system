@@ -5,7 +5,8 @@ from constants import jwtHeaderName, jwtCookieName, loginCookieName, customExcep
 from apiSharedModels import getPersonModel, getUserModel
 from tenants import ExecuteAuthOperation, GetTenant
 from werkzeug.exceptions import BadRequest
-from authsCommon import getAuthRecord, DeleteAuthRecord
+from persons import deleteAuthAndUnassiciateFromPerson
+from authsCommon import getAuthRecord
 '''
 The currentAuth API includes functionality availiable for authed users
 
@@ -163,9 +164,9 @@ def registerAPI(appObj):
           raise BadRequest("Auth provider not found")
         if not authProviderDICT['AllowUnlink']:
           raise BadRequest("Auth provider dosn't allow unlinking")
-        
-        DeleteAuthRecord(appObj, authObj['AuthUserKey'], storeConnection)
-        
+
+        deleteAuthAndUnassiciateFromPerson(appObj, authObj['personGUID'], authObj['AuthUserKey'], storeConnection)
+
         return {
           'result': "OK"
         }, 200      
