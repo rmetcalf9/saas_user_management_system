@@ -9,7 +9,7 @@
         <div v-for="curVal in currentTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
           <q-item>
             <q-item-main v-if="curVal.auth.AuthProviderType === 'internal'">
-              <AuthSecuritySettingsInternal
+              <AuthProvSecuritySettingsInternal
                 :authData="curVal"
                 :loggedInPerson="UserSettingsData.loggedInUser"
                 @unlink="unlinkClick(curVal)"
@@ -18,7 +18,7 @@
           </q-item>
           <q-item>
             <q-item-main v-if="curVal.auth.AuthProviderType === 'google'">
-              <AuthSecuritySettingsGoogle
+              <AuthProvSecuritySettingsGoogle
                 :authData="curVal"
                 :loggedInPerson="UserSettingsData.loggedInUser"
                 @unlink="unlinkClick(curVal)"
@@ -56,8 +56,8 @@
 <script>
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
-import AuthSecuritySettingsInternal from '../components/authSecuritySettingsInternal'
-import AuthSecuritySettingsGoogle from '../components/authSecuritySettingsGoogle'
+import AuthProvSecuritySettingsInternal from '../components/AuthProvider_SecuritySettings_internal'
+import AuthProvSecuritySettingsGoogle from '../components/AuthProvider_SecuritySettings_google'
 
 function getEmptyUserSettingsData () {
   return {
@@ -73,8 +73,8 @@ function getEmptyUserSettingsData () {
 export default {
   name: 'SecuritySettings',
   components: {
-    'AuthSecuritySettingsInternal': AuthSecuritySettingsInternal,
-    'AuthSecuritySettingsGoogle': AuthSecuritySettingsGoogle
+    'AuthProvSecuritySettingsInternal': AuthProvSecuritySettingsInternal,
+    'AuthProvSecuritySettingsGoogle': AuthProvSecuritySettingsGoogle
   },
   data () {
     return {
@@ -157,7 +157,7 @@ export default {
         router: this.$router
       })
     },
-    linkClick () {
+    linkClick (curVal) {
       Notify.create('TODO')
     },
     goBackClick () {
