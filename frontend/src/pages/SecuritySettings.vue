@@ -33,10 +33,11 @@
           <div v-for="curVal in unusedTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
             <q-item>
               <q-item-main>
-                <q-btn
-                  push
-                  @click="linkClick(curVal)"
-                >{{ curVal.LinkText }}</q-btn>
+                <AuthProvLinkInternal
+                  :authProvData="curVal"
+                  @completeError="linkCompleteError"
+                  @completeOK="linkCompleteOK"
+                />
               </q-item-main>
             </q-item>
           </div>
@@ -57,6 +58,8 @@
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import AuthProvSecuritySettingsInternal from '../components/AuthProvider_SecuritySettings_internal'
+import AuthProvLinkInternal from '../components/AuthProvider_Link_internal'
+
 import AuthProvSecuritySettingsGoogle from '../components/AuthProvider_SecuritySettings_google'
 
 function getEmptyUserSettingsData () {
@@ -74,6 +77,7 @@ export default {
   name: 'SecuritySettings',
   components: {
     'AuthProvSecuritySettingsInternal': AuthProvSecuritySettingsInternal,
+    'AuthProvLinkInternal': AuthProvLinkInternal,
     'AuthProvSecuritySettingsGoogle': AuthProvSecuritySettingsGoogle
   },
   data () {
@@ -113,6 +117,12 @@ export default {
     }
   },
   methods: {
+    linkCompleteError (authProv, errMsg) {
+      Notify.create(errMsg)
+    },
+    linkCompleteOK (authProv, credentialJSON) {
+      Notify.create('link complete ok called')
+    },
     unlinkClick (authData) {
       var TTT = this
       TTT.$q.dialog({
@@ -156,9 +166,6 @@ export default {
         headers: undefined,
         router: this.$router
       })
-    },
-    linkClick (curVal) {
-      Notify.create('TODO')
     },
     goBackClick () {
       window.location.href = this.$store.state.globalDataStore.usersystemReturnaddress
