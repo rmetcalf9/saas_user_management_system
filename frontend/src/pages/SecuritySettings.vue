@@ -35,7 +35,7 @@
               <q-item-main>
                 <q-btn
                   push
-                  @click="linkClick"
+                  @click="linkClick(curVal)"
                 >{{ curVal.LinkText }}</q-btn>
               </q-item-main>
             </q-item>
