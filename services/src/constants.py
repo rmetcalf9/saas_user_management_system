@@ -3,10 +3,12 @@
 masterTenantName="usersystem"
 masterTenantDefaultDescription="Master Tenant for User Management System"
 masterTenantDefaultAuthProviderMenuText="Website account login"
+masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText="Link Website Account"
 masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
 DefaultHasAccountRole="hasaccount"
 SecurityEndpointAccessRole="securityTest"
+
 
 conDefaultUserGUID = "FORCED-CONSTANT-TESTING-GUID"
 conTestingDefaultPersonGUID = "FORCED-CONSTANT-TESTING-PERSON-GUID"

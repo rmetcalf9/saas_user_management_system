@@ -7,19 +7,13 @@ import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
 from constants import customExceptionClass
-from apiSharedModels import getTenantModel, getUserModel
+from apiSharedModels import getTenantModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 from serverInfoAPI import registerServerInfoAPIFn
 import copy
 from userPersonCommon import GetUser
 
 from tenants import GetTenant, Login, RegisterUser
 
-def getLoginPostDataModel(appObj):
-  return appObj.flastRestPlusAPIObject.model('LoginPostData', {
-  'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
-  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
-  'UserID': fields.String(default='DEFAULT', description='If a person has access to mutiple Users then they specify the UserID of the one they need to login with')
-  })
 def getRefreshPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('RefreshPostData', {
     'token': fields.String(description='Refresh Token that was provided to client')
@@ -28,29 +22,6 @@ def getRegisterPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('RegisterPostData', {
   'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
   'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True)
-  })
-
-#Used with both login response and refresh response
-def getLoginResponseModel(appObj):
-  jwtTokenModel = appObj.flastRestPlusAPIObject.model('JWTTokenInfo', {
-    'JWTToken': fields.String(description='JWTToken'),
-    'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time the JWTToken can be used until')
-  })
-  refreshTokenModel = appObj.flastRestPlusAPIObject.model('RefreshTokenInfo', {
-    'token': fields.String(description='Refresh Token'),
-    'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time the Refresh token can be used until')
-  })
-  return appObj.flastRestPlusAPIObject.model('LoginResponseData', {
-    'possibleUsers': fields.List(fields.Nested(getUserModel(appObj))),
-    'jwtData': fields.Nested(jwtTokenModel, skip_none=True),
-    'refresh': fields.Nested(refreshTokenModel, skip_none=True),
-    'userGuid': fields.String(description='Unique identifier of user to be used by the application'),
-    'authedPersonGuid': fields.String(description='Unique identifier of person for use with Auth APIs'),
-    'ThisTenantRoles': fields.List(fields.String(description='Role the user has been assigned for this tenant')),
-    'known_as': fields.String(description='User friendly identifier for username'),
-    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
-    'currentlyUsedAuthProviderGuid': fields.String(description='GUID of auth provider used to login with'),
-    'currentlyUsedAuthKey': fields.String(description='Key of auth used to login with')
   })
 
 def getValidTenantObj(appObj, tenant, storeConnection):
@@ -136,10 +107,10 @@ def registerAPI(appObj):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Login and recieve JWT token'''
+      if 'authProviderGUID' not in request.get_json():
+        raise BadRequest('No authProviderGUID provided')
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
-        if 'authProviderGUID' not in request.get_json():
-          raise BadRequest('No authProviderGUID provided')
         authProviderGUID = request.get_json()['authProviderGUID']
         UserID = None
         if 'UserID' in request.get_json():

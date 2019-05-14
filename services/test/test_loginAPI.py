@@ -41,7 +41,7 @@ class test_loginapi_norm(test_api):
         "AllowUserCreation": False, 
         "AllowLink": False, 
         "AllowUnlink": False, 
-        "LinkText": 'Link', 
+        "LinkText": constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText, 
         "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
         "StaticlyLoadedData": {}
       }],

@@ -58,3 +58,35 @@ def getPersonModel(appObj):
     'creationDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was created'),
     'lastUpdateDateTime': fields.DateTime(dt_format=u'iso8601', description='Datetime user was lastupdated')
   })
+
+#Used with both login and link
+def getLoginPostDataModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('LoginPostData', {
+  'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
+  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
+  'UserID': fields.String(default='DEFAULT', description='If a person has access to mutiple Users then they specify the UserID of the one they need to login with')
+  })
+
+#Used with both login response and refresh response and link response
+def getLoginResponseModel(appObj):
+  jwtTokenModel = appObj.flastRestPlusAPIObject.model('JWTTokenInfo', {
+    'JWTToken': fields.String(description='JWTToken'),
+    'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time the JWTToken can be used until')
+  })
+  refreshTokenModel = appObj.flastRestPlusAPIObject.model('RefreshTokenInfo', {
+    'token': fields.String(description='Refresh Token'),
+    'TokenExpiry': fields.DateTime(dt_format=u'iso8601', description='Time the Refresh token can be used until')
+  })
+  return appObj.flastRestPlusAPIObject.model('LoginResponseData', {
+    'possibleUsers': fields.List(fields.Nested(getUserModel(appObj))),
+    'jwtData': fields.Nested(jwtTokenModel, skip_none=True),
+    'refresh': fields.Nested(refreshTokenModel, skip_none=True),
+    'userGuid': fields.String(description='Unique identifier of user to be used by the application'),
+    'authedPersonGuid': fields.String(description='Unique identifier of person for use with Auth APIs'),
+    'ThisTenantRoles': fields.List(fields.String(description='Role the user has been assigned for this tenant')),
+    'known_as': fields.String(description='User friendly identifier for username'),
+    'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
+    'currentlyUsedAuthProviderGuid': fields.String(description='GUID of auth provider used to login with'),
+    'currentlyUsedAuthKey': fields.String(description='Key of auth used to login with')
+  })
+

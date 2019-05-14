@@ -43,7 +43,7 @@ class test_tenants(testHelperAPIClient):
         "AllowUserCreation": False,
         "AllowLink": False,
         "AllowUnlink": False,
-        "LinkText": 'Link',
+        "LinkText": constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText,
         "ConfigJSON": {
           "userSufix": "@internalDataStore"
         }

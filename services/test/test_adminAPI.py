@@ -1,5 +1,6 @@
 from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, AddAuth
 from constants import masterTenantName, jwtHeaderName, jwtCookieName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, objectVersionHeaderName
+import constants
 import json
 import copy
 from tenants import CreatePerson, GetTenant, _getAuthProvider
@@ -86,7 +87,7 @@ class test_funcitonal(test_api):
       "AllowUserCreation": False, 
       "AllowLink": False, 
       "AllowUnlink": False, 
-      "LinkText": 'Link', 
+      "LinkText": constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText, 
       "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}", "StaticlyLoadedData": {}, 
       "IconLink": None, 
       "MenuText": "Website account login", 

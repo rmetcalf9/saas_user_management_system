@@ -2,7 +2,7 @@
 from flask import request
 from flask_restplus import Resource, fields
 from constants import jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
-from apiSharedModels import getPersonModel, getUserModel
+from apiSharedModels import getPersonModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 from tenants import ExecuteAuthOperation, GetTenant
 from werkzeug.exceptions import BadRequest
 from persons import deleteAuthAndUnassiciateFromPerson
@@ -126,6 +126,19 @@ def registerAPI(appObj):
         if (excep.id=='authopException'):
           raise BadRequest(excep.text)
         raise excep
+
+  @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/link')
+  class loggedInUserAuths_LINK(Resource):
+    '''Link'''
+    @nsCurAuth.doc('Link')
+    @nsCurAuth.expect(getLoginPostDataModel(appObj), validate=True)
+    @nsCurAuth.marshal_with(getLoginResponseModel(appObj), skip_none=True)
+    @nsCurAuth.response(200, 'Success', model=getLoginResponseModel(appObj), skip_none=True)
+    @nsCurAuth.response(400, 'Bad Request')
+    @nsCurAuth.response(401, 'Unauthorized')
+    def post(self, tenant):
+      decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
+      pass
 
   @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/delete')
   class loggedInUserAuths_DELETE(Resource):

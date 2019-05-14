@@ -32,7 +32,7 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
     False, 
     {"userSufix": "@internalDataStore"},
     storeConnection,
-    False, False, 'Link Website Account'
+    False, False, constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText
   )
   
   userID = appObj.defaultUserGUID
