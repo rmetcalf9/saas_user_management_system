@@ -42,6 +42,12 @@ class authProvider():
       raise Exception("ERROR No Type supplied when creating authProvider")
     if not 'AllowUserCreation' in dataDict:
       dataDict['AllowUserCreation'] = False
+    if not 'AllowLink' in dataDict:
+      dataDict['AllowLink'] = False
+    if not 'AllowUnlink' in dataDict:
+      dataDict['AllowUnlink'] = False
+    if not 'LinkText' in dataDict:
+      dataDict['LinkText'] = 'Unlink ' + dataDict['Type']
       
     ##type check
     #if type(dataDict["saltForPasswordHashing"]) is not str:
@@ -51,7 +57,6 @@ class authProvider():
     self._authSpercificInit()
     self.guid = guid
     self.tenantName = tenantName
-    
 
   def getStaticData(self):
     #print('getStaticData for:', self.guid)
@@ -71,6 +76,12 @@ class authProvider():
     return self.dataDict['ConfigJSON']
   def getAllowUserCreation(self):
     return self.dataDict['AllowUserCreation']
+  def getAllowLink(self):
+    return self.dataDict['AllowLink']
+  def getAllowUnlink(self):
+    return self.dataDict['AllowUnlink']
+  def getLinkText(self):
+    return self.dataDict['LinkText']
   def getPublicStaticDataDict(self):
     return {}
 

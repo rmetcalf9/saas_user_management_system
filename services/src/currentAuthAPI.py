@@ -151,6 +151,8 @@ def registerAPI(appObj):
         authProvObj = GetAuthProvider(appObj, tenant, authProviderGUID, storeConnection, tenantObj)
         if authProvObj is None:
           raise BadRequest('Invalid auth prov GUID')
+        if not authProvObj.getAllowLink():
+          raise BadRequest('Not allowed to link to this authProvider')
         
         decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
         
