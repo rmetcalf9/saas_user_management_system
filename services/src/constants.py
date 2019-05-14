@@ -40,6 +40,10 @@ personDosentExistException = customExceptionClass('Person Dosen\'t Exist','perso
 userCreationNotAllowedException = customExceptionClass('User Creation Not Allowed', 'userCreationNotAllowedException')
 
 
+class notImplemented(customExceptionClass):
+  def __init__(self, text):
+    self.text = text + ' Not Implemented'
+
 jwtHeaderName="jwt-auth-token"
 jwtCookieName="jwt-auth-token"
 objectVersionHeaderName="object-version-id"

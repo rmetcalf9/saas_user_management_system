@@ -90,14 +90,6 @@ class test_currentAuthLinkTests(currentAuthLinkSetups):
       password, 
       [400]
     )
-
-    print(linkUserResponseDict)
-    
-    self.assertTrue(False)
-    
-    
-    loginDICT = self.loginAsDefaultUser()
-
-    pass
+    self.assertEqual(linkUserResponseDict['message'], 'personOBj._linkExistantAuth Not Implemented', msg="Link User Response wrong")
 
 

@@ -228,6 +228,9 @@ def GetTenant(tenantName, storeConnection, a,b,c):
       a['AuthProviders'][curAuthProv]['LinkText'] = 'Link ' + a['AuthProviders'][curAuthProv]['Type']
   return tenantClass(a, aVer)
   
+def GetAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):
+  return _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
+
 def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):
   if tenantObj is None:
     tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
@@ -265,7 +268,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     raise tenantDosentExistException
 
   authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
-  authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection)
+  authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection, False)
   if authUserObj is None:
     raise Exception
   

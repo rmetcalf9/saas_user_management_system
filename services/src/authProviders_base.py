@@ -110,10 +110,12 @@ class authProvider():
     SaveAuthRecord(appObj, key, mainObjToStore, storeConnection)
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
-    
-  def AuthReturnAll(self, appObj, credentialDICT, storeConnection):
+  
+  def AuthReturnAll(self, appObj, credentialDICT, storeConnection, supressAutocreate):
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
+      if supressAutocreate:
+        raise authFailedException
       self._AuthActionToTakeWhenThereIsNoRecord(credentialDICT, storeConnection)
       #Assuming action results in an auth record
       obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
@@ -126,9 +128,9 @@ class authProvider():
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     raise authFailedException
 
-  def Auth(self, appObj, credentialDICT, storeConnection):
+  def Auth(self, appObj, credentialDICT, storeConnection, supressAutocreate):
     enrichedCredentialDICT = self._enrichCredentialDictForAuth(credentialDICT)
-    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection)
+    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, supressAutocreate)
     return obj
 
   # Normally overridden
@@ -160,7 +162,7 @@ class authProvider():
     ##Problem to do the auth we need to know the username
     ## but it is not a field in the JWT token
     ## IT is in the response to currentAuthInfo so the webapp can retrieve it from there and supply it correctly in credentials
-    authObj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection)
+    authObj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection, False)
     
     for x in self.operationFunctions[operationName]['requiredDictElements']:
       if x not in operationDICT:
@@ -182,4 +184,5 @@ class authProvider():
   #Overidden for auth provider types that require a seperate call to the register function to create a user
   def requireRegisterCallToAutocreateUser(self):
     return False
+
 

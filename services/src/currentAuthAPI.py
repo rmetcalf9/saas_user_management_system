@@ -2,8 +2,9 @@
 from flask import request
 from flask_restplus import Resource, fields
 from constants import jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
+import constants
 from apiSharedModels import getPersonModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
-from tenants import ExecuteAuthOperation, GetTenant
+from tenants import ExecuteAuthOperation, GetTenant, GetAuthProvider
 from werkzeug.exceptions import BadRequest
 from persons import deleteAuthAndUnassiciateFromPerson
 from authsCommon import getAuthRecord
@@ -137,8 +138,28 @@ def registerAPI(appObj):
     @nsCurAuth.response(400, 'Bad Request')
     @nsCurAuth.response(401, 'Unauthorized')
     def post(self, tenant):
-      decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
-      pass
+      content = request.get_json()
+      requiredInPayload(content, ['authProviderGUID', 'credentialJSON'])
+      authProviderGUID = content['authProviderGUID']
+      credentialJSON = content['credentialJSON']
+
+      def dbfn(storeConnection):
+        decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
+        
+        # must be auth provider for logged in tenant
+        tenantObj = GetTenant(tenant, storeConnection, 'a','b','c')
+        authProvObj = GetAuthProvider(appObj, tenant, authProviderGUID, storeConnection, tenantObj)
+        if authProvObj is None:
+          raise BadRequest('Invalid auth prov GUID')
+        
+        decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
+        
+        return {}, 200
+        
+      try:
+        return appObj.objectStore.executeInsideTransaction(dbfn)
+      except constants.notImplemented as excep:
+        raise BadRequest(excep.text)
 
   @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/delete')
   class loggedInUserAuths_DELETE(Resource):

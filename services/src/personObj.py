@@ -1,5 +1,5 @@
 # Description of Tenant Object
-from constants import authProviderNotFoundException
+import constants
 import json
 import copy
 
@@ -44,3 +44,28 @@ class personClass():
   #Callers should not expect to update this
   def getReadOnlyDict(self):
     return self._mainDict
+
+  def _linkExistantAuth(self, authDict, authProviderObj, credentialJSON, storeConnection):
+    raise constants.notImplemented("personOBj._linkExistantAuth")
+
+
+  def _linkNonExistantAuth(self, authProviderObj, credentialJSON, storeConnection):
+    raise Exception("TODO auth that dosen't exist")
+
+  def linkAuth(self, appObj, authProviderObj, credentialJSON, storeConnection):
+    #Different logic if this is an existing auth vs if it is new
+    
+    authDict = None
+    try:
+      authDict = authProviderObj.Auth(appObj, credentialJSON, storeConnection, True)
+    except constants.customExceptionClass as err:
+      if err.id=="constants.authFailedException":
+        pass
+      else:
+        raise err
+    
+    if authDict is None:
+      return self._linkNonExistantAuth(authProviderObj, credentialJSON, storeConnection)
+    else:
+      return self._linkExistantAuth(authDict, authProviderObj, credentialJSON, storeConnection)
+    
