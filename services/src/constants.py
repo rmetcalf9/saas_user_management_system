@@ -37,7 +37,7 @@ ShouldNotSupplySaltWhenCreatingAuthProvException = customExceptionClass('Should 
 cantUpdateExistingAuthProvException = customExceptionClass('can\'t Update Existing Auth Prov', 'cantUpdateExistingAuthProvException')
 cantDeleteMasterTenantException = customExceptionClass('can\'t delete master tenant', 'cantDeleteMasterTenantException')
 personDosentExistException = customExceptionClass('Person Dosen\'t Exist','personDosentExistException')
-userCreationNotAllowedException = customExceptionClass('User Creaiton Not Allowed', 'userCreationNotAllowedException')
+userCreationNotAllowedException = customExceptionClass('User Creation Not Allowed', 'userCreationNotAllowedException')
 
 
 jwtHeaderName="jwt-auth-token"
