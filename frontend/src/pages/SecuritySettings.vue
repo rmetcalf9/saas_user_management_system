@@ -32,8 +32,15 @@
         <q-list >
           <div v-for="curVal in unusedTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
             <q-item>
-              <q-item-main>
+              <q-item-main v-if="curVal.Type === 'internal'">
                 <AuthProvLinkInternal
+                  :authProvData="curVal"
+                  @completeError="linkCompleteError"
+                  @completeOK="linkCompleteOK"
+                />
+              </q-item-main>
+              <q-item-main v-if="curVal.Type === 'google'">
+                <AuthProvLinkGoogle
                   :authProvData="curVal"
                   @completeError="linkCompleteError"
                   @completeOK="linkCompleteOK"
@@ -61,6 +68,7 @@ import AuthProvSecuritySettingsInternal from '../components/AuthProvider_Securit
 import AuthProvLinkInternal from '../components/AuthProvider_Link_internal'
 
 import AuthProvSecuritySettingsGoogle from '../components/AuthProvider_SecuritySettings_google'
+import AuthProvLinkGoogle from '../components/AuthProvider_Link_google'
 
 function getEmptyUserSettingsData () {
   return {
@@ -78,7 +86,8 @@ export default {
   components: {
     'AuthProvSecuritySettingsInternal': AuthProvSecuritySettingsInternal,
     'AuthProvLinkInternal': AuthProvLinkInternal,
-    'AuthProvSecuritySettingsGoogle': AuthProvSecuritySettingsGoogle
+    'AuthProvSecuritySettingsGoogle': AuthProvSecuritySettingsGoogle,
+    'AuthProvLinkGoogle': AuthProvLinkGoogle
   },
   data () {
     return {
@@ -121,7 +130,26 @@ export default {
       Notify.create(errMsg)
     },
     linkCompleteOK (authProv, credentialJSON) {
-      Notify.create('link complete ok called')
+      var TTT = this
+      var linkRequestPostData = {
+        credentialJSON: credentialJSON,
+        authProviderGUID: authProv.guid
+      }
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          Notify.create('Link ok todo')
+        },
+        error: function (response) {
+          Notify.create('Link error todo')
+        }
+      }
+      TTT.$store.dispatch('globalDataStore/callCurrentAuthAPI', {
+        method: 'POST',
+        path: '/TODO',
+        callback: callback,
+        postdata: linkRequestPostData
+      })
     },
     unlinkClick (authData) {
       var TTT = this

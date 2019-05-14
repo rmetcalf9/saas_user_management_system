@@ -2,7 +2,7 @@
   <div>
     <q-btn
       push
-      @click="linkClick(authProvData)"
+      @click="linkClick()"
     >{{ authProvData.LinkText }}</q-btn>
   </div>
 </template>
@@ -20,9 +20,9 @@ export default {
   methods: {
     linkClick (authProvData) {
       var TTT = this
-      // TTT.$emit('completeError', authProvData, 'Link to Internal Auth Not Done')
+      // TTT.$emit('completeError', TTT.authProvData, 'Link to Internal Auth Not Done')
       var credentialJSON = {}
-      TTT.$emit('completeOK', authProvData, credentialJSON)
+      TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
     }
   }
 }
