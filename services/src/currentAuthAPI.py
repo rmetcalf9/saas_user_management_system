@@ -1,7 +1,6 @@
 #currentAuth API
 from flask import request
 from flask_restplus import Resource, fields
-from constants import jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass
 import constants
 from apiSharedModels import getPersonModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 from tenants import ExecuteAuthOperation, GetTenant, GetAuthProvider
@@ -62,8 +61,8 @@ def verifySecurityOfAPICall(appObj, request, tenant):
     request, 
     tenant, 
     requiredRoles, 
-    [jwtHeaderName], 
-    [jwtCookieName, loginCookieName]
+    [constants.jwtHeaderName], 
+    [constants.jwtCookieName, constants.loginCookieName]
   )
 
 def requiredInPayload(content, fieldList):
@@ -119,7 +118,7 @@ def registerAPI(appObj):
         
       try:
         return appObj.objectStore.executeInsideTransaction(dbfn)
-      except customExceptionClass as excep:
+      except constants.customExceptionClass as excep:
         if (excep.id=='InvalidOperationException'):
           raise Exception("Invalid operation for this auth type (" + operationName + ")")
         if (excep.id=='OperationParamMissingException'):
@@ -162,6 +161,10 @@ def registerAPI(appObj):
         return appObj.objectStore.executeInsideTransaction(dbfn)
       except constants.notImplemented as excep:
         raise BadRequest(excep.text)
+      except constants.customExceptionClass as excep:
+        if (excep.id=='linkAuthFailedException'):
+          raise BadRequest(excep.text)
+        raise excep
 
   @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/delete')
   class loggedInUserAuths_DELETE(Resource):

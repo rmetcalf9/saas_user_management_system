@@ -61,6 +61,8 @@ class personClass():
     except constants.customExceptionClass as err:
       if err.id=="constants.authFailedException":
         pass
+      if err.id=="authFailedException":
+        raise constants.customExceptionClass("Invalid credentials for auth to link with", "linkAuthFailedException")
       else:
         raise err
     

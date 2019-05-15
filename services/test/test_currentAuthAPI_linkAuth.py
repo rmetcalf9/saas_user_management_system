@@ -56,7 +56,7 @@ class test_currentAuthLinkTests(currentAuthLinkSetups):
     result2JSON = json.loads(result2.get_data(as_text=True))
     self.assertEqual(result2JSON['message'],"No JWT Token in header or cookie")
 
-  def test_linkWithAlowLinkFalseFails(self):
+  def test_linkWithAllowLinkFalseFails(self):
     defaultUserLoginDict = self.loginAsDefaultUser()
     masterTenantDict = self.getTenantDICT(constants.masterTenantName)
     masterTenantDict['AuthProviders'][0]["AllowUserCreation"] = True
@@ -130,4 +130,39 @@ class test_currentAuthLinkTests(currentAuthLinkSetups):
     )
     self.assertEqual(linkUserResponseDict['message'], 'personOBj._linkExistantAuth Not Implemented', msg="Link User Response wrong")
 
+  def test_linkWithExistingAuthButInvalidPasswordReturnsError(self):
+    defaultUserLoginDict = self.loginAsDefaultUser()
+    masterTenantDict = self.getTenantDICT(constants.masterTenantName)
+    masterTenantDict['AuthProviders'][0]["AllowUserCreation"] = True
+    masterTenantDict["AllowUserCreation"] = True
+    masterTenantDict['AuthProviders'][0]["AllowLink"] = True
+    masterTenantDict = self.updateTenant(masterTenantDict, [200])
+
+    username = "testSetUserName"
+    password = "delkjgn4rflkjwned"
+    
+    createdAuthProvGUID = masterTenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = masterTenantDict['AuthProviders'][0]['saltForPasswordHashing']
+    
+    registerResultJSON = self.registerInternalUser(masterTenantDict['Name'], username, password, masterTenantDict['AuthProviders'][0])
+    
+    #make sure login as newly registered user works
+    self.loginAsUser(
+      masterTenantDict['Name'], 
+      masterTenantDict['AuthProviders'][0], 
+      username, 
+      password,
+      [200]
+    )
+
+    # Now try and link default user with newly created users autuh
+    linkUserResponseDict = self.linkInternalUserToLoggedInUser(
+      constants.masterTenantName, 
+      defaultUserLoginDict, 
+      masterTenantDict['AuthProviders'][0], 
+      username, 
+      'invalid_password', 
+      [400]
+    )
+    self.assertEqual(linkUserResponseDict['message'], 'Invalid credentials for auth to link with', msg="Should have failed when link auth is invalid")
 
