@@ -50,14 +50,16 @@ function _getRefreshFunctions (commit, state) {
 
 export const callLoginAPI = ({ dispatch, commit, state }, params) => {
   var refreshFns = _getRefreshFunctions(commit, state)
+  // console.log('URL being called:', '/login/' + state.tenant + params['path'])
 
   shared.callAPI(refreshFns, state.tenant, state.apiPrefix, false, '/login/' + state.tenant + params['path'], params['method'], params['postdata'], params.callback)
 }
 
 export const callCurrentAuthAPI = ({ dispatch, commit, state }, params) => {
+  console.log('URL being called:', '/login/' + state.tenant + params['path'])
   // console.log('callCurrentAuthAPI:', params)
   if (typeof (params.curPath) === 'undefined') {
-    callbackHelper.callbackWithSimpleError(params.callback, 'Bad call no current path')
+    callbackHelper.callbackWithSimpleError(params.callback, 'Bad call no current path in params passed to callAPI')
     return
   }
   var refreshFns = _getRefreshFunctions(commit, state)

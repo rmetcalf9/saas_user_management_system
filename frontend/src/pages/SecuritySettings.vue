@@ -138,17 +138,22 @@ export default {
       var callback = {
         ok: function (response) {
           Loading.hide()
-          Notify.create('Link ok todo')
+          this.refreshUserSettingsData()
+          Notify.create('New auth method added')
         },
         error: function (response) {
-          Notify.create('Link error todo')
+          console.log('response:', response)
+          Notify.create('Link error - ' + callbackHelper.getErrorFromResponse(response))
         }
       }
       TTT.$store.dispatch('globalDataStore/callCurrentAuthAPI', {
-        method: 'POST',
-        path: '/TODO',
+        path: '/loggedInUserAuths/link',
+        method: 'post',
+        postdata: linkRequestPostData,
         callback: callback,
-        postdata: linkRequestPostData
+        curPath: this.$router.history.current.path,
+        headers: undefined,
+        router: this.$router
       })
     },
     unlinkClick (authData) {

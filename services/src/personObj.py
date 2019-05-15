@@ -59,7 +59,8 @@ class personClass():
     
     authDict = None
     try:
-      authDict = authProviderObj.Auth(appObj, credentialJSON, storeConnection, True)
+      enrichedCredentialDICT = authProviderObj.EnrichCredentialDictForAuth(credentialJSON)
+      authDict, objVer, creationDateTime, lastUpdateDateTime = authProviderObj.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, True)
     except constants.customExceptionClass as err:
       if err.id=="authNotFoundException":
         pass #Auth is not found so should be created
@@ -69,9 +70,9 @@ class personClass():
         raise err
     
     if authDict is None:
-      return self._linkNonExistantAuth(appObj, authProviderObj, credentialJSON, storeConnection)
+      return self._linkNonExistantAuth(appObj, authProviderObj, enrichedCredentialDICT, storeConnection)
     else:
-      return self._linkExistantAuth(appObj, authDict, authProviderObj, credentialJSON, storeConnection)
+      return self._linkExistantAuth(appObj, authDict, authProviderObj, enrichedCredentialDICT, storeConnection)
     
   def getGUID(self):
     return self._mainDict['guid']

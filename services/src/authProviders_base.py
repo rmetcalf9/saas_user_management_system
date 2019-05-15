@@ -139,8 +139,11 @@ class authProvider():
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     raise constants.authNotFoundException
 
+  def EnrichCredentialDictForAuth(self, credentialDICT):
+    return self._enrichCredentialDictForAuth(credentialDICT)
+
   def Auth(self, appObj, credentialDICT, storeConnection, supressAutocreate):
-    enrichedCredentialDICT = self._enrichCredentialDictForAuth(credentialDICT)
+    enrichedCredentialDICT = self.EnrichCredentialDictForAuth(credentialDICT)
     obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, supressAutocreate)
     return obj
 

@@ -169,6 +169,8 @@ def registerAPI(appObj):
       except constants.customExceptionClass as excep:
         if (excep.id=='linkAuthFailedException'):
           raise BadRequest(excep.text)
+        if (excep.id=='InvalidAuthConfigException'):
+          raise BadRequest(excep.text)
         raise excep
 
   @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/delete')

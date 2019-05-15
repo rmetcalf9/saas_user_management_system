@@ -20,9 +20,9 @@ export default {
   methods: {
     linkClick (authProvData) {
       var TTT = this
-      // TTT.$emit('completeError', TTT.authProvData, 'Link to Internal Auth Not Done')
-      var credentialJSON = {}
-      TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
+      TTT.$emit('completeError', TTT.authProvData, 'Link to Internal Auth Not Done')
+      // var credentialJSON = {}
+      // TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
     }
   }
 }
