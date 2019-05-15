@@ -45,12 +45,14 @@ class personClass():
   def getReadOnlyDict(self):
     return self._mainDict
 
-  def _linkExistantAuth(self, authDict, authProviderObj, credentialJSON, storeConnection):
+  def _linkExistantAuth(self, appObj, authDict, authProviderObj, credentialJSON, storeConnection):
+    #As the auth exists we have TWO person records. This one and the one returned with the other auth object.
+    # we need to decide what to do with the person records
     raise constants.notImplemented("personOBj._linkExistantAuth")
 
 
-  def _linkNonExistantAuth(self, authProviderObj, credentialJSON, storeConnection):
-    raise Exception("TODO auth that dosen't exist")
+  def _linkNonExistantAuth(self, appObj, authProviderObj, credentialJSON, storeConnection):
+    return authProviderObj.AddAuth(appObj, credentialJSON, self.getGUID(), storeConnection)
 
   def linkAuth(self, appObj, authProviderObj, credentialJSON, storeConnection):
     #Different logic if this is an existing auth vs if it is new
@@ -59,15 +61,17 @@ class personClass():
     try:
       authDict = authProviderObj.Auth(appObj, credentialJSON, storeConnection, True)
     except constants.customExceptionClass as err:
-      if err.id=="constants.authFailedException":
-        pass
-      if err.id=="authFailedException":
+      if err.id=="authNotFoundException":
+        pass #Auth is not found so should be created
+      elif err.id=="authFailedException":
         raise constants.customExceptionClass("Invalid credentials for auth to link with", "linkAuthFailedException")
       else:
         raise err
     
     if authDict is None:
-      return self._linkNonExistantAuth(authProviderObj, credentialJSON, storeConnection)
+      return self._linkNonExistantAuth(appObj, authProviderObj, credentialJSON, storeConnection)
     else:
-      return self._linkExistantAuth(authDict, authProviderObj, credentialJSON, storeConnection)
+      return self._linkExistantAuth(appObj, authDict, authProviderObj, credentialJSON, storeConnection)
     
+  def getGUID(self):
+    return self._mainDict['guid']

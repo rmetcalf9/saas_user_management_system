@@ -114,7 +114,7 @@ class test_tenants(testHelperAPIClient):
           None, #requestedUserID
           connectionContext,
           'a','b','c')
-      self.checkGotRightException(context,authFailedException)
+      self.checkGotRightException(context,constants.authNotFoundException)
     appObj.objectStore.executeInsideTransaction(someFn)
 
   def test_StandardUserLoginToInvalidIdentity(self):

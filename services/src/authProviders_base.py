@@ -1,14 +1,14 @@
 #Base class for all authProviders
 # An auth has mutiple identities
 #  an identity has one user
-from constants import authFailedException, customExceptionClass
+import constants
 import uuid
 from persons import associatePersonWithAuthCalledWhenAuthIsCreated
 from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
 
-InvalidAuthConfigException = customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
-tryingToCreateDuplicateAuthException = customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
-InvalidOperationException = customExceptionClass('Invalid Operation','InvalidOperationException')
+InvalidAuthConfigException = constants.customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
+tryingToCreateDuplicateAuthException = constants.customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
+InvalidOperationException = constants.customExceptionClass('Invalid Operation','InvalidOperationException')
 NotOverriddenException = Exception('Not Overridden')
 
 #person.py also uses userAuths
@@ -126,18 +126,18 @@ class authProvider():
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
       if supressAutocreate:
-        raise authFailedException
+        raise constants.authNotFoundException
       self._AuthActionToTakeWhenThereIsNoRecord(credentialDICT, storeConnection)
       #Assuming action results in an auth record
       obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
       if obj is None:
         #Still no auth record so return failure
-        raise authFailedException
+        raise constants.authNotFoundException
     self._auth(appObj, obj, credentialDICT)
     return obj, objVer, creationDateTime, lastUpdateDateTime
     
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
-    raise authFailedException
+    raise constants.authNotFoundException
 
   def Auth(self, appObj, credentialDICT, storeConnection, supressAutocreate):
     enrichedCredentialDICT = self._enrichCredentialDictForAuth(credentialDICT)

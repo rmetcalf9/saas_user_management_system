@@ -45,6 +45,11 @@ def getDeleteAuthModel(appObj):
     'result': fields.String(default='DEFAULT', description='Pass', required=True)
   })
 
+def getLinkAuthResponseModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('LinkAuthResponseModel', {
+    'result': fields.String(default='DEFAULT', description='Pass', required=True)
+  })
+
 
 def requiredInPayload(content, fieldList):
   for a in fieldList:
@@ -132,8 +137,8 @@ def registerAPI(appObj):
     '''Link'''
     @nsCurAuth.doc('Link')
     @nsCurAuth.expect(getLoginPostDataModel(appObj), validate=True)
-    @nsCurAuth.marshal_with(getLoginResponseModel(appObj), skip_none=True)
-    @nsCurAuth.response(200, 'Success', model=getLoginResponseModel(appObj), skip_none=True)
+    @nsCurAuth.marshal_with(getLinkAuthResponseModel(appObj), skip_none=True)
+    @nsCurAuth.response(200, 'Success', model=getLinkAuthResponseModel(appObj), skip_none=True)
     @nsCurAuth.response(400, 'Bad Request')
     @nsCurAuth.response(401, 'Unauthorized')
     def post(self, tenant):
@@ -153,9 +158,9 @@ def registerAPI(appObj):
         if not authProvObj.getAllowLink():
           raise BadRequest('Not allowed to link to this authProvider')
         
-        decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
-        
-        return {}, 200
+        linkAuthResp = decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
+
+        return {'result': "OK"}, 200
         
       try:
         return appObj.objectStore.executeInsideTransaction(dbfn)

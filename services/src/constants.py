@@ -30,6 +30,7 @@ class customExceptionClass(Exception):
 
 authProviderNotFoundException = customExceptionClass('authProviderNotFoundException','authProviderNotFoundException')
 authFailedException = customExceptionClass('authFailedException')
+authNotFoundException = customExceptionClass('authNotFoundException','authNotFoundException')
 PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
 tenantAlreadtExistsException = customExceptionClass('Tenant Already Exists','tenantAlreadtExistsException')
 tenantDosentExistException = customExceptionClass('Tenant Dosen\'t Exist','tenantDosentExistException')
