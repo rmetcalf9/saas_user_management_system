@@ -108,7 +108,8 @@ export default {
             AuthUserKey: a.AuthUserKey,
             auth: a,
             internalAuthProv: internalAuthProvObj,
-            canUnlink: (canAnyUnlink && internalAuthProvObj.AllowUnlink && (TTT.UserSettingsData.currentlyUsedAuthKey !== a.AuthUserKey))
+            canUnlink: (canAnyUnlink && internalAuthProvObj.AllowUnlink && (TTT.UserSettingsData.currentlyUsedAuthKey !== a.AuthUserKey)),
+            authMethodInUse: (TTT.UserSettingsData.currentlyUsedAuthKey === a.AuthUserKey)
           }
         }
       )
@@ -138,8 +139,8 @@ export default {
       var callback = {
         ok: function (response) {
           Loading.hide()
-          this.refreshUserSettingsData()
-          Notify.create('New auth method added')
+          TTT.refreshUserSettingsData()
+          Notify.create({color: 'positive', detail: 'New Login method added'})
         },
         error: function (response) {
           console.log('response:', response)
@@ -182,7 +183,7 @@ export default {
         ok: function (response) {
           Loading.hide()
           TTT.refreshUserSettingsData()
-          Notify.create({color: 'positive', detail: 'Authtype Unlinked'})
+          Notify.create({color: 'positive', detail: 'Login method remvoed'})
         },
         error: function (error) {
           Loading.hide()

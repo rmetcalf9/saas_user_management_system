@@ -1,6 +1,7 @@
 <template>
   <div>
-    <q-item-tile label>{{ authData.internalAuthProv.MenuText }}</q-item-tile>
+    <q-item-tile label v-if="authData.authMethodInUse">{{ authData.internalAuthProv.MenuText }} **Current**</q-item-tile>
+    <q-item-tile label v-if="!authData.authMethodInUse">{{ authData.internalAuthProv.MenuText }}</q-item-tile>
     <q-item-tile sublabel>
       {{ authData.auth.known_as }}
       <q-btn
