@@ -10,8 +10,8 @@ from unittest.mock import patch, mock_open
 from authProviders_base import resetStaticData
 
 
-#client_cliental_json_filename = 'googleauth_client_public.json'
-client_cliental_json_filename = 'googleauth_client_secret.json'
+client_cliental_json_filename = 'googleauth_client_public.json'
+#client_cliental_json_filename = 'googleauth_client_secret.json'
 
 googleAuthProv001_CREATE = {
   "guid": None,
