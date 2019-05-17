@@ -3,15 +3,17 @@
 masterTenantName="usersystem"
 masterTenantDefaultDescription="Master Tenant for User Management System"
 masterTenantDefaultAuthProviderMenuText="Website account login"
+masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText="Link Website Account"
 masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
 DefaultHasAccountRole="hasaccount"
 SecurityEndpointAccessRole="securityTest"
 
+
 conDefaultUserGUID = "FORCED-CONSTANT-TESTING-GUID"
 conTestingDefaultPersonGUID = "FORCED-CONSTANT-TESTING-PERSON-GUID"
 
-
+#This is also used in frontend quasar app
 uniqueKeyCombinator="_`@\/'"
 
 masterInternalAuthTypePassword="dsF4F.D32654.....3D5g"
@@ -28,6 +30,7 @@ class customExceptionClass(Exception):
 
 authProviderNotFoundException = customExceptionClass('authProviderNotFoundException','authProviderNotFoundException')
 authFailedException = customExceptionClass('authFailedException')
+authNotFoundException = customExceptionClass('authNotFoundException','authNotFoundException')
 PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
 tenantAlreadtExistsException = customExceptionClass('Tenant Already Exists','tenantAlreadtExistsException')
 tenantDosentExistException = customExceptionClass('Tenant Dosen\'t Exist','tenantDosentExistException')
@@ -35,7 +38,12 @@ ShouldNotSupplySaltWhenCreatingAuthProvException = customExceptionClass('Should 
 cantUpdateExistingAuthProvException = customExceptionClass('can\'t Update Existing Auth Prov', 'cantUpdateExistingAuthProvException')
 cantDeleteMasterTenantException = customExceptionClass('can\'t delete master tenant', 'cantDeleteMasterTenantException')
 personDosentExistException = customExceptionClass('Person Dosen\'t Exist','personDosentExistException')
+userCreationNotAllowedException = customExceptionClass('User Creation Not Allowed', 'userCreationNotAllowedException')
 
+
+class notImplemented(customExceptionClass):
+  def __init__(self, text):
+    self.text = text + ' Not Implemented'
 
 jwtHeaderName="jwt-auth-token"
 jwtCookieName="jwt-auth-token"

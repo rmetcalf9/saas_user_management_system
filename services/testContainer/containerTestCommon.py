@@ -86,7 +86,7 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
   targetURL = BASE[api] + url
   if loginDICT is not None:
     #print(loginDICT['jwtData']['JWTToken'])
-    _headers[jwtHeaderName] = loginDICT['jwtData']['JWTToken']
+    _headers[constants.jwtHeaderName] = loginDICT['jwtData']['JWTToken']
   if method=='get':
     result = requests.get(
       targetURL,
