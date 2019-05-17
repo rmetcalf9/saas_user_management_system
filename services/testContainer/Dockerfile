@@ -22,11 +22,11 @@ COPY . /ext_volume
 ##Steps to run tests on local machine
 ## use run_localbuild_contianer.sh to start the service then run the following commands:
 ##docker build . -t metcarob/saas_user_management_systemtest:latest
-##docker run --rm --network main_net -e BASEURL_TO_TEST=http://saas_user_management_system_$(cat ../../VERSION | tr '.' '_')_localbuild -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
+##docker run --rm --network main_net -e BASEURL_TO_TEST=http://saas_user_management_system_$(cat ../../VERSION | tr '.' '_')_localbuild -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin -e APIAPP_DEFAULTHOMEADMINPASSWORD=admin --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
 
 
-##Other test
-##docker run --rm --network main_net -e BASEURL_TO_TEST=http://saas_user_management_system_$(cat ../../VERSION | tr '.' '_')_localbuild --mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest curl ${BASEURL_TO_TEST}/public/web/apidocs/
+##Simple curl test
+##docker run --rm --network main_net -e BASEURL_TO_TEST=http://saas_user_management_system_$(cat ../../VERSION | tr '.' '_')_localbuild -e--mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest curl ${BASEURL_TO_TEST}/public/web/apidocs/
 
 
 
