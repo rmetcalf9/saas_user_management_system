@@ -15,9 +15,16 @@ Example config:
 
 
 
-## Google TODO
+## Google
 
-A single google user maps
+A single google user maps to an auth. Setup in the google console and download the client secrets json file. Add it as a docker secret to secure it.
+
+Example config:
+```
+"ConfigJSON": {
+  "clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_google"
+}
+```
 
 
 

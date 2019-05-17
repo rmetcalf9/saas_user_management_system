@@ -1,4 +1,4 @@
-FROM nginx:1.13.12-alpine
+FROM nginx:1.16.0-alpine
 
 #docker file for saas_user_management_system microservice
 # I have built this as a single container microservice to ease versioning
