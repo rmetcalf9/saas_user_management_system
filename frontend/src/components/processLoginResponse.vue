@@ -63,7 +63,7 @@ export default {
           cancel: true,
           preventClose: true,
           color: 'secondary'
-        }).then(data => {
+        }).onOk(data => {
           var postUserSelectionCallback = {
             ok: function (response) {
               TTT.processLoginOKResponse(response, loginRequestPostData)

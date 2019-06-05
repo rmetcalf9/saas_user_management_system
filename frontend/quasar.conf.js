@@ -58,7 +58,9 @@ module.exports = function (ctx) {
         
         
         'QHeader',
-        'QDialog'
+        'QDialog',
+        'QItemSection',
+        'QItemLabel'
       ],
       directives: [
         'Ripple',

@@ -7,46 +7,36 @@
       <p>Your authentication methods:</p>
       <q-list >
         <div v-for="curVal in currentTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
-          <q-item>
-            <q-item-main v-if="curVal.auth.AuthProviderType === 'internal'">
-              <AuthProvSecuritySettingsInternal
-                :authData="curVal"
-                :loggedInPerson="UserSettingsData.loggedInUser"
-                @unlink="unlinkClick(curVal)"
-              />
-            </q-item-main>
-          </q-item>
-          <q-item>
-            <q-item-main v-if="curVal.auth.AuthProviderType === 'google'">
-              <AuthProvSecuritySettingsGoogle
-                :authData="curVal"
-                :loggedInPerson="UserSettingsData.loggedInUser"
-                @unlink="unlinkClick(curVal)"
-              />
-            </q-item-main>
-          </q-item>
+          <AuthProvSecuritySettingsInternal
+            :authData="curVal"
+            :loggedInPerson="UserSettingsData.loggedInUser"
+            @unlink="unlinkClick(curVal)"
+             v-if="curVal.auth.AuthProviderType === 'internal'"
+          />
+          <AuthProvSecuritySettingsGoogle
+            :authData="curVal"
+            :loggedInPerson="UserSettingsData.loggedInUser"
+            @unlink="unlinkClick(curVal)"
+             v-if="curVal.auth.AuthProviderType === 'google'"
+          />
         </div>
       </q-list>
       <div v-if="unusedTenantAuthsWithAuthProvData.length > 0">
         <p>Link new authentication methods:</p>
         <q-list >
           <div v-for="curVal in unusedTenantAuthsWithAuthProvData" :key=curVal.AuthUserKey>
-            <q-item>
-              <q-item-main v-if="curVal.Type === 'internal'">
-                <AuthProvLinkInternal
-                  :authProvData="curVal"
-                  @completeError="linkCompleteError"
-                  @completeOK="linkCompleteOK"
-                />
-              </q-item-main>
-              <q-item-main v-if="curVal.Type === 'google'">
-                <AuthProvLinkGoogle
-                  :authProvData="curVal"
-                  @completeError="linkCompleteError"
-                  @completeOK="linkCompleteOK"
-                />
-              </q-item-main>
-            </q-item>
+            <AuthProvLinkInternal
+              :authProvData="curVal"
+              @completeError="linkCompleteError"
+              @completeOK="linkCompleteOK"
+              v-if="curVal.Type === 'internal'"
+            />
+            <AuthProvLinkGoogle
+              :authProvData="curVal"
+              @completeError="linkCompleteError"
+              @completeOK="linkCompleteOK"
+              v-if="curVal.Type === 'google'"
+            />
           </div>
         </q-list>
       </div>
@@ -173,7 +163,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         TTT.unlinkClickSure(authData)
       })
     },

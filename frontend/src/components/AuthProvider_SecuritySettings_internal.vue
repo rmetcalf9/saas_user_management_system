@@ -1,61 +1,82 @@
 <template>
-  <div>
-    <q-item-tile label v-if="authData.authMethodInUse">{{ authData.internalAuthProv.MenuText }} **Current**</q-item-tile>
-    <q-item-tile label v-if="!authData.authMethodInUse">{{ authData.internalAuthProv.MenuText }}</q-item-tile>
-    <q-item-tile sublabel>
-      {{ authData.auth.known_as }}
-      <q-btn
-          color="primary"
+  <q-item>
+    <q-item-section>
+      <q-item-label v-if="authData.authMethodInUse">{{ authData.internalAuthProv.MenuText }} **Current**</q-item-label>
+      <q-item-label v-if="!authData.authMethodInUse">{{ authData.internalAuthProv.MenuText }}</q-item-label>
+      <q-item-label caption>
+        {{ authData.auth.known_as }}
+        <q-btn
+            color="primary"
+            push
+            @click="resetPasswordClick"
+          >Reset Password</q-btn>
+        <q-btn
           push
-          @click="resetPasswordClick"
-        >Reset Password</q-btn>
-      <q-btn
-        push
-        v-if="authData.canUnlink"
-        @click="$emit('unlink')"
-      >Unlink</q-btn>
-      <q-modal v-model="resetPasswordDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-        <q-modal-layout>
-          <q-toolbar slot="header">
-            <q-btn
-              color="primary"
-              flat
-              round
-              dense
-              icon="keyboard_arrow_left"
-              @click="cancelResetPasswordDialog"
-            />
-            <q-toolbar-title>
-              Reset password for {{ authData.internalAuthProv.MenuText }}: {{ authData.auth.known_as }}
-            </q-toolbar-title>
-          </q-toolbar>
-          <div class="layout-padding">
-            <q-field helper="Must match your current password" label="Current Password" :label-width="3">
-              <q-input type="password" v-model="dialogData.current_password" ref="someTextBoxDataInput1"/>
-            </q-field>
-            <q-field :helper="passwordERRORMessage" label="New Password" :label-width="3" :error="passwordERROR">
-              <q-input type="password" v-model="dialogData.password" ref="someTextBoxDataInput2"/>
-            </q-field>
-            <q-field helper="New password repeat" label="New Password Repeat" :label-width="3" :error="passwordERROR">
-              <q-input type="password" v-model="dialogData.password_repeat" @keyup.enter="okResetPasswordDialog" ref="someTextBoxDataInput3"/>
-            </q-field>
-            <div>&nbsp;</div>
-            <q-btn
-              @click="okResetPasswordDialog"
-              color="primary"
-              label="Ok"
-              class = "float-right q-ml-xs"
-            />
-            <q-btn
-              @click="cancelResetPasswordDialog"
-              label="Cancel"
-              class = "float-right"
-            />
-          </div>
-        </q-modal-layout>
-      </q-modal>
-    </q-item-tile>
-  </div>
+          v-if="authData.canUnlink"
+          @click="$emit('unlink')"
+        >Unlink</q-btn>
+
+      <q-dialog v-model="resetPasswordDialogVisible">
+        <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+          <q-header class="bg-primary">
+            <q-toolbar>
+              <q-toolbar-title>
+                Reset password for {{ authData.internalAuthProv.MenuText }}: {{ authData.auth.known_as }}
+              </q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+
+          <q-page-container>
+            <q-page padding>
+              <q-input
+                type="password"
+                v-model="dialogData.current_password"
+                ref="someTextBoxDataInput1"
+                error-message="Must match your current password"
+                label="Current Password"
+                :label-width="3"
+              />
+              <q-input
+                type="password"
+                v-model="dialogData.password"
+                ref="someTextBoxDataInput2"
+                label="New Password"
+                :label-width="3"
+                :error-message="passwordERRORMessage"
+                :error="passwordERROR"
+              />
+              <q-input
+                type="password"
+                v-model="dialogData.password_repeat"
+                @keyup.enter="okResetPasswordDialog"
+                ref="someTextBoxDataInput3"
+                label="New Password Repeat"
+                :label-width="3"
+                error-message="New password repeat"
+                :error="passwordERROR"
+              />
+              <div>&nbsp;</div>
+              <q-btn
+                @click="okResetPasswordDialog"
+                color="primary"
+                label="Ok"
+                class = "float-right q-ml-xs"
+              />
+              <q-btn
+                @click="cancelResetPasswordDialog"
+                label="Cancel"
+                class = "float-right"
+              />
+            </q-page>
+          </q-page-container>
+
+        </q-layout>
+      </q-dialog>
+
+      </q-item-label>
+    </q-item-section>
+  </q-item>
 </template>
 
 <script>
