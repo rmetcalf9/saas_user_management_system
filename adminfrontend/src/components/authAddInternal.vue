@@ -49,7 +49,7 @@ export default {
         },
         cancel: true,
         color: 'secondary'
-      }).then(username => {
+      }).onOk(username => {
         if (username === '') {
           Notify.create({color: 'negative', message: 'You must enter a username'})
           return

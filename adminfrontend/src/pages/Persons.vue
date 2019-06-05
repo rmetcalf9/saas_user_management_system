@@ -149,7 +149,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         personsToDelete.map(function (usr) {
           TTT.deletePersonNoConfirm(TTT, usr)
         })

@@ -176,7 +176,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         var base64encodedkey = btoa(curAuth.AuthUserKey)
         var callback = {
           ok: function (response) {
@@ -248,7 +248,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         var callback = {
           ok: function (response) {
             Notify.create({color: 'positive', detail: 'User Person Link Removed - ' + userData.UserID})
@@ -363,7 +363,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         var callback = {
           ok: function (response) {
             Notify.create({color: 'positive', detail: 'Person ' + personGUID + ' deleted'})

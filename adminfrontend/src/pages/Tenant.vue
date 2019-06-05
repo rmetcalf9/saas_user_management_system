@@ -264,7 +264,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         TTT.editAuthProvModalDialogData.DeleteMode = true
         TTT.okAuthProvTenantDialog()
       }).catch(() => {
@@ -425,7 +425,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         var callback = {
           ok: function (response) {
             Notify.create({color: 'positive', detail: 'Tenant ' + nameOfTenantToDelete + ' deleted'})

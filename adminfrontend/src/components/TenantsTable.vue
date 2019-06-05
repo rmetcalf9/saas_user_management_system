@@ -141,7 +141,7 @@ export default {
         },
         cancel: true,
         color: 'secondary'
-      }).then(data => {
+      }).onOk(data => {
         var postdata = {
           'Name': data,
           'Description': '',

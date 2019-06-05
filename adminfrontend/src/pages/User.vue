@@ -149,7 +149,7 @@ export default {
         },
         cancel: true,
         color: 'secondary'
-      }).then(data => {
+      }).onOk(data => {
         for (var curRole in TTT.editUserModalDialogData.TenantRoles) {
           if (TTT.editUserModalDialogData.TenantRoles[curRole].TenantName === data) {
             Notify.create({color: 'negative', detail: 'Already exists'})
@@ -258,7 +258,7 @@ export default {
         // preventClose: false,
         // noBackdropDismiss: false,
         // noEscDismiss: false
-      }).then(() => {
+      }).onOk(() => {
         var callback = {
           ok: function (response) {
             Notify.create({color: 'positive', detail: 'User ' + userID + ' deleted'})
