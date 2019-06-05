@@ -44,7 +44,7 @@ RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pc
 COPY ./services/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirements.txt
 
-COPY ./frontend/dist/spa-mat ${APIAPP_FRONTEND_FRONTEND}
+COPY ./frontend/dist/spa ${APIAPP_FRONTEND_FRONTEND}
 COPY ./adminfrontend/dist/spa-mat ${APIAPP_FRONTEND_ADMINFRONTEND}
 COPY ./VERSION /VERSION
 COPY ./services/run_app_docker.sh /run_app_docker.sh
