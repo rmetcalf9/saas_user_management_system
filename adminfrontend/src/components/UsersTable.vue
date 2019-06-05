@@ -133,7 +133,7 @@ export default {
     deleteUserNoConfirm (TTT, usr) {
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'User ' + usr.UserID + ' deleted'})
+          Notify.create({color: 'positive', message: 'User ' + usr.UserID + ' deleted'})
           TTT.futureRefresh()
         },
         error: function (error) {
@@ -190,7 +190,7 @@ export default {
       var callback = {
         ok: function (response) {
           TTT.createUserModalDialogVisible = false
-          Notify.create({color: 'positive', detail: 'User Created'})
+          Notify.create({color: 'positive', message: 'User Created'})
           TTT.refresh()
         },
         error: function (error) {

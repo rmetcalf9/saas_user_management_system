@@ -24,7 +24,7 @@ export default {
   },
   methods: {
     resetPassword () {
-      Notify.create({color: 'positive', detail: 'TODO'})
+      Notify.create({color: 'positive', message: 'TODO'})
     }
   }
 }

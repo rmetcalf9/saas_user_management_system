@@ -51,7 +51,7 @@ export default {
         color: 'secondary'
       }).then(username => {
         if (username === '') {
-          Notify.create({color: 'negative', detail: 'You must enter a username'})
+          Notify.create({color: 'negative', message: 'You must enter a username'})
           return
         }
         var selectedAuthProvider = 'undefined'
@@ -61,7 +61,7 @@ export default {
           }
         }
         if (selectedAuthProvider === 'undefined') {
-          Notify.create({color: 'negative', detail: 'Selected tenant dosen\'t have an internal auth provider'})
+          Notify.create({color: 'negative', message: 'Selected tenant dosen\'t have an internal auth provider'})
           return
         }
         var salt = selectedAuthProvider.saltForPasswordHashing

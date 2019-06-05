@@ -123,7 +123,7 @@ export default {
       var TTT = this
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Tenant created'})
+          Notify.create({color: 'positive', message: 'Tenant created'})
           setTimeout(function () {
             TTT.refresh()
           }, 400)
