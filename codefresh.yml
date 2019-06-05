@@ -32,7 +32,7 @@ steps:
 
   unit_test:
     description: Make sure all the unit tests pass
-    image: metcarob/docker-ws-caller:0.4.0
+    image: metcarob/docker-ws-caller:0.5.3
     working_directory: ${{main_clone}}/services
     commands:
       - pip3 install --no-cache-dir -r ./src/requirements.txt
@@ -136,7 +136,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/public null null null true
@@ -150,7 +150,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/authed null null null true
@@ -169,7 +169,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED
         \"${{JWT_COOKIE_NAME}}\"
@@ -212,7 +212,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_PUBLIC http ${{RJM_KONG_UPSTREAM_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/public null null null true
@@ -230,7 +230,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route 
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED http ${{RJM_KONG_UPSTREAM_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/authed null null null true
@@ -249,7 +249,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED
         \"${{JWT_COOKIE_NAME}}\"
@@ -270,7 +270,7 @@ steps:
     working_directory: ${{main_clone}}
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_upstream 
-        metcarob/docker-ws-caller:0.4.1
+        metcarob/docker-ws-caller:0.5.3
         http://kong:8001
         ${{RJM_KONG_UPSTREAM_NAME}}
         ${{RJM_DOCKER_SERVICE_NAME}}:80
