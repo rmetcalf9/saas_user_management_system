@@ -42,14 +42,14 @@ steps:
 
   compile_frontend:
     description: Compile the frontend quasar application
-    image: metcarob/docker-build-quasar-app:0.0.3
+    image: metcarob/docker-build-quasar-app:0.0.5
     working_directory: ${{main_clone}}
     commands:
       - build_quasar_app ./frontend
       
   compile_adminfrontend:
     description: Compile the adminfrontend quasar application
-    image: metcarob/docker-build-quasar-app:0.0.3
+    image: metcarob/docker-build-quasar-app:0.0.5
     working_directory: ${{main_clone}}
     commands:
       - build_quasar_app ./adminfrontend
