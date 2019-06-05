@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@quasar/app": "^1.0.0-rc.6",
+    "@quasar/cli": "^1.0.0-rc.2",
     "@quasar/extras": "^1.1.2",
     "axios": "^0.18.0",
     "bcryptjs": "^2.4.3",

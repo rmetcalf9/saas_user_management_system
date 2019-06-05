@@ -3,18 +3,17 @@
 module.exports = function (ctx) {
   return {
     // app plugins (/src/plugins)
-    plugins: [
+    boot: [
       'axios'
     ],
     css: [
       'app.styl'
     ],
     extras: [
-      ctx.theme.mat ? 'roboto-font' : null,
       'material-icons' // optional, you are not bound to it
-      // 'ionicons',
-      // 'mdi',
-      // 'fontawesome'
+      // 'ionicons-v4',
+      // 'mdi-v3',
+      // 'fontawesome-v5'
     ],
     supportIE: true,
     build: {
@@ -42,17 +41,12 @@ module.exports = function (ctx) {
     framework: {
       components: [
         'QLayout',
-        'QLayoutHeader',
-        'QLayoutFooter',
-        'QLayoutDrawer',
         'QPageContainer',
         'QPage',
         'QPageSticky',
-        'QSearch',
         'QToolbar',
         'QToolbarTitle',
         'QTable',
-        'QTableColumns',
         'QToggle',
         'QTh',
         'QTr',
@@ -62,17 +56,17 @@ module.exports = function (ctx) {
         'QList',
         'QInput',
         'QField',
-        'QListHeader',
         'QItem',
-        'QItemMain',
-        'QItemSide',
-        'QItemTile',
-        'QModal',
-        'QModalLayout',
-        'QChipsInput'
+        
+        'QHeader',
+        'QDialog',
+        'QItemSection',
+        'QItemLabel'
+
       ],
       directives: [
-        'Ripple'
+        'Ripple',
+        'ClosePopup'
       ],
       // Quasar plugins
       plugins: [
@@ -81,8 +75,7 @@ module.exports = function (ctx) {
         'Loading',
         'Dialog'
       ]
-      // iconSet: ctx.theme.mat ? 'material-icons' : 'ionicons'
-      // i18n: 'de' // Quasar language
+      // lang: 'de' // Quasar language
     },
     // animations: 'all' --- includes all animations
     animations: [],
