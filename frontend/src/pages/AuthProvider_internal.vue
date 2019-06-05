@@ -22,46 +22,61 @@
         </q-btn>
       </p>
     </div>
-    <q-modal v-model="createAccountDialogModel.visible" :content-css="{minWidth: '40vw', minHeight: '30vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-            <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelCreateAccountDialog"
-          />
-          <q-toolbar-title>
-            Create Account
-          </q-toolbar-title>
-        </q-toolbar>
 
-        <div class="layout-padding">
-          <q-field helper="Username" label="Username" :label-width="3">
-            <q-input v-model="createAccountDialogModel.username" ref="usernameDialogInput"/>
-          </q-field>
-          <q-field :helper="passwordERRORMessage" label="Password" :label-width="3" :error="passwordERROR">
-            <q-input type="password" v-model="createAccountDialogModel.password" />
-          </q-field>
-          <q-field helper="Retype Password" label="Retype" :label-width="3" :error="passwordERROR">
-            <q-input type="password" v-model="createAccountDialogModel.password2" @keyup.enter="okCreateAccountDialog" />
-          </q-field>
-          <q-btn
-            @click="okCreateAccountDialog"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-          />
-          <q-btn
-            @click="cancelCreateAccountDialog"
-            label="Cancel"
-            class = "float-right"
-          />
-        </div>
-      </q-modal-layout>
-    </q-modal>
+    <q-dialog v-model="createAccountDialogModel.visible">
+      <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+        <q-header class="bg-primary">
+          <q-toolbar>
+            <q-toolbar-title>
+              Create Account
+            </q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
+          </q-toolbar>
+        </q-header>
+
+        <q-page-container>
+          <q-page padding>
+            <q-input
+              v-model="createAccountDialogModel.username"
+              ref="usernameDialogInput"
+              helper="Username"
+              label="Username"
+              :label-width="3"
+             />
+            <q-input
+              type="password"
+              v-model="createAccountDialogModel.password"
+              label="Password"
+              :label-width="3"
+              :error-message="passwordERRORMessage"
+              :error="passwordERROR"
+             />
+            <q-input
+              type="password"
+              v-model="createAccountDialogModel.password2"
+              @keyup.enter="okCreateAccountDialog"
+              label="Retype Password"
+              :label-width="3"
+              :error-message="passwordERRORMessage"
+              :error="passwordERROR"
+            />
+            <q-btn
+              @click="okCreateAccountDialog"
+              color="primary"
+              label="Ok"
+              class = "float-right q-ml-xs"
+            />
+            <q-btn
+              @click="cancelCreateAccountDialog"
+              label="Cancel"
+              class = "float-right"
+            />
+          </q-page>
+        </q-page-container>
+
+      </q-layout>
+    </q-dialog>
+
     <processLoginResponse ref="processLoginResponseInstance"></processLoginResponse>
   </div>
 </template>
@@ -131,7 +146,7 @@ export default {
         ok: function (response) {
           Loading.hide()
           TTT.createAccountDialogModel.visible = false
-          Notify.create({color: 'positive', detail: 'Account created'})
+          Notify.create({color: 'positive', message: 'Account created'})
         },
         error: function (response) {
           Loading.hide()
@@ -206,7 +221,7 @@ export default {
   },
   mounted: function () {
     if (this.$store.state.globalDataStore.messagePendingDisplay !== null) {
-      Notify.create({color: 'negative', detail: this.$store.state.globalDataStore.messagePendingDisplay})
+      Notify.create({color: 'negative', message: this.$store.state.globalDataStore.messagePendingDisplay})
       this.$store.commit('globalDataStore/setMessageDisplayed')
     }
     var TTT = this

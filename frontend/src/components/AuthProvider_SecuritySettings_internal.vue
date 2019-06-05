@@ -113,7 +113,7 @@ export default {
       var callback = {
         ok: function (response) {
           Loading.hide()
-          Notify.create({color: 'positive', detail: 'Password reset sucessful'})
+          Notify.create({color: 'positive', message: 'Password reset sucessful'})
         },
         error: function (error) {
           Loading.hide()

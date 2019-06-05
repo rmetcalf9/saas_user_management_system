@@ -140,7 +140,7 @@ export default {
         ok: function (response) {
           Loading.hide()
           TTT.refreshUserSettingsData()
-          Notify.create({color: 'positive', detail: 'New Login method added'})
+          Notify.create({color: 'positive', message: 'New Login method added'})
         },
         error: function (response) {
           console.log('response:', response)
@@ -183,7 +183,7 @@ export default {
         ok: function (response) {
           Loading.hide()
           TTT.refreshUserSettingsData()
-          Notify.create({color: 'positive', detail: 'Login method remvoed'})
+          Notify.create({color: 'positive', message: 'Login method remvoed'})
         },
         error: function (error) {
           Loading.hide()

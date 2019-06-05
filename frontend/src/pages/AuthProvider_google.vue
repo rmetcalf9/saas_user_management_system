@@ -63,7 +63,7 @@ export default {
     },
     displayErrorToUserAndMoveToLoginSelectionScreen (message) {
       Loading.hide()
-      Notify.create({color: 'negative', detail: message})
+      Notify.create({color: 'negative', message: message})
       this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
     }
   },
@@ -71,7 +71,7 @@ export default {
     var TTT = this
     Loading.show()
     if (this.$store.state.globalDataStore.messagePendingDisplay !== null) {
-      Notify.create({color: 'negative', detail: this.$store.state.globalDataStore.messagePendingDisplay})
+      Notify.create({color: 'negative', message: this.$store.state.globalDataStore.messagePendingDisplay})
       this.$store.commit('globalDataStore/setMessageDisplayed')
     }
     this.$gapi.load('auth2', function () {

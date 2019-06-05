@@ -42,7 +42,7 @@ export default {
   },
   mounted () {
     if (this.$store.state.globalDataStore.messagePendingDisplay !== null) {
-      Notify.create({color: 'negative', detail: this.$store.state.globalDataStore.messagePendingDisplay})
+      Notify.create({color: 'negative', message: this.$store.state.globalDataStore.messagePendingDisplay})
       this.$store.commit('globalDataStore/setMessageDisplayed')
     }
   }
