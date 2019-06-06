@@ -49,40 +49,39 @@
     </q-item>
   </q-list>
 
-    <q-modal v-model="editUserModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-            <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelEditTenantDialog"
-          />
+  <q-dialog v-model="editUserModalDialogVisible">
+    <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+      <q-header class="bg-primary">
+        <q-toolbar>
           <q-toolbar-title>
             Edit {{ userData.UserID }} Information
           </q-toolbar-title>
+          <q-btn flat v-close-popup round dense icon="close" />
         </q-toolbar>
+      </q-header>
 
-        <div class="layout-padding">
-          <q-field helper="Displayed to user in UI" label="Known As" :label-width="3">
-            <q-input v-model="editUserModalDialogData.known_as" @keyup.enter="okEditUserDialog" ref="knownAsInput"/>
-          </q-field>
-          <q-field helper="Other information about the user (JSON)" label="Other Data" :label-width="3" :error="isOtherDataInvalid">
-            <q-input v-model="editUserModalDialogData.other_data" type="textarea" />
-          </q-field>
-          <q-field :helper="'Roles for ' + curRole.TenantName" :label="curRole.TenantName + ' Roles'" :label-width="3" v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole.TenantName>
-             <q-chips-input v-model="curRole.ThisTenantRoles" />
-          </q-field>
-          <q-field>
-            <q-btn
-              @click="addTenantToEditUserDialog"
-              color="positive"
-              icon="add_to_queue"
-              round
-              class = "q-ml-xs"
-            />          </q-field>
+      <q-page-container>
+        <q-page padding>
+          <q-input v-model="editUserModalDialogData.known_as" @keyup.enter="okEditUserDialog" ref="knownAsInput" label="Known As" :label-width="3"/> Displayed to user in UI
+          <q-input v-model="editUserModalDialogData.other_data" type="textarea"  label="Other Data" :label-width="3" :error="isOtherDataInvalid"/> Other information about the user (JSON)
+
+          <div v-for="curRole in editUserModalDialogData.TenantRoles" :key=curRole.TenantName>
+            <b>Roles for {{ curRole.TenantName }}:</b><q-select
+              v-model="curRole.ThisTenantRoles"
+              use-input
+              use-chips
+              multiple
+              input-debounce="0"
+              @new-value="dialogTenantRoleCreateValue"
+            />
+          </div>
+          <q-btn
+            @click="addTenantToEditUserDialog"
+            color="positive"
+            icon="add_to_queue"
+            round
+            class = "q-ml-xs"
+          />
           <div>&nbsp;</div>
           <q-btn
             @click="okEditUserDialog"
@@ -95,9 +94,11 @@
             label="Cancel"
             class = "float-right"
           />
-        </div>
-      </q-modal-layout>
-    </q-modal>
+        </q-page>
+      </q-page-container>
+
+    </q-layout>
+  </q-dialog>
 
   </q-page>
 </template>
@@ -140,6 +141,13 @@ export default {
     }
   },
   methods: {
+    dialogTenantRoleCreateValue (val, done) {
+      if (val.length < 3) {
+        Notify.create({color: 'negative', message: 'Must have at least 3 characters'})
+        return
+      }
+      done(val, 'add-unique')
+    },
     addTenantToEditUserDialog () {
       var TTT = this
       this.$q.dialog({
@@ -154,7 +162,7 @@ export default {
       }).onOk(data => {
         for (var curRole in TTT.editUserModalDialogData.TenantRoles) {
           if (TTT.editUserModalDialogData.TenantRoles[curRole].TenantName === data) {
-            Notify.create({color: 'negative', detail: 'Already exists'})
+            Notify.create({color: 'negative', message: 'Already exists'})
             return
           }
         }
@@ -167,7 +175,7 @@ export default {
     okEditUserDialog () {
       var TTT = this
       if (this.isOtherDataInvalid) {
-        Notify.create({color: 'negative', detail: 'Other JSON must be valid JSON'})
+        Notify.create({color: 'negative', message: 'Other JSON must be valid JSON'})
         return
       }
       this.editUserModalDialogVisible = false
@@ -190,7 +198,7 @@ export default {
 
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'User Updated'})
+          Notify.create({color: 'positive', message: 'User Updated'})
           TTT.refreshUserData()
         },
         error: function (error) {
@@ -263,7 +271,7 @@ export default {
       }).onOk(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'User ' + userID + ' deleted'})
+            Notify.create({color: 'positive', message: 'User ' + userID + ' deleted'})
             TTT.$router.push('/' + TTT.$route.params.tenantName + '/users/')
           },
           error: function (error) {
