@@ -118,7 +118,7 @@ export default {
   },
   methods: {
     linkCompleteError (authProv, errMsg) {
-      Notify.create(errMsg)
+      Notify.create({color: 'negative', message: errMsg})
     },
     linkCompleteOK (authProv, credentialJSON) {
       var TTT = this
@@ -134,7 +134,7 @@ export default {
         },
         error: function (response) {
           console.log('response:', response)
-          Notify.create('Link error - ' + callbackHelper.getErrorFromResponse(response))
+          Notify.create({color: 'negative', message: 'Link error - ' + callbackHelper.getErrorFromResponse(response)})
         }
       }
       TTT.$store.dispatch('globalDataStore/callCurrentAuthAPI', {
@@ -177,7 +177,7 @@ export default {
         },
         error: function (error) {
           Loading.hide()
-          Notify.create('Unlink request failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Unlink request failed - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
       Loading.show()
@@ -203,7 +203,7 @@ export default {
         },
         error: function (error) {
           Loading.hide()
-          Notify.create('Person query failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Person query failed - ' + callbackHelper.getErrorFromResponse(error)})
           TTT.UserSettingsData = getEmptyUserSettingsData()
         }
       }

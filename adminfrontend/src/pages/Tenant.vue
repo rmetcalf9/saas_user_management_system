@@ -45,115 +45,112 @@
     label="Add Auth Provider"
     class = "float-left q-ma-xs"
   />
-<!-- TODO
-    <q-modal v-model="editTenantModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-            <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelEditTenantDialog"
-          />
-          <q-toolbar-title>
-            Edit Tenant Information
-          </q-toolbar-title>
-        </q-toolbar>
 
-        <div class="layout-padding">
-          <q-field helper="Description of Tenant" label="Description" :label-width="3">
-            <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput"/>
-          </q-field>
-          <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
-            <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
-          </q-field>
-          <div>&nbsp;</div>
-          <q-btn
-            @click="okEditTenantDialog"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-          />
-          <q-btn
-            @click="cancelEditTenantDialog"
-            label="Cancel"
-            class = "float-right"
-          />
-        </div>
-      </q-modal-layout>
-    </q-modal>
--->
-<!-- TODO
-    <q-modal v-model="editAuthProvModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-            <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelAuthProvTenantDialog"
-          />
-          <q-toolbar-title v-if="editAuthProvModalDialogData.AddMode">
-            Add Auth Provider for {{ tenantData.Name }}
-          </q-toolbar-title>
-          <q-toolbar-title v-if="!editAuthProvModalDialogData.AddMode">
-            Edit {{ editAuthProvModalDialogData.Type }} Auth Provider for {{ tenantData.Name }}
-          </q-toolbar-title>
-        </q-toolbar>
+<q-dialog v-model="editTenantModalDialogVisible">
+  <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+    <q-header class="bg-primary">
+      <q-toolbar>
+        <q-toolbar-title>
+          Edit Tenant Information
+        </q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
+    </q-header>
+    <q-page-container>
+      <q-page padding>
+        <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput" label="Description" :label-width="3"/> Description of Tenant
+        <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
+          <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
+        </q-field> Must be on for both Tenant and Auth Provider to be effective
+        <div>&nbsp;</div>
+        <q-btn
+          @click="okEditTenantDialog"
+          color="primary"
+          label="Ok"
+          class = "float-right q-ml-xs"
+        />
+        <q-btn
+          @click="cancelEditTenantDialog"
+          label="Cancel"
+          class = "float-right"
+        />
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</q-dialog>
 
-        <div class="layout-padding">
-          <q-field helper="Type" label="Type" :label-width="3">
-            <q-input v-model="editAuthProvModalDialogData.Type" />
-          </q-field>
-          <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
-            <q-toggle v-model="editAuthProvModalDialogData.AllowUserCreation" />
-          </q-field>
-          <q-field helper="Allow a user to add this auth method" label="Allow Link" :label-width="3">
-            <q-toggle v-model="editAuthProvModalDialogData.AllowLink" />
-          </q-field>
-          <q-field helper="Allow a user to remove this auth method (As long as they have at least one other active)" label="Allow Unlink" :label-width="3">
-            <q-toggle v-model="editAuthProvModalDialogData.AllowUnlink" />
-          </q-field>
-          <q-field helper="Text to show in security settings UI" label="Link Text" :label-width="3">
-            <q-input v-model="editAuthProvModalDialogData.LinkText" />
-          </q-field>
-          <q-field helper="Text to display in select auth dialog" label="Menu Text" :label-width="3">
-            <q-input v-model="editAuthProvModalDialogData.MenuText" />
-          </q-field>
-          <q-field helper="Link to icon to be used in select auth dialog" label="Icon Link" :label-width="3">
-            <q-input v-model="editAuthProvModalDialogData.IconLink" />
-          </q-field>
-          <q-field helper="Auth Prov Spercific Config" label="ConfigJSON" :label-width="3"  :error="isConfigJSONInvalid">
-            <q-input v-model="editAuthProvModalDialogData.ConfigJSON" type="textarea" />
-          </q-field>
-          <div>&nbsp;</div>
-          <q-btn
-            @click="deleteAuthProvTenantDialog"
-            color="negative"
-            label="Delete"
-            round
-            icon="delete"
-            class = "float-left q-ml-xs"
-          />
-          <q-btn
-            @click="okAuthProvTenantDialog"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-          />
-          <q-btn
-            @click="cancelAuthProvTenantDialog"
-            label="Cancel"
-            class = "float-right"
-          />
-        </div>
-      </q-modal-layout>
-    </q-modal>-->
-  </q-page>
+<q-dialog v-model="editAuthProvModalDialogVisible">
+  <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+    <q-header class="bg-primary">
+      <q-toolbar>
+        <q-toolbar-title v-if="editAuthProvModalDialogData.AddMode">
+          Add Auth Provider for {{ tenantData.Name }}
+        </q-toolbar-title>
+        <q-toolbar-title v-if="!editAuthProvModalDialogData.AddMode">
+          Edit {{ editAuthProvModalDialogData.Type }} Auth Provider for {{ tenantData.Name }}
+        </q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
+    </q-header>
+    <q-page-container>
+      <q-page padding>
+        <q-input v-model="editAuthProvModalDialogData.Type" label="Type" :label-width="3"/>
+        <q-toggle v-model="editAuthProvModalDialogData.AllowUserCreation" label="Allow User Creation" :label-width="3"/> Must be on for both Tenant and Auth Provider to be effective
+        <div>&nbsp;</div>
+        <q-toggle v-model="editAuthProvModalDialogData.AllowLink" label="Allow Link" :label-width="3"/> Allow a user to add this auth method
+        <div>&nbsp;</div>
+        <q-toggle v-model="editAuthProvModalDialogData.AllowUnlink" label="Allow Unlink" :label-width="3"/> Allow a user to remove this auth method (As long as they have at least one other active)
+        <div>&nbsp;</div>
+        <q-input
+          v-model="editAuthProvModalDialogData.LinkText"
+          label="Link Text"
+          :label-width="3"
+          error-message="Must be filled in"
+          :error="editAuthProvModalDialogData.LinkText.length === 0"
+        /> Text to show in security settings UI
+        <q-input
+          v-model="editAuthProvModalDialogData.MenuText"
+          label="Menu Text"
+          :label-width="3"
+          error-message="Must be filled in"
+          :error="editAuthProvModalDialogData.MenuText.length === 0"
+        /> Text to display in select auth dialog
+        <q-input
+          v-model="editAuthProvModalDialogData.IconLink"
+          label="Icon Link"
+          :label-width="3"
+        /> Link to icon to be used in select auth dialog
+        <q-input
+          v-model="editAuthProvModalDialogData.ConfigJSON"
+          type="textarea"
+          label="ConfigJSON"
+          :label-width="3"
+          :error="isConfigJSONInvalid"
+        /> Auth Prov Spercific Config
+        <div>&nbsp;</div>
+        <q-btn
+          @click="deleteAuthProvTenantDialog"
+          color="negative"
+          round
+          icon="delete"
+          class = "float-left q-ml-xs"
+        />
+        <q-btn
+          @click="okAuthProvTenantDialog"
+          color="primary"
+          label="Ok"
+          class = "float-right q-ml-xs"
+        />
+        <q-btn
+          @click="cancelAuthProvTenantDialog"
+          label="Cancel"
+          class = "float-right"
+        />
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</q-dialog>
+</q-page>
 </template>
 
 <style>
@@ -270,8 +267,6 @@ export default {
       }).onOk(() => {
         TTT.editAuthProvModalDialogData.DeleteMode = true
         TTT.okAuthProvTenantDialog()
-      }).catch(() => {
-        // Do nothing
       })
     },
     okAuthProvTenantDialog () {
@@ -281,16 +276,16 @@ export default {
 
       // Shared validation
       if (this.editAuthProvModalDialogData.MenuText === '') {
-        Notify.create({color: 'negative', detail: 'Menu text must be filled in'})
+        Notify.create({color: 'negative', message: 'Menu text must be filled in'})
         return
       }
       if (this.editAuthProvModalDialogData.LinkText === '') {
-        Notify.create({color: 'negative', detail: 'LinkText text must be filled in'})
+        Notify.create({color: 'negative', message: 'LinkText text must be filled in'})
         return
       }
       // Check configJSON string is valid JSON
       if (this.isConfigJSONInvalid) {
-        Notify.create({color: 'negative', detail: 'ConfigJSON is not valid JSON'})
+        Notify.create({color: 'negative', message: 'ConfigJSON is not valid JSON'})
         return
       }
       var newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
@@ -322,7 +317,7 @@ export default {
       var callback = {
         ok: function (response) {
           TTT.editAuthProvModalDialogVisible = false
-          Notify.create({color: 'positive', detail: 'Tenant Updated'})
+          Notify.create({color: 'positive', message: 'Tenant Updated'})
           TTT.refreshTenantData()
         },
         error: function (error) {
@@ -330,7 +325,7 @@ export default {
           if (TTT.editAuthProvModalDialogData.AddMode) {
             verb = 'Add'
           }
-          Notify.create(verb + ' Auth Provider failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: verb + ' Auth Provider failed - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -350,6 +345,7 @@ export default {
       this.editTenantModalDialogVisible = false
       if (this.editTenantModalDialogData.Description === this.tenantData.Description) {
         if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
+          Notify.create({color: 'positive', message: 'No changes made'})
           return // no change so do nothing
         }
       }
@@ -359,11 +355,11 @@ export default {
 
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Tenant Updated'})
+          Notify.create({color: 'positive', message: 'Tenant Updated'})
           TTT.refreshTenantData()
         },
         error: function (error) {
-          Notify.create('Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -383,8 +379,10 @@ export default {
       this.editTenantModalDialogData.AllowUserCreation = this.tenantData.AllowUserCreation
 
       this.editTenantModalDialogVisible = true
-
-      this.$refs.descriptionInput.focus()
+      var TTT = this
+      setTimeout(function () {
+        TTT.$refs.descriptionInput.focus()
+      }, 5)
     },
     refreshTenantData () {
       var jobNameToLoad = this.$route.params.selTenantNAME
@@ -397,7 +395,7 @@ export default {
         },
         error: function (error) {
           Loading.hide()
-          Notify.create('Tenant query failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Tenant query failed - ' + callbackHelper.getErrorFromResponse(error)})
           TTT.tenantData = getEmptyTenantData()
         }
       }
@@ -431,11 +429,11 @@ export default {
       }).onOk(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'Tenant ' + nameOfTenantToDelete + ' deleted'})
+            Notify.create({color: 'positive', message: 'Tenant ' + nameOfTenantToDelete + ' deleted'})
             TTT.$router.push('/' + TTT.$route.params.tenantName + '/tenants/')
           },
           error: function (error) {
-            Notify.create('Delete Tenant failed - ' + callbackHelper.getErrorFromResponse(error))
+            Notify.create({color: 'negative', message: 'Delete Tenant failed - ' + callbackHelper.getErrorFromResponse(error)})
           }
         }
         TTT.$store.dispatch('globalDataStore/callAdminAPI', {

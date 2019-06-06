@@ -17,7 +17,7 @@
         >Unlink</q-btn>
 
       <q-dialog v-model="resetPasswordDialogVisible">
-        <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+        <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
           <q-header class="bg-primary">
             <q-toolbar>
               <q-toolbar-title>

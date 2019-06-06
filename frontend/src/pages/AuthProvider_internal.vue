@@ -24,7 +24,7 @@
     </div>
 
     <q-dialog v-model="createAccountDialogModel.visible">
-      <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+      <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
         <q-header class="bg-primary">
           <q-toolbar>
             <q-toolbar-title>
@@ -139,7 +139,7 @@ export default {
     okCreateAccountDialog () {
       var TTT = this
       if (this.passwordERROR) {
-        Notify.create(this.passwordERRORMessage)
+        Notify.create({color: 'negative', message: this.passwordERRORMessage})
         return
       }
       var callback = {
@@ -162,7 +162,7 @@ export default {
               }
             }
           }
-          Notify.create('Login Failed - ' + msg)
+          Notify.create({color: 'negative', message: 'Login Failed - ' + msg})
         }
       }
       Loading.show()
@@ -190,7 +190,7 @@ export default {
     usernamePassLogin () {
       var TTT = this
       if (this.$store.state.globalDataStore.selectedAuthProvGUID === null) {
-        Notify.create('No AuthProvGUID selected - you shouldn\'t navigate here directly')
+        Notify.create({color: 'negative', message: 'No AuthProvGUID selected - you shouldn\'t navigate here directly'})
         return
       }
       var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.authProvInfo.saltForPasswordHashing))
@@ -207,7 +207,7 @@ export default {
         },
         error: function (response) {
           Loading.hide()
-          Notify.create('Login Failed')
+          Notify.create({color: 'negative', message: 'Login Failed'})
         }
       }
       Loading.show()
