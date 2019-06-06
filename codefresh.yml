@@ -5,6 +5,11 @@ steps:
   #If version is x.y.z (xy and z are numbers)
   # x is the major version
 
+  main_clone:
+    title: Cloning main repository...
+    type: git-clone
+    repo: '${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}'
+    revision: '${{CF_REVISION}}'
 
   setup_variables:
     description: Sets variables for future steps
