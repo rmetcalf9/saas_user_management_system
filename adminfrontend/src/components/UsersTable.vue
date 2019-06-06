@@ -57,32 +57,22 @@
       </q-td>
   </q-table>
 
-    <q-modal v-model="createUserModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-            <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelCreateUserDialog"
-          />
-          <q-toolbar-title>
-            Create new user
-          </q-toolbar-title>
-        </q-toolbar>
+    <q-dialog v-model="createUserModalDialogVisible">
+      <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+        <q-header class="bg-primary">
+          <q-toolbar>
+            <q-toolbar-title>
+              Create new user
+            </q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
+          </q-toolbar>
+        </q-header>
 
-        <div class="layout-padding">
-          <q-field helper="Normally <User ID>@<Auth Prov>" label="User ID" :label-width="3">
-            <q-input v-model="createUserModalDialogData.UserID" ref="userIDInput"/>
-          </q-field>
-          <q-field helper="Name displayed to user" label="Known As" :label-width="3">
-            <q-input v-model="createUserModalDialogData.known_as" ref="userIDInput"/>
-          </q-field>
-          <q-field helper="Optional Tenant to create a hasaccount role" label="Main Tenant" :label-width="3">
-            <q-input v-model="createUserModalDialogData.mainTenant" @keyup.enter="okCreateUserDialog" ref="userIDInput"/>
-          </q-field>
+        <q-page-container>
+          <q-page padding>
+            <q-input v-model="createUserModalDialogData.UserID" ref="userIDInput" label="User ID" :label-width="3"/> Normally &lt;User ID>@&lt;Auth Prov>
+            <q-input v-model="createUserModalDialogData.known_as" label="Known As" :label-width="3"/> Name displayed to user
+            <q-input v-model="createUserModalDialogData.mainTenant" @keyup.enter="okCreateUserDialog" label="Main Tenant" :label-width="3"/> Optional Tenant to create a hasaccount role
           <div>&nbsp;</div>
           <q-btn
             @click="okCreateUserDialog"
@@ -91,13 +81,16 @@
             class = "float-right q-ml-xs"
           />
           <q-btn
-            @click="cancelCreateUserDialog"
             label="Cancel"
             class = "float-right"
+            v-close-popup
           />
-        </div>
-      </q-modal-layout>
-    </q-modal></div>
+          </q-page>
+        </q-page-container>
+      </q-layout>
+    </q-dialog>
+
+  </div>
 </template>
 
 <script>
@@ -134,7 +127,9 @@ export default {
       futureRefreshRequested: false,
       createUserModalDialogVisible: false,
       createUserModalDialogData: {
-        UserID: ''
+        UserID: '',
+        known_as: '',
+        mainTenant: ''
       }
     }
   },
@@ -209,7 +204,7 @@ export default {
           TTT.refresh()
         },
         error: function (error) {
-          Notify.create('Create User failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Create User failed - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
