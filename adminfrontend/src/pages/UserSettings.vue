@@ -2,30 +2,36 @@
   <q-page>
     <q-list >
       <q-item>
-        <q-item-main >
-          <q-item-tile label>User:</q-item-tile>
-          <q-item-tile sublabel>{{ loggedInUserCookie.known_as }}</q-item-tile>
-        </q-item-main>
+        <q-item-section >
+          <q-item-label>User:</q-item-label>
+          <q-item-label caption>{{ loggedInUserCookie.known_as }}</q-item-label>
+        </q-item-section>
       </q-item>
       <q-item>
-        <q-item-main >
-          <q-item-tile label>Roles:</q-item-tile>
-          <q-item-tile sublabel v-for="curVal in loggedInUserCookie.ThisTenantRoles" :key=curVal>{{ curVal }}</q-item-tile>
-        </q-item-main>
+        <q-item-section >
+          <q-item-label>Roles:</q-item-label>
+          <q-item-label caption v-for="curVal in loggedInUserCookie.ThisTenantRoles" :key=curVal>{{ curVal }}</q-item-label>
+        </q-item-section>
       </q-item>
       <q-item>
-        <q-item-main >
-          <q-item-tile label>Other:</q-item-tile>
-          <q-item-tile sublabel><q-btn
-            color="primary"
-            @click="securitySettingsClick"
-            label="Security Settings"
-          /></q-item-tile>
-        </q-item-main>
+        <q-item-section >
+          <q-item-label>Other:</q-item-label>
+          <q-item-label caption >
+            <q-btn
+              color="primary"
+              @click="securitySettingsClick"
+              label="Security Settings"
+            />
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Logged in users cookie:</q-item-label>
+          <q-item-label caption>{{ loggedInUserCookie }}</q-item-label>
+        </q-item-section>
       </q-item>
     </q-list>
-
-    {{ loggedInUserCookie }}
   </q-page>
 </template>
 
