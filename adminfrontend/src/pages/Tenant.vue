@@ -11,19 +11,21 @@
     </q-page-sticky>
 
   <q-list >
-    <q-item highlight @click.native="editTenant">
-      <q-item-main >
-        <q-item-tile label>Tenant Name: {{ tenantData.Name }}</q-item-tile>
-        <q-item-tile sublabel>{{ tenantData.Description }}</q-item-tile>
-      </q-item-main>
-      <q-item-side right icon="mode_edit" />
+    <q-item clickable v-ripple highlight @click.native="editTenant">
+      <q-item-section >
+        <q-item-label>Tenant Name: {{ tenantData.Name }}</q-item-label>
+        <q-item-label caption>{{ tenantData.Description }}</q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
     </q-item>
     <q-item>
-      <q-item-main >
-        <q-item-tile label>Allow User Creation:</q-item-tile>
-        <q-item-tile sublabel v-if="tenantData.AllowUserCreation">New users can sign up</q-item-tile>
-        <q-item-tile sublabel v-if="!tenantData.AllowUserCreation">Users must be created by admins</q-item-tile>
-      </q-item-main>
+      <q-item-section >
+        <q-item-label>Allow User Creation:</q-item-label>
+        <q-item-label caption v-if="tenantData.AllowUserCreation">New users can sign up</q-item-label>
+        <q-item-label caption v-if="!tenantData.AllowUserCreation">Users must be created by admins</q-item-label>
+      </q-item-section>
     </q-item>
   </q-list>
 
@@ -43,7 +45,7 @@
     label="Add Auth Provider"
     class = "float-left q-ma-xs"
   />
-
+<!-- TODO
     <q-modal v-model="editTenantModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
@@ -82,7 +84,8 @@
         </div>
       </q-modal-layout>
     </q-modal>
-
+-->
+<!-- TODO
     <q-modal v-model="editAuthProvModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
@@ -149,7 +152,7 @@
           />
         </div>
       </q-modal-layout>
-    </q-modal>
+    </q-modal>-->
   </q-page>
 </template>
 
