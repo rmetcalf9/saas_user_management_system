@@ -1,6 +1,7 @@
 <template>
+  <!-- saas_user_management adminfrontend -->
   <q-layout view="lHh Lpr lFf">
-    <q-layout-header>
+    <q-header>
       <q-toolbar
         color="primary"
         :glossy="$q.theme === 'mat'"
@@ -24,58 +25,65 @@
           <div slot="subtitle">Running on Quasar v{{ $q.version }}</div>
         </q-toolbar-title>
       </q-toolbar>
-    </q-layout-header>
-    <q-layout-drawer
-      v-model="leftDrawerOpen"
-      :content-class="$q.theme === 'mat' ? 'bg-grey-2' : null"
-    >
-      <q-list
-        no-border
-        link
-        inset-delimiter
-      >
-        <q-list-header>Functions</q-list-header>
+    </q-header>
+
+    <!-- Left Side Drawer -->
+    <q-drawer side="left" v-model="leftDrawerOpen" :content-class="$q.theme === 'mat' ? 'bg-grey-2' : null">
+      <q-list no-border link inset-separator>
+        <q-item-label header>Navigation</q-item-label>
+
         <q-item :to='"/" + this.$route.params.tenantName + "/tenants"'>
-          <q-item-side icon="business" />
-          <q-item-main label="Tenants" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="business" />
+          </q-item-section>
+          <q-item-section>Tenants</q-item-section>
         </q-item>
         <q-item :to='"/" + this.$route.params.tenantName + "/users"'>
-          <q-item-side icon="person" />
-          <q-item-main label="Users" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="person" />
+          </q-item-section>
+          <q-item-section>Users</q-item-section>
         </q-item>
         <q-item :to='"/" + this.$route.params.tenantName + "/persons"'>
-          <q-item-side icon="directions_walk" />
-          <q-item-main label="Persons" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="directions_walk" />
+          </q-item-section>
+          <q-item-section>Persons</q-item-section>
         </q-item>
-        <q-list-header>User Options</q-list-header>
         <q-item :to='"/" + this.$route.params.tenantName + "/usersettings"'>
-          <q-item-side icon="settings" />
-          <q-item-main label="User Settings" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="settings" />
+          </q-item-section>
+          <q-item-section>User Settings</q-item-section>
         </q-item>
-        <q-item @click.native="clickLogout">
-          <q-item-side icon="exit_to_app" />
-          <q-item-main label="Logout" />
+        <q-separator />
+        <q-item clickable @click.native="clickLogout">
+          <q-item-section avatar>
+            <q-icon color="primary" name="exit_to_app" />
+          </q-item-section>
+          <q-item-section>User Logout</q-item-section>
         </q-item>
       </q-list>
-    </q-layout-drawer>
+    </q-drawer>
+
     <q-page-container>
       <router-view />
     </q-page-container>
 
-    <q-layout-footer>
-      <q-toolbar
-          color="primary"
-          :glossy="$q.theme === 'mat'"
-          :inverted="$q.theme === 'ios'"
-        >
-          <a v-if="! (serverInfo.Server.APIAPP_APIDOCSURL === '_')" v-bind:href="serverInfo.Server.APIAPP_APIDOCSURL" target="_blank">APIdocs</a>
-          <div>&nbsp;</div>
-          <a href="https://github.com/rmetcalf9/saas_user_management_system" target="_blank">GitHub</a>
-          <div class="col"></div> <!-- eat up all the free space -->
-          Version: {{serverInfo.Server.Version}}
+    <q-footer>
+      <q-toolbar>
+        <table width="100%"><tr>
+        <td>
+          <table><tr><td>
+            <a v-if="! (serverInfo.Server.APIAPP_APIDOCSURL === '_')" v-bind:href="serverInfo.Server.APIAPP_APIDOCSURL" target="_blank">APIdocs</a>
+          </td><td>
+            <a href="https://github.com/rmetcalf9/saas_user_management_system" target="_blank">GitHub</a>
+          </td></tr></table>
+        </td>
+        <td align="right">Version: {{serverInfo.Server.Version}}</td>
+        </tr></table>
       </q-toolbar>
-    </q-layout-footer>
-
+    </q-footer>
   </q-layout>
 </template>
 

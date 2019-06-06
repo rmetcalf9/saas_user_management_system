@@ -59,9 +59,12 @@ module.exports = function (ctx) {
         'QItem',
         
         'QHeader',
+        'QFooter',
         'QDialog',
         'QItemSection',
-        'QItemLabel'
+        'QItemLabel',
+        'QDrawer',
+        'QSeparator'
 
       ],
       directives: [
