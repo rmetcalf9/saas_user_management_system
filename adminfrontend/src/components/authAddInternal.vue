@@ -5,13 +5,13 @@
         push
         @click="click"
       >Add Internal Auth</q-btn>
-      <!-- TODO
+
     <TenantSelectionModal
       ref="TenantSelectionModal"
       :title="'Select Tenant to Associate new auth with'"
       @ok="tenantSelected"
       :multiselection="false"
-    />-->
+    />
 
   </div>
 </template>
@@ -39,6 +39,7 @@ export default {
       this.$refs.TenantSelectionModal.launchDialog()
     },
     tenantSelected (res) {
+      console.log('TTT')
       var TTT = this
       var tenant = res.selectedTenantList[0]
       this.$q.dialog({

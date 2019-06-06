@@ -302,11 +302,10 @@ export default {
       this.editPersonModalDialogVisible = false
     },
     editPerson () {
+      this.editPersonModalDialogVisible = true
       this.editPersonModalDialogData.someTextBoxData = ''
       this.editPersonModalDialogData.guid = JSON.parse(JSON.stringify(this.personData.guid))
       this.editPersonModalDialogData.ObjectVersion = JSON.parse(JSON.stringify(this.personData.ObjectVersion))
-
-      this.editPersonModalDialogVisible = true
 
       if (typeof (this.$refs.someTextBoxDataInput) !== 'undefined') {
         this.$refs.someTextBoxDataInput.focus()

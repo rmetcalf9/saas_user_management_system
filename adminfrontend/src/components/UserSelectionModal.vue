@@ -76,10 +76,13 @@ export default {
       this.visible = false
     },
     launchDialog () {
-      this.visible = true // Must be visible for ref to exist
-      this.$store.commit('tablePersistStore/resetTableSettings', 'usersSel')
-      this.$refs.userTable.tableSelected = []
-      this.$refs.userTable.refresh()
+      var TTT = this
+      TTT.visible = true // Must be visible for ref to exist
+      setTimeout(function () {
+        TTT.$store.commit('tablePersistStore/resetTableSettings', 'usersSel')
+        TTT.$refs.userTable.tableSelected = []
+        TTT.$refs.userTable.refresh()
+      }, 5)
     }
   }
 }
