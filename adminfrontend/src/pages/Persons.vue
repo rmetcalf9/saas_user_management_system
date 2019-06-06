@@ -24,16 +24,25 @@
           push
           @click="createPersonButtonClick"
         >Create Person</q-btn>
-        &nbsp;
-        <q-search clearable hide-underline v-model="tablePersistSettings.filter" />
       </template>
+
       <template slot="top-right" slot-scope="props">
-       <q-table-columns
-        color="secondary"
-        class="q-mr-sm"
-        v-model="tablePersistSettings.visibleColumns"
-        :columns="tableColumns"
-      />
+        <selectColumns
+          v-model="tablePersistSettings.visibleColumns"
+          :columns="tableColumns"
+        />
+        &nbsp;
+        <q-input
+          v-model="tablePersistSettings.filter"
+          debounce="500"
+          clearable
+          placeholder="Search" outlined
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+
       </template>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
@@ -87,9 +96,13 @@
 import { Notify } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
+import selectColumns from '../components/selectColumns'
 
 export default {
   name: 'PageIndex',
+  components: {
+    selectColumns
+  },
   data () {
     return {
       tableRowsPerPageOptions: [5, 10, 25, 50, 100, 200],
