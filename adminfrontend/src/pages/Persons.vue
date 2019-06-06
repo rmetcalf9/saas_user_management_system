@@ -50,41 +50,37 @@
       </q-td>
   </q-table>
 
-    <q-modal v-model="createPersonModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-            <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelCreatePersonDialog"
-          />
-          <q-toolbar-title>
-            Create new person
-          </q-toolbar-title>
-        </q-toolbar>
+    <q-dialog v-model="createPersonModalDialogVisible">
+      <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 250px; width: 700px; max-width: 80vw;">
+        <q-header class="bg-primary">
+          <q-toolbar>
+            <q-toolbar-title>
+              Create new person
+            </q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
+          </q-toolbar>
+        </q-header>
 
-        <div class="layout-padding">
-          <q-field helper="No Editable Person Data" label="Unknown" :label-width="3">
-            <q-input v-model="createPersonModalDialogData.guid" ref="personIDInput"/>
-          </q-field>
-          <div>&nbsp;</div>
-          <q-btn
-            @click="okCreatePersonDialog"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-          />
-          <q-btn
-            @click="cancelCreatePersonDialog"
-            label="Cancel"
-            class = "float-right"
-          />
-        </div>
-      </q-modal-layout>
-    </q-modal>
+        <q-page-container>
+          <q-page padding>
+            <q-input v-model="createPersonModalDialogData.guid" ref="personIDInput" label="Unknown" :label-width="3"/> No Editable Person Data
+            <div>&nbsp;</div>
+            <q-btn
+              @click="okCreatePersonDialog"
+              color="primary"
+              label="Ok"
+              class = "float-right q-ml-xs"
+            />
+            <q-btn
+              @click="cancelCreatePersonDialog"
+              label="Cancel"
+              class = "float-right"
+            />
+          </q-page>
+        </q-page-container>
+
+      </q-layout>
+    </q-dialog>
 
   </q-page>
 </template>
@@ -126,7 +122,7 @@ export default {
     deletePersonNoConfirm (TTT, usr) {
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Person ' + usr.guid + ' deleted'})
+          Notify.create({color: 'positive', message: 'Person ' + usr.guid + ' deleted'})
           TTT.futureRefresh()
         },
         error: function (error) {
@@ -181,7 +177,7 @@ export default {
       var callback = {
         ok: function (response) {
           TTT.createPersonModalDialogVisible = false
-          Notify.create({color: 'positive', detail: 'Person Created'})
+          Notify.create({color: 'positive', message: 'Person Created'})
           TTT.refresh()
         },
         error: function (error) {
