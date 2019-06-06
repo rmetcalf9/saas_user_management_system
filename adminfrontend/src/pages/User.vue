@@ -36,7 +36,7 @@
     </q-item>
     <q-item>
       <q-item-section >
-        <q-item-label>Linked Person Records ({{ userData['associatedPersonGUIDs'].length }})</q-item-label>
+        <q-item-label>Linked Person Records ({{ associatedPersonGUIDLength }})</q-item-label>
         <q-item-label caption v-for="curPersonGUID in userData.associatedPersonGUIDs" :key=curPersonGUID><a :href="curPathPartBeforeHash + '#/' + $route.params.tenantName + '/persons/' + curPersonGUID">{{ curPersonGUID }}</a></q-item-label>
       </q-item-section>
     </q-item>
@@ -131,6 +131,12 @@ export default {
     }
   },
   computed: {
+    associatedPersonGUIDLength () {
+      if (typeof (this.userData['associatedPersonGUIDs']) === 'undefined') {
+        return 0
+      }
+      return this.userData['associatedPersonGUIDs'].length
+    },
     isOtherDataInvalid () {
       try {
         JSON.parse(this.editUserModalDialogData.other_data)
