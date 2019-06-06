@@ -4,13 +4,14 @@
         color="primary"
         push
         @click="click"
-      >Add Internal</q-btn>
+      >Add Internal Auth</q-btn>
+      <!-- TODO
     <TenantSelectionModal
       ref="TenantSelectionModal"
       :title="'Select Tenant to Associate new auth with'"
       @ok="tenantSelected"
       :multiselection="false"
-    />
+    />-->
 
   </div>
 </template>

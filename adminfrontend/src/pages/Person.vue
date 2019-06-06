@@ -11,17 +11,19 @@
     </q-page-sticky>
 
   <q-list >
-    <q-item highlight @click.native="editPerson">
-      <q-item-main >
-        <q-item-tile label>Person Info</q-item-tile>
-        <q-item-tile sublabel>Known as {{ personData.guid }}</q-item-tile>
-      </q-item-main>
-      <q-item-side right icon="mode_edit" />
+    <q-item clickable v-ripple highlight @click.native="editPerson">
+      <q-item-section >
+        <q-item-label>Person Info</q-item-label>
+        <q-item-label caption>Known as {{ personData.guid }}</q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
     </q-item>
     <q-item>
-      <q-item-main >
-        <q-item-tile label>Linked User Records ({{ numberOfAssociatedUsers }})</q-item-tile>
-        <q-item-tile sublabel v-for="curUser in personData.associatedUsers" :key=curUser.UserID>
+      <q-item-section >
+        <q-item-label>Linked User Records ({{ numberOfAssociatedUsers }})</q-item-label>
+        <q-item-label caption v-for="curUser in personData.associatedUsers" :key=curUser.UserID>
           <a :href="curPathPartBeforeHash + '#/' + $route.params.tenantName + '/users/' + curUser.UserID">{{ curUser.UserID }}</a>&nbsp;
           <q-btn
             color="negative"
@@ -31,73 +33,69 @@
             icon="remove"
           >
           </q-btn>
-        </q-item-tile>
-      </q-item-main>
-      <q-item-side right>
-      <q-btn
-        color="positive"
-        size="xs"
-        round
-        @click="associateWithUserBtnClick"
-        icon="add"
-      ></q-btn>&nbsp;
-      </q-item-side>
+        </q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-btn
+          color="positive"
+          size="xs"
+          round
+          @click="associateWithUserBtnClick"
+          icon="add"
+        ></q-btn>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Auths</q-item-label>
+        <q-item v-for="curAuth in personData.personAuths" :key=curAuth.AuthUserKey>
+          <q-item-section >
+            <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'internal'">
+              <q-item-label>
+                {{ curAuth.tenantName }} - {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}
+                <q-btn class="float-left" color="negative" round @click="deleteAuth(curAuth)" icon="remove" size="xs" />
+                <AuthDisplayInternal
+                  :person="personData"
+                  :authData="curAuth"
+                />
+              </q-item-label>
+            </div>
+            <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'default'">
+              <q-item-label> {{ curAuth.tenantName }} - {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-label>
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-item-section>
+      <q-item-section avatar>
+        <AuthAddInternal
+          :person="personData"
+          @updateMaster="refreshPersonData"
+        />
+      </q-item-section>
     </q-item>
 
     <q-item>
-      <q-item-main >
-        <q-item-tile label>Auths</q-item-tile>
-        <div v-for="curAuth in personData.personAuths" :key=curAuth.AuthUserKey>
-          <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'internal'">
-            <q-item-tile sublabel >
-              <q-btn class="float-left" color="negative" round @click="deleteAuth(curAuth)" icon="remove" size="xs" />
-              <AuthDisplayInternal
-                :person="personData"
-                :authData="curAuth"
-              />
-            </q-item-tile>
-          </div>
-          <div v-if="supportedAuthType(curAuth.AuthProviderType) === 'default'">
-            <q-item-tile sublabel > {{ curAuth.tenantName }} - {{ curAuth.AuthProviderType }}, Key:{{ curAuth.AuthUserKey }}</q-item-tile>
-          </div>
-        </div>
-        <q-item-tile sublabel >
-          <AuthAddInternal
-            :person="personData"
-            @updateMaster="refreshPersonData"
-          />
-        </q-item-tile>
-      </q-item-main>
-    </q-item>
-    <q-item>
-      <q-item-main >
-        <q-item-tile label>Update Info</q-item-tile>
-        <q-item-tile sublabel>Created {{ personData.creationDateTime }}</q-item-tile>
-        <q-item-tile sublabel>Last Updated {{ personData.lastUpdateDateTime }}</q-item-tile>
-      </q-item-main>
+      <q-item-section >
+        <q-item-label>Update Info</q-item-label>
+        <q-item-label caption>Created {{ personData.creationDateTime }}</q-item-label>
+        <q-item-label caption>Last Updated {{ personData.lastUpdateDateTime }}</q-item-label>
+      </q-item-section>
     </q-item>
   </q-list>
 
-    <q-modal v-model="editPersonModalDialogVisible" :content-css="{minWidth: '40vw', minHeight: '40vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-          <q-btn
-            color="primary"
-            flat
-            round
-            dense
-            icon="keyboard_arrow_left"
-            @click="cancelEditPersonDialog"
-          />
+  <q-dialog v-model="editPersonModalDialogVisible">
+    <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+      <q-header class="bg-primary">
+        <q-toolbar>
           <q-toolbar-title>
             Edit {{ personData.guid }} Information
           </q-toolbar-title>
+          <q-btn flat v-close-popup round dense icon="close" />
         </q-toolbar>
-
-        <div class="layout-padding">
-          <q-field helper="No Editable Fields for Person" label="Unknown" :label-width="3">
-            <q-input v-model="editPersonModalDialogData.someTextBoxData" @keyup.enter="okEditPersonDialog" ref="someTextBoxDataInput"/>
-          </q-field>
+      </q-header>
+      <q-page-container>
+        <q-page padding>
+          <q-input v-model="editPersonModalDialogData.someTextBoxData" @keyup.enter="okEditPersonDialog" ref="someTextBoxDataInput" label="Unknown" :label-width="3"/> No Editable Fields for Person
           <div>&nbsp;</div>
           <q-btn
             @click="okEditPersonDialog"
@@ -110,9 +108,11 @@
             label="Cancel"
             class = "float-right"
           />
-        </div>
-      </q-modal-layout>
-    </q-modal>
+        </q-page>
+      </q-page-container>
+
+    </q-layout>
+  </q-dialog>
 
     <UserSelectionModal
       ref="UserSelectionModal"
@@ -180,11 +180,11 @@ export default {
         var base64encodedkey = btoa(curAuth.AuthUserKey)
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'Auth Deleted'})
+            Notify.create({color: 'positive', message: 'Auth Deleted'})
             TTT.refreshPersonData()
           },
           error: function (error) {
-            Notify.create('Delete auth failed ( ' + curAuth.AuthUserKey + ') - ' + callbackHelper.getErrorFromResponse(error))
+            Notify.create({color: 'negative', message: 'Delete auth failed ( ' + curAuth.AuthUserKey + ') - ' + callbackHelper.getErrorFromResponse(error)})
           }
         }
         TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -205,11 +205,11 @@ export default {
       var TTT = this
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Person Auth Added - ' + userData.UserID})
+          Notify.create({color: 'positive', message: 'Person Auth Added - ' + userData.UserID})
           TTT.futureRefresh()
         },
         error: function (error) {
-          Notify.create('Add Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Add Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -251,12 +251,12 @@ export default {
       }).onOk(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'User Person Link Removed - ' + userData.UserID})
+            Notify.create({color: 'positive', message: 'User Person Link Removed - ' + userData.UserID})
             // TTT.futureRefresh()
             TTT.refreshPersonData()
           },
           error: function (error) {
-            Notify.create('Remove Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error))
+            Notify.create({color: 'negative', message: 'Remove Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error)})
           }
         }
         TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -283,11 +283,11 @@ export default {
 
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Person Updated'})
+          Notify.create({color: 'positive', message: 'Person Updated'})
           TTT.refreshPersonData()
         },
         error: function (error) {
-          Notify.create('Update Person failed - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create({color: 'negative', message: 'Update Person failed - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
       TTT.$store.dispatch('globalDataStore/callAdminAPI', {
@@ -308,7 +308,9 @@ export default {
 
       this.editPersonModalDialogVisible = true
 
-      this.$refs.someTextBoxDataInput.focus()
+      if (typeof (this.$refs.someTextBoxDataInput) !== 'undefined') {
+        this.$refs.someTextBoxDataInput.focus()
+      }
     },
     futureRefresh () {
       if (this.futureRefreshRequested) {
@@ -366,7 +368,7 @@ export default {
       }).onOk(() => {
         var callback = {
           ok: function (response) {
-            Notify.create({color: 'positive', detail: 'Person ' + personGUID + ' deleted'})
+            Notify.create({color: 'positive', message: 'Person ' + personGUID + ' deleted'})
             TTT.$router.push('/' + TTT.$route.params.tenantName + '/persons/')
           },
           error: function (error) {
