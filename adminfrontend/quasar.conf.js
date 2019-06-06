@@ -65,7 +65,8 @@ module.exports = function (ctx) {
         'QItemLabel',
         'QDrawer',
         'QSeparator',
-        'QSelect'
+        'QSelect',
+        'QChip'
 
       ],
       directives: [

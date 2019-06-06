@@ -11,39 +11,41 @@
     </q-page-sticky>
 
   <q-list >
-    <q-item highlight @click.native="editUser">
-      <q-item-main >
-        <q-item-tile label>{{ userData.UserID }}</q-item-tile>
-        <q-item-tile sublabel>Known as {{ userData.known_as }}</q-item-tile>
-      </q-item-main>
-      <q-item-side right icon="mode_edit" />
+    <q-item clickable v-ripple highlight @click.native="editUser">
+      <q-item-section >
+        <q-item-label>Job {{ userData.UserID }}</q-item-label>
+        <q-item-label caption>Known as {{ userData.known_as }}</q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
     </q-item>
     <q-item>
-      <q-item-main >
-        <q-item-tile label>Other Data</q-item-tile>
-        <q-item-tile sublabel>{{ userData.other_data }}</q-item-tile>
-      </q-item-main>
+      <q-item-section >
+        <q-item-label>Other Data</q-item-label>
+        <q-item-label caption>{{ userData.other_data }}</q-item-label>
+      </q-item-section>
     </q-item>
     <q-item v-for="curRole in userData.TenantRoles" :key=curRole.TenantName>
-      <q-item-main >
-        <q-item-tile label>Tenant Roles - {{ curRole.TenantName }}</q-item-tile>
-        <q-item-tile>
-            <q-chips-input readonly hide-underline v-model="curRole.ThisTenantRoles" />
-        </q-item-tile>
-      </q-item-main>
+      <q-item-section >
+        <q-item-label>Tenant Roles - {{ curRole.TenantName }}</q-item-label>
+        <q-item-label>
+          <q-chip size="10px" v-for="curVal in curRole.ThisTenantRoles" :key=curVal>{{ curVal }}</q-chip>
+        </q-item-label>
+      </q-item-section>
     </q-item>
     <q-item>
-      <q-item-main >
-        <q-item-tile label>Linked Person Records ({{ userData['associatedPersonGUIDs'].length }})</q-item-tile>
-        <q-item-tile sublabel v-for="curPersonGUID in userData.associatedPersonGUIDs" :key=curPersonGUID><a :href="curPathPartBeforeHash + '#/' + $route.params.tenantName + '/persons/' + curPersonGUID">{{ curPersonGUID }}</a></q-item-tile>
-      </q-item-main>
+      <q-item-section >
+        <q-item-label>Linked Person Records ({{ userData['associatedPersonGUIDs'].length }})</q-item-label>
+        <q-item-label caption v-for="curPersonGUID in userData.associatedPersonGUIDs" :key=curPersonGUID><a :href="curPathPartBeforeHash + '#/' + $route.params.tenantName + '/persons/' + curPersonGUID">{{ curPersonGUID }}</a></q-item-label>
+      </q-item-section>
     </q-item>
     <q-item>
-      <q-item-main >
-        <q-item-tile label>Update Info</q-item-tile>
-        <q-item-tile sublabel>Created {{ userData.creationDateTime }}</q-item-tile>
-        <q-item-tile sublabel>Last Updated {{ userData.lastUpdateDateTime }}</q-item-tile>
-      </q-item-main>
+      <q-item-section >
+        <q-item-label>Update Info</q-item-label>
+        <q-item-label caption>Created {{ userData.creationDateTime }}</q-item-label>
+        <q-item-label caption>Last Updated {{ userData.lastUpdateDateTime }}</q-item-label>
+      </q-item-section>
     </q-item>
   </q-list>
 
