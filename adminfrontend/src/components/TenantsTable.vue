@@ -17,17 +17,26 @@
           push
           @click="openCreateTenantModalDialog"
         >Add Tenant</q-btn>
-        &nbsp;
-        <q-search clearable hide-underline v-model="tablePersistSettings.filter" />
       </template>
       <template slot="top-right" slot-scope="props">
-       <q-table-columns
-        color="secondary"
-        class="q-mr-sm"
-        v-model="tablePersistSettings.visibleColumns"
-        :columns="tableColumns"
-      />
+        <selectColumns
+          v-model="tablePersistSettings.visibleColumns"
+          :columns="tableColumns"
+        />
+        &nbsp;
+        <q-input
+          v-model="tablePersistSettings.filter"
+          debounce="500"
+          clearable
+          placeholder="Search" outlined
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+
       </template>
+
       <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
         <q-btn flat no-caps dense :label="props.value" @click="clickSingleTenantCallbackFN(props)" width="100%"/>
       </q-td>
@@ -42,6 +51,7 @@
 import { Notify } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
+import selectColumns from '../components/selectColumns'
 
 export default {
   // name: 'TenantsTable',
@@ -50,6 +60,9 @@ export default {
     'persistantSettingsSlot',
     'clickSingleTenantCallback'
   ],
+  components: {
+    selectColumns
+  },
   data () {
     return {
       tableRowsPerPageOptions: [5, 10, 25, 50, 100, 200],
