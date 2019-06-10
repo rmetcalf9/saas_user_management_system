@@ -181,7 +181,7 @@ def registerAPI(appObj):
       '''Get tenant information'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def dbfn(storeConnection):
-        a = GetTenant(tenantName, storeConnection, 'a','b','c')
+        a = GetTenant(tenantName, storeConnection, appObj=appObj)
         if a is None:
           raise NotFound('Tenant Not Found')
         return a.getJSONRepresenation()
@@ -306,7 +306,7 @@ def registerAPI(appObj):
         if "mainTenant" in content:
           if content["mainTenant"] != "":
             tenant = content["mainTenant"]
-            tenantObj = GetTenant(tenant, storeConnection, 'a','b','c')
+            tenantObj = GetTenant(tenant, storeConnection, appObj=appObj)
             if tenantObj is None:
               raise BadRequest("Invalid tenant name")
         try:

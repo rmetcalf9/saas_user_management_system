@@ -21,6 +21,7 @@ def getTenantModel(appObj):
     'Description': fields.String(default='DEFAULT', description='Description of tenant'),
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
     'AuthProviders': fields.List(fields.Nested(AuthProviderModel)),
+    'JWTCollecitonAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
   })
 

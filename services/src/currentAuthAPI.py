@@ -151,7 +151,7 @@ def registerAPI(appObj):
         decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
         
         # must be auth provider for logged in tenant
-        tenantObj = GetTenant(tenant, storeConnection, 'a','b','c')
+        tenantObj = GetTenant(tenant, storeConnection, appObj=appObj)
         authProvObj = GetAuthProvider(appObj, tenant, authProviderGUID, storeConnection, tenantObj)
         if authProvObj is None:
           raise BadRequest('Invalid auth prov GUID')
@@ -204,7 +204,7 @@ def registerAPI(appObj):
         if tenant != tenantNameFromAuth:
           raise BadRequest("Auth to be deleted is from a different tenant")
           
-        tenantObj = GetTenant(tenantNameFromAuth, storeConnection, 'a','b','c')
+        tenantObj = GetTenant(tenantNameFromAuth, storeConnection, appObj=appObj)
         authProviderDICT = tenantObj.getAuthProvider(authObj['AuthProviderGUID'])
         if authProviderDICT is None:
           raise BadRequest("Auth provider not found")

@@ -43,6 +43,7 @@ class appObjClass(parAppObj):
   APIAPP_JWT_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_SESSION_TIMEOUT = None
+  APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = None
   gateway = None
   defaultUserGUID = None
   testingDefaultPersonGUID = None
@@ -78,6 +79,8 @@ class appObjClass(parAppObj):
     if self.APIAPP_REFRESH_SESSION_TIMEOUT < self.APIAPP_REFRESH_TOKEN_TIMEOUT:
       print("ERROR - APIAPP_REFRESH_SESSION_TIMEOUT should never be less than APIAPP_REFRESH_SESSION_TIMEOUT")
       raise invalidConfigurationException
+      
+    self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
 
     print('APIAPP_JWT_TOKEN_TIMEOUT:'+str(self.APIAPP_JWT_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
@@ -101,7 +104,7 @@ class appObjClass(parAppObj):
     self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
 
     def dbChangingFn(storeConnection):
-      if GetTenant(masterTenantName, storeConnection, 'a','b','c') is None:
+      if GetTenant(masterTenantName, storeConnection, appObj=self) is None:
         print("********No master tenant found - creating********")
         def someFn(connectionContext):
           CreateMasterTenant(self, testingMode, storeConnection)

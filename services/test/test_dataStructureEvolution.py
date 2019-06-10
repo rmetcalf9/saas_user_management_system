@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, sampleInternalAuthProv001_CREATE
+from TestHelperSuperClass import testHelperAPIClient, sampleInternalAuthProv001_CREATE, env
 from appObj import appObj
 import constants
 from tenants import GetTenant
@@ -30,7 +30,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
 
     appObj.objectStore.executeInsideTransaction(dbfn)
 
-  def test_Issue42_AddingFieldsToAuthPRoviders(self):
+  def test_Issue42_AddingFieldsToAuthProviders(self):
     def dbfn(storeConnection):
       PreviousTenantExample = {
         'Name': 'PreviousTenantExample', 
@@ -51,7 +51,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
         }
       }
       storeConnection.saveJSONObject("tenants", PreviousTenantExample['Name'], PreviousTenantExample)
-      tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, 'a','b','c')
+      tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, appObj=appObj)
       self.assertNotEqual(tenantObj, None, msg="Tenant Object not found")
       for x in tenantObj.getAuthProviderGUIDList():
         authProvDict = tenantObj.getAuthProvider(x)
@@ -91,6 +91,106 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     del oldAuthProv['AllowLink']
     del oldAuthProv['AllowUnlink']
     del oldAuthProv['LinkText']
+    tenantDict["AuthProviders"].append(oldAuthProv)
+
+    #This tests editing an authProv
+    tenantDict3 = self.updateTenant(tenantDict2, [200])
+
+  def test_Issue49_AddingJWTCollecitonAllowedOriginFieldToTenantMASTER(self):
+    #This is defaulted to None for all tenants apart from master where it defaults to the comma seperated list in
+    # env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD']
+    def dbfn(storeConnection):
+      
+      PreviousTenantExample = {
+        'Name': constants.masterTenantName, 
+        'Description': 'Master Tenant for User Management System', 
+        'AllowUserCreation': False, 
+        'AuthProviders': {
+          'd366fdd2-b40d-4c12-9d91-2e11ddf9bbe7': {
+            'guid': 'd366fdd2-b40d-4c12-9d91-2e11ddf9bbe7', 
+            'MenuText': 'Website account login', 
+            'IconLink': None, 
+            'Type': 'internal', 
+            'AllowUserCreation': False, 
+            'AllowLink': False, 'AllowUnlink': False, 'LinkText': 'Link Website Account', 
+            'ConfigJSON': {'userSufix': '@internalDataStore'}, 'saltForPasswordHashing': 'JDJiJDEyJGxYdGkzMlhENkxrd1lVbkx3LjF2aC4='
+          }
+        }
+      }
+      #Save old version of tenant into datastore
+
+      def updTenant(tenant, storeConnection):
+        if tenant is None:
+          raise constants.tenantDosentExistException
+        return PreviousTenantExample
+      storeConnection.updateJSONObject("tenants", PreviousTenantExample['Name'], updTenant, 2)
+      
+      jsonData, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",constants.masterTenantName)
+      tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, appObj=appObj)
+      #print(tenantObj.getJSONRepresenation())
+      
+      originList = list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
+      
+      self.assertEqual(tenantObj.getJWTCollecitonAllowedOriginList(), originList, msg="Did not default master tenant origin list to default env param")
+      
+
+    appObj.objectStore.executeInsideTransaction(dbfn)
+
+  def test_Issue49_AddingJWTCollecitonAllowedOriginFieldToTenant(self):
+    #This is defaulted to None for all tenants apart from master where it defaults to the comma seperated list in
+    # env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD']
+    def dbfn(storeConnection):
+      
+      PreviousTenantExample = {
+        'Name': 'someRandomTenantForTesting', 
+        'Description': 'Msaddsastem', 
+        'AllowUserCreation': False, 
+        'AuthProviders': {
+          'd366fdd2-b40d-4c12-9d91-2e11ddf9bbe7': {
+            'guid': 'd366fdd2-b40d-4c12-9d91-2e11ddf9bbe7', 
+            'MenuText': 'Website account login', 
+            'IconLink': None, 
+            'Type': 'internal', 
+            'AllowUserCreation': False, 
+            'AllowLink': False, 'AllowUnlink': False, 'LinkText': 'Link Website Account', 
+            'ConfigJSON': {'userSufix': '@internalDataStore'}, 'saltForPasswordHashing': 'JDJiJDEyJGxYdGkzMlhENkxrd1lVbkx3LjF2aC4='
+          }
+        }
+      }
+      #Save old version of tenant into datastore
+
+      storeConnection.saveJSONObject("tenants", PreviousTenantExample['Name'], PreviousTenantExample)
+      
+      jsonData, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",constants.masterTenantName)
+      tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, appObj=appObj)
+      #print(tenantObj.getJSONRepresenation())
+      
+      self.assertEqual(tenantObj.getJWTCollecitonAllowedOriginList(), [], msg="Did not default master tenant origin list to default env param")
+      
+    appObj.objectStore.executeInsideTransaction(dbfn)
+
+  def test_Issue49_ServiceCallWorksWithoutExtraFields(self):
+    tenantDict = self.getTenantDICT(constants.masterTenantName)
+    
+    #Before we start change all the fields to non-default values
+    tenantDictNonDefaultValues = copy.deepcopy(tenantDict)
+    tenantDictNonDefaultValues["JWTCollecitonAllowedOriginList"] = ['http://nonstandard']
+    tenantDictNonDefaultValuesRes = self.updateTenant(tenantDictNonDefaultValues, [200])
+    
+    #Remove the added fields from structure (testing that we can edit without changing values)
+    tenantDictForEditTest = copy.deepcopy(tenantDictNonDefaultValuesRes)
+    del tenantDictNonDefaultValues["JWTCollecitonAllowedOriginList"]
+    
+    #This tests editing an authProv - as this is editing existing this should default 
+    # data from existing values
+    tenantDict2 = self.updateTenant(tenantDictForEditTest, [200])
+    
+    print(tenantDict2)
+    
+    self.assertEqual(tenantDict2["JWTCollecitonAllowedOriginList"],True, msg="JWTCollecitonAllowedOriginList was changed when it was not provided in update payload")
+   
+    oldAuthProv = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    del oldAuthProv['JWTCollecitonAllowedOriginList']
     tenantDict["AuthProviders"].append(oldAuthProv)
 
     #This tests editing an authProv

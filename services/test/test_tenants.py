@@ -28,7 +28,7 @@ class test_tenants(testHelperAPIClient):
 
   def test_MasterTenantExists(self):
     def someFn(connectionContext):    
-      masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
+      masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       self.assertFalse(masterTenant is None, msg="Master Tenant was not created")
       self.assertEquals(masterTenant.getJSONRepresenation()['Name'], masterTenantName, msg="Master tenant name is wrong")
       self.assertEquals(masterTenant.getJSONRepresenation()['Description'], masterTenantDefaultDescription, msg="Master tenant default description wrong")
@@ -81,7 +81,7 @@ class test_tenants(testHelperAPIClient):
 
   def test_StandardUserInvalidPassword(self):
     def someFn(connectionContext):    
-      masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
+      masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
       singleAuthProvGUID = ""
       for guid in masterTenant.getAuthProviderGUIDList():
@@ -100,7 +100,7 @@ class test_tenants(testHelperAPIClient):
 
   def test_StandardUserInvalidUsername(self):
     def someFn(connectionContext):    
-      masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
+      masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
       singleAuthProvGUID = ""
       for guid in masterTenant.getAuthProviderGUIDList():
@@ -119,7 +119,7 @@ class test_tenants(testHelperAPIClient):
 
   def test_StandardUserLoginToInvalidIdentity(self):
     def someFn(connectionContext):    
-      masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
+      masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
       singleAuthProvGUID = ""
       for guid in masterTenant.getAuthProviderGUIDList():
@@ -236,7 +236,7 @@ class test_tenants(testHelperAPIClient):
   #UserA can be shared by many People (Who may or may not have many auths)
   def test_oneUserCanBeAccessedByTwoAuths(self):
     def someFn(connectionContext):    
-      masterTenant = GetTenant(masterTenantName, connectionContext, 'a','b','c')
+      masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       userID = 'TestUser'
       CreateUser(appObj, {"user_unique_identifier": userID, "known_as": userID}, masterTenantName, 'test/CreateMasterTenant', connectionContext)
 

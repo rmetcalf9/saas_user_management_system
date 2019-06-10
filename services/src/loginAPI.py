@@ -25,7 +25,7 @@ def getRegisterPostDataModel(appObj):
   })
 
 def getValidTenantObj(appObj, tenant, storeConnection):
-  tenant = GetTenant(tenant, storeConnection, 'a','b','c')
+  tenant = GetTenant(tenant, storeConnection, appObj=appObj)
   if tenant is None:
     raise BadRequest('Tenant not found')
   return tenant

@@ -62,7 +62,8 @@ env = {
   'APIAPP_JWT_TOKEN_TIMEOUT': '60',
   'APIAPP_REFRESH_TOKEN_TIMEOUT': '240',
   'APIAPP_REFRESH_SESSION_TIMEOUT': '2400',
-  'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none"}'
+  'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none"}',
+  'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD': 'http://a.com, https://b.com, http://c.co.uk'
 }
 
 SQLAlchemy_LocalDBConfigDict = {
@@ -203,7 +204,7 @@ class testClassWithTestClient(testHelperSuperClass):
     #return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
   def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername, storeConnection):
-    masterTenant = GetTenant(masterTenantName, storeConnection, 'a','b','c')
+    masterTenant = GetTenant(masterTenantName, storeConnection, appObj=appObj)
     CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName, "test/createTwoUsersForOnePerson", storeConnection)
     CreateUser(appObj, {"user_unique_identifier": userID2, "known_as": userID2}, masterTenantName, "test/createTwoUsersForOnePerson", storeConnection)
     authProvGUID = list(masterTenant.getAuthProviderGUIDList())[0] #Just use first configured authProvider

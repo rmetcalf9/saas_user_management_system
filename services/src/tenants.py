@@ -84,7 +84,7 @@ def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnec
   return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection)
   
 def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection):
-  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
+  tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   if str(tenantObj.getObjectVersion()) != str(objectVersion):
@@ -142,12 +142,12 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       raise tenantDosentExistException
     return jsonForTenant
   storeConnection.updateJSONObject("tenants", tenantName, updTenant, objectVersion)
-  return GetTenant(tenantName, storeConnection, 'a','b','c')
+  return GetTenant(tenantName, storeConnection, appObj=appObj)
   
 def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
   if tenantName == masterTenantName:
     raise cantDeleteMasterTenantException
-  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
+  tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   ##print("DeleteTenant objectVersion:", objectVersion)
@@ -170,14 +170,14 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
   return GetUser(appObj, userData['user_unique_identifier'], storeConnection)
 
 def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenantName, authProvGUID):
-  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
+  tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   authProvObj.executeAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT)
 
 def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT, storeConnection):
-  tenantObj = GetTenant(tenantName, storeConnection, 'a','b','c')
+  tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   personObj = GetPerson(appObj, personGUID, storeConnection)
@@ -215,10 +215,15 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
 
   return tenantClass(jsonForTenant, createdTenantVer)
 
-def GetTenant(tenantName, storeConnection, a,b,c):
+def GetTenant(tenantName, storeConnection, appObj):
   a, aVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",tenantName)
   if a is None:
     return a
+  if not 'JWTCollecitonAllowedOriginList' in a:
+    if a['Name'] == constants.masterTenantName:
+      a['JWTCollecitonAllowedOriginList'] = list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(',')))
+    else:
+      a['JWTCollecitonAllowedOriginList'] = []
   for curAuthProv in a['AuthProviders']:
     if not 'AllowLink' in a['AuthProviders'][curAuthProv]:
       a['AuthProviders'][curAuthProv]['AllowLink'] = False
@@ -233,7 +238,7 @@ def GetAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenan
 
 def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):
   if tenantObj is None:
-    tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
+    tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
     if tenantObj is None:
       raise tenantDosentExistException
   AuthProvider = authProviderFactory(tenantObj.getAuthProvider(authProviderGUID),authProviderGUID, tenantName, tenantObj, appObj)
@@ -263,7 +268,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'currentlyUsedAuthProviderGuid': None
   }
   #print("tenants.py Login credentialJSON:",credentialJSON)
-  tenantObj = GetTenant(tenantName, storeConnection, 'a', 'b', 'c')
+  tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
 
