@@ -27,6 +27,13 @@
         <q-item-label caption v-if="!tenantData.AllowUserCreation">Users must be created by admins</q-item-label>
       </q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>JWTCollectionAllowedOriginList:</q-item-label>
+        <q-item-label caption><q-chip size="10px" v-for="curVal in tenantData.JWTCollectionAllowedOriginList" :key=curVal>{{ curVal }}</q-chip></q-item-label>
+      </q-item-section>
+    </q-item>
+
   </q-list>
 
   <q-table
@@ -47,7 +54,7 @@
   />
 
 <q-dialog v-model="editTenantModalDialogVisible">
-  <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+  <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 450px; width: 700px; max-width: 80vw;">
     <q-header class="bg-primary">
       <q-toolbar>
         <q-toolbar-title>
@@ -62,6 +69,14 @@
         <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
           <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
         </q-field> Must be on for both Tenant and Auth Provider to be effective
+        <q-select
+          v-model="editTenantModalDialogData.JWTCollectionAllowedOriginList"
+          use-input
+          use-chips
+          multiple
+          input-debounce="0"
+          @new-value="dialogEditJWTCollectionAllowedOriginListCreateValue"
+        />
         <div>&nbsp;</div>
         <q-btn
           @click="okEditTenantDialog"
@@ -185,7 +200,8 @@ export default {
       ],
       editTenantModalDialogData: {
         Description: '',
-        AllowUserCreation: false
+        AllowUserCreation: false,
+        JWTCollectionAllowedOriginList: []
       },
       editTenantModalDialogVisible: false,
       editAuthProvModalDialogData: {
@@ -340,18 +356,28 @@ export default {
     cancelAuthProvTenantDialog () {
       this.editAuthProvModalDialogVisible = false
     },
+    dialogEditJWTCollectionAllowedOriginListCreateValue (val, done) {
+      if (val.length < 3) {
+        Notify.create({color: 'negative', message: 'Must have at least 3 characters'})
+        return
+      }
+      done(val, 'add-unique')
+    },
     okEditTenantDialog () {
       var TTT = this
       this.editTenantModalDialogVisible = false
       if (this.editTenantModalDialogData.Description === this.tenantData.Description) {
         if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
-          Notify.create({color: 'positive', message: 'No changes made'})
-          return // no change so do nothing
+          if (this.editTenantModalDialogData.JWTCollectionAllowedOriginList === this.tenantData.JWTCollectionAllowedOriginList) {
+            Notify.create({color: 'positive', message: 'No changes made'})
+            return // no change so do nothing
+          }
         }
       }
       var newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
       newTenantJSON.Description = this.editTenantModalDialogData.Description
       newTenantJSON.AllowUserCreation = this.editTenantModalDialogData.AllowUserCreation
+      newTenantJSON.JWTCollectionAllowedOriginList = this.editTenantModalDialogData.JWTCollectionAllowedOriginList
 
       var callback = {
         ok: function (response) {
@@ -377,6 +403,7 @@ export default {
     editTenant () {
       this.editTenantModalDialogData.Description = this.tenantData.Description
       this.editTenantModalDialogData.AllowUserCreation = this.tenantData.AllowUserCreation
+      this.editTenantModalDialogData.JWTCollectionAllowedOriginList = this.tenantData.JWTCollectionAllowedOriginList
 
       this.editTenantModalDialogVisible = true
       var TTT = this

@@ -41,6 +41,10 @@
         <q-btn flat no-caps dense :label="props.value" @click="clickSingleTenantCallbackFN(props)" width="100%"/>
       </q-td>
 
+      <q-td  slot="body-cell-JWTCollectionAllowedOriginList" slot-scope="props" :props="props">
+        {{ props.value }}
+      </q-td>
+
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
         <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleTenantCallbackFN(props)" />
       </q-td>
@@ -72,6 +76,7 @@ export default {
         { name: 'Name', required: true, label: 'Tenant Name', align: 'left', field: 'Name', sortable: false, filter: false },
         { name: 'Description', required: false, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
         { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false },
+        { name: 'JWTCollectionAllowedOriginList', required: false, label: 'Allowed Origin List', align: 'left', field: 'JWTCollectionAllowedOriginList', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ]
     }
