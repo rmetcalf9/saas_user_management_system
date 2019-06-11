@@ -29,7 +29,7 @@
     </q-item>
     <q-item>
       <q-item-section >
-        <q-item-label>JWTCollectionAllowedOriginList:</q-item-label>
+        <q-item-label>Origins which client apps will be allowed to collect JWT tokens from:</q-item-label>
         <q-item-label caption><q-chip size="10px" v-for="curVal in tenantData.JWTCollectionAllowedOriginList" :key=curVal>{{ curVal }}</q-chip></q-item-label>
       </q-item-section>
     </q-item>
@@ -70,13 +70,14 @@
           <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
         </q-field> Must be on for both Tenant and Auth Provider to be effective
         <q-select
+          label="JWT Collection Allowed Origin List"
           v-model="editTenantModalDialogData.JWTCollectionAllowedOriginList"
           use-input
           use-chips
           multiple
           input-debounce="0"
           @new-value="dialogEditJWTCollectionAllowedOriginListCreateValue"
-        />
+        /> Origins which client apps will be allowed to collect JWT tokens from
         <div>&nbsp;</div>
         <q-btn
           @click="okEditTenantDialog"
