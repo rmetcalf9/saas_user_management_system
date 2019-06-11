@@ -53,6 +53,6 @@ class tenantClass():
   def getObjectVersion(self):
     return self._objectVersion
 
-  def getJWTCollecitonAllowedOriginList(self):
-    return self._mainDict["JWTCollecitonAllowedOriginList"]
+  def getJWTCollectionAllowedOriginList(self):
+    return self._mainDict["JWTCollectionAllowedOriginList"]
 

@@ -155,7 +155,7 @@ def registerAPI(appObj):
           raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
         def someFn(connectionContext):
-          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, 'a','b','c')
+          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, JWTCollectionAllowedOriginList=getOrNone("JWTCollectionAllowedOriginList",content))
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
         
       except customExceptionClass as err:
@@ -166,6 +166,11 @@ def registerAPI(appObj):
         raise InternalServerError
       
       return tenantObj.getJSONRepresenation(), 201
+
+  def getOrNone(ite, lis):
+    if ite not in lis:
+      return None
+    return lis[ite]
 
   @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>')
   class tenantInfo(Resource):
@@ -200,9 +205,8 @@ def registerAPI(appObj):
 
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
-
         def someFn(connectionContext):
-          return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext)
+          return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext, JWTCollectionAllowedOriginList=getOrNone("JWTCollectionAllowedOriginList",content))
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
       
       except customExceptionClass as err:

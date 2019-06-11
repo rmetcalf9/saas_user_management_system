@@ -33,7 +33,7 @@ class test_loginapi_norm(test_api):
       "Name": masterTenantName,
       "Description": masterTenantDefaultDescription, 
       "AllowUserCreation": False,
-      "JWTCollecitonAllowedOriginList": list(map(env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(","))),
+      "JWTCollectionAllowedOriginList": list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(","))),
       "AuthProviders": [{
         "guid": "1199545b-58f4-4f6e-885a-376dad1a68e9",
         "Type": "internal", 
@@ -48,8 +48,8 @@ class test_loginapi_norm(test_api):
       }],
       "ObjectVersion": "2"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders', "JWTCollecitonAllowedOriginList" ])
-    self.assertEqual(resultJSON["JWTCollecitonAllowedOriginList"], expectedResult["JWTCollecitonAllowedOriginList"])
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders', "JWTCollectionAllowedOriginList" ])
+    self.assertEqual(resultJSON["JWTCollectionAllowedOriginList"], expectedResult["JWTCollectionAllowedOriginList"])
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON[ 'AuthProviders' ][0], expectedResult[ 'AuthProviders' ][0], [ 'guid', 'saltForPasswordHashing' ], msg="Master tenant auth provider wrong")
 
   def test_sucessfulLoginAsDefaultUser(self):

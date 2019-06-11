@@ -131,7 +131,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
       
       originList = list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
       
-      self.assertEqual(tenantObj.getJWTCollecitonAllowedOriginList(), originList, msg="Did not default master tenant origin list to default env param")
+      self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), originList, msg="Did not default master tenant origin list to default env param")
       
 
     appObj.objectStore.executeInsideTransaction(dbfn)
@@ -165,7 +165,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
       tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, appObj=appObj)
       #print(tenantObj.getJSONRepresenation())
       
-      self.assertEqual(tenantObj.getJWTCollecitonAllowedOriginList(), [], msg="Did not default master tenant origin list to default env param")
+      self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), [], msg="Did not default master tenant origin list to default env param")
       
     appObj.objectStore.executeInsideTransaction(dbfn)
 
@@ -174,24 +174,19 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     
     #Before we start change all the fields to non-default values
     tenantDictNonDefaultValues = copy.deepcopy(tenantDict)
-    tenantDictNonDefaultValues["JWTCollecitonAllowedOriginList"] = ['http://nonstandard']
+    tenantDictNonDefaultValues["JWTCollectionAllowedOriginList"] = ['http://nonstandard']
     tenantDictNonDefaultValuesRes = self.updateTenant(tenantDictNonDefaultValues, [200])
     
     #Remove the added fields from structure (testing that we can edit without changing values)
     tenantDictForEditTest = copy.deepcopy(tenantDictNonDefaultValuesRes)
-    del tenantDictNonDefaultValues["JWTCollecitonAllowedOriginList"]
+    del tenantDictForEditTest["JWTCollectionAllowedOriginList"]
     
     #This tests editing an authProv - as this is editing existing this should default 
     # data from existing values
     tenantDict2 = self.updateTenant(tenantDictForEditTest, [200])
     
-    print(tenantDict2)
+    #print(tenantDict2)
+    #print(tenantDictNonDefaultValues)
     
-    self.assertEqual(tenantDict2["JWTCollecitonAllowedOriginList"],True, msg="JWTCollecitonAllowedOriginList was changed when it was not provided in update payload")
+    self.assertEqual(tenantDict2["JWTCollectionAllowedOriginList"],tenantDictNonDefaultValues["JWTCollectionAllowedOriginList"], msg="JWTCollectionAllowedOriginList was changed when it was not provided in update payload")
    
-    oldAuthProv = copy.deepcopy(sampleInternalAuthProv001_CREATE)
-    del oldAuthProv['JWTCollecitonAllowedOriginList']
-    tenantDict["AuthProviders"].append(oldAuthProv)
-
-    #This tests editing an authProv
-    tenantDict3 = self.updateTenant(tenantDict2, [200])

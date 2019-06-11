@@ -77,7 +77,13 @@ class test_funcitonal(test_api):
 
     self.assertJSONStringsEqual(resultJSON['pagination'], {"offset": 0, "pagesize": 100, "total": 1})
     self.assertEqual(len(resultJSON["result"]),1,msg="Only 1 result should be returned")
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], {"AllowUserCreation": False, "AuthProviders": "ignored", "Description": "Master Tenant for User Management System", "Name": "usersystem"}, ['AuthProviders',"ObjectVersion"])
+    
+    expectedResult = copy.deepcopy(tenantWithNoAuthProviders)
+    expectedResult["Name"] = constants.masterTenantName
+    expectedResult["Description"] = constants.masterTenantDefaultDescription
+    expectedResult["JWTCollectionAllowedOriginList"] = list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
+    
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], expectedResult, ['AuthProviders',"ObjectVersion"])
     self.assertEqual(resultJSON["result"][0]["ObjectVersion"],"2")
 
 

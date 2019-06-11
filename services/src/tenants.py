@@ -22,7 +22,7 @@ authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not
 #only called on intial setup Creates a master tenant with single internal auth provider
 def CreateMasterTenant(appObj, testingMode, storeConnection):
   print("Creating master tenant")
-  _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection)
+  _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection, JWTCollectionAllowedOriginList=list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(","))))
   masterTenantInternalAuthProvider = AddAuthProvider(
     appObj, 
     masterTenantName, 
@@ -78,23 +78,26 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
 
 #returns tenantObj
 ##allowUserCreation used to default to false, description used to default to ""
-def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnection, a,b,c):
+def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList):
   if tenantName == masterTenantName:
     raise failedToCreateTenantException
-  return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection)
+  return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList)
   
-def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection):
+def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection, JWTCollectionAllowedOriginList):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   if str(tenantObj.getObjectVersion()) != str(objectVersion):
     raise WrongObjectVersionException
 
+  if JWTCollectionAllowedOriginList is None:
+    JWTCollectionAllowedOriginList = tenantObj.getJWTCollectionAllowedOriginList()
   jsonForTenant = {
     "Name": tenantName,
     "Description": description,
     "AllowUserCreation": allowUserCreation,
-    "AuthProviders": {}
+    "AuthProviders": {},
+    "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList
   }
   for authProv in authProvDict:
     newAuthDICT = {}
@@ -201,7 +204,7 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
   return authProviderJSON
   
 # called locally
-def _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection):
+def _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList):
   tenantWithSameName, ver, creationDateTime, lastUpdateDateTime =  storeConnection.getObjectJSON("tenants", tenantName)
   if tenantWithSameName is not None:
     raise tenantAlreadtExistsException
@@ -209,7 +212,8 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
     "Name": tenantName,
     "Description": description,
     "AllowUserCreation": allowUserCreation,
-    "AuthProviders": {}
+    "AuthProviders": {},
+    "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList
   }
   createdTenantVer = storeConnection.saveJSONObject("tenants", tenantName, jsonForTenant)
 
@@ -219,11 +223,11 @@ def GetTenant(tenantName, storeConnection, appObj):
   a, aVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",tenantName)
   if a is None:
     return a
-  if not 'JWTCollecitonAllowedOriginList' in a:
+  if not 'JWTCollectionAllowedOriginList' in a:
     if a['Name'] == constants.masterTenantName:
-      a['JWTCollecitonAllowedOriginList'] = list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(',')))
+      a['JWTCollectionAllowedOriginList'] = list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(',')))
     else:
-      a['JWTCollecitonAllowedOriginList'] = []
+      a['JWTCollectionAllowedOriginList'] = []
   for curAuthProv in a['AuthProviders']:
     if not 'AllowLink' in a['AuthProviders'][curAuthProv]:
       a['AuthProviders'][curAuthProv]['AllowLink'] = False

@@ -30,7 +30,8 @@ tenantWithNoAuthProviders = {
   "Name": "NewlyCreatedTenantNoAuth",
   "Description": "Tenant with no auth providers",
   "AllowUserCreation": False,
-  "AuthProviders": []
+  "AuthProviders": [],
+  "JWTCollectionAllowedOriginList": []
 }
 sampleInternalAuthProv001_CREATE = {
   "guid": None,
@@ -307,7 +308,7 @@ class testClassWithTestClient(testHelperSuperClass):
 
   def getTenantSpercificAuthProvDict(self, tenant, type):
     result = self.testClient.get(self.loginAPIPrefix + '/' + tenant + '/authproviders')
-    self.assertEqual(result.status_code, 200)
+    self.assertEqual(result.status_code, 200, msg="Get auth providers service call failed")
     resultJSON = json.loads(result.get_data(as_text=True))
     for x in resultJSON[ 'AuthProviders' ]:
       if x['Type'] == type:

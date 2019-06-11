@@ -95,6 +95,7 @@ def registerAPI(appObj):
      '''Get list of auth providers supported by this service'''
      def dbfn(storeConnection):
        tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+       #print(tenantObj.getJSONRepresenation())
        return tenantObj.getJSONRepresenation()
      return appObj.objectStore.executeInsideConnectionContext(dbfn)
      
