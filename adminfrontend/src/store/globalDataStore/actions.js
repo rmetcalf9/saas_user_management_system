@@ -77,6 +77,8 @@ export const callAdminAPI = ({ dispatch, commit, state }, params) => {
   if (state.apiPrefix === null) {
     var callback = {
       ok: function (response) {
+        // console.log('readServerInfo Callback, state:', state)
+        // console.log(' going to call ' + params['method'] + ':' + params['path'] + ':::' + state.tenantName + ':' + state.apiPrefix)
         shared.callAuthedAPI(commit, state, params['path'], params['method'], params['postdata'], params.callback, params.curPath, params.headers, refreshFns, 'admin', state.tenantName, state.apiPrefix)
       },
       error: params.callback.error

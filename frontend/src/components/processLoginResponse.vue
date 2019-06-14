@@ -40,18 +40,25 @@ export default {
           }
           returnAddressToUse = TTT.$store.state.globalDataStore.usersystemReturnaddress
         }
-        // Expires in one day
-        TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+
+        // Not setting cookie - this should now be done by the frontend once it has done inital refresh
+        // TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+        // console.log('AA:' + JSON.stringify(response.data))
+        if ((returnAddressToUse.match(/&/g) || []).length === 0) {
+          returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
+        } else {
+          returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
+        }
         console.log('Redirecting back to main site:', returnAddressToUse)
         window.location.href = returnAddressToUse
       } else {
-        console.log('response:', response.data.possibleUsers)
+        // console.log('response:', response.data.possibleUsers)
         var items = []
         for (var x in response.data.possibleUsers) {
-          console.log(response.data.possibleUsers[x])
+          // console.log(response.data.possibleUsers[x])
           items.push({label: response.data.possibleUsers[x].known_as + ' (' + response.data.possibleUsers[x].UserID + ')', value: response.data.possibleUsers[x].UserID})
         }
-        console.log(items)
+        // console.log(items)
         TTT.$q.dialog({
           title: 'Select User',
           message: 'You have access to mutiple user accounts on this site',

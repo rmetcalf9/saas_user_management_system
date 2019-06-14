@@ -122,14 +122,14 @@ function TryToConnectToAPI (currentHREF, tenantName, callback, apiPath) {
   TryToConnectToAPIRecurring(possiblePublicApiLocations.reverse(), callback, apiPath)
 }
 
-function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtTokenData, refreshTokenData) {
+function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, refreshToken) {
   var config = {
     method: 'POST',
     url: getAPIPathToCall(apiPrefix, false, '/login/' + tenantName + '/refresh'),
-    data: {'token': refreshTokenData.token}
+    data: {'token': refreshToken}
   }
   // console.log(config)
-  // console.log(refreshTokenData)
+  // console.log(refreshToken)
 
   axios(config).then(
     (response) => {
@@ -139,6 +139,44 @@ function updateCookieWithRefreshToken (callback, apiPrefix, tenantName, jwtToken
       callback.error(response)
     }
   )
+}
+
+function sendRefreshRequestToGetNewJWTAndSaveItAsACookie (
+  refreshFns,
+  tenantName,
+  apiPrefix,
+  authed,
+  path,
+  method,
+  data,
+  callback,
+  curPath,
+  headers,
+  refreshToken,
+  sessionInFromFrontendUI,
+  frontendRecordReturnAddressFn
+) {
+  refreshFns.startRefreshFN()
+  var callback2 = {
+    ok: function (response) {
+      // Save new token data to cookie (expires in 1 day)
+      Cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+
+      // callback ok
+      refreshFns.endRefreshFN()
+      refreshFns.refreshCompleteFN()
+
+      var cookie = Cookies.get('usersystemUserCredentials')
+      callAPI(refreshFns, tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
+    },
+    error: function (response) {
+      // Refresh may have been in progress when page changed so make sure it is stopped
+      refreshFns.endRefreshFN()
+      moveToFrontendUI(curPath, 'Session refresh failed', '', sessionInFromFrontendUI, frontendRecordReturnAddressFn)
+      // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
+    }
+  }
+  updateCookieWithRefreshToken(callback2, apiPrefix, tenantName, refreshToken)
 }
 
 /*
@@ -168,6 +206,8 @@ function callAPI (
   sessionInFromFrontendUI = false,
   frontendRecordReturnAddressFn = null
 ) {
+  // Path at this point should be something like /admin/usersystem/persons?pagesize=10&offset=0
+  // console.log('CALL API PATH:' + path)
   if (authed) {
     if (jwtTokenData === null) {
       callbackHelper.callbackWithSimpleError(callback, 'Missing jwtTokenData Data in callAPI')
@@ -219,27 +259,21 @@ function callAPI (
           refreshFns.addPostRefreshActionFN(callback3)
           return
         }
-        refreshFns.startRefreshFN()
-        var callback2 = {
-          ok: function (response) {
-            // Save new token data to cookie (expires in 1 day)
-            Cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
-
-            // callback ok
-            refreshFns.endRefreshFN()
-            refreshFns.refreshCompleteFN()
-
-            var cookie = Cookies.get('usersystemUserCredentials')
-            callAPI(refreshFns, tenantName, apiPrefix, authed, path, method, data, callback, cookie.jwtData, cookie.refresh, true, curPath, headers)
-          },
-          error: function (response) {
-            // Refresh may have been in progress when page changed so make sure it is stopped
-            refreshFns.endRefreshFN()
-            moveToFrontendUI(curPath, 'Session refresh failed', '', sessionInFromFrontendUI, frontendRecordReturnAddressFn)
-            // callbackHelper.callbackWithSimpleError(callback, 'TODO - refresh failed - goto login and display Session refresh failed')
-          }
-        }
-        updateCookieWithRefreshToken(callback2, apiPrefix, tenantName, jwtTokenData, refreshTokenData)
+        sendRefreshRequestToGetNewJWTAndSaveItAsACookie(
+          refreshFns,
+          tenantName,
+          apiPrefix,
+          authed,
+          path,
+          method,
+          data,
+          callback,
+          curPath,
+          headers,
+          refreshTokenData.token,
+          sessionInFromFrontendUI,
+          frontendRecordReturnAddressFn
+        )
       } else {
         // Refresh may have been in progress when page changed so make sure it is stopped
         refreshFns.endRefreshFN()
@@ -314,20 +348,40 @@ function moveToFrontendUI (thisQuasarPath, message = undefined, frontendPath = u
   window.location.href = newHREF
 }
 
-function callAuthedAPI (commit, state, path, method, postdata, callback, curPath, headers, refreshFns, apiType, tenantName, apiPrefix, sessionInFromFrontendUI = false, frontendRecordReturnAddressFn = null) {
+function callAuthedAPI (commit, state, path, method, data, callback, curPath, headers, refreshFns, apiType, tenantName, apiPrefix, sessionInFromFrontendUI = false, frontendRecordReturnAddressFn = null) {
   var cookie = Cookies.get('usersystemUserCredentials')
+  // console.log('cookie:', JSON.stringify(cookie))
 
   if (refreshFns.isRefreshInProgressFN()) {
     console.log('Preventing call in action.js because refresh is in progress')
     var callback2 = {
       ok: function (response) {
-        callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers, sessionInFromFrontendUI, frontendRecordReturnAddressFn)
+        callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, data, callback, cookie.jwtData, cookie.refresh, false, curPath, headers, sessionInFromFrontendUI, frontendRecordReturnAddressFn)
       },
       error: callback.error
     }
     commit('RECORD_REFRESH_STORED_RESPONSE', callback2)
   } else {
-    callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, postdata, callback, cookie.jwtData, cookie.refresh, false, curPath, headers, sessionInFromFrontendUI, frontendRecordReturnAddressFn)
+    if (cookie.jwtData.JWTToken === 'INVALID') {
+      // We have just logged in so need to get the token
+      sendRefreshRequestToGetNewJWTAndSaveItAsACookie(
+        refreshFns,
+        tenantName,
+        apiPrefix,
+        true, // authed
+        '/' + apiType + '/' + tenantName + path,
+        method,
+        data,
+        callback,
+        curPath,
+        headers,
+        cookie.refresh.token,
+        sessionInFromFrontendUI,
+        frontendRecordReturnAddressFn
+      )
+    } else {
+      callAPI(refreshFns, tenantName, apiPrefix, true, '/' + apiType + '/' + tenantName + path, method, data, callback, cookie.jwtData, cookie.refresh, false, curPath, headers, sessionInFromFrontendUI, frontendRecordReturnAddressFn)
+    }
   }
 }
 

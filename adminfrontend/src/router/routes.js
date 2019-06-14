@@ -18,6 +18,22 @@ function directToFrontend (to, from, next, message = undefined, frontendPath = u
 function checkLoginNeeded (to, from, next) {
   stores().commit('globalDataStore/updateTenantName', to.params.tenantName)
 
+  if (typeof (to.query.jwtretervialtoken) !== 'undefined') {
+    var fakeFirstCookie = {
+      jwtData: {
+        JWTToken: 'INVALID',
+        TokenExpiry: '2019-06-14T13:43:16.140755+00:00'
+      },
+      refresh: {
+        token: to.query.jwtretervialtoken,
+        TokenExpiry: null
+      }
+    }
+    // console.log('fakeFirstCookie:', JSON.stringify(fakeFirstCookie))
+    Cookies.set('usersystemUserCredentials', fakeFirstCookie, {expires: 1, path: '/'})
+    delete to.query.jwtretervialtoken
+  }
+
   // console.log('Checking to see if login is needed')
   var authCookieSet = Cookies.has('usersystemUserCredentials')
   if (authCookieSet) {
