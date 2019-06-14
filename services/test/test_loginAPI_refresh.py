@@ -1,5 +1,5 @@
 from test_loginAPI import test_api as parent_test_api
-from TestHelperSuperClass import env
+from TestHelperSuperClass import env, httpOrigin
 from dateutil.parser import parse
 import pytz
 from appObj import appObj
@@ -29,8 +29,8 @@ class test_api(parent_test_api):
     dt = parse(OrigLoginResult['refresh']['TokenExpiry'])
     refreshExpiry = dt.astimezone(pytz.utc)
     
-    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': refreshToken}), content_type='application/json')
-    self.assertEqual(RefreshedLogin.status_code, 200)
+    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': refreshToken}), content_type='application/json', headers={"Origin": httpOrigin})
+    self.assertEqual(RefreshedLogin.status_code, 200, msg="Invalid response - " + RefreshedLogin.get_data(as_text=True))
     refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
     
     self.assertFalse('other_date' in refreshedLoginInfo)
@@ -47,8 +47,8 @@ class test_api(parent_test_api):
 
   def test_cantUseSameRefreshTokenTwice(self):
     OrigLoginResult = self.loginAsDefaultUser()
-    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json')
-    self.assertEqual(RefreshedLogin.status_code, 200)
+    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json', headers={"Origin": httpOrigin})
+    self.assertEqual(RefreshedLogin.status_code, 200, msg="Invalid response - " + RefreshedLogin.get_data(as_text=True))
     RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json')
     self.assertEqual(RefreshedLogin.status_code, 401)
 
@@ -70,12 +70,12 @@ class test_api(parent_test_api):
       curTime = curTime + timedelta(seconds=secondsToWaitBeforeTryingRefresh)
       appObj.setTestingDateTime(curTime)
       
-      RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': refreshToken}), content_type='application/json')
+      RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': refreshToken}), content_type='application/json', headers={"Origin": httpOrigin})
       if curTime > timeRefreshSessionShouldEnd:
         self.assertEqual(RefreshedLogin.status_code, 401, msg="Got a sucessful refresh beyond the time that the refresh session should have timed out")
         running = False
       else:
-        self.assertEqual(RefreshedLogin.status_code, 200)
+        self.assertEqual(RefreshedLogin.status_code, 200, msg="Invalid response - " + RefreshedLogin.get_data(as_text=True))
         refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
         refreshToken = refreshedLoginInfo['refresh']['token']
 
@@ -92,7 +92,9 @@ class test_api(parent_test_api):
     curTime = curTime + timedelta(seconds=secondsToWaitBeforeTryingRefresh)
     appObj.setTestingDateTime(curTime)
     
-    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json')
+    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json', headers={"Origin": httpOrigin})
+    self.assertEqual(RefreshedLogin.status_code, 200, msg="Did not get sucessful login")
+    
     refreshedLoginInfo = json.loads(RefreshedLogin.get_data(as_text=True))
     dt = parse(refreshedLoginInfo['refresh']['TokenExpiry'])
     secondRefreshExpiry = dt.astimezone(pytz.utc)
@@ -103,3 +105,14 @@ class test_api(parent_test_api):
     
     self.assertTrue(secondsExtendedBy > 0, msg="New tokens refresh time isn't later than origional")
     self.assertTrue(secondsExtendedBy < int(env['APIAPP_REFRESH_TOKEN_TIMEOUT']), msg="Refresh time was extended by more than a signle time out")
+
+  def test_tryToGetRefreshTokenFromInvalidOrigin(self):
+    OrigLoginResult = self.loginAsDefaultUser()
+
+    RefreshedLogin = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/refresh', data=json.dumps({'token': OrigLoginResult['refresh']['token']}), content_type='application/json', headers={"Origin": "someInvalidOrigin"})
+
+    self.assertEqual(RefreshedLogin.status_code, 401, msg="Invalid response - " + RefreshedLogin.get_data(as_text=True))
+    OrigLoginResultInfo = json.loads(RefreshedLogin.get_data(as_text=True))
+
+    self.assertEqual(OrigLoginResultInfo['message'], "Invalid Origin", msg="Wrong error indicator returned")
+

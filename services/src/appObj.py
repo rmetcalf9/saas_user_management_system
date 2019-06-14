@@ -16,12 +16,12 @@ from adminAPI import registerAPI as registerAdminApi
 from currentAuthAPI import registerAPI as registerCurAuthApi
 
 from tenants import GetTenant, CreateMasterTenant, RegisterUser
-from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID
+from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID, customExceptionClass
+import constants
 from object_store_abstraction import createObjectStoreInstance
 from gatewayInterface import getGatewayInterface
 import uuid
 import json
-from constants import customExceptionClass
 from refreshTokenGeneration import RefreshTokenManager
 from persons import GetPerson
 from userPersonCommon import GetUser
@@ -139,9 +139,9 @@ class appObjClass(parAppObj):
       return GetPerson(appObj, decodedJWTToken.getPersonID(), connectionContext), GetUser(appObj, decodedJWTToken.getUserID(), connectionContext)
     personObj, userObj = appObj.objectStore.executeInsideTransaction(someFn)
     if (personObj is None):
-      raise Exception('Invlaid person in token')
+      raise constants.invalidPersonInToken('Invlaid person in token')
     if (userObj is None):
-      raise Exception('Invlaid user in token')
+      raise constants.invalidUserInToken('Invlaid user in token')
     decodedJWTToken.personObj = personObj
     decodedJWTToken.userObj = userObj    
     return decodedJWTToken

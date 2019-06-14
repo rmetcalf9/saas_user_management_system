@@ -49,6 +49,8 @@ sampleInternalAuthProv001_CREATE = {
 sampleInternalAuthProv001_CREATE_WithAllowUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
 sampleInternalAuthProv001_CREATE_WithAllowUserCreation['AllowUserCreation'] = True
 
+httpOrigin = 'http://a.com'
+
 env = {
   'APIAPP_MODE': 'DOCKER',
   'APIAPP_JWTSECRET': 'DOsaddsaCKER',
@@ -64,7 +66,7 @@ env = {
   'APIAPP_REFRESH_TOKEN_TIMEOUT': '240',
   'APIAPP_REFRESH_SESSION_TIMEOUT': '2400',
   'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none"}',
-  'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD': 'http://a.com, https://b.com, http://c.co.uk'
+  'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD': httpOrigin + ', https://b.com, http://c.co.uk'
 }
 
 SQLAlchemy_LocalDBConfigDict = {

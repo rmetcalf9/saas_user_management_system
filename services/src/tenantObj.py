@@ -13,6 +13,9 @@ class tenantClass():
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
     self._objectVersion = objectVersion
     
+    if self._mainDict["JWTCollectionAllowedOriginList"] is None:
+      raise Exception("Internal - JWTCollectionAllowedOriginList not defined")
+    
     #print(self._mainDict)
     #raise Exception("STOP CHECK")
   

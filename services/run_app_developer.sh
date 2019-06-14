@@ -38,11 +38,12 @@ export APIAPP_PORT=8098
 export APIAPP_MASTERPASSWORDFORPASSHASH=ABC
 export APIAPP_DEFAULTHOMEADMINUSERNAME=admin
 export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
-#export APIAPP_JWT_TOKEN_TIMEOUT=3   #2 seconds, default is 5 minutes Use default
-#export APIAPP_REFRESH_TOKEN_TIMEOUT=5  #30 seconds, default is 2 hours
+##export APIAPP_JWT_TOKEN_TIMEOUT=3   #2 seconds, default is 5 minutes Use default
+##export APIAPP_REFRESH_TOKEN_TIMEOUT=5  #30 seconds, default is 2 hours
 ##export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"Memory\"}"
 ####export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SQLAlchemy\", \"connectionString\":\"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man_rad\"}"
 ##export APIAPP_GATEWAYINTERFACECONFIG "{\"Type\": \"none\", \"jwtSecret\":\"some_secretxx\", "kongISS": "kong_iss"}"
+export APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="http://localhost, http://somefunnyhostname.com:5081"
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/VERSION ]; then

@@ -25,10 +25,13 @@ def getRegisterPostDataModel(appObj):
   })
 
 def getValidTenantObj(appObj, tenant, storeConnection):
-  tenant = GetTenant(tenant, storeConnection, appObj=appObj)
-  if tenant is None:
+  tenantObj = GetTenant(tenant, storeConnection, appObj=appObj)
+  if tenantObj is None:
     raise BadRequest('Tenant not found')
-  return tenant
+  originHeader = request.headers.get('Origin')
+  if originHeader not in tenantObj.getJWTCollectionAllowedOriginList():
+    raise Unauthorized('Invalid Origin')
+  return tenantObj
 
 def registerAPI(appObj):
 
@@ -95,6 +98,7 @@ def registerAPI(appObj):
      '''Get list of auth providers supported by this service'''
      def dbfn(storeConnection):
        tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+
        #print(tenantObj.getJSONRepresenation())
        return tenantObj.getJSONRepresenation()
      return appObj.objectStore.executeInsideConnectionContext(dbfn)
@@ -112,6 +116,7 @@ def registerAPI(appObj):
         raise BadRequest('No authProviderGUID provided')
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+        
         authProviderGUID = request.get_json()['authProviderGUID']
         UserID = None
         if 'UserID' in request.get_json():
@@ -171,6 +176,7 @@ def registerAPI(appObj):
       '''Get new JWT token with Refresh'''
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection)
+        
         refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
         if refreshedAuthDetails is None:
           raise Unauthorized('Refresh token not found, token or session may have timedout')

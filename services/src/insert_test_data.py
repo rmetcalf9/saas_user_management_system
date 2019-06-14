@@ -8,6 +8,7 @@ from base64 import b64decode
 import copy
 import time
 
+httpOrigin="http://localhost"
 
 creationStats = {
   'empty_tenants': 15,
@@ -42,7 +43,7 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
 def callService(api, url, method, dataDICT, expectedResponses):
   result = None
   targetURL = BASE[api] + url
-  headers = {}
+  headers = {"Origin": httpOrigin} #We always need origin to be set
   data = None
   if loginDICT is not None:
     #print(loginDICT['jwtData']['JWTToken'])
@@ -82,6 +83,7 @@ def callService(api, url, method, dataDICT, expectedResponses):
 
   if result.status_code not in expectedResponses:
     print("Sending " + method + " to ", targetURL)
+    print("headers:", headers)
     if dataDICT is not None:
       print(" data:", dataDICT)
     print("Got response ",result.status_code)
@@ -127,7 +129,8 @@ tenantCreationDICT = {
   "Name": "testData_Tenant",
   "Description": "Created by insert_test_data.py",
   "AllowUserCreation": True,
-  "AuthProviders": []
+  "AuthProviders": [],
+  "JWTCollectionAllowedOriginList": [httpOrigin]
 }
 
 authProvCreationDICT = {

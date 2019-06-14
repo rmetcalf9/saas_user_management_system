@@ -86,13 +86,18 @@ def verifySecurityOfAdminAPICall(appObj, request, tenant, systemAdminRole=master
   if tenant != masterTenantName:
     raise Unauthorized("Supplied tenant is not the master tenant")
 
-  return appObj.apiSecurityCheck(
-    request, 
-    tenant, 
-    [DefaultHasAccountRole, systemAdminRole], 
-    [jwtHeaderName], 
-    [jwtCookieName, loginCookieName]
-  )
+  try:
+    return appObj.apiSecurityCheck(
+      request, 
+      tenant, 
+      [DefaultHasAccountRole, systemAdminRole], 
+      [jwtHeaderName], 
+      [jwtCookieName, loginCookieName]
+    )
+  except constants.invalidPersonInToken as err:
+    raise Unauthorized(err.text)
+  except constants.invalidUserInToken as err:
+    raise Unauthorized(err.text)
 
   
 def registerAPI(appObj):
@@ -155,7 +160,7 @@ def registerAPI(appObj):
           raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
         def someFn(connectionContext):
-          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, JWTCollectionAllowedOriginList=getOrNone("JWTCollectionAllowedOriginList",content))
+          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, []))
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
         
       except customExceptionClass as err:
@@ -167,9 +172,9 @@ def registerAPI(appObj):
       
       return tenantObj.getJSONRepresenation(), 201
 
-  def getOrNone(ite, lis):
+  def getOrSomethngElse(ite, lis, somethingElse):
     if ite not in lis:
-      return None
+      return somethingElse
     return lis[ite]
 
   @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>')
@@ -206,7 +211,7 @@ def registerAPI(appObj):
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
         def someFn(connectionContext):
-          return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext, JWTCollectionAllowedOriginList=getOrNone("JWTCollectionAllowedOriginList",content))
+          return UpdateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],  content['AuthProviders'], content['ObjectVersion'], connectionContext, JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, []))
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
       
       except customExceptionClass as err:
