@@ -26,30 +26,30 @@ def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, st
 
 internalUSerSufix = "@internalDataStore"
 
+httpOrigin = 'http://a.com'
+
 tenantWithNoAuthProviders = {
   "Name": "NewlyCreatedTenantNoAuth",
   "Description": "Tenant with no auth providers",
   "AllowUserCreation": False,
   "AuthProviders": [],
-  "JWTCollectionAllowedOriginList": []
+  "JWTCollectionAllowedOriginList": [httpOrigin]
 }
 sampleInternalAuthProv001_CREATE = {
   "guid": None,
   "Type": "internal",
   "AllowUserCreation": False,
-  "AllowLink": False, 
-  "AllowUnlink": False, 
-  "LinkText": 'Link', 
+  "AllowLink": False,
+  "AllowUnlink": False,
+  "LinkText": 'Link',
   "MenuText": "Default Menu Text",
   "IconLink": "string",
   "ConfigJSON": "{\"userSufix\": \"" + internalUSerSufix + "\"}",
   "StaticlyLoadedData": {},
   "saltForPasswordHashing": None
-} 
+}
 sampleInternalAuthProv001_CREATE_WithAllowUserCreation = copy.deepcopy(sampleInternalAuthProv001_CREATE)
 sampleInternalAuthProv001_CREATE_WithAllowUserCreation['AllowUserCreation'] = True
-
-httpOrigin = 'http://a.com'
 
 env = {
   'APIAPP_MODE': 'DOCKER',
@@ -84,7 +84,7 @@ def getObjectStoreExternalFns():
   return {
     'getCurDateTime': appObj.getCurDateTime,
     'getPaginatedResult': appObj.getPaginatedResult
-  }    
+  }
 
 
 class testHelperSuperClass(unittest.TestCase):
@@ -110,7 +110,7 @@ class testHelperSuperClass(unittest.TestCase):
       for k in objToSotr.keys():
         self.sortAllMembers(objToSotr[k])
       return
-    
+
   def convertAnyByteValueToString(self, val):
     if isinstance(val,list):
       for a in val:
@@ -123,7 +123,7 @@ class testHelperSuperClass(unittest.TestCase):
         self.convertAnyByteValueToString(val[a])
     else:
       pass
-    
+
   def areJSONStringsEqual(self, str1, str2):
     self.sortAllMembers(str1)
     self.sortAllMembers(str2)
@@ -143,7 +143,7 @@ class testHelperSuperClass(unittest.TestCase):
     print("--")
     print(b)
     self.assertTrue(False, msg=msg)
-    
+
   #provide a list of ignored keys
   def assertJSONStringsEqualWithIgnoredKeys(self, str1, str2, ignoredKeys, msg=''):
     cleaned1 = copy.deepcopy(str1)
@@ -188,21 +188,21 @@ class testClassWithTestClient(testHelperSuperClass):
 
   def _getEnvironment(self):
     raise Exception("Should be overridden")
-    
+
   def setUp(self):
     # curDatetime = datetime.datetime.now(pytz.utc)
     # for testing always pretend the server started at a set datetime
     self.pre_setUpHook()
     appObj.init(self._getEnvironment(), self.standardStartupTime, testingMode = True)
     self.testClient = appObj.flaskAppObject.test_client()
-    self.testClient.testing = True 
+    self.testClient.testing = True
   def tearDown(self):
     self.testClient = None
-    
+
   def pre_setUpHook(self):
     pass
 
-  def decodeToken(self, JWTToken): 
+  def decodeToken(self, JWTToken):
     return jwt.decode(JWTToken, b64decode(appObj.APIAPP_JWTSECRET), algorithms=['HS256'])
     #return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
@@ -214,7 +214,7 @@ class testClassWithTestClient(testHelperSuperClass):
     person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
     authData = AddAuth(
       appObj, masterTenantName, authProvGUID, {
-        "username": InternalAuthUsername, 
+        "username": InternalAuthUsername,
         "password": get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes()
       },
       person['guid'],
@@ -222,7 +222,7 @@ class testClassWithTestClient(testHelperSuperClass):
     )
     associateUserWithPerson(appObj, userID1, person['guid'], storeConnection)
     associateUserWithPerson(appObj, userID2, person['guid'], storeConnection)
-    
+
     return {
       'authProvGUID': authProvGUID,
       'person': person
@@ -235,11 +235,11 @@ class testClassWithTestClient(testHelperSuperClass):
   def getNormalJWTToken(self):
     userIDForToken = appObj.defaultUserGUID
     return self.makeJWTTokenWithMasterTenantRoles(
-      [DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, constants.SecurityEndpointAccessRole], 
+      [DefaultHasAccountRole, masterTenantDefaultSystemAdminRole, constants.SecurityEndpointAccessRole],
       userIDForToken
     )
-  
-  
+
+
   def makeJWTTokenWithMasterTenantRoles(self, roles, UserID='abc123'):
     userDict = {
       "UserID": UserID,
@@ -251,44 +251,44 @@ class testClassWithTestClient(testHelperSuperClass):
   def generateJWTToken(self, userDict):
     personGUID = appObj.testingDefaultPersonGUID
     return generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID, 'DummyCurrentlyAuthedGUID', 'DummyAuthKey')['JWTToken']
-    
+
   def getTenantDICT(self, tenantName):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-    
+
     for curTenant in resultJSON['result']:
       if curTenant['Name'] == tenantName:
         return curTenant
     return None
-  
+
   def createTenantForTesting(self, tenantDICT):
     result = self.testClient.post(
-      self.adminAPIPrefix + '/' + masterTenantName + '/tenants', 
-      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantDICT), 
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants',
+      headers={ jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantDICT),
       content_type='application/json'
     )
     self.assertEqual(result.status_code, 201, result.get_data(as_text=True))
     resultJSON = json.loads(result.get_data(as_text=True))
-    
+
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantDICT, ["ObjectVersion"], msg='JSON of created Tenant is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"1")
-    
+
     return resultJSON
-  
+
   def updateTenant(self, tenantDICT, expectedResults):
     result = self.testClient.put(
-      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantDICT['Name'], 
-      headers={ jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantDICT), 
+      self.adminAPIPrefix + '/' + masterTenantName + '/tenants/' + tenantDICT['Name'],
+      headers={ jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantDICT),
       content_type='application/json'
     )
     for x in expectedResults:
         if result.status_code == x:
           return json.loads(result.get_data(as_text=True))
     self.assertTrue(False,msg="Wrong status code returned, expected one of " + str(expectedResults) + " got " + str(result.status_code) + ":" + result.get_data(as_text=True))
-  
+
   def createTenantForTestingWithMutipleAuthProviders(self, tenantDICT, authProvDictList):
     tenantJSON = self.createTenantForTesting(tenantDICT)
     tenantWithAuthProviders = copy.deepcopy(tenantDICT)
@@ -297,7 +297,7 @@ class testClassWithTestClient(testHelperSuperClass):
       a.append(copy.deepcopy(b))
     tenantWithAuthProviders['AuthProviders'] = a
     tenantWithAuthProviders['ObjectVersion'] = tenantJSON['ObjectVersion']
-    
+
     return self.updateTenant(tenantWithAuthProviders, [200])
 
   def createTenantWithAuthProvider(self, tenantBase, tenantUserCreation, authProvDict):
@@ -309,7 +309,10 @@ class testClassWithTestClient(testHelperSuperClass):
     return self.createTenantForTestingWithMutipleAuthProviders(tenantWithUserCreation, [authProvCreateWithUserCreation])
 
   def getTenantSpercificAuthProvDict(self, tenant, type):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + tenant + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + tenant + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200, msg="Get auth providers service call failed")
     resultJSON = json.loads(result.get_data(as_text=True))
     for x in resultJSON[ 'AuthProviders' ]:
@@ -322,43 +325,49 @@ class testClassWithTestClient(testHelperSuperClass):
 
   def registerInternalUser(self, tenantName, username, password, authProvider):
     hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
-      username, 
-      password, 
+      username,
+      password,
       authProvider['saltForPasswordHashing']
     )
     registerJSON = {
       "authProviderGUID": authProvider['guid'],
-      "credentialJSON": { 
-        "username": username, 
+      "credentialJSON": {
+        "username": username,
         "password": hashedPassword
        }
     }
     registerResult = self.testClient.put(
-      self.loginAPIPrefix + '/' + tenantName + '/register', 
-      data=json.dumps(registerJSON), 
-      content_type='application/json'
+      self.loginAPIPrefix + '/' + tenantName + '/register',
+      data=json.dumps(registerJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
     )
     self.assertEqual(registerResult.status_code, 201, msg="Registration failed - " + registerResult.get_data(as_text=True))
     return json.loads(registerResult.get_data(as_text=True))
 
   def loginAsDefaultUser(self):
     return self.loginAsUser(masterTenantName, self.getTenantInternalAuthProvDict(masterTenantName), env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'])
-    
+
   def loginAsUser(self, tenant, authProviderDICT, username, password, expectedResults = [200]):
     hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
-      username, 
-      password, 
+      username,
+      password,
       authProviderDICT['saltForPasswordHashing']
     )
-    
+
     loginJSON = {
       "authProviderGUID": authProviderDICT['guid'],
-      "credentialJSON": { 
-        "username": username, 
+      "credentialJSON": {
+        "username": username,
         "password": hashedPassword
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenant + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(
+      self.loginAPIPrefix + '/' + tenant + '/authproviders',
+      data=json.dumps(loginJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
+    )
     for x in expectedResults:
       if result2.status_code == x:
         return json.loads(result2.get_data(as_text=True))
@@ -368,19 +377,19 @@ class testClassWithTestClient(testHelperSuperClass):
 
   def getNewAuthDICT(self, userName="testUsername"):
     masterTenant = self.getTenantDICT(masterTenantName)
-    
+
     hashedpassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
-      userName, 
-      env['APIAPP_DEFAULTHOMEADMINPASSWORD'], 
+      userName,
+      env['APIAPP_DEFAULTHOMEADMINPASSWORD'],
       masterTenant["AuthProviders"][0]["saltForPasswordHashing"]
     )
-    
+
     newAuthDICT = {
       "personGUID": "FORCED-CONSTANT-TESTING-PERSON-GUID",
       "tenantName": masterTenantName,
       "authProviderGUID": masterTenant["AuthProviders"][0]["guid"],
-      "credentialJSON": { 
-        "username": userName, 
+      "credentialJSON": {
+        "username": userName,
         "password": hashedpassword
       }
     }
@@ -410,7 +419,7 @@ class testHelperAPIClientUsingSQLAlchemy(testClassWithTestClient):
     fns = {
       'getCurDateTime': appObj.getCurDateTime,
       'getPaginatedResult': appObj.getPaginatedResult
-    }    
+    }
     objectStore = createObjectStoreInstance(json.loads(self._getEnvironment()['APIAPP_OBJECTSTORECONFIG']), fns)
     objectStore.resetDataForTest()
 
@@ -426,4 +435,3 @@ envUsingKongGateway['APIAPP_GATEWAYINTERFACECONFIG']='{"Type": "kong", "kongISS"
 class testHelperAPIClientUsingKongStaticGateway(testClassWithTestClient):
   def _getEnvironment(self):
     return envUsingKongGateway
-

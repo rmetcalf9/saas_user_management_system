@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+from TestHelperSuperClass import httpOrigin, testHelperAPIClient, env, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 import unittest
 import json
 from appObj import appObj
@@ -16,33 +16,39 @@ invalidTenantName="invalidtenantname"
 
 class test_api(testHelperAPIClient):
   pass
-  
-class test_loginapi_norm(test_api):    
+
+class test_loginapi_norm(test_api):
   def test_loginInvalidTenantFails(self):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + invalidTenantName + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + invalidTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 400)
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertJSONStringsEqual(resultJSON, {"message": "Tenant not found"})
 
   def test_loginReturnsDefaultTenantAndAuthInfo(self):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-    
+
     expectedResult = {
       "Name": masterTenantName,
-      "Description": masterTenantDefaultDescription, 
+      "Description": masterTenantDefaultDescription,
       "AllowUserCreation": False,
       "JWTCollectionAllowedOriginList": list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(","))),
       "AuthProviders": [{
         "guid": "1199545b-58f4-4f6e-885a-376dad1a68e9",
-        "Type": "internal", 
-        "MenuText": masterTenantDefaultAuthProviderMenuText, 
-        "IconLink": masterTenantDefaultAuthProviderMenuIconLink, 
-        "AllowUserCreation": False, 
-        "AllowLink": False, 
-        "AllowUnlink": False, 
-        "LinkText": constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText, 
+        "Type": "internal",
+        "MenuText": masterTenantDefaultAuthProviderMenuText,
+        "IconLink": masterTenantDefaultAuthProviderMenuIconLink,
+        "AllowUserCreation": False,
+        "AllowLink": False,
+        "AllowUnlink": False,
+        "LinkText": constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText,
         "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
         "StaticlyLoadedData": {}
       }],
@@ -54,20 +60,27 @@ class test_loginapi_norm(test_api):
 
   def test_sucessfulLoginAsDefaultUser(self):
     result2JSON = self.loginAsDefaultUser()
-    
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
-    
+
     loginJSON = {
       "authProviderGUID": masterAuthProviderGUID,
-      "credentialJSON": { 
-        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+      "credentialJSON": {
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
         "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(resultJSON[ 'AuthProviders' ][0]['saltForPasswordHashing'])
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      data=json.dumps(loginJSON), content_type='application/json',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result2.status_code, 200)
     result2JSON = json.loads(result2.get_data(as_text=True))
 
@@ -83,14 +96,14 @@ class test_loginapi_norm(test_api):
     expectedResult = {
     }
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON[ 'jwtData' ], expectedResult, [ 'JWTToken','TokenExpiry' ])
-    
+
     jwtTokenDict = self.decodeToken(result2JSON[ 'jwtData' ]['JWTToken'])
     expectedTokenDict = {
-      'UserID': 'FORCED-CONSTANT-TESTING-GUID', 
-      'iss': 'FORCED-CONSTANT-TESTING-GUID', 
+      'UserID': 'FORCED-CONSTANT-TESTING-GUID',
+      'iss': 'FORCED-CONSTANT-TESTING-GUID',
       'TenantRoles': {
         'usersystem': [masterTenantDefaultSystemAdminRole, DefaultHasAccountRole, constants.SecurityEndpointAccessRole]
-      }, 
+      },
       'exp': 1547292391,
       'authedPersonGuid': 'Ignore',
       "known_as": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
@@ -100,7 +113,7 @@ class test_loginapi_norm(test_api):
       "currentlyUsedAuthKey": "AdminTestSet@internalDataStore_`@\\/'internal"
     }
     self.assertJSONStringsEqualWithIgnoredKeys(jwtTokenDict, expectedTokenDict, [ 'exp', 'authedPersonGuid', 'associatedPersons', 'currentlyUsedAuthProviderGuid' ])
-    
+
     #Make sure passed expiry matches token expiry
     dt = parse(result2JSON['jwtData']['TokenExpiry'])
     dateTimeObjFromJSON = dt.astimezone(pytz.utc)
@@ -108,7 +121,7 @@ class test_loginapi_norm(test_api):
     dateTimeObjFromToken = datetime.fromtimestamp(jwtTokenDict['exp'],pytz.utc)
     time_diff = (dateTimeObjFromToken - dateTimeObjFromJSON).total_seconds()
     self.assertTrue(abs(time_diff) < 1,msg="More than 1 second difference between reported expiry time and actual expiry time in token")
-    
+
     #Make sure expiry is in the future
     expectedExpiry = datetime.now(pytz.utc) + timedelta(seconds=int(env['APIAPP_JWT_TOKEN_TIMEOUT']))
 
@@ -117,38 +130,46 @@ class test_loginapi_norm(test_api):
 
     #Sucessfull login test point
     #self.assertTrue(False)
-    
+
   def setupLoginWithMutipleUserIDsAndGetLoginResponse(self, InternalAuthUsername, userID1, userID2):
     def dbfn(storeConnection):
       def someFn(connectionContext):
         return self.createTwoUsersForOnePerson(userID1, userID2, InternalAuthUsername, storeConnection)
-      res = storeConnection.executeInsideTransaction(someFn)    
-      
-      result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+      res = storeConnection.executeInsideTransaction(someFn)
+
+      result = self.testClient.get(
+        self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+        headers={"Origin": httpOrigin}
+      )
       self.assertEqual(result.status_code, 200)
       resultJSON = json.loads(result.get_data(as_text=True))
       masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
-      
+
       loginJSON = {
         ##"identityGUID": "string",
         "authProviderGUID": masterAuthProviderGUID,
-        "credentialJSON": { 
-          "username": InternalAuthUsername, 
+        "credentialJSON": {
+          "username": InternalAuthUsername,
           "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
          }
       }
-      result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+      result2 = self.testClient.post(
+        self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+        data=json.dumps(loginJSON),
+        content_type='application/json',
+        headers={"Origin": httpOrigin}
+      )
       self.assertEqual(result2.status_code, 200)
       return json.loads(result2.get_data(as_text=True))
     return appObj.objectStore.executeInsideConnectionContext(dbfn)
-    
+
   def test_getMutipleUserIDsResponseDefaultUser(self):
     testDateTime = datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)
     userID1 = 'TestUser1'
     userID2 = 'TestUser2'
     result2JSON = self.setupLoginWithMutipleUserIDsAndGetLoginResponse('ABC', userID1, userID2)
-    
+
     user1ExcpectedResult = {
       "UserID": userID1,
       "TenantRoles": [{
@@ -186,25 +207,29 @@ class test_loginapi_norm(test_api):
       if resultUser['UserID'] == userID2:
         id2Found = True
         self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion', 'associatedPersonGUIDs' ], msg="Identity 2 result mismatch")
-      
+
     self.assertTrue(id1Found, msg="Identity 1 not in response")
     self.assertTrue(id2Found, msg="Identity 2 not in response")
-    
+
   def test_attemptToLoginWithoutProvidingCredentials(self):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
-    
+
     loginJSON = {
       "authProviderGUID": masterAuthProviderGUID,
-      "credentialJSON": { 
+      "credentialJSON": {
        }
     }
     result2 = self.testClient.post(
-      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', 
-      data=json.dumps(loginJSON), 
-      content_type='application/json'
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      data=json.dumps(loginJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
     )
     self.assertEqual(result2.status_code, 401)
     result2JSON = json.loads(result2.get_data(as_text=True))
@@ -212,18 +237,26 @@ class test_loginapi_norm(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
   def test_attemptToLoginProvidingValidUserWithNoPassword(self):
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
-    
+
     loginJSON = {
       "authProviderGUID": masterAuthProviderGUID,
-      "credentialJSON": { 
+      "credentialJSON": {
         "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME']
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      data=json.dumps(loginJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result2.status_code, 401)
     result2JSON = json.loads(result2.get_data(as_text=True))
     expectedResult = {'message': 'Invalid credentials provided'}
@@ -243,21 +276,29 @@ class test_loginapi_norm(test_api):
       CreateUser(appObj, {"user_unique_identifier": userID3, "known_as": userID3}, tenantWithNoAuthProviders["Name"], "test/getMutipleIdentityResponseOnlyReturnsUsersForThisTenant", connectionContext) #might fail if I require transaction in future
       associateUserWithPerson(appObj, userID3, person['guid'], connectionContext)
 
-      
-      result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+
+      result = self.testClient.get(
+        self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+        headers={"Origin": httpOrigin}
+      )
       self.assertEqual(result.status_code, 200)
       resultJSON = json.loads(result.get_data(as_text=True))
       masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
-      
+
       loginJSON = {
         ##"identityGUID": "string",
         "authProviderGUID": masterAuthProviderGUID,
-        "credentialJSON": { 
-          "username": InternalAuthUsername, 
+        "credentialJSON": {
+          "username": InternalAuthUsername,
           "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
          }
       }
-      result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+      result2 = self.testClient.post(
+        self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+        data=json.dumps(loginJSON),
+        content_type='application/json',
+        headers={"Origin": httpOrigin}
+      )
       self.assertEqual(result2.status_code, 200)
       result2JSON = json.loads(result2.get_data(as_text=True))
 
@@ -298,7 +339,7 @@ class test_loginapi_norm(test_api):
         if resultUser['UserID'] == userID2:
           id2Found = True
           self.assertJSONStringsEqualWithIgnoredKeys(resultUser, user2ExcpectedResult, [ 'guid', 'ObjectVersion', 'associatedPersonGUIDs' ], msg="Identity 2 result mismatch")
-        
+
       self.assertTrue(id1Found, msg="Identity 1 not in response")
       self.assertTrue(id2Found, msg="Identity 2 not in response")
     appObj.objectStore.executeInsideTransaction(someFn)
@@ -310,7 +351,10 @@ class test_loginapi_norm(test_api):
     userID2 = 'TestUser2'
     result2JSON = self.setupLoginWithMutipleUserIDsAndGetLoginResponse('ABC', userID1, userID2)
 
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -318,12 +362,17 @@ class test_loginapi_norm(test_api):
     loginJSON = {
       "UserID": userID1,
       "authProviderGUID": masterAuthProviderGUID,
-      "credentialJSON": { 
-        "username": 'ABC', 
+      "credentialJSON": {
+        "username": 'ABC',
         "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      data=json.dumps(loginJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result2.status_code, 200, 'Login failed - ' + result2.get_data(as_text=True))
 
   def test_loginAsInvalidUSerIDWithOfTwoPossibleUsers(self):
@@ -333,7 +382,10 @@ class test_loginapi_norm(test_api):
     userID2 = 'TestUser2'
     result2JSON = self.setupLoginWithMutipleUserIDsAndGetLoginResponse('ABC', userID1, userID2)
 
-    result = self.testClient.get(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders')
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     masterAuthProviderGUID = resultJSON[ 'AuthProviders' ][0]['guid']
@@ -341,12 +393,17 @@ class test_loginapi_norm(test_api):
     loginJSON = {
       "UserID": 'invalid',
       "authProviderGUID": masterAuthProviderGUID,
-      "credentialJSON": { 
-        "username": 'ABC', 
+      "credentialJSON": {
+        "username": 'ABC',
         "password": env['APIAPP_DEFAULTHOMEADMINPASSWORD']
        }
     }
-    result2 = self.testClient.post(self.loginAPIPrefix + '/' + masterTenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+    result2 = self.testClient.post(
+      self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
+      data=json.dumps(loginJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
+    )
     self.assertEqual(result2.status_code, 400, 'Login failed - ' + result2.get_data(as_text=True))
 
   def test_attemptToLoginTenantWherePersonHasInternalAuthOnAnotherTenant(self):
@@ -355,34 +412,33 @@ class test_loginapi_norm(test_api):
     tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
     tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
-    
+
     username = "someuname"
     password = "somepword"
-    
+
     #Register user on tenant where they have an account
     registerResultJSON = self.registerInternalUser(
-      tenantWhereUserHasAccountDict['Name'], 
+      tenantWhereUserHasAccountDict['Name'],
       username,
-      password, 
+      password,
       self.getTenantInternalAuthProvDict(tenantWhereUserHasAccountDict['Name'])
     )
 
     #Login as user on tenant where they have an account and ensure success
     self.loginAsUser(
-      tenantWhereUserHasAccountDict['Name'], 
-      self.getTenantInternalAuthProvDict(tenantWhereUserHasAccountDict['Name']), 
-      username, 
+      tenantWhereUserHasAccountDict['Name'],
+      self.getTenantInternalAuthProvDict(tenantWhereUserHasAccountDict['Name']),
+      username,
       password
     )
-    
+
     #Login as user on tenant where they have no account and ensure failure
     self.loginAsUser(
-      tenantWhereUserHasNoAccountDict['Name'], 
-      self.getTenantInternalAuthProvDict(tenantWhereUserHasNoAccountDict['Name']), 
-      username, 
+      tenantWhereUserHasNoAccountDict['Name'],
+      self.getTenantInternalAuthProvDict(tenantWhereUserHasNoAccountDict['Name']),
+      username,
       password,
       [401]
     )
 
     #self.assertTrue(False)
-
