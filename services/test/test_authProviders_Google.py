@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+from TestHelperSuperClass import httpOrigin, testHelperAPIClient, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
 from appObj import appObj
 from tenants import GetTenant
 import constants
@@ -17,9 +17,9 @@ googleAuthProv001_CREATE = {
   "guid": None,
   "Type": "google",
   "AllowUserCreation": False,
-  "AllowLink": False, 
-  "AllowUnlink": False, 
-  "LinkText": 'Link', 
+  "AllowLink": False,
+  "AllowUnlink": False,
+  "LinkText": 'Link',
   "MenuText": "Log in with Google",
   "IconLink": "string",
   "ConfigJSON": "{\"clientSecretJSONFile\": \"" + os.path.dirname(os.path.realpath(__file__)) + "/../" + client_cliental_json_filename + "\"}",
@@ -32,30 +32,30 @@ googleLoginAccounts = []
 googleLoginAccounts.append({
   "code": "AAA",
   "creds": {
-    "access_token": "XXX", 
-    "client_id": "XXX", 
-    "client_secret": "XXX", 
-    "refresh_token": "XXX", 
-    "token_expiry": "2019-05-08T14:55:14Z", 
-    "token_uri": "https://oauth2.googleapis.com/token", 
-    "user_agent": None, 
-    "revoke_uri": "https://oauth2.googleapis.com/revoke", 
+    "access_token": "XXX",
+    "client_id": "XXX",
+    "client_secret": "XXX",
+    "refresh_token": "XXX",
+    "token_expiry": "2019-05-08T14:55:14Z",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "user_agent": None,
+    "revoke_uri": "https://oauth2.googleapis.com/revoke",
     "id_token": {
-      "iss": "https://accounts.google.com", 
-      "azp": "???.apps.googleusercontent.com", 
-      "aud": "???.apps.googleusercontent.com", 
-      "sub": "56454656465454", 
-      "email": "rmetcalf9@googlemail.com", 
-      "email_verified": True, 
-      "at_hash": "???", 
-      "name": "Robert Metcalf", 
-      "picture": "https://lh6.googleusercontent.com/dsaddsaffs/s96-c/photo.jpg", 
-      "given_name": "Robert", 
-      "family_name": "Metcalf", 
-      "locale": "en-GB", 
-      "iat": 342543, 
+      "iss": "https://accounts.google.com",
+      "azp": "???.apps.googleusercontent.com",
+      "aud": "???.apps.googleusercontent.com",
+      "sub": "56454656465454",
+      "email": "rmetcalf9@googlemail.com",
+      "email_verified": True,
+      "at_hash": "???",
+      "name": "Robert Metcalf",
+      "picture": "https://lh6.googleusercontent.com/dsaddsaffs/s96-c/photo.jpg",
+      "given_name": "Robert",
+      "family_name": "Metcalf",
+      "locale": "en-GB",
+      "iat": 342543,
       "exp": 324324
-    }, 
+    },
   }
 })
 googleLoginAccounts.append(copy.deepcopy(googleLoginAccounts[0]))
@@ -78,7 +78,12 @@ class google_auth_test_api_helper_functions(testHelperAPIClient):
     }
     result2 = None
     with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=googleLoginAccounts[accNum]) as mock_loadStaticData:
-      result2 = self.testClient.post(self.loginAPIPrefix + '/' + tenantName + '/authproviders', data=json.dumps(loginJSON), content_type='application/json')
+      result2 = self.testClient.post(
+        self.loginAPIPrefix + '/' + tenantName + '/authproviders',
+        data=json.dumps(loginJSON),
+        content_type='application/json',
+        headers={"Origin": httpOrigin}
+      )
 
     for x in expectedResults:
       if x == result2.status_code:
@@ -92,14 +97,14 @@ class test_api(google_auth_test_api_helper_functions):
     tenantJSON['AuthProviders'].append(copy.deepcopy(authProviderDICT))
     tenantJSON['ObjectVersion'] = currentTenantJSON['ObjectVersion']
     result = self.testClient.put(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'], 
-      headers={ constants.jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantJSON), 
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'],
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantJSON),
       content_type='application/json'
     )
     self.assertEqual(result.status_code, 200, msg="Failed to add auth - " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
-  
+
   def setupGoogleAuthOnMainTenantForTests(self, override_JSON = googleAuthProv001_CREATE, tenantName = constants.masterTenantName):
     result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
@@ -107,7 +112,7 @@ class test_api(google_auth_test_api_helper_functions):
     for x in resultJSON['result']:
       if x['Name'] == tenantName:
         self.addAuthProvider(x, override_JSON)
-    
+
     result2 = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result2.status_code, 200)
     resultJSON2 = json.loads(result2.get_data(as_text=True))
@@ -115,11 +120,11 @@ class test_api(google_auth_test_api_helper_functions):
       if x['Name'] == tenantName:
         return x
     return None
-  
-class test_addGoogleAuthProviderToMasterTenant(test_api):    
+
+class test_addGoogleAuthProviderToMasterTenant(test_api):
   def test_createAuth(self):
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
-    
+
     expectedResult = copy.deepcopy(googleAuthProv001_CREATE)
     expectedResult["StaticlyLoadedData"] = {"client_id": "someGoogleID.apps.googleusercontent.com"}
 
@@ -137,14 +142,14 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenantJSON['AuthProviders'].append(copy.deepcopy(googleAuthProv001_CREATE_missingClientSecretParam))
     tenantJSON['ObjectVersion'] = resultJSON['result'][0]['ObjectVersion']
     result = self.testClient.put(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'], 
-      headers={ constants.jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantJSON), 
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'],
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantJSON),
       content_type='application/json'
     )
     self.assertEqual(result.status_code, 400, msg='Create should have failed')
 
-  
+
   def test_createAuthMissingclientSecretJSONFile(self):
     result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
@@ -154,9 +159,9 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenantJSON['AuthProviders'].append(copy.deepcopy(googleAuthProv001_CREATE_badSecretFileParam))
     tenantJSON['ObjectVersion'] = resultJSON['result'][0]['ObjectVersion']
     result = self.testClient.put(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'], 
-      headers={ constants.jwtHeaderName: self.getNormalJWTToken()}, 
-      data=json.dumps(tenantJSON), 
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'],
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantJSON),
       content_type='application/json'
     )
     self.assertEqual(result.status_code, 400, msg='Create should have failed')
@@ -169,27 +174,27 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenantDICT = self.addAuthProvider(resultJSON['result'][0], googleAuthProv001_CREATE)
     googleAuthProv = tenantDICT['AuthProviders'][1]
     googleAuthProv['ConfigJSON'] = json.loads(googleAuthProv['ConfigJSON'])
-    
+
     #Get Tenant will call auth provider for the first time
     #resetStaticData() #uncommenting this line should cause this test to error since the static data will be loaded from file
     with patch("authProviders_Google.loadStaticData", return_value={'web':{'client_id':'DummyClientID'}}) as mock_loadStaticData:
       a = authProviderFactory(googleAuthProv, googleAuthProv['guid'], constants.masterTenantName, None, appObj)
       if a==None:
         self.assertTrue(False, msg="authProviderFactory didn't create object")
-    
-    mock_loadStaticData.assert_not_called()
-  
 
-  
+    mock_loadStaticData.assert_not_called()
+
+
+
   def test_authFailsWithNoGoogleAuthsAccepted(self):
     #Test authentication via google.
     ## Must use mocks
-    
+
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
     googleAuthProvider = resultJSON2["AuthProviders"][1]
-    
+
     result2JSON = self.loginWithGoogle(0, constants.masterTenantName, googleAuthProvider, [401])
-    
+
 
   def test_authWithUserCreation(self):
     #Test authentication via google.
@@ -198,9 +203,9 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
     googleAuthProvider = resultJSON2["AuthProviders"][1]
-    
+
     result2JSON = self.loginWithGoogle(0, tenantDict['Name'], googleAuthProvider, [200])
-    
+
     #Turn off auto user creation
     tenantDict2 = self.getTenantDICT(tenantDict['Name'])
     tenantDict2['AllowUserCreation'] = False
@@ -241,8 +246,8 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
     self.assertEqual(result2JSON['userGuid'],result3JSON['userGuid'],msg="Different user accounts returned")
     self.assertEqual(result2JSON['authedPersonGuid'],result3JSON['authedPersonGuid'],msg="Different person accounts used")
-    
-    
+
+
   def test_TwoUsersGetDifferentUserAndPErsonIDs(self):
     tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
 
@@ -251,4 +256,3 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
     self.assertNotEqual(acc1LoginJSON['userGuid'],acc2LoginJSON['userGuid'],msg="user accounts returned should not be the same")
     self.assertNotEqual(acc1LoginJSON['authedPersonGuid'],acc2LoginJSON['authedPersonGuid'],msg="person accounts used should not be the same")
-
