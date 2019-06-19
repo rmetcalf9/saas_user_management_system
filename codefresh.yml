@@ -128,6 +128,7 @@ steps:
             -e APIAPP_APIURL=https://api.metcarob.com/api
             -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/apidocs
             -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/frontend
+            -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api.metcarob.com"
             metcarob/saas_user_management_system:${{RJM_VERSION}}
       environment:
         - SSH_KEY=${{SSH_KEY_COMMAS}}
