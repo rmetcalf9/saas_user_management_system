@@ -41,6 +41,12 @@ personDosentExistException = customExceptionClass('Person Dosen\'t Exist','perso
 userCreationNotAllowedException = customExceptionClass('User Creation Not Allowed', 'userCreationNotAllowedException')
 
 
+class invalidPersonInToken(Exception):
+  pass
+class invalidUserInToken(Exception):
+  pass
+
+
 class notImplemented(customExceptionClass):
   def __init__(self, text):
     self.text = text + ' Not Implemented'

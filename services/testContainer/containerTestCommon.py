@@ -18,7 +18,7 @@ adminAPIPrefix = '/authed/api/admin'
 baseURL="http://saas_user_management_system:80"
 if ('BASEURL_TO_TEST' in os.environ):
   baseURL=os.environ['BASEURL_TO_TEST']
-runningViaKong = False  
+runningViaKong = False
 if ('RUNNINGVIAKONG' in os.environ):
   runningViaKong=True
 
@@ -34,12 +34,12 @@ BASE[ADMIN]=baseURL + adminAPIPrefix
 BASE[APIDOCS]=baseURL + '/public/web/apidocs'
 BASE[FRONTEND]=baseURL + '/public/web/frontend'
 BASE[ADMINFRONTEND]=baseURL + '/public/web/adminfrontend'
- 
 
-  
+httpOrigin = "http://localhost"
+
 def getEnviromentVariable(name):
   return readFromEnviroment(os.environ, name, None, None, False)
-  
+
 #Read environment variable or raise an exception if it is missing and there is no default
 def readFromEnviroment(env, envVarName, defaultValue, acceptableValues, nullValueAllowed=False):
   val = None
@@ -71,9 +71,9 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
   masterSecretKey = (username + ":" + password + ":AG44")
   decodedSalt = b64decode(tenantAuthProvSalt)
   ret = bcrypt.hashpw(masterSecretKey.encode('utf-8'), decodedSalt)
-  return ret.decode("utf-8") 
+  return ret.decode("utf-8")
 
- 
+
 def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, headers, cookies):
   _headers = {}
   if headers is not None:
@@ -81,6 +81,8 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
   _cookies = {}
   if cookies is not None:
     _cookies = copy.deepcopy(cookies)
+
+  _headers["Origin"] = httpOrigin
 
   result = None
   targetURL = BASE[api] + url
@@ -119,8 +121,8 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
   if api in [LOGIN, ADMIN]:
     return json.loads(result.text), result.status_code
   return result.text, result.status_code
-  
-  
+
+
 def callGetService(api,url, expectedResponses, loginDICT, headers, cookies):
   return _callService(api,url, "get", None, expectedResponses, loginDICT, headers, cookies)
 
@@ -136,11 +138,11 @@ def getLoginDICTForDefaultUser(unittestClassInstance):
 
   loginCallDICT = {
     "authProviderGUID": MainAuthProvider['guid'],
-    "credentialJSON": { 
-      "username": getEnviromentVariable('APIAPP_DEFAULTHOMEADMINUSERNAME'), 
+    "credentialJSON": {
+      "username": getEnviromentVariable('APIAPP_DEFAULTHOMEADMINUSERNAME'),
       "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
-        getEnviromentVariable('APIAPP_DEFAULTHOMEADMINUSERNAME'), 
-        getEnviromentVariable('APIAPP_DEFAULTHOMEADMINPASSWORD'), 
+        getEnviromentVariable('APIAPP_DEFAULTHOMEADMINUSERNAME'),
+        getEnviromentVariable('APIAPP_DEFAULTHOMEADMINPASSWORD'),
         MainAuthProvider['saltForPasswordHashing']
       )
      }
@@ -148,5 +150,3 @@ def getLoginDICTForDefaultUser(unittestClassInstance):
   ###print("Login DICT:",loginCallDICT)
   loginDICT,res = callPostService(LOGIN, "/" + constants.masterTenantName + "/authproviders",loginCallDICT,[200], None, None, None)
   return loginDICT
-    
-    
