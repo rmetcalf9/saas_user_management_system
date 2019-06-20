@@ -77,7 +77,7 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
   return ret.decode("utf-8")
 
 
-def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, headers, cookies):
+def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, headers, cookies, addOrigin):
   _headers = {}
   if headers is not None:
     _headers = copy.deepcopy(headers)
@@ -85,7 +85,8 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
   if cookies is not None:
     _cookies = copy.deepcopy(cookies)
 
-  _headers["Origin"] = httpOrigin
+  if addOrigin:
+    _headers["Origin"] = httpOrigin
   result = None
   targetURL = BASE[api] + url
   if loginDICT is not None:
@@ -126,14 +127,14 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
   return result.text, result.status_code
 
 
-def callGetService(api,url, expectedResponses, loginDICT, headers, cookies):
-  return _callService(api,url, "get", None, expectedResponses, loginDICT, headers, cookies)
+def callGetService(api,url, expectedResponses, loginDICT, headers, cookies, addOrigin=True):
+  return _callService(api,url, "get", None, expectedResponses, loginDICT, headers, cookies, addOrigin)
 
-def callPostService(api,url, POSTdict, expectedResponses, loginDICT, headers, cookies):
-  return _callService(api,url, "post", POSTdict, expectedResponses, loginDICT, headers, cookies)
+def callPostService(api,url, POSTdict, expectedResponses, loginDICT, headers, cookies, addOrigin=True):
+  return _callService(api,url, "post", POSTdict, expectedResponses, loginDICT, headers, cookies, addOrigin)
 
-def callPutService(api,url, PUTdict, expectedResponses, loginDICT, headers, cookies):
-  return _callService(api,url, "put", PUTdict, expectedResponses, loginDICT, headers, cookies)
+def callPutService(api,url, PUTdict, expectedResponses, loginDICT, headers, cookies, addOrigin=True):
+  return _callService(api,url, "put", PUTdict, expectedResponses, loginDICT, headers, cookies, addOrigin)
 
 def getLoginDICTForDefaultUser(unittestClassInstance):
   AuthProvidersDICT,res = callGetService(
