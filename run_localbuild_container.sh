@@ -33,7 +33,7 @@ if [ ${RES} -ne 1 ]; then
   exit 1
 fi
 
-#Removed 
+#Removed
 ##-e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config \
 ##-e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
 #and added
@@ -57,6 +57,7 @@ docker service create --name ${RJM_RUNNING_SERVICE_NAME} \
 -e APIAPP_APIURL=${EXTURL}:${EXTPORT80}/api \
 -e APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT80}/public/web/apidocs \
 -e APIAPP_FRONTENDURL=${EXTURL}:${EXTPORT80}/public/web/frontend \
+-e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="http://localhost" \
 --publish 80:80 \
 ${RJM_IMAGE_TO_RUN}
 RES=$?

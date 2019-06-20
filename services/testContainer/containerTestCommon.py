@@ -23,6 +23,11 @@ if ('RUNNINGVIAKONG' in os.environ):
   runningViaKong=True
 
 
+httpOrigin = "http://localhost"
+if ('HTTPORIGIN_TO_TEST' in os.environ):
+  httpOrigin=os.environ['HTTPORIGIN_TO_TEST']
+
+
 BASE = [0,1,2,3,4]
 LOGIN = 0
 ADMIN = 1
@@ -34,8 +39,6 @@ BASE[ADMIN]=baseURL + adminAPIPrefix
 BASE[APIDOCS]=baseURL + '/public/web/apidocs'
 BASE[FRONTEND]=baseURL + '/public/web/frontend'
 BASE[ADMINFRONTEND]=baseURL + '/public/web/adminfrontend'
-
-httpOrigin = "http://localhost"
 
 def getEnviromentVariable(name):
   return readFromEnviroment(os.environ, name, None, None, False)
@@ -83,12 +86,12 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
     _cookies = copy.deepcopy(cookies)
 
   _headers["Origin"] = httpOrigin
-
   result = None
   targetURL = BASE[api] + url
   if loginDICT is not None:
     #print(loginDICT['jwtData']['JWTToken'])
     _headers[constants.jwtHeaderName] = loginDICT['jwtData']['JWTToken']
+
   if method=='get':
     result = requests.get(
       targetURL,
@@ -133,7 +136,13 @@ def callPutService(api,url, PUTdict, expectedResponses, loginDICT, headers, cook
   return _callService(api,url, "put", PUTdict, expectedResponses, loginDICT, headers, cookies)
 
 def getLoginDICTForDefaultUser(unittestClassInstance):
-  AuthProvidersDICT,res = callGetService(LOGIN, "/" + constants.masterTenantName + "/authproviders", [200], None, None, None)
+  AuthProvidersDICT,res = callGetService(
+    LOGIN, "/" + constants.masterTenantName + "/authproviders",
+    [200],
+    None,
+    None,
+    None
+  )
   MainAuthProvider = AuthProvidersDICT['AuthProviders'][0]
 
   loginCallDICT = {

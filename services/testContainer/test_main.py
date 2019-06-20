@@ -2,7 +2,7 @@
 import unittest
 import os
 import json
-from containerTestCommon import baseURL, callGetService, callPutService
+from containerTestCommon import httpOrigin, baseURL, callGetService, callPutService
 import containerTestCommon
 import copy_of_main_constants_do_not_edit as constants
 
@@ -31,10 +31,10 @@ class test_containerAPI(unittest.TestCase):
   #  print(result.text)
   #  resultJSON = json.loads(result.text)
   #  self.assertEqual(resultJSON['Server']['APIAPP_APIDOCSURL'], baseURL + "/public/web/apidocs")
-    
+
   def test_WeCanGetToSwaggerUIStaticFiles(self):
     callGetService(containerTestCommon.APIDOCS, "/swaggerui/bower/swagger-ui/dist/droid-sans.css", [200], None, None, None)
-    
+
   def test_adminfrontendMainPage(self):
     callGetService(containerTestCommon.ADMINFRONTEND, "/", [200], None, None, None)
     callGetService(containerTestCommon.ADMINFRONTEND, "/#/usersystem/", [200], None, None, None)
@@ -42,15 +42,15 @@ class test_containerAPI(unittest.TestCase):
   def test_frontendMainPage(self):
     callGetService(containerTestCommon.FRONTEND, "/", [200], None, None, None) #This gives us Quasar 404 page but still a 200 response
     callGetService(containerTestCommon.FRONTEND, "/#/usersystem/", [200], None, None, None)
-    
+
   def test_putCall(self):
     #With nginx not sure if put call will work.
     # if we get 503 we are getting an nginx error
     PUTdict = { "invalid": True }
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
     jwtToken = loginDICT['jwtData']['JWTToken']
-    
-    headers = {"Authorization": "Bearer " + jwtToken}
+
+    headers = {"Authorization": "Bearer " + jwtToken, "Origin": httpOrigin}
     cookies = {}
 
     callPutService(containerTestCommon.ADMINFRONTEND,"/" + constants.masterTenantName + "/tenants/usersystem", PUTdict, [405], loginDICT, headers, cookies)

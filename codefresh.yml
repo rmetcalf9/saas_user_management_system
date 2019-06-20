@@ -202,6 +202,7 @@ steps:
     environment:
       - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
       - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
+      - HTTPORIGIN_TO_TEST=https://api.metcarob.com
       - RUNNINGVIAKONG="TRUE"
       - APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user
       - APIAPP_DEFAULTHOMEADMINPASSWORD=${{CODEFRESH_TEST_USER_PASSWORD}}
