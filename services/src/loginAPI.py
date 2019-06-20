@@ -28,9 +28,10 @@ def getValidTenantObj(appObj, tenant, storeConnection, validateOrigin):
   tenantObj = GetTenant(tenant, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise BadRequest('Tenant not found')
-  originHeader = request.headers.get('Origin')
-  if originHeader not in tenantObj.getJWTCollectionAllowedOriginList():
-    raise Unauthorized('Invalid Origin')
+  if validateOrigin:
+    originHeader = request.headers.get('Origin')
+    if originHeader not in tenantObj.getJWTCollectionAllowedOriginList():
+      raise Unauthorized('Invalid Origin')
   return tenantObj
 
 def registerAPI(appObj):
