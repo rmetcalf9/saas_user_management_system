@@ -50,6 +50,7 @@ class appObjClass(parAppObj):
   refreshTokenManager = None
   scheduler = None
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
+  APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN = None
 
   def init(self, env, serverStartTime, testingMode = False):
     authProviders_resetStaticData()
@@ -58,29 +59,37 @@ class appObjClass(parAppObj):
     if testingMode:
       self.defaultUserGUID = conDefaultUserGUID
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
-    
+
     super(appObjClass, self).init(env, serverStartTime, testingMode)
-      
+
     #This app always needs a JWT key
     if self.APIAPP_JWTSECRET is None:
       print("ERROR - APIAPP_JWTSECRET should always be set")
       raise invalidConfigurationException
-    
+
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None).strip()
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None).strip()
     self.APIAPP_DEFAULTHOMEADMINPASSWORD = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None).strip() #no default must be read in
     self.APIAPP_JWT_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 5, None)) #default to five minutes
     self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 10, None)) #default to ten minutes
     self.APIAPP_REFRESH_SESSION_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 48, None)) #default to 48 hours
-    
+
     if self.APIAPP_REFRESH_TOKEN_TIMEOUT < self.APIAPP_JWT_TOKEN_TIMEOUT:
       print("ERROR - APIAPP_REFRESH_TOKEN_TIMEOUT should never be less than APIAPP_JWT_TOKEN_TIMEOUT")
       raise invalidConfigurationException
     if self.APIAPP_REFRESH_SESSION_TIMEOUT < self.APIAPP_REFRESH_TOKEN_TIMEOUT:
       print("ERROR - APIAPP_REFRESH_SESSION_TIMEOUT should never be less than APIAPP_REFRESH_SESSION_TIMEOUT")
       raise invalidConfigurationException
-      
+
     self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
+
+    self.APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN = readFromEnviroment(
+      env,
+      'APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN',
+      self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD,
+      None
+    )
+
 
     print('APIAPP_JWT_TOKEN_TIMEOUT:'+str(self.APIAPP_JWT_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
@@ -94,9 +103,9 @@ class appObjClass(parAppObj):
     except Exception as err:
       print(err) # for the repr
       print(str(err)) # for just the message
-      print(err.args) # the arguments that the exception has been called with. 
+      print(err.args) # the arguments that the exception has been called with.
       raise(InvalidObjectStoreConfigInvalidJSONException)
-    
+
     fns = {
       'getCurDateTime': self.getCurDateTime,
       'getPaginatedResult': self.getPaginatedResult
@@ -124,6 +133,13 @@ class appObjClass(parAppObj):
     self.flastRestPlusAPIObject.title = "SAAS User Management"
     self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
 
+    @self.flaskAppObject.after_request
+    def after_request(response):
+      response.headers.add('Access-Control-Allow-Origin', self.APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN)
+      response.headers.add('Access-Control-Allow-Headers', '*')
+      response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+      return response
+
   def stopThread(self):
     ##print("stopThread Called")
     self.scheduler.shutdown()
@@ -143,7 +159,7 @@ class appObjClass(parAppObj):
     if (userObj is None):
       raise constants.invalidUserInToken('Invlaid user in token')
     decodedJWTToken.personObj = personObj
-    decodedJWTToken.userObj = userObj    
+    decodedJWTToken.userObj = userObj
     return decodedJWTToken
 
 appObj = appObjClass()

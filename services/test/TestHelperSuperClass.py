@@ -66,7 +66,8 @@ env = {
   'APIAPP_REFRESH_TOKEN_TIMEOUT': '240',
   'APIAPP_REFRESH_SESSION_TIMEOUT': '2400',
   'APIAPP_GATEWAYINTERFACECONFIG': '{"Type": "none"}',
-  'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD': httpOrigin + ', https://b.com, http://c.co.uk'
+  'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD': httpOrigin + ', https://b.com, http://c.co.uk',
+  'APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN': httpOrigin + ', https://sillysite.com'
 }
 
 SQLAlchemy_LocalDBConfigDict = {
