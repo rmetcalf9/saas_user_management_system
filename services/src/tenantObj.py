@@ -1,5 +1,5 @@
 # Description of Tenant Object
-from constants import authProviderNotFoundException
+import constants
 import json
 import copy
 from authProviders import authProviderFactory
@@ -9,16 +9,31 @@ class tenantClass():
   _mainDict = None
   _jsonRepersentation = None
   _objectVersion = None
-  def __init__(self, JSONRetrievedFromStore, objectVersion):
+  def __init__(self, JSONRetrievedFromStore, objectVersion, appObj):
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
+
+    if not 'JWTCollectionAllowedOriginList' in self._mainDict:
+      if self._mainDict['Name'] == constants.masterTenantName:
+        self._mainDict['JWTCollectionAllowedOriginList'] = list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(',')))
+      else:
+        self._mainDict['JWTCollectionAllowedOriginList'] = []
+    for curAuthProv in self._mainDict['AuthProviders']:
+      if not 'AllowLink' in self._mainDict['AuthProviders'][curAuthProv]:
+        self._mainDict['AuthProviders'][curAuthProv]['AllowLink'] = False
+      if not 'AllowUnlink' in self._mainDict['AuthProviders'][curAuthProv]:
+        self._mainDict['AuthProviders'][curAuthProv]['AllowUnlink'] = False
+      if not 'LinkText' in self._mainDict['AuthProviders'][curAuthProv]:
+        self._mainDict['AuthProviders'][curAuthProv]['LinkText'] = 'Link ' + self._mainDict['AuthProviders'][curAuthProv]['Type']
+
+
     self._objectVersion = objectVersion
-    
+
     if self._mainDict["JWTCollectionAllowedOriginList"] is None:
       raise Exception("Internal - JWTCollectionAllowedOriginList not defined")
-    
+
     #print(self._mainDict)
     #raise Exception("STOP CHECK")
-  
+
   #Need to convert authProviders into a list as in _mainDict it is a dict for indexing
   def getJSONRepresenation(self):
     if self._jsonRepersentation is None:
@@ -38,12 +53,12 @@ class tenantClass():
 
   def getAuthProvider(self, guid):
     if guid not in self._mainDict["AuthProviders"]:
-      raise authProviderNotFoundException
+      raise constants.authProviderNotFoundException
     return self._mainDict["AuthProviders"][guid]
 
   def getNumberOfAuthProviders(self):
     return len(self._mainDict["AuthProviders"])
-  
+
   def getAuthProviderGUIDList(self):
     return self._mainDict["AuthProviders"].keys()
 
@@ -58,4 +73,3 @@ class tenantClass():
 
   def getJWTCollectionAllowedOriginList(self):
     return self._mainDict["JWTCollectionAllowedOriginList"]
-

@@ -133,7 +133,7 @@ def registerAPI(appObj):
       '''Get list of tenants'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       def defOutput(item):
-        return tenantClass(item[0],item[1]).getJSONRepresenation()
+        return tenantClass(item[0],item[1], appObj).getJSONRepresenation()
 
       try:
         def dbfn(storeConnection):
@@ -216,7 +216,7 @@ def registerAPI(appObj):
             content['Description'],
             content['AllowUserCreation'],
             content['AuthProviders'],
-            content['ObjectVersion'], connectionContext, 
+            content['ObjectVersion'], connectionContext,
             JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, None)
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)

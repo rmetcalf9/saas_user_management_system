@@ -24,26 +24,26 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
   print("Creating master tenant")
   _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection, JWTCollectionAllowedOriginList=list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(","))))
   masterTenantInternalAuthProvider = AddAuthProvider(
-    appObj, 
-    masterTenantName, 
-    masterTenantDefaultAuthProviderMenuText, 
-    masterTenantDefaultAuthProviderMenuIconLink, 
-    "internal", 
-    False, 
+    appObj,
+    masterTenantName,
+    masterTenantDefaultAuthProviderMenuText,
+    masterTenantDefaultAuthProviderMenuIconLink,
+    "internal",
+    False,
     {"userSufix": "@internalDataStore"},
     storeConnection,
     False, False, constants.masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText
   )
-  
+
   userID = appObj.defaultUserGUID
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
-  
+
   #User spercific creation
   CreateUser(
-    appObj, 
-    {"user_unique_identifier": userID, "known_as": InternalAuthUsername}, 
-    masterTenantName, 
-    'init/CreateMasterTenant', 
+    appObj,
+    {"user_unique_identifier": userID, "known_as": InternalAuthUsername},
+    masterTenantName,
+    'init/CreateMasterTenant',
     storeConnection
   )
   AddUserRole(appObj, userID, masterTenantName, constants.masterTenantDefaultSystemAdminRole, storeConnection)
@@ -56,21 +56,21 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
     person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
 
   credentialJSON = {
-    "username": InternalAuthUsername, 
+    "username": InternalAuthUsername,
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       appObj, InternalAuthUsername, appObj.APIAPP_DEFAULTHOMEADMINPASSWORD, masterTenantInternalAuthProvider['saltForPasswordHashing']
     )
   }
 
   authData = _getAuthProvider(
-    appObj, masterTenantName, 
+    appObj, masterTenantName,
     masterTenantInternalAuthProvider['guid'],
     storeConnection,
     None
   ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection)
 
   #mainUserIdentity with authData
-  
+
   associateUserWithPerson(appObj, userID, person['guid'], storeConnection)
 
 
@@ -82,7 +82,7 @@ def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnec
   if tenantName == masterTenantName:
     raise failedToCreateTenantException
   return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList)
-  
+
 def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection, JWTCollectionAllowedOriginList):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
@@ -101,12 +101,12 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
   }
   for authProv in authProvDict:
     newAuthDICT = {}
-    
+
     if 'saltForPasswordHashing' not in authProv:
       authProv['saltForPasswordHashing'] = None
     if 'guid' not in authProv:
       authProv['guid'] = None
-    
+
     #Accept guid and saltForPasswordHashing as empty string as well as none - both mean a new auth provider needs to be created
     if authProv['guid'] is not None:
       if authProv['guid'] == '':
@@ -126,7 +126,7 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       #print("UpdateTenant:authProb'congigJSON':",authProv['ConfigJSON']," - ", type(authProv['ConfigJSON']))
       #No defaults provided
       newAuthDICT = getExistingAuthProviderJSON(
-        appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
+        appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'],
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
         authProv.get('AllowLink',existingAuthProv['AllowLink']), authProv.get('AllowUnlink',existingAuthProv['AllowUnlink']), authProv.get('LinkText',existingAuthProv['LinkText'])
       )
@@ -134,19 +134,19 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       if authProv['saltForPasswordHashing'] is not None:
         raise ShouldNotSupplySaltWhenCreatingAuthProvException
       newAuthDICT = getNewAuthProviderJSON(
-        appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'], 
+        appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'],
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
         authProv.get('AllowLink',False), authProv.get('AllowUnlink',False), authProv.get('LinkText','Link')
       )
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
-  
+
   def updTenant(tenant, storeConnection):
     if tenant is None:
       raise tenantDosentExistException
     return jsonForTenant
   storeConnection.updateJSONObject("tenants", tenantName, updTenant, objectVersion)
   return GetTenant(tenantName, storeConnection, appObj=appObj)
-  
+
 def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
   if tenantName == masterTenantName:
     raise cantDeleteMasterTenantException
@@ -163,13 +163,13 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   if not authProvObj.getAllowUserCreation():
     raise userCreationNotAllowedException
-  
+
   userData = authProvObj.getTypicalAuthData(credentialDICT)
   CreateUser(appObj, userData, tenantObj.getName(), createdBy, storeConnection)
   person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'], storeConnection)
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'], storeConnection)
-  
+
   return GetUser(appObj, userData['user_unique_identifier'], storeConnection)
 
 def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenantName, authProvGUID):
@@ -188,7 +188,7 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT,
     raise personDosentExistException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID, storeConnection)
-  
+
   return authData
 
 
@@ -202,7 +202,7 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
   #This update function will not alter the tenant version at all so we can find the latest object version and use that
   storeConnection.updateJSONObject("tenants", tenantName, updTenant)
   return authProviderJSON
-  
+
 # called locally
 def _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList):
   tenantWithSameName, ver, creationDateTime, lastUpdateDateTime =  storeConnection.getObjectJSON("tenants", tenantName)
@@ -217,26 +217,14 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
   }
   createdTenantVer = storeConnection.saveJSONObject("tenants", tenantName, jsonForTenant)
 
-  return tenantClass(jsonForTenant, createdTenantVer)
+  return tenantClass(jsonForTenant, createdTenantVer, appObj)
 
 def GetTenant(tenantName, storeConnection, appObj):
   a, aVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",tenantName)
   if a is None:
     return a
-  if not 'JWTCollectionAllowedOriginList' in a:
-    if a['Name'] == constants.masterTenantName:
-      a['JWTCollectionAllowedOriginList'] = list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(',')))
-    else:
-      a['JWTCollectionAllowedOriginList'] = []
-  for curAuthProv in a['AuthProviders']:
-    if not 'AllowLink' in a['AuthProviders'][curAuthProv]:
-      a['AuthProviders'][curAuthProv]['AllowLink'] = False
-    if not 'AllowUnlink' in a['AuthProviders'][curAuthProv]:
-      a['AuthProviders'][curAuthProv]['AllowUnlink'] = False
-    if not 'LinkText' in a['AuthProviders'][curAuthProv]:
-      a['AuthProviders'][curAuthProv]['LinkText'] = 'Link ' + a['AuthProviders'][curAuthProv]['Type']
-  return tenantClass(a, aVer)
-  
+  return tenantClass(a, aVer, appObj)
+
 def GetAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj):
   return _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
 
@@ -250,7 +238,7 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tena
     print("Can't find auth provider with type \"" + tenantObj.getAuthProvider(authProviderGUID)["Type"] + "\" for tenant " + tenantObj.getName())
     raise authProviderTypeNotFoundException
   return AuthProvider
-  
+
 # Login function will
 # - raise an exception if auth fails
 # - raise an exception is user identityGUID is missing or not allowed for this object
@@ -280,7 +268,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection, False)
   if authUserObj is None:
     raise Exception
-  
+
   #We have authed with a single authMethod, we need to get a list of identities for that provider
   possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
@@ -292,14 +280,14 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     if authProvider.requireRegisterCallToAutocreateUser():
       raise PersonHasNoAccessToAnyIdentitiesException
     #print("No possible identities returned - this means there is no has account role - we should add it")
-    
+
     #Person may have many users, but if we can create accounts for this tenant we can add the account to all users
     # and give the person logging in a choice
     #We don't do a tenant check because all it's doing is restricting the returned users to users who already have a hasaccount role
     userIDList = getListOfUserIDsForPersonNoTenantCheck(appObj, authUserObj['personGUID'], storeConnection)
     for curUserID in userIDList:
       AddUserRole(appObj, curUserID, tenantName, constants.DefaultHasAccountRole, storeConnection)
-    
+
     possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
     if len(possibleUserIDs)==0:
       #This should never happen as we just added the has account role
@@ -319,7 +307,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
-    
+
   thisTenantRoles = []
   if tenantName in userDict["TenantRoles"]:
     #thisTenantRoles = copy.deepcopy(userDict["TenantRoles"][tenantName])
@@ -353,4 +341,3 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)
 
   return resDict
-
