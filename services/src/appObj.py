@@ -8,6 +8,7 @@ import pytz
 
 from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, readFromEnviroment
 from flask_restplus import fields
+from flask import request
 import time
 import datetime
 
@@ -137,9 +138,11 @@ class appObjClass(parAppObj):
 
     @self.flaskAppObject.after_request
     def after_request(response):
-      response.headers.add('Access-Control-Allow-Origin', self.accessControlAllowOriginObj.toString())
-      response.headers.add('Access-Control-Allow-Headers', '*')
-      response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+      originHeader = request.headers.get('Origin')
+      if originHeader in self.accessControlAllowOriginObj.data:
+        response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
       return response
 
   def stopThread(self):

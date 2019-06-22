@@ -6,20 +6,23 @@ import constants
 import json
 import copy
 
+#Origin can only have one value
+## http://blog.crashtest-security.com/multiple-values-access-control-allow-origin
+
 class corsPreflight_helpers(testHelperAPIClient):
-  def findCORSReturnVals(self, tenantName):
+  def findCORSReturnVals(self, tenantName, origin):
     loginJSON = {}
     result2 = self.testClient.options(
       self.loginAPIPrefix + '/' + tenantName + '/authproviders',
       data=json.dumps(loginJSON), content_type='application/json',
-      headers={"Origin": httpOrigin}
+      headers={"Origin": origin}
     )
     self.assertEqual(result2.status_code, 200, msg="Options request did not return 200")
     return result2.headers
 
 class test_corsPreflight(corsPreflight_helpers):
   def test_simpleCorsCall(self):
-    a = self.findCORSReturnVals(constants.masterTenantName)
+    a = self.findCORSReturnVals(constants.masterTenantName, httpOrigin)
 
     self.assertEqual(a.get("Access-Control-Allow-Origin"),env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"])
 
@@ -38,6 +41,7 @@ class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
     )
     self.assertEqual(result.status_code, 200)
 
-    a = self.findCORSReturnVals(constants.masterTenantName)
+TODO Check for each valid origin and one invalid one
+    a = self.findCORSReturnVals(constants.masterTenantName, httpOrigin)
 
     self.assertEqual(a.get("Access-Control-Allow-Origin"),env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com")
