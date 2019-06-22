@@ -26,6 +26,7 @@ from refreshTokenGeneration import RefreshTokenManager
 from persons import GetPerson
 from userPersonCommon import GetUser
 from authProviders_base import resetStaticData as authProviders_resetStaticData
+from uniqueCommaSeperatedList import uniqueCommaSeperatedListClass
 
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -50,7 +51,7 @@ class appObjClass(parAppObj):
   refreshTokenManager = None
   scheduler = None
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
-  APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN = None
+  accessControlAllowOriginObj = None
 
   def init(self, env, serverStartTime, testingMode = False):
     authProviders_resetStaticData()
@@ -83,12 +84,13 @@ class appObjClass(parAppObj):
 
     self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
 
-    self.APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN = readFromEnviroment(
+    originCommaSeperatedList = readFromEnviroment(
       env,
       'APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN',
       self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD,
       None
     )
+    self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(originCommaSeperatedList)
 
 
     print('APIAPP_JWT_TOKEN_TIMEOUT:'+str(self.APIAPP_JWT_TOKEN_TIMEOUT) + ' seconds')
@@ -135,7 +137,7 @@ class appObjClass(parAppObj):
 
     @self.flaskAppObject.after_request
     def after_request(response):
-      response.headers.add('Access-Control-Allow-Origin', self.APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN)
+      response.headers.add('Access-Control-Allow-Origin', self.accessControlAllowOriginObj.toString())
       response.headers.add('Access-Control-Allow-Headers', '*')
       response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
       return response

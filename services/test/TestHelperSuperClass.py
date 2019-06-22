@@ -95,8 +95,28 @@ class testHelperSuperClass(unittest.TestCase):
         print("**** Wrong exception raised:")
         print("      expected: " + type(ExpectedException).__name__ + ' - ' + str(ExpectedException));
         print("           got: " + type(context.exception).__name__ + ' - ' + str(context.exception));
+        print("")
+        if context.exception.__traceback__ is None:
+          print("No traceback data in origional exception")
+        else:
+          print("Origional exception Traceback: ", context.exception.__traceback__)
+        print("context", context)
         raise context.exception
     self.assertTrue(ExpectedException == context.exception)
+
+  def checkGotRightExceptionType(self, context, ExpectedException, msg=""):
+    if (context.exception != None):
+      if (context.exception != ExpectedException):
+        if (not isinstance(context.exception,ExpectedException)):
+          print("**** Wrong exception TYPE raised:")
+          print("      expected: " + type(ExpectedException).__name__ + ' - ' + str(ExpectedException));
+          print("           got: " + type(context.exception).__name__ + ' - ' + str(context.exception));
+          print("")
+          if context.exception.__traceback__ is None:
+            print("No traceback data in origional exception")
+          else:
+            print("Origional exception Traceback: ", context.exception.__traceback__)
+          raise context.exception
 
   def sortAllMembers(self, objToSotr):
     if isinstance(objToSotr,list):
