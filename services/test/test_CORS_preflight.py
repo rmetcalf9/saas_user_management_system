@@ -5,6 +5,7 @@ from TestHelperSuperClass import tenantWithNoAuthProviders, env, httpOrigin, tes
 import constants
 import json
 import copy
+from uniqueCommaSeperatedList import uniqueCommaSeperatedListClass
 
 #Origin can only have one value
 ## http://blog.crashtest-security.com/multiple-values-access-control-allow-origin
@@ -24,9 +25,28 @@ class test_corsPreflight(corsPreflight_helpers):
   def test_simpleCorsCall(self):
     a = self.findCORSReturnVals(constants.masterTenantName, httpOrigin)
 
-    self.assertEqual(a.get("Access-Control-Allow-Origin"),env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"])
+    requiredOriginList = uniqueCommaSeperatedListClass(env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"]).data
+    for x in requiredOriginList:
+      a = self.findCORSReturnVals(constants.masterTenantName, x)
+      self.assertEqual(a.get("Access-Control-Allow-Origin"),x)
 
-#TODO Test for combinations of data
+    a = self.findCORSReturnVals(constants.masterTenantName, "http://h.com")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+    a = self.findCORSReturnVals(constants.masterTenantName, "hyyp://i.com")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+    a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+    a = self.findCORSReturnVals(constants.masterTenantName, None)
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+    a = self.findCORSReturnVals(constants.masterTenantName, "")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+
+#Test for combinations of data
 class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
   def test_twoTenantsCall(self):
     tenantWithDifferentAllowedOrigin = copy.deepcopy(tenantWithNoAuthProviders)
@@ -41,7 +61,16 @@ class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
     )
     self.assertEqual(result.status_code, 200)
 
-TODO Check for each valid origin and one invalid one
-    a = self.findCORSReturnVals(constants.masterTenantName, httpOrigin)
+    requiredOriginList = uniqueCommaSeperatedListClass(env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com").data
+    for x in requiredOriginList:
+      a = self.findCORSReturnVals(constants.masterTenantName, x)
+      self.assertEqual(a.get("Access-Control-Allow-Origin"),x)
 
-    self.assertEqual(a.get("Access-Control-Allow-Origin"),env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com")
+    a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+    a = self.findCORSReturnVals(constants.masterTenantName, None)
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+    a = self.findCORSReturnVals(constants.masterTenantName, "")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
