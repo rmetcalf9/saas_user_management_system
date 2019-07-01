@@ -113,8 +113,10 @@ export default {
         pagination.page = 1
       }
       var queryParams = []
-      if (filter !== '') {
-        queryParams['query'] = filter
+      if (filter !== null) {
+        if (filter !== '') {
+          queryParams['query'] = filter
+        }
       }
       if (pagination.rowsPerPage !== 0) {
         queryParams['pagesize'] = pagination.rowsPerPage.toString()
