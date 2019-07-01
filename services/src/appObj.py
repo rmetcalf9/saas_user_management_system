@@ -140,9 +140,11 @@ class appObjClass(parAppObj):
     def after_request(response):
       originHeader = request.headers.get('Origin')
       if originHeader in self.accessControlAllowOriginObj.data:
-        response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        if (not self.globalParamObject.getDeveloperMode()):
+          # base app will allow any origin if developer mode is selected
+          response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
+          response.headers.add('Access-Control-Allow-Headers', '*')
+          response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
       return response
 
   def stopThread(self):

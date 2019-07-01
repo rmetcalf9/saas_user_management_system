@@ -66,9 +66,9 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
     console.log('NON prod detected url and tenantName: ', currentURL, ': tenantName:', tenantName)
     return [
       { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
-      { prefix: 'http://127.0.0.1:8098/', kong: false }, // home run all parts on dec machine
+      { prefix: 'http://localhost:8098/', kong: false }, // home run all parts on dec machine
       { prefix: 'http://somefunnyhostname.com:5080/', kong: true }, // work container on dev machine
-      { prefix: 'http://127.0.0.1:80/', kong: true } // home container on dev machine
+      { prefix: 'http://localhost:80/', kong: true } // home container on dev machine
       // { prefix: 'http://localhost:8082/', kong: false },
       // { prefix: 'http://somefunnyhostname.com:8098/', kong: false }
     ]
@@ -102,12 +102,14 @@ function TryToConnectToAPIRecurring (locationsToTry, callback, apiPath) {
   console.log('Tyring to reach API at ' + config.url)
   axios(config).then(
     (response) => {
+      console.log('SUCCESS!')
       callback.ok({
         origResponse: response,
         sucessfulApiPrefix: apiPrefix
       })
     },
     (response) => {
+      console.log('FAILED')
       if (locationsToTry.length > 0) {
         TryToConnectToAPIRecurring(locationsToTry, callback, apiPath)
       } else {
