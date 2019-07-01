@@ -110,8 +110,7 @@ class appObjClass(parAppObj):
       raise(InvalidObjectStoreConfigInvalidJSONException)
 
     fns = {
-      'getCurDateTime': self.getCurDateTime,
-      'getPaginatedResult': self.getPaginatedResult
+      'getCurDateTime': self.getCurDateTime
     }
     self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
 

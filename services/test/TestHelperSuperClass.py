@@ -438,8 +438,7 @@ class testHelperAPIClientUsingSQLAlchemy(testClassWithTestClient):
       return
     #App object isn't instalised so we need to make an object to reset the data for the test
     fns = {
-      'getCurDateTime': appObj.getCurDateTime,
-      'getPaginatedResult': appObj.getPaginatedResult
+      'getCurDateTime': appObj.getCurDateTime
     }
     objectStore = createObjectStoreInstance(json.loads(self._getEnvironment()['APIAPP_OBJECTSTORECONFIG']), fns)
     objectStore.resetDataForTest()

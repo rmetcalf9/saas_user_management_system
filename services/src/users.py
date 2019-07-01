@@ -32,7 +32,7 @@ def CreateUser(appObj, userData, mainTenant, createdBy, storeConnection):
   if "other_data" in userData:
     OtherData = userData['other_data']
   OtherData["createdBy"] = createdBy
-  
+
   userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is not None:
     raise TryingToCreateDuplicateUserException
@@ -63,9 +63,9 @@ def associateUserWithPerson(appObj, UserID, personGUID, storeConnection):
     idfea.append(UserID)
     return idfea
   #print('Asociating user ', UserID, ' with ', personGUID)
-  
+
   storeConnection.updateJSONObject("UsersForEachPerson", personGUID, upd)
-  
+
 def AddUserRole(appObj, userID, tennantName, roleName, storeConnection):
   def updUser(obj, transactionContext):
     if obj is None:
@@ -78,7 +78,7 @@ def AddUserRole(appObj, userID, tennantName, roleName, storeConnection):
   storeConnection.updateJSONObject("users", userID, updUser)
 
 
-  
+
 ##END OF CREATION FUNCTIONS
 
 def DeleteUser(appObj, UserID, objectVersion, storeConnection):
@@ -86,13 +86,13 @@ def DeleteUser(appObj, UserID, objectVersion, storeConnection):
   if userObj is None:
     raise userDosentExistException
   associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("users_associatedPersons",UserID)
-    
+
   for personGUID in associatedPersonList:
     RemoveUserAssociation(appObj, UserID, personGUID, DeletePerson, storeConnection)
-    
+
   storeConnection.removeJSONObject("users", UserID, objectVersion)
   storeConnection.removeJSONObject("users_associatedPersons", UserID)
-  
+
   return userObj
 
 def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, storeConnection):
@@ -115,7 +115,7 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, st
     "known_as": known_as,
     "other_data": other_data
   }
-  
+
   def updUser(user, storeConnection):
     if user is None:
       raise userNotFoundException
@@ -126,9 +126,10 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, st
   return uObj
 
 def GetPaginatedUserData(appObj, request, outputFN, storeConnection):
-  return storeConnection.getPaginatedResult("users",  getPaginatedParamValues(request), outputFN)
+  a = getPaginatedParamValues(request)
+  ##print(a)
+  return storeConnection.getPaginatedResult("users",  a, outputFN)
 
 def getIdentityDict(appObj, personGUID, storeConnection):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)
   return identifyJSON
-
