@@ -11,7 +11,6 @@ from flask_restplus import fields
 from flask import request
 import time
 import datetime
-import logging
 
 from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
@@ -47,7 +46,7 @@ class appObjClass(parAppObj):
   APIAPP_REFRESH_TOKEN_TIMEOUT = None
   APIAPP_REFRESH_SESSION_TIMEOUT = None
   APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = None
-  APIAPP_SQLALCHEMYLOGGINGINFO = None
+  APIAPP_OBJECTSTOREDETAILLOGGING = None
   gateway = None
   defaultUserGUID = None
   testingDefaultPersonGUID = None
@@ -70,18 +69,6 @@ class appObjClass(parAppObj):
     if self.APIAPP_JWTSECRET is None:
       print("ERROR - APIAPP_JWTSECRET should always be set")
       raise invalidConfigurationException
-
-    self.APIAPP_SQLALCHEMYLOGGINGINFO = readFromEnviroment(
-      env=env,
-      envVarName='APIAPP_SQLALCHEMYLOGGINGINFO',
-      defaultValue='N',
-      acceptableValues=['Y', 'N'],
-      nullValueAllowed=True
-    ).strip()
-    if (self.APIAPP_SQLALCHEMYLOGGINGINFO=='Y'):
-      print("APIAPP_SQLALCHEMYLOGGINGINFO set to Y - statement logging enabled")
-      logging.basicConfig()
-      logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None).strip()
     self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None).strip()
@@ -123,10 +110,24 @@ class appObjClass(parAppObj):
       print(err.args) # the arguments that the exception has been called with.
       raise(InvalidObjectStoreConfigInvalidJSONException)
 
+    self.APIAPP_OBJECTSTOREDETAILLOGGING = readFromEnviroment(
+      env=env,
+      envVarName='APIAPP_OBJECTSTOREDETAILLOGGING',
+      defaultValue='N',
+      acceptableValues=['Y', 'N'],
+      nullValueAllowed=True
+    ).strip()
+    if (self.APIAPP_OBJECTSTOREDETAILLOGGING=='Y'):
+      print("APIAPP_OBJECTSTOREDETAILLOGGING set to Y - statement logging enabled")
+
     fns = {
       'getCurDateTime': self.getCurDateTime
     }
-    self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+    self.objectStore = createObjectStoreInstance(
+      objectStoreConfigDict,
+      fns,
+      detailLogging=(self.APIAPP_OBJECTSTOREDETAILLOGGING=='Y')
+    )
 
     def dbChangingFn(storeConnection):
       if GetTenant(masterTenantName, storeConnection, appObj=self) is None:
