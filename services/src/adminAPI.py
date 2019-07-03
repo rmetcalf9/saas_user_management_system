@@ -304,10 +304,12 @@ def registerAPI(appObj):
     @appObj.addStandardSortParams(nsAdmin)
     def get(self, tenant):
       '''Get list of users'''
-      logger.info('ADMIN/users A - request.args:' + str(request.args))
+      #logger.info('ADMIN/users A - request.args:' + str(request.args))
+      print('ADMIN/users A - request.args:' + str(request.args))
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      logger.info('ADMIN/users B - request.args:' + str(request.args))
+      print('ADMIN/users B - request.args:' + str(request.args))
       paginatedParamValues = getPaginatedParamValues(request)
+      print(str(paginatedParamValues))
 
       def dbfn(storeConnection):
         def defOutput(item):
