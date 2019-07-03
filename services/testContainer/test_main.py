@@ -54,3 +54,29 @@ class test_containerAPI(unittest.TestCase):
     cookies = {}
 
     callPutService(containerTestCommon.ADMINFRONTEND,"/" + constants.masterTenantName + "/tenants/usersystem", PUTdict, [405], loginDICT, headers, cookies)
+
+  def test_URLParamsGoToServer(self):
+    #https://api.metcarob.com/saas_user_management/v0/authed/api/admin/usersystem/users?query=code&pagesize=100&offset=0
+    loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
+    jwtToken = loginDICT['jwtData']['JWTToken']
+    headers = {}
+    cookies = {constants.jwtCookieName: jwtToken}
+    res, _ = callGetService(
+      containerTestCommon.ADMIN,
+      "/" + constants.masterTenantName + "/users",
+      [200],
+      None,
+      headers,
+      cookies
+    )
+    self.assertNotEqual(len(res['result']), 0, msg="Should not have zero users")
+    res2, _ = callGetService(
+      containerTestCommon.ADMIN,
+      "/" + constants.masterTenantName + "/users?query=codedfskhdsgew43tgrsadsasd&pagesize=100&offset=0",
+      [200],
+      None,
+      headers,
+      cookies
+    )
+    print(res2)
+    self.assertEqual(len(res2['result']), 0, msg="Query paramater should have resulted in no results")

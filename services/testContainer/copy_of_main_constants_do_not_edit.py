@@ -42,9 +42,9 @@ userCreationNotAllowedException = customExceptionClass('User Creation Not Allowe
 
 
 class invalidPersonInToken(Exception):
-  pass
+  text = "invalidPersonInToken"
 class invalidUserInToken(Exception):
-  pass
+  text = "invalidUserInToken"
 
 
 class notImplemented(customExceptionClass):
