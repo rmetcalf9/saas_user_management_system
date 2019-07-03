@@ -18,6 +18,10 @@ import copy
 import base64
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
   if 'AuthProviders' in content:
@@ -294,6 +298,7 @@ def registerAPI(appObj):
 
         try:
           outputFN = defOutput
+          logger.info('ADMIN/users - request.args:' + str(request.args))
           return GetPaginatedUserData(appObj, request, outputFN, storeConnection)
         except Exception as e:
           print(e)

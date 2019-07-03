@@ -29,6 +29,8 @@ from userPersonCommon import GetUser
 from authProviders_base import resetStaticData as authProviders_resetStaticData
 from uniqueCommaSeperatedList import uniqueCommaSeperatedListClass
 
+import logging
+import sys
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -55,7 +57,19 @@ class appObjClass(parAppObj):
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
   accessControlAllowOriginObj = None
 
+  def setupLogging(self):
+    root = logging.getLogger()
+    #root.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+
   def init(self, env, serverStartTime, testingMode = False):
+    ##self.setupLogging() Comment in when debugging
+
     authProviders_resetStaticData()
     self.scheduler = BackgroundScheduler(timezone="UTC")
     self.defaultUserGUID = str(uuid.uuid4())
