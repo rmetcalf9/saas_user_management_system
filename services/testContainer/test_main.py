@@ -72,7 +72,7 @@ class test_containerAPI(unittest.TestCase):
     self.assertNotEqual(len(res['result']), 0, msg="Should not have zero users")
     res2, _ = callGetService(
       containerTestCommon.ADMIN,
-      "/" + constants.masterTenantName + "/users?query=codedfskhdsgew43tgrsadsasd&pagesize=100&offset=0",
+      "/" + constants.masterTenantName + "/users?query=codedfskhdsgew43tgrsadsasd&pagesize=100&offset=0&someotherparam=abs",
       [200],
       None,
       headers,

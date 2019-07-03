@@ -19,7 +19,7 @@ import base64
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+###logger.setLevel(logging.INFO)
 
 
 def getPaginatedParamValues(request):
@@ -305,12 +305,12 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of users'''
       #logger.info('ADMIN/users A - request.args:' + str(request.args))
-      print('ADMIN/users A - request.args:' + str(request.args))
-      print('              - request.values:' + str(request.values))
-      print('              - request.url:' + str(request.url))
+      #print('ADMIN/users A - request.args:' + str(request.args))
+      #print('              - request.values:' + str(request.values))
+      #print('              - request.url:' + str(request.url))
       verifySecurityOfAdminAPICall(appObj, request, tenant)
       paginatedParamValues = getPaginatedParamValues(request)
-      print(str(paginatedParamValues))
+      #print(str(paginatedParamValues))
 
       def dbfn(storeConnection):
         def defOutput(item):
