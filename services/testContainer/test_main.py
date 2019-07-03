@@ -56,6 +56,10 @@ class test_containerAPI(unittest.TestCase):
     callPutService(containerTestCommon.ADMINFRONTEND,"/" + constants.masterTenantName + "/tenants/usersystem", PUTdict, [405], loginDICT, headers, cookies)
 
   def test_URLParamsGoToServer(self):
+    if containerTestCommon.runningViaKong:
+      print("Skipping test_testNormalJWTHeader as this won't work via Kong - Kong can not read custom headers")
+      return
+
     #https://api.metcarob.com/saas_user_management/v0/authed/api/admin/usersystem/users?query=code&pagesize=100&offset=0
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
     jwtToken = loginDICT['jwtData']['JWTToken']
