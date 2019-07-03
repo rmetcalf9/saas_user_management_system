@@ -16,12 +16,24 @@ from tenantObj import tenantClass
 from object_store_abstraction import WrongObjectVersionExceptionClass
 import copy
 import base64
-from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
+def getPaginatedParamValues(request):
+  #value checking now done in object store
+  offset = request.args.get('offset')
+  pagesize = request.args.get('pagesize')
+  sort = request.args.get('sort')
+  query = request.args.get('query')
+  return {
+    'offset': offset,
+    'pagesize': pagesize,
+    'query': query,
+    'sort': sort,
+  }
 
 def updateContentConvertingInputStringsToDictsWhereRequired(content):
   if 'AuthProviders' in content:
@@ -136,13 +148,16 @@ def registerAPI(appObj):
     def get(self, tenant):
       '''Get list of tenants'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
+
+      paginatedParamValues = getPaginatedParamValues(request)
+
       def defOutput(item):
         return tenantClass(item[0],item[1], appObj).getJSONRepresenation()
 
       try:
         def dbfn(storeConnection):
           outputFN = defOutput
-          return storeConnection.getPaginatedResult("tenants", getPaginatedParamValues(request), outputFN)
+          return storeConnection.getPaginatedResult("tenants", paginatedParamValues, outputFN)
         return appObj.objectStore.executeInsideConnectionContext(dbfn)
       except:
         raise InternalServerError
@@ -289,7 +304,11 @@ def registerAPI(appObj):
     @appObj.addStandardSortParams(nsAdmin)
     def get(self, tenant):
       '''Get list of users'''
+      logger.info('ADMIN/users A - request.args:' + str(request.args))
       verifySecurityOfAdminAPICall(appObj, request, tenant)
+      logger.info('ADMIN/users B - request.args:' + str(request.args))
+      paginatedParamValues = getPaginatedParamValues(request)
+
       def dbfn(storeConnection):
         def defOutput(item):
           a = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
@@ -298,8 +317,9 @@ def registerAPI(appObj):
 
         try:
           outputFN = defOutput
-          logger.info('ADMIN/users - request.args:' + str(request.args))
-          return GetPaginatedUserData(appObj, request, outputFN, storeConnection)
+          ##print(a)
+
+          return GetPaginatedUserData(appObj, paginatedParamValues, outputFN, storeConnection)
         except Exception as e:
           print(e)
           print(str(e.args))
@@ -463,11 +483,12 @@ def registerAPI(appObj):
       '''Get list of persons'''
       verifySecurityOfAdminAPICall(appObj, request, tenant)
 
+      paginatedParamValues = getPaginatedParamValues(request)
       try:
         def someFn(connectionContext):
           def defOutput(item):
             return CreatePersonObjFromUserDict(appObj, item[0],item[1],item[2],item[3], connectionContext).getJSONRepresenation()
-          return GetPaginatedPersonData(appObj, request, defOutput, connectionContext)
+          return GetPaginatedPersonData(appObj, paginatedParamValues, defOutput, connectionContext)
         return appObj.objectStore.executeInsideTransaction(someFn)
 
 

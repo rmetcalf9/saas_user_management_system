@@ -1,5 +1,4 @@
 from constants import customExceptionClass, DefaultHasAccountRole
-from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
 from persons import GetPerson, DeletePerson
 from userPersonCommon import RemoveUserAssociation, GetUser, userDosentExistException
@@ -125,10 +124,8 @@ def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, st
   uObj = GetUser(appObj, UserID, storeConnection)
   return uObj
 
-def GetPaginatedUserData(appObj, request, outputFN, storeConnection):
-  a = getPaginatedParamValues(request)
-  ##print(a)
-  return storeConnection.getPaginatedResult("users",  a, outputFN)
+def GetPaginatedUserData(appObj, paginatedParamValues, outputFN, storeConnection):
+  return storeConnection.getPaginatedResult("users",  paginatedParamValues, outputFN)
 
 def getIdentityDict(appObj, personGUID, storeConnection):
   identifyJSON, objectVer = appObj.objectStore.getObjectJSON(appObj,"Identities", personGUID)

@@ -7,7 +7,6 @@ from constants import customExceptionClass
 from object_store_abstraction import WrongObjectVersionExceptionClass
 from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
 from authsCommon import getAuthRecord, DeleteAuthRecord
-from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information
@@ -43,31 +42,31 @@ def deleteAuthAndUnassiciateFromPerson(appObj, personGUID, AuthUserKey, storeCon
   storeConnection.updateJSONObject("AuthsForEachPerson", personGUID, upd)
 
   DeleteAuthRecord(appObj, AuthUserKey, storeConnection)
-  
+
 def _getAuthInfoForKeyForPersonObj(appObj, authKey, storeConnection):
   authRecordDict, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey, storeConnection)
   return {
     "AuthUserKey": authRecordDict["AuthUserKey"],
     "known_as": authRecordDict["known_as"],
-    "AuthProviderType": authRecordDict["AuthProviderType"],  
+    "AuthProviderType": authRecordDict["AuthProviderType"],
     "AuthProviderGUID": authRecordDict["AuthProviderGUID"],
     "tenantName": authRecordDict["tenantName"]
   }
-  
+
 def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime, lastUpdateDateTime, storeConnection):
   AssociatedUserIDs = getListOfUserIDsForPersonNoTenantCheck(appObj, PersonDict['guid'], storeConnection)
   ##print("AAA:", AssociatedUserIDs, ":", personGUID)
   AssociatedUserObjs = []
   for uid in AssociatedUserIDs:
     AssociatedUserObjs.append(GetUser(appObj,uid, storeConnection))
-  
+
   authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2 = storeConnection.getObjectJSON("AuthsForEachPerson", PersonDict['guid'])
   authObjs = []
   if authKeyDICT is not None:
     #there are people with no auths
     for authKey in authKeyDICT:
       authObjs.append(_getAuthInfoForKeyForPersonObj(appObj, authKey, storeConnection))
-  
+
   personObj = personClass(PersonDict, objVersion, creationDateTime, lastUpdateDateTime, AssociatedUserObjs, authObjs)
   return personObj
 
@@ -84,7 +83,7 @@ def UpdatePerson(appObj, personGUID, objectVersion, storeConnection):
     raise personDosentExistException
   if str(personObj.getObjectVersion()) != str(objectVersion):
     raise WrongObjectVersionExceptionClass
-    
+
   def updPerson(person, storeConnection):
     if person is None:
       raise personDosentExistException
@@ -99,7 +98,7 @@ def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
   userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
   for userID in userIDsThisPerson:
     RemoveUserAssociation(appObj, userID, personGUID, None, storeConnection)
-  
+
   #may not have object version check (cascades don't)
   #not cascading delete down to users
   personObj = GetPerson(appObj, personGUID, storeConnection)
@@ -107,19 +106,18 @@ def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
     raise personDosentExistException
 
   storeConnection.removeJSONObject("Persons", personGUID, objectVersion)
-  
+
   authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("AuthsForEachPerson", personGUID)
 
   storeConnection.removeJSONObject("AuthsForEachPerson", personGUID, ignoreMissingObject=True)
-  
+
   storeConnection.removeJSONObject("UsersForEachPerson", personGUID, None, ignoreMissingObject=True)
 
-  
+
   if authsForThisGUID is not None:
     for authKey in authsForThisGUID:
       DeleteAuthRecord(appObj, authKey, storeConnection)
   return personObj
-  
-def GetPaginatedPersonData(appObj, request, outputFN, storeConnection):
-  return storeConnection.getPaginatedResult("Persons",  getPaginatedParamValues(request), outputFN)
 
+def GetPaginatedPersonData(appObj, paginatedParamValues, outputFN, storeConnection):
+  return storeConnection.getPaginatedResult("Persons",  paginatedParamValues, outputFN)
