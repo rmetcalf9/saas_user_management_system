@@ -306,8 +306,9 @@ def registerAPI(appObj):
       '''Get list of users'''
       #logger.info('ADMIN/users A - request.args:' + str(request.args))
       print('ADMIN/users A - request.args:' + str(request.args))
+      print('              - request.values:' + str(request.values))
+      print('              - request.url:' + str(request.url))
       verifySecurityOfAdminAPICall(appObj, request, tenant)
-      print('ADMIN/users B - request.args:' + str(request.args))
       paginatedParamValues = getPaginatedParamValues(request)
       print(str(paginatedParamValues))
 
