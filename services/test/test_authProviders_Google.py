@@ -235,10 +235,10 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
   #Test user with google auth creates a new account on second tenant the same user record is returned
   def test_AutocreateingGoogleAccountsInDifferentTenantsShareSameUser(self):
-    tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenant1 = self.createTenantWithAuthProvider(copy.deepcopy(tenantWithNoAuthProviders), True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
     tenant2D = copy.deepcopy(tenantWithNoAuthProviders)
     tenant2D['Name'] = 'secondTestTenant'
-    tenant2 = self.createTenantWithAuthProvider(tenant2D, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenant2 = self.createTenantWithAuthProvider(tenant2D, True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
 
     result2JSON = self.loginWithGoogle(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
 
@@ -247,8 +247,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     self.assertEqual(result2JSON['userGuid'],result3JSON['userGuid'],msg="Different user accounts returned")
     self.assertEqual(result2JSON['authedPersonGuid'],result3JSON['authedPersonGuid'],msg="Different person accounts used")
 
-
-  def test_TwoUsersGetDifferentUserAndPErsonIDs(self):
+  def test_TwoUsersGetDifferentUserAndPersonIDs(self):
     tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
 
     acc1LoginJSON = self.loginWithGoogle(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])

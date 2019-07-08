@@ -90,7 +90,7 @@ def registerAPI(appObj):
   @nsLogin.route('/<string:tenant>/authproviders')
   class servceInfo(Resource):
 
-    '''Login'''
+    '''Get Auth Providers'''
     @nsLogin.doc('login')
     @nsLogin.marshal_with(getTenantModel(appObj))
     @nsLogin.response(200, 'Success', model=getTenantModel(appObj))
