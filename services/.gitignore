@@ -1,3 +1,5 @@
 secret_run_app_developer.sh
 rds-combined-ca-bundle.pem
 googleauth_client_secret.json
+facebookauth_client_secret.json
+
