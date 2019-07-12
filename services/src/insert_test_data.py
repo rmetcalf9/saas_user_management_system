@@ -38,7 +38,7 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
   masterSecretKey = (username + ":" + password + ":AG44")
   decodedSalt = b64decode(tenantAuthProvSalt)
   ret = bcrypt.hashpw(masterSecretKey.encode('utf-8'), decodedSalt)
-  return ret.decode("utf-8") 
+  return ret.decode("utf-8")
 
 def callService(api, url, method, dataDICT, expectedResponses):
   result = None
@@ -78,8 +78,8 @@ def callService(api, url, method, dataDICT, expectedResponses):
       unsucessful = True
       if numTries > 60:
         print("We have been trying too many times - giving up")
-        raise err 
-      
+        raise err
+
 
   if result.status_code not in expectedResponses:
     print("Sending " + method + " to ", targetURL)
@@ -90,8 +90,8 @@ def callService(api, url, method, dataDICT, expectedResponses):
     print("     ",result.text)
     raise Exception("Did not get expected response")
   return json.loads(result.text), result.status_code
-  
-  
+
+
 def callGetService(api,url, expectedResponses):
   return callService(api,url, "get", None, expectedResponses)
 
@@ -109,7 +109,7 @@ def errorInProcess(errMessage):
   print("Press Enter to exit")
   a = input()
   exit(1)
-  
+
 
 print("Start of script to insert test data")
 
@@ -118,8 +118,8 @@ MainAuthProvider = AuthProvidersDICT['AuthProviders'][0]
 
 loginCallDICT = {
   "authProviderGUID": MainAuthProvider['guid'],
-  "credentialJSON": { 
-    "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'], 
+  "credentialJSON": {
+    "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
    }
 }
@@ -159,13 +159,26 @@ authProvGoogleCreationDICT = {
     "saltForPasswordHashing": None
 }
 
+authProvFacebookCreationDICT = {
+    "guid": None,
+    "Type": "facebook",
+    "AllowUserCreation": True,
+    "AllowLink": True,
+    "AllowUnlink": True,
+    "LinkText": 'Link Facebook Account',
+    "MenuText": "Login with Facebook",
+    "IconLink": "string",
+    "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../facebookauth_client_secret.json\"}",
+    "saltForPasswordHashing": None
+}
+
 #print(authProvGoogleCreationDICT)
 #errorInProcess("DD")
 
 registeruserDICT = {
   "authProviderGUID": "TODO",
-  "credentialJSON": { 
-    "username": "testUser_", 
+  "credentialJSON": {
+    "username": "testUser_",
     "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
    }
 }
@@ -195,7 +208,7 @@ def getTenantRoleDictFromTenantRoles(tenantRoles, tenantName):
   }
   tenantRoles.append(a)
   return a
-  
+
 def addUserRole(UserID, TenantName, role):
   print(" - adding " + role + " role to " + UserID + " on " + TenantName + " ", end='')
   AuthProvidersDICT,res = callGetService(ADMIN, "/" + masterTenantName + "/users/" + UserID, [200])
@@ -247,7 +260,7 @@ def addAuthProvider(tenantName, authDict):
       print(resDICT)
       errorInProcess("Error")
   return tenantDICT2
-  
+
 print("Setting up admin2 auth connected to two users - adminTest and normalTest")
 createUserUsingAdminAPI("adminTest", "adminTest", masterTenantName)
 createUserUsingAdminAPI("normalTest", "normalTest", masterTenantName)
@@ -259,6 +272,9 @@ addInternalAuth(personDICT['guid'], masterTenantName, MainAuthProvider, 'admin2'
 
 print("Adding google auth to master tenant")
 addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
+
+print("Adding facebook auth to master tenant")
+addAuthProvider(masterTenantName, authProvFacebookCreationDICT)
 
 print("Enabling Link and accounts with Master Tenant")
 tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + masterTenantName, [200])
@@ -280,13 +296,13 @@ for cur in range(creationStats['allowUserCreation_tenants']['num']):
       print('Skipping tenant create as it already exists')
     else:
       errorInProcess("Error")
-      
+
   tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], [200])
   if len(tenantDICT["AuthProviders"]) == 0:
     addAuthProvDICT = copy.deepcopy(tenantDICT)
     addAuthProvDICT["AuthProviders"].append(authProvCreationDICT)
     tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], addAuthProvDICT, [200])
-    
+
   for curUser in range(creationStats['allowUserCreation_tenants']['num_users']):
     print(" - user ", curUser)
     creationDICT = copy.deepcopy(registeruserDICT)
@@ -299,7 +315,7 @@ for cur in range(creationStats['allowUserCreation_tenants']['num']):
         print('Ignoring user create error as it already exists')
       else:
         errorInProcess("Error")
-    
+
 
 print("Creating more tenants without any users or auths")
 for cur in range(creationStats['empty_tenants']):
@@ -313,7 +329,7 @@ for cur in range(creationStats['empty_tenants']):
     else:
       errorInProcess("Error")
 
-print("Creating teat tenant with internal and google auth")
+print("Creating teat tenant with internal, facebook and google auth")
 creationDICT = copy.deepcopy(tenantCreationDICT)
 creationDICT['Name'] = creationDICT['Name'] + "_googleAuthWithInternal"
 resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
@@ -326,8 +342,8 @@ if (res==400):
 else:
   addAuthProvider(creationDICT['Name'], authProvCreationDICT)
   addAuthProvider(creationDICT['Name'], authProvGoogleCreationDICT)
+  addAuthProvider(creationDICT['Name'], authProvFacebookCreationDICT)
 
 print("End")
 
 #/public/login/{tenant}/authproviders
-

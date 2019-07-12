@@ -26,5 +26,13 @@ Example config:
 }
 ```
 
+## Facebook
 
+Facebook auth only works from https endpoints
 
+Example config:
+```
+"ConfigJSON": {
+  "clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"
+}
+```

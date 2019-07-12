@@ -37,6 +37,12 @@ facebookAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJS
 #  mutiple to represent different logins
 facebookLoginAccounts = []
 facebookLoginAccounts.append({
+  "code": "AAA",
+  "creds": {
+    "id_token": {
+      "sub": "RJM001"
+    }
+  }
 })
 
 class facebook_auth_test_api_helper_functions(testHelperAPIClient):
@@ -88,6 +94,7 @@ class facebook_auth_test_api_helper_functions(testHelperAPIClient):
     for x in expectedResults:
       if x == result2.status_code:
         return json.loads(result2.get_data(as_text=True))
+    print(result2.get_data(as_text=True))
     self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
     return None
 
@@ -185,10 +192,10 @@ class test_api(facebook_auth_test_api_helper_functions):
   #Test user with google auth in one tenant can't log into a tenant they don't have access too
 '''  def test_CrossTenantLoginsDisallowed(self):
     #Second tenant has allow user creation set to FALSE for this test to work - otherwise account is just auto created
-    tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, facebookAuthProv001_CREATE_withAllowCreate)
     tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
-    tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, False, googleAuthProv001_CREATE_withAllowCreate)
+    tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, False, facebookAuthProv001_CREATE_withAllowCreate)
 
     #Login as user on tenant where they have an account - this will cause the account to be autocreated
     result2JSON = self.loginWithFacebook(0, tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
@@ -197,12 +204,12 @@ class test_api(facebook_auth_test_api_helper_functions):
     result2JSON = self.loginWithFacebook(0, tenantWhereUserHasAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasAccountDict['Name'], 'google'), [200])
 
     #Login as user on tenant where they have an account and ensure failure (no autocreation will occur)
-    result2JSON = self.loginWithGoogle(0, tenantWhereUserHasNoAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasNoAccountDict['Name'], 'google'), [401])
+    result2JSON = self.loginWithFacebook(0, tenantWhereUserHasNoAccountDict['Name'], self.getTenantSpercificAuthProvDict(tenantWhereUserHasNoAccountDict['Name'], 'google'), [401])
 
 
   #Test user with google auth creates a new account on second tenant the same user record is returned
   def test_AutocreateingGoogleAccountsInDifferentTenantsShareSameUser(self):
-    tenant1 = self.createTenantWithAuthProvider(copy.deepcopy(tenantWithNoAuthProviders), True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
+    tenant1 = self.createTenantWithAuthProvider(copy.deepcopy(tenantWithNoAuthProviders), True, copy.deepcopy(facebookAuthProv001_CREATE_withAllowCreate))
     tenant2D = copy.deepcopy(tenantWithNoAuthProviders)
     tenant2D['Name'] = 'secondTestTenant'
     tenant2 = self.createTenantWithAuthProvider(tenant2D, True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
@@ -217,8 +224,8 @@ class test_api(facebook_auth_test_api_helper_functions):
   def test_TwoUsersGetDifferentUserAndPersonIDs(self):
     tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
 
-    acc1LoginJSON = self.loginWithFacebook(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
-    acc2LoginJSON = self.loginWithFacebook(1, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
+    acc1LoginJSON = self.loginWithFacebook(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'facebook'), [200])
+    acc2LoginJSON = self.loginWithFacebook(1, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'facebook'), [200])
 
     self.assertNotEqual(acc1LoginJSON['userGuid'],acc2LoginJSON['userGuid'],msg="user accounts returned should not be the same")
     self.assertNotEqual(acc1LoginJSON['authedPersonGuid'],acc2LoginJSON['authedPersonGuid'],msg="person accounts used should not be the same")

@@ -6,7 +6,8 @@ module.exports = function (ctx) {
     // app plugins (/src/plugins)
     boot: [
       'axios',
-      'google_login'
+      'google_login',
+      'facebook_sdk'
     ],
     css: [
       'app.styl'
@@ -55,8 +56,8 @@ module.exports = function (ctx) {
         'QItem',
         'QCard',
         'QCardActions',
-        
-        
+
+
         'QHeader',
         'QDialog',
         'QItemSection',

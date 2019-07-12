@@ -2,6 +2,17 @@
 from authProviders_base import authProvider, InvalidAuthConfigException
 import constants
 import json
+import requests
+
+#def credentialDictGet_email(credentialDICT):
+#  return credentialDICT["creds"]["id_token"]["email"]
+#def credentialDictGet_emailVerfied(credentialDICT):
+#  return credentialDICT["creds"]["id_token"]["email_verified"]
+#def credentialDictGet_known_as(credentialDICT):
+#  return credentialDICT["creds"]["id_token"]["given_name"]
+def credentialDictGet_unique_user_id(credentialDICT):
+  return credentialDICT["creds"]["id_token"]["sub"]
+
 
 def loadStaticData(fileName):
   try:
@@ -35,6 +46,10 @@ class authProviderFacebook(authProvider):
         raise constants.customExceptionClass('Facebook secret file invliad (missing client_id)','InvalidAuthConfigException')
       if "client_secret" not in self.getStaticData()['secretJSON']["web"]:
         raise constants.customExceptionClass('Facebook secret file invliad (missing client_id)','InvalidAuthConfigException')
+      if "redirect_uri" not in self.getStaticData()['secretJSON']["web"]:
+        raise constants.customExceptionClass('Facebook secret file invliad (missing redirect_uri)','InvalidAuthConfigException')
+      if "auth_uri" not in self.getStaticData()['secretJSON']["web"]:
+        raise constants.customExceptionClass('Facebook secret file invliad (missing auth_uri)','InvalidAuthConfigException')
 
   def _makeKey(self, credentialDICT):
     if 'code' not in credentialDICT:
@@ -57,18 +72,51 @@ class authProviderFacebook(authProvider):
     #not required as auths are checked at the enrichment stage
     pass
 
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+    try:
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+    except constants.customExceptionClass as err:
+      if err.id == 'userCreationNotAllowedException':
+        return #Do nothing
+      raise err
+
+  def _enrichCredentialDictForAuth(self, credentialDICT):
+    print("_enrichCredentialDictForAuth - Partially Implemented")
+
+    #From DOCS
+    #GET https://graph.facebook.com/v3.3/oauth/access_token?
+    #   client_id={app-id}
+    #   &redirect_uri={redirect-uri}
+    #   &client_secret={app-secret}
+    #   &code={code-parameter}
+
+    authUri = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["auth_uri"]
+    client_id=self.__getClientID()
+    client_secret=self.getStaticData()['secretJSON']["web"]["client_secret"]
+    code=credentialDICT['code']
+
+    urlToGet = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["auth_uri"]
+    urlToGet += "?client_id=" + self.__getClientID()
+    urlToGet += "&redirect_uri=" + self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["redirect_uri"]
+    urlToGet += "&client_secret=" + self.getStaticData()['secretJSON']["web"]["client_secret"]
+    urlToGet += "&code={code-parameter}"
+
+    print("URL to make get to call is:", urlToGet)
+
+    result = requests.get(
+      urlToGet,
+      headers=None,
+      cookies=None
+    )
+    print("Got result status code:", result.status_code)
+    print("Got result text:", result.text)
+
+    raise Exception("Rest Not Implemented yet")
+
   def _getTypicalAuthData(self, credentialDICT):
     print("_getTypicalAuthData")
     raise Exception("Not Implemented yet")
 
   def _getAuthData(self, appObj, credentialDICT):
     print("_getAuthData")
-    raise Exception("Not Implemented yet")
-
-  def _enrichCredentialDictForAuth(self, credentialDICT):
-    print("_enrichCredentialDictForAuth")
-    raise Exception("Not Implemented yet")
-
-  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
-    print("_AuthActionToTakeWhenThereIsNoRecord")
     raise Exception("Not Implemented yet")

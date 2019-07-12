@@ -79,6 +79,11 @@ const routes = [
     beforeEnter: ensurePassedTenantIsLoaded
   },
   {
+    path: '/:tenantName/AuthProvider/facebook',
+    component: () => import('pages/AuthProvider_facebook.vue'),
+    beforeEnter: ensurePassedTenantIsLoaded
+  },
+  {
     path: '/:tenantName/SecuritySettings',
     component: () => import('pages/SecuritySettings.vue'),
     beforeEnter: ensurePassedTenantIsLoaded
