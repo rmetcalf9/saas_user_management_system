@@ -58,13 +58,17 @@ class authProviderFacebook(authProvider):
     pass
 
   def _getTypicalAuthData(self, credentialDICT):
+    print("_getTypicalAuthData")
     raise Exception("Not Implemented yet")
 
   def _getAuthData(self, appObj, credentialDICT):
+    print("_getAuthData")
     raise Exception("Not Implemented yet")
 
   def _enrichCredentialDictForAuth(self, credentialDICT):
+    print("_enrichCredentialDictForAuth")
     raise Exception("Not Implemented yet")
 
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+    print("_AuthActionToTakeWhenThereIsNoRecord")
     raise Exception("Not Implemented yet")
