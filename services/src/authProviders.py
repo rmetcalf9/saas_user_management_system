@@ -1,6 +1,8 @@
 #Provides auth provider functions
+from authProviders_base import InvalidAuthConfigException
 from authProviders_Internal import authProviderInternal
 from authProviders_Google import authProviderGoogle
+from authProviders_Facebook import authProviderFacebook
 from uuid import uuid4
 from base64 import b64encode
 
@@ -9,9 +11,11 @@ def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
     return authProviderInternal(dataDict, guid, tenantName, tenantObj, appObj)
   if dataDict["Type"]=='google':
     return authProviderGoogle(dataDict, guid, tenantName, tenantObj, appObj)
-  return None
-  
-def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation, 
+  if dataDict["Type"]=='facebook':
+    return authProviderFacebook(dataDict, guid, tenantName, tenantObj, appObj)
+  raise InvalidAuthConfigException
+
+def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation,
   configJSON, AllowLink, AllowUnlink, LinkText
 ):
   if not isinstance(configJSON,dict):
@@ -36,16 +40,14 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
 
 def getExistingAuthProviderJSON(appObj, existingJSON, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText):
   return _getAuthProviderJSON(
-    appObj, 
-    existingJSON['guid'], 
-    existingJSON['saltForPasswordHashing'], 
+    appObj,
+    existingJSON['guid'],
+    existingJSON['saltForPasswordHashing'],
     menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText
   )
 
 def getNewAuthProviderJSON(appObj, menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText):
   return _getAuthProviderJSON(
-    appObj, str(uuid4()), str(b64encode(appObj.bcrypt.gensalt()),'utf-8'), 
+    appObj, str(uuid4()), str(b64encode(appObj.bcrypt.gensalt()),'utf-8'),
     menuText, iconLink, Type, AllowUserCreation, configJSON, AllowLink, AllowUnlink, LinkText
   )
-
-  
