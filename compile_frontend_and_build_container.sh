@@ -8,33 +8,6 @@ DOCKER_USERNAME=metcarob
 DOCKER_IMAGENAME=saas_user_managmenet_system
 VERSIONNUM=$(cat ./VERSION)
 
-function build_quasar_app {
-  APPNAME=${1}
-  echo "Executing Quasar webfrontend build"
-  cd ${GITROOT}/${APPNAME}
-  if [ -d ./dist ]; then
-    rm -rf dist
-  fi
-  if [ -d ./dist ]; then
-    echo "ERROR - failed to delete dist directory"
-    cd ${GITROOT}
-    exit 1
-  fi
-  eval quasar build
-  RES=$?
-  if [ ${RES} -ne 0 ]; then
-    cd ${GITROOT}
-    echo ""
-    echo "Quasar build failed for ${APPNAME}"
-    exit 1
-  fi
-  if [ ! -d ./dist ]; then
-    echo "ERROR - build command didn't create ${APPNAME}/dist directory"
-    cd ${GITROOT}
-    exit 1
-  fi
-}  
-
 docker image inspect ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild > /dev/null
 RES=$?
 if [ ${RES} -eq 0 ]; then
@@ -46,18 +19,28 @@ if [ ${RES} -eq 0 ]; then
   fi
 fi
 
-
-
-build_quasar_app frontend
+docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume metcarob/docker-build-quasar-app:0.0.6 -c "build_quasar_app /ext_volume spa"
 RES=$?
 if [ ${RES} -ne 0 ]; then
   exit 1
 fi
-build_quasar_app adminfrontend
+docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/adminfrontend,target=/ext_volume metcarob/docker-build-quasar-app:0.0.6 -c "build_quasar_app /ext_volume spa"
 RES=$?
 if [ ${RES} -ne 0 ]; then
   exit 1
 fi
+
+if [ ! -d ${GITROOT}/${APPNAME}/frontend/dist/spa ]; then
+  echo "ERROR - build command didn't create ${GITROOT}/${APPNAME}/frontend/dist/spa directory"
+  cd ${GITROOT}
+  exit 1
+fi
+if [ ! -d ${GITROOT}/${APPNAME}/adminfrontend/dist/spa ]; then
+  echo "ERROR - build command didn't create ${GITROOT}/${APPNAME}/adminfrontend/dist/spa directory"
+  cd ${GITROOT}
+  exit 1
+fi
+
 
 echo "Build docker container (VERSIONNUM=${VERSIONNUM})"
 #This file does no version bumping
