@@ -19,12 +19,12 @@ if [ ${RES} -eq 0 ]; then
   fi
 fi
 
-docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume metcarob/docker-build-quasar-app:0.0.6 -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
+docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume metcarob/docker-build-quasar-app:0.0.7 -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
 RES=$?
 if [ ${RES} -ne 0 ]; then
   exit 1
 fi
-docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/adminfrontend,target=/ext_volume metcarob/docker-build-quasar-app:0.0.6 -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
+docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/adminfrontend,target=/ext_volume metcarob/docker-build-quasar-app:0.0.7 -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
 RES=$?
 if [ ${RES} -ne 0 ]; then
   exit 1

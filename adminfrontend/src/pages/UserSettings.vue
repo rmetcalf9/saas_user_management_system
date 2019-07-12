@@ -31,6 +31,12 @@
           <q-item-label caption>{{ loggedInUserCookie }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>adminfrontend codebase version:</q-item-label>
+          <q-item-label caption>{{ codebasever }}</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-list>
   </q-page>
 </template>
@@ -40,6 +46,7 @@
 
 <script>
 import { Cookies } from 'quasar'
+import rjmversion from '../rjmversion'
 export default {
   name: 'PageIndex',
   methods: {
@@ -51,6 +58,9 @@ export default {
   computed: {
     loggedInUserCookie () {
       return Cookies.get('usersystemUserCredentials')
+    },
+    codebasever () {
+      return rjmversion.codebasever
     }
   }
 }
