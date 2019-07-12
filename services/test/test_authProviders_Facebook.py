@@ -170,7 +170,7 @@ class test_api(facebook_auth_test_api_helper_functions):
 
     result2JSON = self.loginWithFacebook(0, constants.masterTenantName, googleAuthProvider, [401])
 
-
+'''
   def test_authWithUserCreation(self):
     #Test authentication via google.
     ## Must use mocks
@@ -190,7 +190,7 @@ class test_api(facebook_auth_test_api_helper_functions):
     result3JSON = self.loginWithFacebook(0, tenantDict['Name'], facebookAuthProvider, [200])
 
   #Test user with google auth in one tenant can't log into a tenant they don't have access too
-'''  def test_CrossTenantLoginsDisallowed(self):
+  def test_CrossTenantLoginsDisallowed(self):
     #Second tenant has allow user creation set to FALSE for this test to work - otherwise account is just auto created
     tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, facebookAuthProv001_CREATE_withAllowCreate)
     tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
