@@ -82,28 +82,22 @@ class authProviderFacebook(authProvider):
       raise err
 
   def _enrichCredentialDictForAuth(self, credentialDICT):
-
-    '''
-      Example credentialJSON recieved from JSON login TODO CONF
-      {
-        "credentialJSON": {
-          "status": "connected",
-          "authResponse": {
-            "accessToken": "longlongstringoflettersandnumbers",
-            "userID": "10112018153479955",
-            "expiresIn": 5952,
-            "signedRequest": "longlongstringoflettersandnumbers",
-            "reauthorize_required_in": 7776000,
-            "data_access_expiration_time": 1570785648
-          }
-        },
-        "authProviderGUID": "b21e3b1a-cd88-4f18-845a-a27e1f29c96a"
-      }
-    '''
-
     print("_enrichCredentialDictForAuth - Partially Implemented")
 
+    '''
     print("input credentialDICT:", credentialDICT)
+    input credentialDICT: {
+      'authResponse': {
+        'accessToken': 'longlongstringoflettersandnumbers',
+        'userID': '10217018159979944',
+        'expiresIn': 6780,
+        'signedRequest': 'longlongstringoflettersandnumbers',
+        'reauthorize_required_in': 7776000,
+        'data_access_expiration_time': 1570788420
+      },
+      'status': 'connected'
+    }
+    '''
 
     #From DOCS
     #GET https://graph.facebook.com/v3.3/oauth/access_token?
