@@ -11,12 +11,12 @@ import requests
 #def credentialDictGet_known_as(credentialDICT):
 #  return credentialDICT["creds"]["id_token"]["given_name"]
 def credentialDictGet_unique_user_id(credentialDICT):
-  return credentialDICT["creds"]["id_token"]["sub"]
+  return credentialDICT["authResponse"]["userID"]
 
 
 def loadStaticData(fileName):
   try:
-    ##print('authProviderGoogle loadStaticData')
+    ##print('authProviderFacebook loadStaticData')
     with open(fileName, 'r') as f:
       return json.load(f)
   except FileNotFoundError:
@@ -74,14 +74,35 @@ class authProviderFacebook(authProvider):
 
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     try:
-      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Facebook/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing
       raise err
 
   def _enrichCredentialDictForAuth(self, credentialDICT):
+
+    '''
+      Example credentialJSON recieved from JSON login TODO CONF
+      {
+        "credentialJSON": {
+          "status": "connected",
+          "authResponse": {
+            "accessToken": "longlongstringoflettersandnumbers",
+            "userID": "10112018153479955",
+            "expiresIn": 5952,
+            "signedRequest": "longlongstringoflettersandnumbers",
+            "reauthorize_required_in": 7776000,
+            "data_access_expiration_time": 1570785648
+          }
+        },
+        "authProviderGUID": "b21e3b1a-cd88-4f18-845a-a27e1f29c96a"
+      }
+    '''
+
     print("_enrichCredentialDictForAuth - Partially Implemented")
+
+    print("input credentialDICT:", credentialDICT)
 
     #From DOCS
     #GET https://graph.facebook.com/v3.3/oauth/access_token?
@@ -90,14 +111,14 @@ class authProviderFacebook(authProvider):
     #   &client_secret={app-secret}
     #   &code={code-parameter}
 
-    authUri = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["auth_uri"]
+    authUri = self.getStaticData()['secretJSON']["web"]["auth_uri"]
     client_id=self.__getClientID()
     client_secret=self.getStaticData()['secretJSON']["web"]["client_secret"]
     code=credentialDICT['code']
 
-    urlToGet = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["auth_uri"]
+    urlToGet = self.getStaticData()['secretJSON']["web"]["auth_uri"]
     urlToGet += "?client_id=" + self.__getClientID()
-    urlToGet += "&redirect_uri=" + self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["redirect_uri"]
+    urlToGet += "&redirect_uri=" + self.getStaticData()['secretJSON']["web"]["redirect_uri"]
     urlToGet += "&client_secret=" + self.getStaticData()['secretJSON']["web"]["client_secret"]
     urlToGet += "&code={code-parameter}"
 
