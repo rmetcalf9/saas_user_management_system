@@ -11,6 +11,7 @@ import requests
 #def credentialDictGet_known_as(credentialDICT):
 #  return credentialDICT["creds"]["id_token"]["given_name"]
 def credentialDictGet_unique_user_id(credentialDICT):
+  print(credentialDICT)
   return credentialDICT["authResponse"]["userID"]
 
 

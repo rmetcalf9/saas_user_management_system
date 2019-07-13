@@ -37,10 +37,15 @@ facebookAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJS
 #  mutiple to represent different logins
 facebookLoginAccounts = []
 facebookLoginAccounts.append({
-  "code": "AAA",
   "creds": {
-    "id_token": {
-      "sub": "RJM001"
+    "status": "connected",
+    "authResponse": {
+      "accessToken": "longlongstringoflettersandnumbers",
+      "userID": "10112018153479955",
+      "expiresIn": 5952,
+      "signedRequest": "longlongstringoflettersandnumbers",
+      "reauthorize_required_in": 7776000,
+      "data_access_expiration_time": 1570785648
     }
   }
 })
@@ -77,8 +82,16 @@ class facebook_auth_test_api_helper_functions(testHelperAPIClient):
 
   def loginWithFacebook(self, accNum, tenantName, authProviderDICT, expectedResults):
     loginJSON = {
-      "credentialJSON":{
-        "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
+      "credentialJSON": {
+        "status": "connected",
+        "authResponse": {
+          "accessToken": "longlongstringoflettersandnumbers",
+          "userID": "10112018153479955",
+          "expiresIn": 5952,
+          "signedRequest": "longlongstringoflettersandnumbers",
+          "reauthorize_required_in": 7776000,
+          "data_access_expiration_time": 1570785648
+        }
       },
       "authProviderGUID":authProviderDICT['guid']
     }
