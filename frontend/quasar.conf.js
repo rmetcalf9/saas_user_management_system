@@ -6,8 +6,7 @@ module.exports = function (ctx) {
     // app plugins (/src/plugins)
     boot: [
       'axios',
-      'google_login',
-      'facebook_sdk'
+      'google_login'
     ],
     css: [
       'app.styl'

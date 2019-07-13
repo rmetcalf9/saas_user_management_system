@@ -69,15 +69,12 @@ export default {
 
     // var returnURI = window.location.href + '2?usersystem_returnaddress=' + encodeURIComponent(this.$store.state.globalDataStore.usersystemReturnaddress)
 
-    console.log('$fbapi:', this.$fbapi)
-    window.fbAsyncInit = function () {
-      window.FB.init({
-        appId: TTT.authProvInfo.StaticlyLoadedData.client_id,
-        autoLogAppEvents: true,
-        xfbml: true,
-        version: 'v3.3'
-      })
-    }
+    window.FB.init({
+      appId: TTT.authProvInfo.StaticlyLoadedData.client_id,
+      autoLogAppEvents: true,
+      xfbml: true,
+      version: 'v3.3'
+    })
 
     window.FB.login(function (response) {
       if (response.authResponse) {
