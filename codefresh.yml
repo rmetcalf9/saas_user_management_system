@@ -37,6 +37,7 @@ steps:
       - cf_export AUTHED_ACL_WHITELIST="${AUTHED_ACL_WHITELIST}"
       - cf_export AUTHED_ACL_BLACKLIST="${AUTHED_ACL_BLACKLIST}"
       - cf_export RJM_BUILDQUASARAPP_IMAGE="${RJM_BUILDQUASARAPP_IMAGE}"
+      - cf_export RJM_DOCKERWSCALLER_IMAGE="${RJM_DOCKERWSCALLER_IMAGE}"
 
   unit_test:
     description: Make sure all the unit tests pass
