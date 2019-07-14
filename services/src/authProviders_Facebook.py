@@ -82,6 +82,9 @@ class authProviderFacebook(authProvider):
       raise err
 
   def _enrichCredentialDictForAuth(self, credentialDICT):
+    # This process MUST verify the token we got from facebook is Invalid
+    #  otherwise users can send anything and pretend they logged into
+    #  facebook as anyone!
     print("_enrichCredentialDictForAuth - Partially Implemented")
 
     '''
@@ -106,16 +109,8 @@ class authProviderFacebook(authProvider):
     #   &client_secret={app-secret}
     #   &code={code-parameter}
 
-    authUri = self.getStaticData()['secretJSON']["web"]["auth_uri"]
-    client_id=self.__getClientID()
-    client_secret=self.getStaticData()['secretJSON']["web"]["client_secret"]
-    code=credentialDICT['code']
-
-    urlToGet = self.getStaticData()['secretJSON']["web"]["auth_uri"]
-    urlToGet += "?client_id=" + self.__getClientID()
-    urlToGet += "&redirect_uri=" + self.getStaticData()['secretJSON']["web"]["redirect_uri"]
-    urlToGet += "&client_secret=" + self.getStaticData()['secretJSON']["web"]["client_secret"]
-    urlToGet += "&code={code-parameter}"
+    urlToGet = "https://graph.facebook.com/me?fields=id&"
+    urlToGet += "access_token=" + credentialDICT["authResponse"]["accessToken"]
 
     print("URL to make get to call is:", urlToGet)
 
@@ -124,8 +119,22 @@ class authProviderFacebook(authProvider):
       headers=None,
       cookies=None
     )
+    '''
+    Example result
+    {
+      "id": "ID_VALUE"
+    }
+    '''
     print("Got result status code:", result.status_code)
     print("Got result text:", result.text)
+
+    resultDICT = json.loads(result.text)
+    print("resultDICT:", resultDICT)
+
+    if resultDICT["id"] == credentialDICT["authResponse"]["userID"]:
+      print("ID MATCH")
+    else:
+      print("ID MISMATCH")
 
     raise Exception("Rest Not Implemented yet")
 
