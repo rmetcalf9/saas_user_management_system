@@ -4,15 +4,12 @@ import constants
 import json
 import requests
 
-#def credentialDictGet_email(credentialDICT):
-#  return credentialDICT["creds"]["id_token"]["email"]
-#def credentialDictGet_emailVerfied(credentialDICT):
-#  return credentialDICT["creds"]["id_token"]["email_verified"]
-#def credentialDictGet_known_as(credentialDICT):
-#  return credentialDICT["creds"]["id_token"]["given_name"]
 def credentialDictGet_unique_user_id(credentialDICT):
   print(credentialDICT)
-  return credentialDICT["authResponse"]["userID"]
+  return credentialDICT["creds"]["userID"]
+def credentialDictGet_unique_access_token(credentialDICT):
+  print(credentialDICT)
+  return credentialDICT["creds"]["accessToken"]
 
 
 def loadStaticData(fileName):
@@ -85,63 +82,77 @@ class authProviderFacebook(authProvider):
     # This process MUST verify the token we got from facebook is Invalid
     #  otherwise users can send anything and pretend they logged into
     #  facebook as anyone!
-    print("_enrichCredentialDictForAuth - Partially Implemented")
+    try:
 
-    '''
-    print("input credentialDICT:", credentialDICT)
-    input credentialDICT: {
-      'authResponse': {
-        'accessToken': 'longlongstringoflettersandnumbers',
-        'userID': '10217018159979944',
-        'expiresIn': 6780,
-        'signedRequest': 'longlongstringoflettersandnumbers',
-        'reauthorize_required_in': 7776000,
-        'data_access_expiration_time': 1570788420
-      },
-      'status': 'connected'
+
+      #print("_enrichCredentialDictForAuth - Partially Implemented")
+
+      '''
+      print("input credentialDICT:", credentialDICT)
+      input credentialDICT: {
+        'authResponse': {
+          'accessToken': 'longlongstringoflettersandnumbers',
+          'userID': '10217018159979944',
+          'expiresIn': 6780,
+          'signedRequest': 'longlongstringoflettersandnumbers',
+          'reauthorize_required_in': 7776000,
+          'data_access_expiration_time': 1570788420
+        },
+        'status': 'connected'
+      }
+      '''
+
+      # URL to make get to call is: https://graph.facebook.com/me?fields=id&access_token=longlongstringoflettersandnumbers
+      #print("URL to make get to call is:", urlToGet)
+
+      urlToGet = "https://graph.facebook.com/me?fields=id&"
+      urlToGet += "access_token=" + credentialDICT["authResponse"]["accessToken"]
+
+      result = requests.get(
+        urlToGet,
+        headers=None,
+        cookies=None
+      )
+      '''
+      Example result
+      {
+        "id": "ID_VALUE"
+      }
+      '''
+      #print("Got result status code:", result.status_code)
+      # Got result status code: 200
+      #print("Got result text:", result.text)
+      #resultDICT = json.loads(result.text)
+      # Got result text: {"id":"123"}
+      #print("resultDICT:", resultDICT)
+      # resultDICT: {'id': '123'}
+      # ID MATCH
+
+      if result.status_code != 200:
+        raise constants.authFailedException
+
+      if resultDICT["id"] != credentialDICT["authResponse"]["userID"]:
+        raise constants.authFailedException
+
+    except Exception as err:
+      print(err) # for the repr
+      print(str(err)) # for just the message
+      print(err.args) # the arguments that the exception has been called with.
+      raise constants.authFailedException
+
+    return {
+      "creds": {
+        userID: credentialDICT["authResponse"]["userID"],
+        accessToken: credentialDICT["authResponse"]["accessToken"]
+      }
     }
-    '''
-
-    #From DOCS
-    #GET https://graph.facebook.com/v3.3/oauth/access_token?
-    #   client_id={app-id}
-    #   &redirect_uri={redirect-uri}
-    #   &client_secret={app-secret}
-    #   &code={code-parameter}
-
-    urlToGet = "https://graph.facebook.com/me?fields=id&"
-    urlToGet += "access_token=" + credentialDICT["authResponse"]["accessToken"]
-
-    print("URL to make get to call is:", urlToGet)
-
-    result = requests.get(
-      urlToGet,
-      headers=None,
-      cookies=None
-    )
-    '''
-    Example result
-    {
-      "id": "ID_VALUE"
-    }
-    '''
-    print("Got result status code:", result.status_code)
-    print("Got result text:", result.text)
-
-    resultDICT = json.loads(result.text)
-    print("resultDICT:", resultDICT)
-
-    if resultDICT["id"] == credentialDICT["authResponse"]["userID"]:
-      print("ID MATCH")
-    else:
-      print("ID MISMATCH")
-
-    raise Exception("Rest Not Implemented yet")
 
   def _getTypicalAuthData(self, credentialDICT):
-    print("_getTypicalAuthData")
-    raise Exception("Not Implemented yet")
+    return {
+      "user_unique_identifier": credentialDictGet_unique_user_id(credentialDICT) + '@' + self.guid, #used for username - needs to be unique across all auth provs
+      "known_as": credentialDictGet_unique_user_id(credentialDICT), #used to display in UI for the user name
+      "other_data": {}
+    }
 
   def _getAuthData(self, appObj, credentialDICT):
-    print("_getAuthData")
-    raise Exception("Not Implemented yet")
+    return {}
