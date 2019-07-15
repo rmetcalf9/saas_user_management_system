@@ -19,7 +19,7 @@ if [ ${RES} -eq 0 ]; then
   fi
 fi
 
-QUASARBUILDIMAGE="metcarob/docker-build-quasar-app:0.0.11"
+QUASARBUILDIMAGE="metcarob/docker-build-quasar-app:0.0.12"
 
 docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume ${QUASARBUILDIMAGE} -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
 RES=$?

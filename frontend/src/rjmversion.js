@@ -1,1 +1,2 @@
-export default {codebasever: 'devbuild'}
+/* eslint-disable */
+export default { codebasever: 'dev_build' }
