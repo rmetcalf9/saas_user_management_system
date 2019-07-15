@@ -122,7 +122,8 @@ class authProviderFacebook(authProvider):
       #print("Got result status code:", result.status_code)
       # Got result status code: 200
       #print("Got result text:", result.text)
-      #resultDICT = json.loads(result.text)
+
+      resultDICT = json.loads(result.text)
       # Got result text: {"id":"123"}
       #print("resultDICT:", resultDICT)
       # resultDICT: {'id': '123'}
