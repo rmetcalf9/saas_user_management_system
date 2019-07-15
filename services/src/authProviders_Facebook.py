@@ -110,8 +110,8 @@ class authProviderFacebook(authProvider):
           validCredentialDICT = False
 
       if not validCredentialDICT:
-        print("Invalid crecential DICT recieved")
-        print("input credentialDICT:", credentialDICT)
+        #print("Invalid crecential DICT recieved")
+        #print("input credentialDICT:", credentialDICT)
         raise constants.authFailedException
 
       # URL to make get to call is: https://graph.facebook.com/me?fields=id&access_token=longlongstringoflettersandnumbers
@@ -155,8 +155,8 @@ class authProviderFacebook(authProvider):
 
     return {
       "creds": {
-        userID: credentialDICT["authResponse"]["userID"],
-        accessToken: credentialDICT["authResponse"]["accessToken"]
+        "userID": credentialDICT["authResponse"]["userID"],
+        "accessToken": credentialDICT["authResponse"]["accessToken"]
       }
     }
 
