@@ -19,6 +19,12 @@
             @unlink="unlinkClick(curVal)"
              v-if="curVal.auth.AuthProviderType === 'google'"
           />
+          <AuthProvSecuritySettingsFacebook
+            :authData="curVal"
+            :loggedInPerson="UserSettingsData.loggedInUser"
+            @unlink="unlinkClick(curVal)"
+             v-if="curVal.auth.AuthProviderType === 'facebook'"
+          />
         </div>
       </q-list>
       <div v-if="unusedTenantAuthsWithAuthProvData.length > 0">
@@ -36,6 +42,12 @@
               @completeError="linkCompleteError"
               @completeOK="linkCompleteOK"
               v-if="curVal.Type === 'google'"
+            />
+            <AuthProvLinkFacebook
+              :authProvData="curVal"
+              @completeError="linkCompleteError"
+              @completeOK="linkCompleteOK"
+              v-if="curVal.Type === 'facebook'"
             />
           </div>
         </q-list>
@@ -60,6 +72,9 @@ import AuthProvLinkInternal from '../components/AuthProvider_Link_internal'
 import AuthProvSecuritySettingsGoogle from '../components/AuthProvider_SecuritySettings_google'
 import AuthProvLinkGoogle from '../components/AuthProvider_Link_google'
 
+import AuthProvSecuritySettingsFacebook from '../components/AuthProvider_SecuritySettings_facebook'
+import AuthProvLinkFacebook from '../components/AuthProvider_Link_facebook'
+
 function getEmptyUserSettingsData () {
   return {
     loggedInPerson: {
@@ -77,7 +92,9 @@ export default {
     'AuthProvSecuritySettingsInternal': AuthProvSecuritySettingsInternal,
     'AuthProvLinkInternal': AuthProvLinkInternal,
     'AuthProvSecuritySettingsGoogle': AuthProvSecuritySettingsGoogle,
-    'AuthProvLinkGoogle': AuthProvLinkGoogle
+    'AuthProvLinkGoogle': AuthProvLinkGoogle,
+    'AuthProvSecuritySettingsFacebook': AuthProvSecuritySettingsFacebook,
+    'AuthProvLinkFacebook': AuthProvLinkFacebook
   },
   data () {
     return {
