@@ -72,6 +72,7 @@ class authProviderFacebook(authProvider):
 
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     try:
+      print("Facebook: _AuthActionToTakeWhenThereIsNoRecord")
       self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Facebook/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
@@ -112,6 +113,7 @@ class authProviderFacebook(authProvider):
       if not validCredentialDICT:
         #print("Invalid crecential DICT recieved")
         #print("input credentialDICT:", credentialDICT)
+        print("Invalid credentialDICT passed to facebook login")
         raise constants.authFailedException
 
       # URL to make get to call is: https://graph.facebook.com/me?fields=id&access_token=longlongstringoflettersandnumbers
@@ -142,12 +144,17 @@ class authProviderFacebook(authProvider):
       # ID MATCH
 
       if result.status_code != 200:
+        print("Facebook serivce bad response")
+        print(" Got result status_code:", result.status_code)
+        print(" Got result text:", result.text)
         raise constants.authFailedException
 
       if resultDICT["id"] != credentialDICT["authResponse"]["userID"]:
+        print("Facebook vefiry failed")
         raise constants.authFailedException
 
     except Exception as err:
+      print("Facebook ERR)")
       print(err) # for the repr
       print(str(err)) # for just the message
       print(err.args) # the arguments that the exception has been called with.
