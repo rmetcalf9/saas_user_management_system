@@ -38,15 +38,8 @@ facebookAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJS
 facebookLoginAccounts = []
 facebookLoginAccounts.append({
   "creds": {
-    "status": "connected",
-    "authResponse": {
-      "accessToken": "longlongstringoflettersandnumbers",
-      "userID": "10112018153479955",
-      "expiresIn": 5952,
-      "signedRequest": "longlongstringoflettersandnumbers",
-      "reauthorize_required_in": 7776000,
-      "data_access_expiration_time": 1570785648
-    }
+    "userID": "10112018153479955",
+    "accessToken": "somelngstring"
   }
 })
 
