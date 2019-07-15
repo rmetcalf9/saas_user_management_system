@@ -5,10 +5,10 @@ import json
 import requests
 
 def credentialDictGet_unique_user_id(credentialDICT):
-  print(credentialDICT)
+  #print(credentialDICT)
   return credentialDICT["creds"]["userID"]
 def credentialDictGet_unique_access_token(credentialDICT):
-  print(credentialDICT)
+  #print(credentialDICT)
   return credentialDICT["creds"]["accessToken"]
 
 
@@ -50,8 +50,6 @@ class authProviderFacebook(authProvider):
         raise constants.customExceptionClass('Facebook secret file invliad (missing auth_uri)','InvalidAuthConfigException')
 
   def _makeKey(self, credentialDICT):
-    if 'code' not in credentialDICT:
-      raise InvalidAuthConfigException
     if 'creds' not in credentialDICT:
       raise InvalidAuthConfigException
     return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'facebook'
