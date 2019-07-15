@@ -88,7 +88,6 @@ class authProviderFacebook(authProvider):
       #print("_enrichCredentialDictForAuth - Partially Implemented")
 
       '''
-      print("input credentialDICT:", credentialDICT)
       input credentialDICT: {
         'authResponse': {
           'accessToken': 'longlongstringoflettersandnumbers',
@@ -101,6 +100,19 @@ class authProviderFacebook(authProvider):
         'status': 'connected'
       }
       '''
+      validCredentialDICT = True
+      if "authResponse" not in credentialDICT:
+        validCredentialDICT = False
+      else:
+        if "accessToken" not in credentialDICT["authResponse"]:
+          validCredentialDICT = False
+        if "userID" not in credentialDICT["authResponse"]:
+          validCredentialDICT = False
+
+      if not validCredentialDICT:
+        print("Invalid crecential DICT recieved")
+        print("input credentialDICT:", credentialDICT)
+        raise constants.authFailedException
 
       # URL to make get to call is: https://graph.facebook.com/me?fields=id&access_token=longlongstringoflettersandnumbers
       #print("URL to make get to call is:", urlToGet)
