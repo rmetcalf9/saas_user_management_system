@@ -205,7 +205,7 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
 
 # called locally
 def _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList):
-  tenantWithSameName, ver, creationDateTime, lastUpdateDateTime =  storeConnection.getObjectJSON("tenants", tenantName)
+  tenantWithSameName, ver, creationDateTime, lastUpdateDateTime, _ =  storeConnection.getObjectJSON("tenants", tenantName)
   if tenantWithSameName is not None:
     raise tenantAlreadtExistsException
   jsonForTenant = {
@@ -220,7 +220,7 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
   return tenantClass(jsonForTenant, createdTenantVer, appObj)
 
 def GetTenant(tenantName, storeConnection, appObj):
-  a, aVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",tenantName)
+  a, aVer, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("tenants",tenantName)
   if a is None:
     return a
   return tenantClass(a, aVer, appObj)

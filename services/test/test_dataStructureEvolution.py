@@ -145,7 +145,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
         return PreviousTenantExample
       storeConnection.updateJSONObject("tenants", PreviousTenantExample['Name'], updTenant, 2)
 
-      jsonData, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",constants.masterTenantName)
+      jsonData, objVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("tenants",constants.masterTenantName)
       tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, appObj=appObj)
       #print(tenantObj.getJSONRepresenation())
 
@@ -166,7 +166,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     def dbfn(storeConnection):
       self.Issue49_putOldStyleTenantIntoStore(storeConnection)
 
-      jsonData, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("tenants",constants.masterTenantName)
+      jsonData, objVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("tenants",constants.masterTenantName)
       tenantObj = GetTenant(randomTenantName, storeConnection, appObj=appObj)
       #print(tenantObj.getJSONRepresenation())
 

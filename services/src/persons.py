@@ -60,7 +60,7 @@ def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime
   for uid in AssociatedUserIDs:
     AssociatedUserObjs.append(GetUser(appObj,uid, storeConnection))
 
-  authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2 = storeConnection.getObjectJSON("AuthsForEachPerson", PersonDict['guid'])
+  authKeyDICT, objVer2, creationDateTime2, lastUpdateDateTime2, _ = storeConnection.getObjectJSON("AuthsForEachPerson", PersonDict['guid'])
   authObjs = []
   if authKeyDICT is not None:
     #there are people with no auths
@@ -71,7 +71,7 @@ def CreatePersonObjFromUserDict(appObj, PersonDict, objVersion, creationDateTime
   return personObj
 
 def GetPerson(appObj, personGUID, storeConnection):
-  personDICT, objVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("Persons", personGUID)
+  personDICT, objVer, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("Persons", personGUID)
   if personDICT is None:
     return None
   return CreatePersonObjFromUserDict(appObj, personDICT, objVer, creationDateTime, lastUpdateDateTime, storeConnection)
@@ -107,7 +107,7 @@ def DeletePerson(appObj, personGUID, objectVersion, storeConnection, a,b,c):
 
   storeConnection.removeJSONObject("Persons", personGUID, objectVersion)
 
-  authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("AuthsForEachPerson", personGUID)
+  authsForThisGUID, objVer, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("AuthsForEachPerson", personGUID)
 
   storeConnection.removeJSONObject("AuthsForEachPerson", personGUID, ignoreMissingObject=True)
 

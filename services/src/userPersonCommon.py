@@ -7,13 +7,13 @@ userDosentExistException = customExceptionClass('User not found', 'userDosentExi
 #This file is required to stop circular references between users and persons
 
 def GetUser(appObj, UserID, storeConnection):
-  jsonData, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("users",UserID)
+  jsonData, objVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("users",UserID)
   if jsonData is None:
     return None
   return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime, storeConnection)
-  
+
 def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime, storeConnection):
-  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2 = storeConnection.getObjectJSON("users_associatedPersons",UserDict['UserID'])
+  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2, _ = storeConnection.getObjectJSON("users_associatedPersons",UserDict['UserID'])
   return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
 
 
@@ -37,16 +37,16 @@ def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn, storeConne
         idfea.remove(userID)
       return idfea
     storeConnection.updateJSONObject("UsersForEachPerson", personGUID, updUsersForEachPerson)
-      
-      
+
+
     return associatedPersonList
   storeConnection.updateJSONObject("users_associatedPersons", userID, updateTheUsersPersonListFn)
-  
-  
-  userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("UsersForEachPerson",personGUID)
+
+
+  userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("UsersForEachPerson",personGUID)
   if userListForThisPerson is None:
     return
-    
+
   if deletePersonFn is not None:
     if len(userListForThisPerson)==0:
       #print("RemoveUserAssociation Last user for this persion - deleting the person")
@@ -54,12 +54,12 @@ def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn, storeConne
 
 def getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection):
   res = []
-  userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("UsersForEachPerson", personGUID)
+  userIDsThisPerson, ver, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("UsersForEachPerson", personGUID)
   if userIDsThisPerson is None:
     return []
   return userIDsThisPerson
 
-  
+
 def getListOfUserIDsForPerson(appObj, personGUID, tenantName, GetUser, storeConnection):
   userIDsThisPerson = getListOfUserIDsForPersonNoTenantCheck(appObj, personGUID, storeConnection)
   userIDsInThisTenant = []

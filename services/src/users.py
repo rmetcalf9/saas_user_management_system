@@ -84,7 +84,7 @@ def DeleteUser(appObj, UserID, objectVersion, storeConnection):
   userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is None:
     raise userDosentExistException
-  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime = storeConnection.getObjectJSON("users_associatedPersons",UserID)
+  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("users_associatedPersons",UserID)
 
   for personGUID in associatedPersonList:
     RemoveUserAssociation(appObj, UserID, personGUID, DeletePerson, storeConnection)
