@@ -48,6 +48,7 @@ module.exports = function (ctx) {
         'QToolbarTitle',
         'QTable',
         'QToggle',
+        'QTooltip',
         'QTh',
         'QTr',
         'QTd',
@@ -57,7 +58,7 @@ module.exports = function (ctx) {
         'QInput',
         'QField',
         'QItem',
-        
+
         'QHeader',
         'QFooter',
         'QDialog',

@@ -80,7 +80,16 @@
             <a href="https://github.com/rmetcalf9/saas_user_management_system" target="_blank">GitHub</a>
           </td></tr></table>
         </td>
-        <td align="right">Version: {{serverInfo.Server.Version}}</td>
+        <td align="right" v-if="serverInfoVersionMatchesCodeBaseVersion">Version: {{serverInfo.Server.Version}}</td>
+        <td align="right" v-if="!serverInfoVersionMatchesCodeBaseVersion" class="text-negative">
+          <div class="float-right">
+            Version: {{serverInfo.Server.Version}}
+            <q-tooltip>
+              <table><tr><td>Services: {{serverInfo.Server.Version}}</td></tr>
+              <tr><td>Code: {{ codebasever }}</td></tr></table>
+            </q-tooltip>
+          </div>
+        </td>
         </tr></table>
       </q-toolbar>
     </q-footer>
@@ -89,12 +98,14 @@
 
 <script>
 import { openURL } from 'quasar'
+import rjmversion from '../rjmversion'
 
 export default {
   name: 'MyLayout',
   data () {
     return {
-      leftDrawerOpen: this.$q.platform.is.desktop
+      leftDrawerOpen: this.$q.platform.is.desktop,
+      codebasever: rjmversion.codebasever
     }
   },
   computed: {
@@ -116,6 +127,16 @@ export default {
       var newPath = o.substring(1)
       // console.log('new Path is', newPath)
       return newPath
+    },
+    serverInfoVersionMatchesCodeBaseVersion () {
+      if (this.serverInfo.Server.Version === 'NotRead') {
+        // don't display the error if we haven't read services version yet
+        return true
+      }
+      if (this.serverInfo.Server.Version === this.codebasever) {
+        return true
+      }
+      return false
     }
   },
   methods: {
