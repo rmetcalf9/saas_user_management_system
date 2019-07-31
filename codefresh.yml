@@ -111,16 +111,12 @@ steps:
     registry: dockerhub
 
   #Deploy new container to my website swarm
-  #Delete secret saas_user_management_system_objectstore_config
-  #Delete secret saas_user_management_system_objectstore_config_mig_to_dynamodb
   deploy_to_metcarob_swarm:
       image: codefresh/remote-docker
       working_directory: ${{main_clone}}
       commands:
         - rdocker ${{RDOCKER_HOST}} docker service create --name ${{RJM_DOCKER_SERVICE_NAME}}
             --network main_net
-            --secret saas_user_management_system_objectstore_config
-            --secret saas_user_management_system_objectstore_config_mig_to_dynamodb
             --secret saas_user_management_system_objectstore_config_dynamodb
             --secret saas_user_management_system_objectstore_hashpw
             --secret saas_user_management_system_objectstore_adminpw
@@ -130,7 +126,7 @@ steps:
             --secret saas_user_management_system_authprov_facebook
             -e APIAPP_JWTSECRETFILE=/run/secrets/saas_jwtsecret
             -e APIAPP_GATEWAYINTERFACECONFIGFILE=/run/secrets/saas_user_management_system_gateway_config
-            -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config_mig_to_dynamodb
+            -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config_dynamodb
             -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw
             -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin
