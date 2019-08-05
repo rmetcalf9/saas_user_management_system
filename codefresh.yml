@@ -26,7 +26,7 @@ steps:
       - export AUTHED_ACL_WHITELIST="saas_user_management"
       - export AUTHED_ACL_BLACKLIST=""
       - export RJM_BUILDQUASARAPP_IMAGE="metcarob/docker-build-quasar-app:0.0.12"
-      - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.5.3"
+      - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.6.0"
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
@@ -66,13 +66,13 @@ steps:
   build_the_image:
     working_directory: ${{main_clone}}
     type: build
-    image_name: metcarob/saas_user_management_system
+    image_name: metcarob/saas_user_management
     tag: ${{RJM_VERSION}}
 
   build_the_test_image:
     working_directory: ${{main_clone}}/services/testContainer
     type: build
-    image_name: metcarob/saas_user_management_system
+    image_name: metcarob/saas_user_managementtest
     tag: develop
     dockerfile: ./Dockerfile
 
@@ -107,7 +107,7 @@ steps:
     description: description
     candidate: ${{build_the_image}}
     tag: ${{RJM_VERSION}}
-    image_name: metcarob/saas_user_management_system
+    image_name: metcarob/saas_user_management
     registry: dockerhub
 
   #Deploy new container to my website swarm
@@ -135,7 +135,7 @@ steps:
             -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/frontend
             -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api.metcarob.com"
             -e APIAPP_OBJECTSTOREDETAILLOGGING="N"
-            metcarob/saas_user_management_system:${{RJM_VERSION}}
+            metcarob/saas_user_management:${{RJM_VERSION}}
       environment:
         - SSH_KEY=${{SSH_KEY_COMMAS}}
         - SSH_PORT=${{SSH_PORT}}
@@ -305,4 +305,29 @@ steps:
       delay: 3
       exponentialFactor: 1
 
-# Possible future steps - test main endpoint and fail back if it is not working
+  approveCleanUpOldVersion:
+    type: pending-approval
+    title: Check prod version ${{RJM_VERSION}} is working
+    description: Check prod version before continuing pipeline and destorying old versions
+    timeout:
+      duration: 2
+      finalState: denied
+
+ cleanUpOldVersion:
+    image: codefresh/remote-docker
+    working_directory: ${{main_clone}}
+    commands:
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint docker_service_remove_non_live
+        ${{RJM_DOCKERWSCALLER_IMAGE}}
+        \"${{RJM_WS_NAME}}\"
+        \"${{RJM_VERSION}}\"
+        \"metcarob/\"
+    environment:
+      - SSH_KEY=${{SSH_KEY_COMMAS}}
+      - SSH_PORT=${{SSH_PORT}}
+      - SPLIT_CHAR=${{SPLIT_CHAR}}
+   when:
+     steps:
+     - name: approveCleanUpOldVersion
+       on:
+       - approved
