@@ -26,7 +26,7 @@ steps:
       - export AUTHED_ACL_WHITELIST="saas_user_management"
       - export AUTHED_ACL_BLACKLIST=""
       - export RJM_BUILDQUASARAPP_IMAGE="metcarob/docker-build-quasar-app:0.0.12"
-      - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.6.1"
+      - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.6.3"
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
@@ -317,7 +317,7 @@ steps:
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
-      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --entrypoint docker_service_remove_non_live
+      - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --volume=/var/run:/var/run --entrypoint docker_service_remove_non_live
         ${{RJM_DOCKERWSCALLER_IMAGE}}
         ${{RJM_WS_NAME}}
         ${{RJM_VERSION}}
@@ -332,6 +332,6 @@ steps:
         on:
         - approved
     retry:
-      maxAttempts: 3
+      maxAttempts: 2
       delay: 3
       exponentialFactor: 1
