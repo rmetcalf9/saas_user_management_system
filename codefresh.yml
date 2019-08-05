@@ -313,7 +313,7 @@ steps:
       duration: 2
       finalState: denied
 
- cleanUpOldVersion:
+  cleanUpOldVersion:
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -326,8 +326,8 @@ steps:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
       - SSH_PORT=${{SSH_PORT}}
       - SPLIT_CHAR=${{SPLIT_CHAR}}
-   when:
-     steps:
-     - name: approveCleanUpOldVersion
-       on:
-       - approved
+    when:
+      steps:
+      - name: approveCleanUpOldVersion
+        on:
+        - approved
