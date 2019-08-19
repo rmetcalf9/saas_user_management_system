@@ -14,16 +14,16 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, userna
   saltToUse = b64decode(tenantAuthProvSalt)
   res = appObj.bcrypt.hashpw(masterSecretKey, saltToUse)
   #print(" result:",res, ': (', type(res), ')')
-  
+
   return res
 
 def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
-  #USed for debugging - not in main code as would be security risk
+  #Used for debugging - not in main code as would be security risk
   #print("_INT_hashPassword call with:")
   #print(" - APIAPP_MASTERPASSWORDFORPASSHASH:", APIAPP_MASTERPASSWORDFORPASSHASH, ' (', type(APIAPP_MASTERPASSWORDFORPASSHASH), ')')
   #print(" - password:", password, ' (', type(password), ')')
   #print(" - salt:", salt, ' (', type(salt), ')')
-  
+
   masterSecretKey = (masterInternalAuthTypePassword + "f" + APIAPP_MASTERPASSWORDFORPASSHASH)
   if (type(password)) is not bytes:
     #print(type(password))
@@ -36,10 +36,10 @@ def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, sal
     raise Exception('Salt passed to hashPassword must be bytes')
   combo_password = password + salt + str.encode(masterSecretKey)
   hashed_password = bcryptObj.hashpw(combo_password, salt)
-  
+
   #print("Resulting hashed password:")
   #print("hashed_password:", hashed_password, ' (', type(APIAPP_MASTERPASSWORDFORPASSHASH), ')')
-  
+
   return hashed_password
 
 class authProviderInternal(authProvider):
@@ -49,7 +49,7 @@ class authProviderInternal(authProvider):
       'fn': self._executeAuthOperation_resetPassword,
       'requiredDictElements': ['newPassword']
     }
-  
+
   def _authSpercificInit(self):
     if 'userSufix' not in self.getConfig():
       raise InvalidAuthConfigException
@@ -77,7 +77,7 @@ class authProviderInternal(authProvider):
     # this converts it to always be bytes
     if (type(credentialDICT['password'])) is not bytes:
       credentialDICT['password'] = bytes(credentialDICT['password'], 'utf-8')
-    
+
   def _auth(self, appObj, obj, credentialDICT):
     #print("_getAuthData call with:")
     #print(" credentialDICT['password']:",credentialDICT['password'], ' (', type(credentialDICT['password']), ')')
@@ -113,6 +113,6 @@ class authProviderInternal(authProvider):
     authObj['AuthProviderJSON']['password'] = newHashedPassword
     resultValue = {}
     return resultValue, authObj
-    
+
   def requireRegisterCallToAutocreateUser(self):
     return True

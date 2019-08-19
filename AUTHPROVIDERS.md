@@ -36,3 +36,23 @@ Example config:
   "clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"
 }
 ```
+## LDAP
+
+Authenticate via LDAP server
+
+Example config:
+```
+"ConfigJSON": {
+  "Timeout": 60,
+  "Host": "unixldap.somehost.com",
+  "Port": "123",
+  "UserBaseDN": "ou=People,ou=everyone,dc=somehost,dc=com",
+  "UserAttribute": "uid",
+  "GroupBaseDN": "ou=Group,ou=everyone,dc=somehost,dc=com",
+  "GroupAttribute": "cn",
+  "GroupMemberField": "memberUid",
+  "GroupWhiteList": "group1,group2,group3"
+}
+```
+
+GroupWhiteList: Users must be a memeber of at least one of these groups to be authenticated

@@ -20,6 +20,10 @@ from users import associateUserWithPerson
 
 from object_store_abstraction import createObjectStoreInstance
 
+from nose.plugins.attrib import attr
+def wipd(f):
+    return attr('wip')(f)
+
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
   return auth
