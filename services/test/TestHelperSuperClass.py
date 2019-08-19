@@ -202,6 +202,12 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
   ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
   return ret
 
+#Reversable version used for LDAP passwords which need to be known by the server
+def getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, tenantAuthProvSalt):
+  masterSecretKey = (username + ":" + password + ":AG44")
+  ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
+  return ret
+
 
 class testClassWithTestClient(testHelperSuperClass):
   testClient = None

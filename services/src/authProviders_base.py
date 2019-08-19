@@ -32,7 +32,7 @@ class authProvider():
   operationFunctions = None
   tenantObj = None
   appObj = None
-  def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
+  def __init__(self, dataDict, guid, tenantName, tenantObj, appObj, typeSupportsUserCreation = True):
     self.appObj = appObj
     self.tenantObj = tenantObj
     self.operationFunctions = dict()
@@ -48,7 +48,11 @@ class authProvider():
       dataDict['AllowUnlink'] = False
     if not 'LinkText' in dataDict:
       dataDict['LinkText'] = 'Unlink ' + dataDict['Type']
-      
+
+    if not typeSupportsUserCreation:
+      if dataDict['AllowUserCreation']:
+        raise constants.customExceptionClass("ERROR auth type " +  dataDict['Type'] + " dosen't support user creation",'InvalidAuthConfigException')
+
     ##type check
     #if type(dataDict["saltForPasswordHashing"]) is not str:
     #  print('dataDict["saltForPasswordHashing"]:',dataDict["saltForPasswordHashing"])
@@ -69,7 +73,7 @@ class authProvider():
     #print('Checking has static data for:', self.guid)
     #print('staticDataClassInstance.data:',staticDataClassInstance.data)
     return self.guid in staticDataClassInstance.data
-  
+
   def getType(self):
     return self.dataDict['Type']
   def getConfig(self):
@@ -99,6 +103,7 @@ class authProvider():
   def _authSpercificInit(self):
     raise NotOverriddenException
 
+  #Saved with the users authorization as part of their auth record
   def _getAuthData(self, appObj, credentialDICT):
     raise NotOverriddenException
 
@@ -121,7 +126,7 @@ class authProvider():
     SaveAuthRecord(appObj, key, mainObjToStore, storeConnection)
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
-  
+
   def AuthReturnAll(self, appObj, credentialDICT, storeConnection, supressAutocreate):
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
     if obj is None:
@@ -135,7 +140,7 @@ class authProvider():
         raise constants.authNotFoundException
     self._auth(appObj, obj, credentialDICT)
     return obj, objVer, creationDateTime, lastUpdateDateTime
-    
+
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     raise constants.authNotFoundException
 
@@ -155,9 +160,10 @@ class authProvider():
       "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
     }
 
+  #Passed in call to createUser when user is first created
   def getTypicalAuthData(self, credentialDICT):
     return self._getTypicalAuthData(credentialDICT)
-   
+
   # Normally overridden
   def _getDefaultKnownAs(self, credentialDICT):
     return 'autoCreatedUser'
@@ -166,28 +172,28 @@ class authProvider():
     return self._getDefaultKnownAs(credentialDICT)
 
   def executeAuthOperation(self, appObj, credentialDICT, storeConnection, operationName, operationDICT):
-    #for processing operations that change the auth record. This requires existing credentials. 
+    #for processing operations that change the auth record. This requires existing credentials.
     # one example of an auth operaiton is 'resetpassword' for the internal ath
-    
+
     if operationName not in self.operationFunctions:
       raise InvalidOperationException
-    
+
     #Get the auth object - this will raise an exception is the credentials are wrong
     ##Problem to do the auth we need to know the username
     ## but it is not a field in the JWT token
     ## IT is in the response to currentAuthInfo so the webapp can retrieve it from there and supply it correctly in credentials
     authObj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection, False)
-    
+
     for x in self.operationFunctions[operationName]['requiredDictElements']:
       if x not in operationDICT:
         raise customExceptionClass('Missing operation paramater - ' + x,'OperationParamMissingException')
     (resultValue, alteredAuthObj) = self.operationFunctions[operationName]['fn'](appObj, authObj, storeConnection, operationName, operationDICT)
-    
+
     #Save changed auth data back to object store
     UpdateAuthRecord(appObj, self._makeKey(credentialDICT), alteredAuthObj, objectVersion, storeConnection)
-    
+
     return resultValue
-  
+
   #some auth types will need credentials enriched
   ## e.g. for google Auth we recieve a Code, we will need to enrich that to get
   ## a refresh token, access token and a key
@@ -198,5 +204,3 @@ class authProvider():
   #Overidden for auth provider types that require a seperate call to the register function to create a user
   def requireRegisterCallToAutocreateUser(self):
     return False
-
-

@@ -51,7 +51,8 @@ Example config:
   "GroupBaseDN": "ou=Group,ou=everyone,dc=somehost,dc=com",
   "GroupAttribute": "cn",
   "GroupMemberField": "memberUid",
-  "GroupWhiteList": "group1,group2,group3"
+  "GroupWhiteList": "group1,group2,group3",
+  "userSufix": "@OrgNameLDAP"
 }
 ```
 
