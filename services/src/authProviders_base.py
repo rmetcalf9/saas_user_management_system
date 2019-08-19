@@ -103,7 +103,7 @@ class authProvider():
   def _authSpercificInit(self):
     raise NotOverriddenException
 
-  #Saved with the users authorization as part of their auth record
+  #Saved with the authProvs record
   def _getAuthData(self, appObj, credentialDICT):
     raise NotOverriddenException
 

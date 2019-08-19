@@ -7,6 +7,7 @@ import os
 from tenants import GetTenant, CreateUser
 from persons import CreatePerson
 from users import associateUserWithPerson
+from authProviders_LDAP import encryptPassword, decryptPassword
 
 LDAPAuthProv001_CREATE_configJSON = {
   "Timeout": 60,
@@ -89,7 +90,8 @@ class authProviderHelperFunctions(testHelperAPIClient):
       "authProviderGUID": authProviderDICT['guid'],
       "credentialJSON": {
         "username": username,
-        "password": hashedPassword
+        "iv": hashedPassword["iv"],
+        "password": hashedPassword["password"]
        }
     }
     result2 = self.testClient.post(
@@ -101,7 +103,7 @@ class authProviderHelperFunctions(testHelperAPIClient):
     for x in expectedResults:
       if result2.status_code == x:
         return json.loads(result2.get_data(as_text=True))
-    print(result2.get_data(as_text=True))
+    #print(result2.get_data(as_text=True))
     self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
     return None
 
@@ -125,6 +127,15 @@ class authProviderHelperFunctions(testHelperAPIClient):
 
 @wipd
 class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
+  def test_passwordEncrypt(self):
+    plainText="AAAAA"
+    salt=appObj.bcrypt.gensalt()
+
+    (iv, cypherText) = encryptPassword(plainText, salt)
+    plainText2 = decryptPassword(iv, cypherText, salt)
+
+    self.assertEqual(plainText, plainText2)
+
   def test_createAuth(self):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][0]["Type"],"internal", msg="First auth prov type wrong")
@@ -190,9 +201,30 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     )
 
     self.assertEqual(resp["message"],"authFailedException",msg="Wrong error message")
+  '''
+  def test_basPasswordFails(self):
+    resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
+    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
+    ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
 
-#bad password fails
+    #Create user
+    def dbfn(storeConnection):
+      return self.createLDAPUser(
+        username=ldapUsername,
+        storeConnection=storeConnection,
+        authProvGUID=ldapAuthProv["guid"]
+      )
+    createdUserData = appObj.objectStore.executeInsideTransaction(dbfn)
 
+    self.loginAsUserUsingLDAP(
+      tenant=constants.masterTenantName,
+      authProviderDICT=ldapAuthProv,
+      username=ldapUsername,
+      password='BADPASS',
+      expectedResults = [401]
+    )
+    self.assertEqual(resp["message"],"authFailedException",msg="Wrong error message")
+  '''
 #test_loginUserWithTwoGroupsONEMatching
 
 #test_loginUserFAILWithSingleGroupMatchingSingleGroupInWhitelist

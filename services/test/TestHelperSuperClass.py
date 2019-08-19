@@ -9,7 +9,7 @@ import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import from_iso8601
 import jwt
-from base64 import b64decode
+from base64 import b64decode, b64encode
 
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
@@ -19,6 +19,9 @@ from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson
 
 from object_store_abstraction import createObjectStoreInstance
+
+from authProviders_LDAP import encryptPassword
+
 
 from nose.plugins.attrib import attr
 def wipd(f):
@@ -204,8 +207,15 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
 
 #Reversable version used for LDAP passwords which need to be known by the server
 def getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, tenantAuthProvSalt):
-  masterSecretKey = (username + ":" + password + ":AG44")
-  ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))
+  (iv, cypherText) = encryptPassword(password, tenantAuthProvSalt)
+  print("SUPER: getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse")
+  print("Orig Pass:", password)
+  print("orig IV=", iv)
+  print("orig   p=", cypherText)
+  ret = {
+    "iv": b64encode(iv).decode("utf-8"),
+    "password": b64encode(cypherText).decode("utf-8")
+  }
   return ret
 
 
