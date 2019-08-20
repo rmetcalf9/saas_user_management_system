@@ -25,6 +25,8 @@ LDAPAuthProv001_CREATE_configJSON = {
   "MandatoryGroupList": "",
   "AnyGroupList": "group1,group2, group3"
 }
+LDAPAuthProv001_CREATE_configJSON_withMANdatoryGroup = copy.deepcopy(LDAPAuthProv001_CREATE_configJSON)
+LDAPAuthProv001_CREATE_configJSON_withMANdatoryGroup["MandatoryGroupList"] = 'groupMAN'
 
 LDAPAuthProv001_CREATE = {
   "guid": None,
@@ -40,6 +42,9 @@ LDAPAuthProv001_CREATE = {
 }
 LDAPAuthProv001_CREATE_withAllowCreate = copy.deepcopy(LDAPAuthProv001_CREATE)
 LDAPAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
+
+LDAPAuthProv001_CREATE_withAllowCreateAndMandatoryGroup  = copy.deepcopy(LDAPAuthProv001_CREATE_withAllowCreate)
+LDAPAuthProv001_CREATE_withAllowCreateAndMandatoryGroup["ConfigJSON"] = json.dumps(LDAPAuthProv001_CREATE_configJSON_withMANdatoryGroup)
 
 ldapUsername = "ldapuserNameTest001"
 ldapPassword = "ldapPASSTest001"
@@ -284,6 +289,62 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
       expectedResults = [401]
     )
 
-#test_userInAnyGroupButNotMandatoryGroup
+  @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  @patch('ldap.ldapobject.SimpleLDAPObject.search', return_value=123)
+  @patch('ldap.ldapobject.SimpleLDAPObject.result', side_effect=[
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group1,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group2,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'" + ldapUsername + "']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group3,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=groupMAN,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, [])
+  ])
+  def test_userInAnyGroupButNotMandatoryGroup(
+    self,
+    patchSimpleBindS,
+    patchSearch,
+    patchResult,
+  ):
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreateAndMandatoryGroup)
+    ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
+    self.assertEqual(ldapAuthProv["Type"],"LDAP")
 
-#test_userInMandatoryGroupButNotAnyGroup
+    self.loginAsUserUsingLDAP(
+      tenant=tenantDict["Name"],
+      authProviderDICT=ldapAuthProv,
+      username=ldapUsername,
+      password=ldapPassword,
+      expectedResults = [401]
+    )
+
+  @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  @patch('ldap.ldapobject.SimpleLDAPObject.search', return_value=123)
+  @patch('ldap.ldapobject.SimpleLDAPObject.result', side_effect=[
+    (ldap.RES_SEARCH_ENTRY, ["('cn=groupMAN,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'" + ldapUsername + "']})"]), #
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group1,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group2,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group3,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, [])
+  ])
+  def test_userInMandatoryGroupButNotAnyGroup(
+    self,
+    patchSimpleBindS,
+    patchSearch,
+    patchResult,
+  ):
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreateAndMandatoryGroup)
+    ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
+    self.assertEqual(ldapAuthProv["Type"],"LDAP")
+
+    self.loginAsUserUsingLDAP(
+      tenant=tenantDict["Name"],
+      authProviderDICT=ldapAuthProv,
+      username=ldapUsername,
+      password=ldapPassword,
+      expectedResults = [200]
+    )

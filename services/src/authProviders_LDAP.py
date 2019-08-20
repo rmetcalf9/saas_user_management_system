@@ -205,7 +205,7 @@ class authProviderLDAP(authProvider):
 
     return True
 
-  def __INT__isMemberOfRequiredGroups(self, credentialDICT, ldap_connection):
+  def __INT__LdapQueryGetGroupMembership(self, credentialDICT, ldap_connection):
     groupsUserIsAMemberOf = []
     for curGroup in self.KnownAboutGroupMap:
       if self.__INT__ldapQueryIsUserInGroup(
@@ -214,9 +214,19 @@ class authProviderLDAP(authProvider):
         ldap_connection
       ):
         groupsUserIsAMemberOf.append(curGroup)
+    return groupsUserIsAMemberOf
+
+  def __INT__isMemberOfRequiredGroups(self, groupsUserIsAMemberOf):
 
     #If they are not in a mandatory group return False
-    #TODO
+    for curManGroup in self.MandatoryGroupMap:
+      if curManGroup not in groupsUserIsAMemberOf:
+        return False
+
+    if len(self.MandatoryGroupMap) > 0:
+      #If there are mandtory groups and this user is in them it
+      # dosen't matter if they are in any
+      return True
 
     #If they are in group in ANY list return True
     for curGroup in groupsUserIsAMemberOf:
@@ -227,7 +237,6 @@ class authProviderLDAP(authProvider):
 
   #check the auth and if it is not valid raise authFailedException
   def _auth(self, appObj, obj, credentialDICT):
-    print("_auth:", credentialDICT['username'])
     credentialDICT2 = self.__INT__normaliseAndValidateCredentialDICT(credentialDICT)
 
     ldapConString = "ldaps://" + self.getConfig()['Host'] + ":" + self.getConfig()['Port']
@@ -237,5 +246,8 @@ class authProviderLDAP(authProvider):
 
     if not self.__INT__isValidUsernameAndPassword(appObj, obj, credentialDICT2, ldap_connection):
       raise constants.authFailedException
-    if not self.__INT__isMemberOfRequiredGroups(credentialDICT2, ldap_connection):
+
+    groupsUserIsAMemberOf = self.__INT__LdapQueryGetGroupMembership(credentialDICT2, ldap_connection)
+
+    if not self.__INT__isMemberOfRequiredGroups(groupsUserIsAMemberOf):
       raise constants.authFailedException
