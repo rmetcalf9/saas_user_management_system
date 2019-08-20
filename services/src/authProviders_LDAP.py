@@ -3,7 +3,8 @@ import constants
 import json
 from Crypto.Cipher import AES
 from Crypto.Random import OSRNG
-from base64 import b64decode
+from base64 import b64decode, b64encode
+import ldap
 
 #Communication is SSL and that should keep password secure
 # extra security is added by encryptinhg it using the salt as a key
@@ -21,30 +22,41 @@ def encryptPassword(plainText, salt):
   if (type(salt)) is not bytes:
     salt = bytes(salt, 'utf-8')
 
-  print("encryptPassword Salt:", salt)
   #salt is bytes or string
   #plain text is STRING
   #return value is bytes
   iv = OSRNG.posix.new().read(AES.block_size) #'This is an IV456'
   obj = AES.new(__INT__get32BytesFromSalt(salt), AES.MODE_CFB, iv)
   ciphertext = obj.encrypt(plainText)
-  return (iv, ciphertext)
+
+  #output base64 encoded strings
+  return (b64encode(iv).decode("utf-8"), b64encode(ciphertext).decode("utf-8"))
 
 def decryptPassword(iv, cypherText, salt):
   if (type(salt)) is not bytes:
     salt = bytes(salt, 'utf-8')
-
-  print("decryptPassword Salt:", salt)
+  #iv and cypherText are base64 encoded strings
+  ivi=b64decode(iv)
+  cypherTexti=b64decode(cypherText)
 
   #recieved val is BYTES
   #returned val needs to be STRING
-  obj2 = AES.new(__INT__get32BytesFromSalt(salt), AES.MODE_CFB, iv)
-  decrypted = obj2.decrypt(cypherText)
-  print("decrypted:", decrypted)
+  obj2 = AES.new(__INT__get32BytesFromSalt(salt), AES.MODE_CFB, ivi)
+  decrypted = obj2.decrypt(cypherTexti)
   return decrypted.decode("utf-8")
 
 class authProviderLDAP(authProvider):
   def _getTypicalAuthData(self, credentialDICT):
+    if 'username' not in credentialDICT:
+      raise InvalidAuthConfigException
+    if 'password' not in credentialDICT:
+      raise InvalidAuthConfigException
+    return {
+      "user_unique_identifier": credentialDICT['username'] + self.getConfig()['userSufix'], #used for username - needs to be unique across all auth provs
+      "known_as": credentialDICT['username'], #used to display in UI for the user name
+      "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
+    }
+
     raise Exception("_getTypicalAuthData not implemented")
 
   #LDAP will not need to store any data in the authProvs record
@@ -85,11 +97,18 @@ class authProviderLDAP(authProvider):
   #  raise Exception("_enrichCredentialDictForAuth not implemented")
 
   #No special action if there is no auth record - created if allowed
-  #def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
-  #  #if no user creation ERROR
-  #  #else create auth
-  #  raise Exception("_AuthActionToTakeWhenThereIsNoRecord not implemented")
-  #(Tests exist for all cases here)
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+    #Checks in registeruserfn
+    #if not self.getAllowUserCreation():
+    #  return
+    #if not self.tenantObj.getAllowUserCreation():
+    #  return
+    try:
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_LDAP/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+    except constants.customExceptionClass as err:
+      if err.id == 'userCreationNotAllowedException':
+        return #Do nothing
+      raise err
 
   def __INT__normaliseAndValidateCredentialDICT(self, credentialDICT):
     if 'username' not in credentialDICT:
@@ -103,13 +122,29 @@ class authProviderLDAP(authProvider):
     return credentialDICT
 
   def __INT__isValidUsernameAndPassword(self, appObj, authProvObj, credentialDICT):
-    print("     IV:", b64decode(credentialDICT['iv'].decode()))
-    print("password:", b64decode(credentialDICT['password'].decode()))
     decryptedPass = decryptPassword(
-      iv=b64decode(credentialDICT['iv'].decode()),
-      cypherText=b64decode(credentialDICT['password'].decode()),
+      iv=credentialDICT['iv'],
+      cypherText=credentialDICT['password'],
       salt=authProvObj["AuthProviderJSON"]['salt']
     )
+
+    username = credentialDICT['username'].strip()
+    password = decryptedPass
+    if username == "":
+      return False
+    if password == "":
+      return False
+    ldapConString = "ldaps://" + self.getConfig()['Host'] + ":" + self.getConfig()['Port']
+    ldap_connection = ldap.initialize(ldapConString)
+    ldap_connection.protocol_version = ldap.VERSION3
+    ldap.OPT_NETWORK_TIMEOUT = self.getConfig()['Timeout']
+    try:
+      ldap_connection.simple_bind_s(self.getConfig()['UserAttribute'] + "=" + username + "," + self.getConfig()['UserBaseDN'], password)
+    except ldap.INVALID_CREDENTIALS:
+      return False
+    except ldap.SERVER_DOWN:
+      raise constants.customExceptionClass('Can''t connect to LDAP ' + ldapConString,'ExternalAuthProviderNotReachableException')
+
     return True
 
   def __INT__isMemberOfRequiredGroups(self):
@@ -119,6 +154,6 @@ class authProviderLDAP(authProvider):
   def _auth(self, appObj, obj, credentialDICT):
     credentialDICT2 = self.__INT__normaliseAndValidateCredentialDICT(credentialDICT)
     if not self.__INT__isValidUsernameAndPassword(appObj, obj, credentialDICT2):
-      raise authFailedException
+      raise constants.authFailedException
     if not self.__INT__isMemberOfRequiredGroups():
-      raise authFailedException
+      raise constants.authFailedException

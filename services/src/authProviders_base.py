@@ -10,6 +10,7 @@ InvalidAuthConfigException = constants.customExceptionClass('Invalid Auth Config
 tryingToCreateDuplicateAuthException = constants.customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
 InvalidOperationException = constants.customExceptionClass('Invalid Operation','InvalidOperationException')
 NotOverriddenException = Exception('Not Overridden')
+ExternalAuthProviderNotReachableException = constants.customExceptionClass('ExternalAuthProviderNotReachable','ExternalAuthProviderNotReachableException')
 
 #person.py also uses userAuths
 

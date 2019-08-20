@@ -150,6 +150,9 @@ def registerAPI(appObj):
             raise Unauthorized('Invalid credentials provided')
           if (err.id=='UnknownUserIDException'):
             raise BadRequest(err.text)
+          if (err.id=='ExternalAuthProviderNotReachableException'):
+            print(err.text)
+            raise Exception('ExternalAuthProviderNotReachable')
           raise Exception('InternalServerError')
         except:
           raise InternalServerError

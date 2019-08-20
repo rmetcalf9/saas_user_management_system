@@ -1,4 +1,4 @@
-from TestHelperSuperClass import AddAuth, testHelperAPIClient, wipd, httpOrigin, getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from TestHelperSuperClass import tenantWithNoAuthProviders, AddAuth, testHelperAPIClient, wipd, httpOrigin, getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from appObj import appObj
 import constants
 import json
@@ -8,6 +8,9 @@ from tenants import GetTenant, CreateUser
 from persons import CreatePerson
 from users import associateUserWithPerson
 from authProviders_LDAP import encryptPassword, decryptPassword
+import ldap
+
+from unittest.mock import patch
 
 LDAPAuthProv001_CREATE_configJSON = {
   "Timeout": 60,
@@ -150,7 +153,11 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     toLoad["AuthProviders"][1]["AllowUserCreation"] = True
     tenantDict3 = self.updateTenant(toLoad, [200])
 
-  def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_NOUSERCREATIONEXISTINGUSER(self):
+  @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_NOUSERCREATIONEXISTINGUSER(
+    self,
+    patchSimpleBindS
+  ):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
     ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
@@ -172,21 +179,24 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
       expectedResults = [200]
     )
 
-
-  '''
-  def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_USERCREATIONREQUIREDANDALLOWED(self):
-    resultJSON2 = self.setupLDAPAuthOnMainTenantForTests(override_JSON=LDAPAuthProv001_CREATE_withAllowCreate)
-    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
-    ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
+  @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_USERCREATIONREQUIREDANDALLOWED(
+    self,
+    patchSimpleBindS
+  ):
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreate)
+    print(tenantDict["Name"])
+    ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
+    self.assertEqual(ldapAuthProv["Type"],"LDAP")
 
     self.loginAsUserUsingLDAP(
-      tenant=constants.masterTenantName,
+      tenant=tenantDict["Name"],
       authProviderDICT=ldapAuthProv,
       username=ldapUsername,
       password=ldapPassword,
       expectedResults = [200]
     )
-  '''
+
   def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_USERCREATIONREQUIREDBUTNOTALLOWED(self):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
@@ -201,8 +211,9 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     )
 
     self.assertEqual(resp["message"],"authFailedException",msg="Wrong error message")
-  '''
-  def test_basPasswordFails(self):
+
+  @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None, side_effect=ldap.INVALID_CREDENTIALS)
+  def test_basPasswordFails(self, patchSimpleBindS):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
     ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
@@ -216,7 +227,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
       )
     createdUserData = appObj.objectStore.executeInsideTransaction(dbfn)
 
-    self.loginAsUserUsingLDAP(
+    resp = self.loginAsUserUsingLDAP(
       tenant=constants.masterTenantName,
       authProviderDICT=ldapAuthProv,
       username=ldapUsername,
@@ -224,7 +235,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
       expectedResults = [401]
     )
     self.assertEqual(resp["message"],"authFailedException",msg="Wrong error message")
-  '''
+
 #test_loginUserWithTwoGroupsONEMatching
 
 #test_loginUserFAILWithSingleGroupMatchingSingleGroupInWhitelist

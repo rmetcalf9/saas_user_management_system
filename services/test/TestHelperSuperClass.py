@@ -207,14 +207,10 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, pass
 
 #Reversable version used for LDAP passwords which need to be known by the server
 def getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, tenantAuthProvSalt):
-  (iv, cypherText) = encryptPassword(password, tenantAuthProvSalt)
-  print("SUPER: getTwoWayEncryptedPasswordUsingSameMethodAsJavascriptFrontendShouldUse")
-  print("Orig Pass:", password)
-  print("orig IV=", iv)
-  print("orig   p=", cypherText)
+  (iv, cypherText) = encryptPassword(password, b64decode(tenantAuthProvSalt))
   ret = {
-    "iv": b64encode(iv).decode("utf-8"),
-    "password": b64encode(cypherText).decode("utf-8")
+    "iv": iv,
+    "password": cypherText
   }
   return ret
 
