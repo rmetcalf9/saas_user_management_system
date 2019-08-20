@@ -5,6 +5,7 @@ from Crypto.Cipher import AES
 from Crypto.Random import OSRNG
 from base64 import b64decode, b64encode
 import ldap
+from ast import literal_eval
 
 #Communication is SSL and that should keep password secure
 # extra security is added by encryptinhg it using the salt as a key
@@ -46,6 +47,12 @@ def decryptPassword(iv, cypherText, salt):
   return decrypted.decode("utf-8")
 
 class authProviderLDAP(authProvider):
+  MandatoryGroupMap = None
+  AnyGroupMap = None
+
+  #Caculated value to hold all groups we will query LDAP about
+  KnownAboutGroupMap = None
+
   def _getTypicalAuthData(self, credentialDICT):
     if 'username' not in credentialDICT:
       raise InvalidAuthConfigException
@@ -80,16 +87,39 @@ class authProviderLDAP(authProvider):
     if name not in self.getConfig():
       raise constants.customExceptionClass('Missing ' + name,'InvalidAuthConfigException')
 
+  def __INT__prepareGroupList(self, confParam):
+    arr = confParam.strip().split(",")
+    res = {}
+    for x in arr:
+      xx = x.strip()
+      if len(xx) > 0:
+        res[xx] = xx
+    return res
+
   def _authSpercificInit(self):
     for x in [
         'Timeout',
         'Host', 'Port',
         'UserBaseDN', 'UserAttribute',
         'GroupBaseDN', 'GroupAttribute',
-        'GroupMemberField', 'GroupWhiteList',
-        'userSufix'
+        'GroupMemberField',
+        'userSufix',
+        'MandatoryGroupList',
+        'AnyGroupList'
       ]:
       self.__INT__checkStringConfigParamPresent(x)
+
+    self.MandatoryGroupMap = self.__INT__prepareGroupList(self.getConfig()['MandatoryGroupList'])
+    self.AnyGroupMap = self.__INT__prepareGroupList(self.getConfig()['AnyGroupList'])
+
+    if (len(self.MandatoryGroupMap) + len(self.AnyGroupMap))==0:
+      raise constants.customExceptionClass('Must provide groups for MandatoryGroupList or AnyGroupList or both','InvalidAuthConfigException')
+
+    self.KnownAboutGroupMap = {}
+    for x in self.MandatoryGroupMap:
+      self.KnownAboutGroupMap[x] = x
+    for x in self.AnyGroupMap:
+      self.KnownAboutGroupMap[x] = x
 
   #not needed as there is no enrichment. (LDAP won't give us a token for refresh
   # NOTE we don't store the password so with LDAP there is no way to refresh)
@@ -110,6 +140,38 @@ class authProviderLDAP(authProvider):
         return #Do nothing
       raise err
 
+  def __INT__ldapQueryIsUserInGroup(self,username,curGroup,ldap_connection):
+    ldapStr = self.getConfig()['GroupAttribute'] + "=" + curGroup + "," + self.getConfig()['GroupBaseDN']
+    ldap_result_id = ldap_connection.search(ldapStr, ldap.SCOPE_SUBTREE, None, [self.getConfig()['GroupMemberField']])
+    result_set = []
+    numRes = 0
+    while 1:
+      numRes = numRes + 1
+      if numRes > 9999:
+        raise Exception('LDAP query returned to many results')
+      try:
+        result_type, result_data = ldap_connection.result(ldap_result_id, 0)
+      except ldap.NO_SUCH_OBJECT:
+        return False
+      if (result_data == []):
+        break
+      else:
+        if result_type == ldap.RES_SEARCH_ENTRY:
+          result_set.append(result_data)
+    if len(result_set) != 1:
+      raise Exception('LDAP query returned result set size of ' + len(result_set) + ' expected 1')
+
+    #Verify Group Membership
+    tuple = literal_eval(str(result_set[0][0]))
+    if len(tuple) != 2:
+      raise Exception('Did not understand group query result ' + result_set[0][0])
+    for curMember in tuple[1][self.getConfig()['GroupMemberField']]:
+      if curMember.decode("utf-8")==username:
+        return True
+
+    #did not find them in the group
+    return False
+
   def __INT__normaliseAndValidateCredentialDICT(self, credentialDICT):
     if 'username' not in credentialDICT:
       raise InvalidAuthConfigException
@@ -121,7 +183,7 @@ class authProviderLDAP(authProvider):
       credentialDICT['iv'] = bytes(credentialDICT['iv'], 'utf-8')
     return credentialDICT
 
-  def __INT__isValidUsernameAndPassword(self, appObj, authProvObj, credentialDICT):
+  def __INT__isValidUsernameAndPassword(self, appObj, authProvObj, credentialDICT, ldap_connection):
     decryptedPass = decryptPassword(
       iv=credentialDICT['iv'],
       cypherText=credentialDICT['password'],
@@ -134,10 +196,6 @@ class authProviderLDAP(authProvider):
       return False
     if password == "":
       return False
-    ldapConString = "ldaps://" + self.getConfig()['Host'] + ":" + self.getConfig()['Port']
-    ldap_connection = ldap.initialize(ldapConString)
-    ldap_connection.protocol_version = ldap.VERSION3
-    ldap.OPT_NETWORK_TIMEOUT = self.getConfig()['Timeout']
     try:
       ldap_connection.simple_bind_s(self.getConfig()['UserAttribute'] + "=" + username + "," + self.getConfig()['UserBaseDN'], password)
     except ldap.INVALID_CREDENTIALS:
@@ -147,13 +205,37 @@ class authProviderLDAP(authProvider):
 
     return True
 
-  def __INT__isMemberOfRequiredGroups(self):
-    return True
+  def __INT__isMemberOfRequiredGroups(self, credentialDICT, ldap_connection):
+    groupsUserIsAMemberOf = []
+    for curGroup in self.KnownAboutGroupMap:
+      if self.__INT__ldapQueryIsUserInGroup(
+        credentialDICT['username'].strip(),
+        curGroup,
+        ldap_connection
+      ):
+        groupsUserIsAMemberOf.append(curGroup)
+
+    #If they are not in a mandatory group return False
+    #TODO
+
+    #If they are in group in ANY list return True
+    for curGroup in groupsUserIsAMemberOf:
+      if curGroup in self.AnyGroupMap:
+        return True
+
+    return False #not in a group from any list
 
   #check the auth and if it is not valid raise authFailedException
   def _auth(self, appObj, obj, credentialDICT):
+    print("_auth:", credentialDICT['username'])
     credentialDICT2 = self.__INT__normaliseAndValidateCredentialDICT(credentialDICT)
-    if not self.__INT__isValidUsernameAndPassword(appObj, obj, credentialDICT2):
+
+    ldapConString = "ldaps://" + self.getConfig()['Host'] + ":" + self.getConfig()['Port']
+    ldap_connection = ldap.initialize(ldapConString)
+    ldap_connection.protocol_version = ldap.VERSION3
+    ldap.OPT_NETWORK_TIMEOUT = self.getConfig()['Timeout']
+
+    if not self.__INT__isValidUsernameAndPassword(appObj, obj, credentialDICT2, ldap_connection):
       raise constants.authFailedException
-    if not self.__INT__isMemberOfRequiredGroups():
+    if not self.__INT__isMemberOfRequiredGroups(credentialDICT2, ldap_connection):
       raise constants.authFailedException

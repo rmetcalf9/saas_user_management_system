@@ -51,9 +51,12 @@ Example config:
   "GroupBaseDN": "ou=Group,ou=everyone,dc=somehost,dc=com",
   "GroupAttribute": "cn",
   "GroupMemberField": "memberUid",
-  "GroupWhiteList": "group1,group2,group3",
-  "userSufix": "@OrgNameLDAP"
+  "userSufix": "@OrgNameLDAP",
+  "MandatoryGroupList": "group1,group2,group3",
+  "AnyGroupList": "group1,group2,group3"
 }
 ```
 
 GroupWhiteList: Users must be a memeber of at least one of these groups to be authenticated
+
+#TODO Group to role mapping

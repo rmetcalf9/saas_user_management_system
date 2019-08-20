@@ -21,8 +21,9 @@ LDAPAuthProv001_CREATE_configJSON = {
   "GroupBaseDN": "ou=Group,ou=everyone,dc=somehost,dc=com",
   "GroupAttribute": "cn",
   "GroupMemberField": "memberUid",
-  "GroupWhiteList": "group1,group2,group3",
-  "userSufix": "@TestOrgLDAP"
+  "userSufix": "@TestOrgLDAP",
+  "MandatoryGroupList": "",
+  "AnyGroupList": "group1,group2, group3"
 }
 
 LDAPAuthProv001_CREATE = {
@@ -154,9 +155,20 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     tenantDict3 = self.updateTenant(toLoad, [200])
 
   @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  @patch('ldap.ldapobject.SimpleLDAPObject.search', return_value=123)
+  @patch('ldap.ldapobject.SimpleLDAPObject.result', side_effect=[
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group1,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group2,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'" + ldapUsername + "']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group3,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, [])
+  ])
   def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_NOUSERCREATIONEXISTINGUSER(
     self,
-    patchSimpleBindS
+    patchSimpleBindS,
+    patchSearch,
+    patchResult
   ):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
@@ -180,12 +192,22 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     )
 
   @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  @patch('ldap.ldapobject.SimpleLDAPObject.search', return_value=123)
+  @patch('ldap.ldapobject.SimpleLDAPObject.result', side_effect=[
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group1,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group2,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'" + ldapUsername + "']})"]),
+    (ldap.RES_SEARCH_ENTRY, []),
+    (ldap.RES_SEARCH_ENTRY, ["('cn=group3,ou=Group,ou=everyone,dc=somehost,dc=com', {'memberUid': [b'TestUser', b'TestUser2', b'TestUser3']})"]),
+    (ldap.RES_SEARCH_ENTRY, [])
+  ])
   def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_USERCREATIONREQUIREDANDALLOWED(
     self,
-    patchSimpleBindS
+    patchSimpleBindS,
+    patchSearch,
+    patchResult,
   ):
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreate)
-    print(tenantDict["Name"])
     ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
     self.assertEqual(ldapAuthProv["Type"],"LDAP")
 
@@ -236,8 +258,32 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     )
     self.assertEqual(resp["message"],"authFailedException",msg="Wrong error message")
 
-#test_loginUserWithTwoGroupsONEMatching
+  @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None)
+  @patch('ldap.ldapobject.SimpleLDAPObject.search', return_value=123)
+  @patch('ldap.ldapobject.SimpleLDAPObject.result', side_effect=[
+    ldap.NO_SUCH_OBJECT,
+    ldap.NO_SUCH_OBJECT,
+    ldap.NO_SUCH_OBJECT
+  ])
+  def test_userNotInGroupFromAnyList(
+    self,
+    patchSimpleBindS,
+    patchSearch,
+    patchResult,
+  ):
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreate)
+    print(tenantDict["Name"])
+    ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
+    self.assertEqual(ldapAuthProv["Type"],"LDAP")
 
-#test_loginUserFAILWithSingleGroupMatchingSingleGroupInWhitelist
+    self.loginAsUserUsingLDAP(
+      tenant=tenantDict["Name"],
+      authProviderDICT=ldapAuthProv,
+      username=ldapUsername,
+      password=ldapPassword,
+      expectedResults = [401]
+    )
 
-#test_loginUserFAILWithTwoGroupsONEMatching
+#test_userInAnyGroupButNotMandatoryGroup
+
+#test_userInMandatoryGroupButNotAnyGroup
