@@ -44,7 +44,7 @@ steps:
     image: ${{RJM_DOCKERWSCALLER_IMAGE}}
     working_directory: ${{main_clone}}/services
     commands:
-      - sudo apk add openldap-dev
+      - apk add openldap-dev
       - pip3 install --no-cache-dir -r ./src/requirements.txt
       - pip3 install --no-cache-dir -r ./testContainer/requirements.txt
       - export SKIPSQLALCHEMYTESTS=Y
