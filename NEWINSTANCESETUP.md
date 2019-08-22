@@ -15,20 +15,29 @@ I determined that the JWT token had no "kong_iss": "kong_iss" token. This was be
 I changed the config to {"Type": "kong", "kongISS": "kong_iss"}
 
 A consumer needs to be created in Kong.
-Create consumer
- - username: saas_user
- - groups: saas_user_management
- - credential -> JWT
-   HS256, leave everything blank
-when it is created a secret will be generated. This needs to be converted to base64
 
-launch python3:
+Create a consumer using algorithm HS256 but don't fill anything in. Once created copy the secret that consumer was assigned.
+Setup a secret on the server titled saas_jwtsecret consisting of this string:
+
+```
+docker secret create saas_jwtsecret - <<EOF
+COPYED_SECRET_FROM_KONGA
+EOF
+```
+
+You must also create a base64 encoded version of this secret. Do this in python3 as follows:
 ```
 import base64
-sec = b'copy_from_konga'
+sec = b'COPYED_SECRET_FROM_KONGA'
 base64.b64encode(sec)
 ```
 
 The output may end with ='s depending on padding.
+Take the result (excluding b'')
 
-Take the output and paste it into the secret.
+Create consumer
+ - username: saas_user
+ - groups: saas_user_management
+ - credential -> JWT
+   set key to kong_iss, algorithm=HS256, secret=value_from_python_step leave everything else blank
+when it is created a secret will be generated. This needs to be converted to base64.
