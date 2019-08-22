@@ -16,7 +16,7 @@ I changed the config to {"Type": "kong", "kongISS": "kong_iss"}
 
 A consumer needs to be created in Kong.
 Create consumer
- - username: saas_user_management_users
+ - username: saas_user
  - groups: saas_user_management
  - credential -> JWT
    HS256, leave everything blank
