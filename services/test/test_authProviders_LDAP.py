@@ -30,7 +30,7 @@ LDAPAuthProv001_CREATE_configJSON_withMANdatoryGroup["MandatoryGroupList"] = 'gr
 
 LDAPAuthProv001_CREATE = {
   "guid": None,
-  "Type": "LDAP",
+  "Type": "ldap",
   "AllowUserCreation": False,
   "AllowLink": False,
   "AllowUnlink": False,
@@ -148,14 +148,14 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
   def test_createAuth(self):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][0]["Type"],"internal", msg="First auth prov type wrong")
-    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
+    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"ldap", msg="First auth prov type wrong")
 
   def test_turnOnUserCreationFails(self):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
 
     #Turn on user creation on auth prov
     toLoad = copy.deepcopy(resultJSON2["Tenant"])
-    self.assertEqual(toLoad["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
+    self.assertEqual(toLoad["AuthProviders"][1]["Type"],"ldap", msg="First auth prov type wrong")
     toLoad["AuthProviders"][1]["AllowUserCreation"] = True
     tenantDict3 = self.updateTenant(toLoad, [200])
 
@@ -176,7 +176,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     patchResult
   ):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
-    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
+    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"ldap", msg="First auth prov type wrong")
     ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
 
     #Create user
@@ -214,7 +214,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
   ):
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreate)
     ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
-    self.assertEqual(ldapAuthProv["Type"],"LDAP")
+    self.assertEqual(ldapAuthProv["Type"],"ldap")
 
     self.loginAsUserUsingLDAP(
       tenant=tenantDict["Name"],
@@ -226,7 +226,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
 
   def test_loginUserWithSingleGroupMatchingSingleGroupInWhitelist_USERCREATIONREQUIREDBUTNOTALLOWED(self):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
-    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
+    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"ldap", msg="First auth prov type wrong")
     ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
 
     resp = self.loginAsUserUsingLDAP(
@@ -242,7 +242,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
   @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None, side_effect=ldap.INVALID_CREDENTIALS)
   def test_basPasswordFails(self, patchSimpleBindS):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
-    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"LDAP", msg="First auth prov type wrong")
+    self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][1]["Type"],"ldap", msg="First auth prov type wrong")
     ldapAuthProv = copy.deepcopy(resultJSON2["Tenant"]["AuthProviders"][1])
 
     #Create user
@@ -279,7 +279,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreate)
     print(tenantDict["Name"])
     ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
-    self.assertEqual(ldapAuthProv["Type"],"LDAP")
+    self.assertEqual(ldapAuthProv["Type"],"ldap")
 
     self.loginAsUserUsingLDAP(
       tenant=tenantDict["Name"],
@@ -309,7 +309,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
   ):
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreateAndMandatoryGroup)
     ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
-    self.assertEqual(ldapAuthProv["Type"],"LDAP")
+    self.assertEqual(ldapAuthProv["Type"],"ldap")
 
     self.loginAsUserUsingLDAP(
       tenant=tenantDict["Name"],
@@ -339,7 +339,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
   ):
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, LDAPAuthProv001_CREATE_withAllowCreateAndMandatoryGroup)
     ldapAuthProv = copy.deepcopy(tenantDict["AuthProviders"][0])
-    self.assertEqual(ldapAuthProv["Type"],"LDAP")
+    self.assertEqual(ldapAuthProv["Type"],"ldap")
 
     self.loginAsUserUsingLDAP(
       tenant=tenantDict["Name"],

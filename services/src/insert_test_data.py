@@ -172,6 +172,33 @@ authProvFacebookCreationDICT = {
     "saltForPasswordHashing": None
 }
 
+authProvLDAPCreationDICT_ConfigJSON = {
+  "Timeout": 60,
+  "Host": "unixldap.cc.ic.ac.uk",
+  "Port": "636",
+  "UserBaseDN": "ou=People,ou=everyone,dc=somehost,dc=com",
+  "UserAttribute": "uid",
+  "GroupBaseDN": "ou=Group,ou=everyone,dc=somehost,dc=com",
+  "GroupAttribute": "cn",
+  "GroupMemberField": "memberUid",
+  "userSufix": "@OrgNameLDAP",
+  "MandatoryGroupList": "soa_tech_monitoring",
+  "AnyGroupList": ""
+}
+
+authProvLDAPCreationDICT = {
+    "guid": None,
+    "Type": "ldap",
+    "AllowUserCreation": True,
+    "AllowLink": True,
+    "AllowUnlink": True,
+    "LinkText": 'Link LDAP Account',
+    "MenuText": "Login with LDAP",
+    "IconLink": "string",
+    "ConfigJSON": json.dumps(authProvLDAPCreationDICT_ConfigJSON),
+    "saltForPasswordHashing": None
+}
+
 #print(authProvGoogleCreationDICT)
 #errorInProcess("DD")
 
@@ -275,6 +302,10 @@ addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
 
 print("Adding facebook auth to master tenant")
 addAuthProvider(masterTenantName, authProvFacebookCreationDICT)
+
+print("Adding ldap auth to master tenant")
+addAuthProvider(masterTenantName, authProvLDAPCreationDICT)
+
 
 print("Enabling Link and accounts with Master Tenant")
 tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + masterTenantName, [200])

@@ -20,7 +20,7 @@ def getCurrentAuthModel(appObj):
     'loggedInPerson': fields.Nested(getPersonModel(appObj)),
     'loggedInUser': fields.Nested(getUserModel(appObj)),
     'currentlyUsedAuthProviderGuid': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider used for this session', required=True),
-    'currentlyUsedAuthKey': fields.String(default='DEFAULT', description='Unique identifier of Auth used for this session', required=True)    
+    'currentlyUsedAuthKey': fields.String(default='DEFAULT', description='Unique identifier of Auth used for this session', required=True)
   })
 
 def getExecuteAuthOperationModel(appObj):
@@ -61,12 +61,12 @@ def requiredInPayload(content, fieldList):
 #403 = forbidden -> Will not re-prompt for login dosn't make sense to retry
 def verifySecurityOfAPICall(appObj, request, tenant):
   requiredRoles = []
-  
+
   return appObj.apiSecurityCheck(
-    request, 
-    tenant, 
-    requiredRoles, 
-    [constants.jwtHeaderName], 
+    request,
+    tenant,
+    requiredRoles,
+    [constants.jwtHeaderName],
     [constants.jwtCookieName, constants.loginCookieName]
   )
 
@@ -75,7 +75,7 @@ def requiredInPayload(content, fieldList):
     if a not in content:
       raise BadRequest(a + ' not in payload')
 
-  
+
 def registerAPI(appObj):
   nsCurAuth = appObj.flastRestPlusAPIObject.namespace('authed/currentAuth', description='API for accessing functions for the currently authed user/person.')
 
@@ -120,7 +120,7 @@ def registerAPI(appObj):
         return {
           'Result': 'OK'
         }, 200
-        
+
       try:
         return appObj.objectStore.executeInsideTransaction(dbfn)
       except constants.customExceptionClass as excep:
@@ -149,7 +149,7 @@ def registerAPI(appObj):
 
       def dbfn(storeConnection):
         decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
-        
+
         # must be auth provider for logged in tenant
         tenantObj = GetTenant(tenant, storeConnection, appObj=appObj)
         authProvObj = GetAuthProvider(appObj, tenant, authProviderGUID, storeConnection, tenantObj)
@@ -161,7 +161,7 @@ def registerAPI(appObj):
         linkAuthResp = decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
 
         return {'result': "OK"}, 200
-        
+
       try:
         return appObj.objectStore.executeInsideTransaction(dbfn)
       except constants.notImplemented as excep:
@@ -184,11 +184,11 @@ def registerAPI(appObj):
     def post(self, tenant):
       '''Delete Auth'''
       decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
-      
+
       content = request.get_json()
       requiredInPayload(content, ['AuthKey'])
       authKey = content["AuthKey"]
-      
+
       def someFn(storeConnection):
         authObj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, authKey, storeConnection)
         if authObj is None:
@@ -197,13 +197,13 @@ def registerAPI(appObj):
           raise BadRequest("Can't unlinked auth used to authenticate")
         if authObj['personGUID'] != decodedJWTToken._tokenData['authedPersonGuid']:
           raise BadRequest("Can only unlink own auths")
-        
+
         tenantNameFromAuth = authObj['tenantName']
-        
+
         # I am not 100% sure about this check
         if tenant != tenantNameFromAuth:
           raise BadRequest("Auth to be deleted is from a different tenant")
-          
+
         tenantObj = GetTenant(tenantNameFromAuth, storeConnection, appObj=appObj)
         authProviderDICT = tenantObj.getAuthProvider(authObj['AuthProviderGUID'])
         if authProviderDICT is None:
@@ -215,5 +215,5 @@ def registerAPI(appObj):
 
         return {
           'result': "OK"
-        }, 200      
+        }, 200
       return appObj.objectStore.executeInsideTransaction(someFn)

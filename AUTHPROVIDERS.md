@@ -40,6 +40,9 @@ Example config:
 
 Authenticate via LDAP server
 
+"Type": "ldap",
+
+
 Example config:
 ```
 "ConfigJSON": {

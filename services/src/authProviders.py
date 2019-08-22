@@ -14,7 +14,7 @@ def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
     return authProviderGoogle(dataDict, guid, tenantName, tenantObj, appObj)
   if dataDict["Type"]=='facebook':
     return authProviderFacebook(dataDict, guid, tenantName, tenantObj, appObj)
-  if dataDict["Type"]=='LDAP':
+  if dataDict["Type"]=='ldap':
     return authProviderLDAP(dataDict, guid, tenantName, tenantObj, appObj)
   raise InvalidAuthConfigException
 

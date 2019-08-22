@@ -19,7 +19,7 @@ class personClass():
     self._lastUpdateDateTime = lastUpdateDateTime
     self._AssociatedUserObjs = AssociatedUserObjs
     self._authObjs = authObjs
-  
+
   def _generateJSONRepresenationAndStoreItInCache(self):
     aa = self._mainDict.copy()
     aa['ObjectVersion'] = self._objectVersion
@@ -30,9 +30,9 @@ class personClass():
       associatedUsers.append(u.getJSONRepresenation())
     aa['associatedUsers'] = associatedUsers
     aa['personAuths'] = self._authObjs
-    
+
     self._jsonRepersentation = aa
-  
+
   def getJSONRepresenation(self):
     if self._jsonRepersentation is None:
       self._generateJSONRepresenationAndStoreItInCache()
@@ -56,7 +56,7 @@ class personClass():
 
   def linkAuth(self, appObj, authProviderObj, credentialJSON, storeConnection):
     #Different logic if this is an existing auth vs if it is new
-    
+
     authDict = None
     try:
       enrichedCredentialDICT = authProviderObj.EnrichCredentialDictForAuth(credentialJSON)
@@ -68,11 +68,11 @@ class personClass():
         raise constants.customExceptionClass("Invalid credentials for auth to link with", "linkAuthFailedException")
       else:
         raise err
-    
+
     if authDict is None:
       return self._linkNonExistantAuth(appObj, authProviderObj, enrichedCredentialDICT, storeConnection)
     else:
       return self._linkExistantAuth(appObj, authDict, authProviderObj, enrichedCredentialDICT, storeConnection)
-    
+
   def getGUID(self):
     return self._mainDict['guid']

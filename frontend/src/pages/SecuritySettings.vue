@@ -13,6 +13,12 @@
             @unlink="unlinkClick(curVal)"
              v-if="curVal.auth.AuthProviderType === 'internal'"
           />
+          <AuthProvSecuritySettingsLdap
+            :authData="curVal"
+            :loggedInPerson="UserSettingsData.loggedInUser"
+            @unlink="unlinkClick(curVal)"
+             v-if="curVal.auth.AuthProviderType === 'ldap'"
+          />
           <AuthProvSecuritySettingsGoogle
             :authData="curVal"
             :loggedInPerson="UserSettingsData.loggedInUser"
@@ -49,6 +55,12 @@
               @completeOK="linkCompleteOK"
               v-if="curVal.Type === 'facebook'"
             />
+            <AuthProvLinkLdap
+              :authProvData="curVal"
+              @completeError="linkCompleteError"
+              @completeOK="linkCompleteOK"
+              v-if="curVal.Type === 'ldap'"
+            />
           </div>
         </q-list>
       </div>
@@ -75,6 +87,9 @@ import AuthProvLinkGoogle from '../components/AuthProvider_Link_google'
 import AuthProvSecuritySettingsFacebook from '../components/AuthProvider_SecuritySettings_facebook'
 import AuthProvLinkFacebook from '../components/AuthProvider_Link_facebook'
 
+import AuthProvSecuritySettingsLdap from '../components/AuthProvider_SecuritySettings_ldap'
+import AuthProvLinkLdap from '../components/AuthProvider_Link_ldap'
+
 function getEmptyUserSettingsData () {
   return {
     loggedInPerson: {
@@ -94,7 +109,9 @@ export default {
     'AuthProvSecuritySettingsGoogle': AuthProvSecuritySettingsGoogle,
     'AuthProvLinkGoogle': AuthProvLinkGoogle,
     'AuthProvSecuritySettingsFacebook': AuthProvSecuritySettingsFacebook,
-    'AuthProvLinkFacebook': AuthProvLinkFacebook
+    'AuthProvLinkFacebook': AuthProvLinkFacebook,
+    'AuthProvSecuritySettingsLdap': AuthProvSecuritySettingsLdap,
+    'AuthProvLinkLdap': AuthProvLinkLdap
   },
   data () {
     return {
