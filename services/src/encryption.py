@@ -43,6 +43,10 @@ def decryptPassword(iv, cypherText, salt):
   cypherTexti=b64decode(cypherText)
   passphrase=__INT__get32BytesFromSalt(salt)
 
+  print("ivi", ivi)
+  print("cypherTexti", cypherTexti)
+  print("passphrase", passphrase)
+
   aes = AES.new(passphrase, AES.MODE_CBC, ivi)
   paddedPlainText = aes.decrypt(cypherTexti).decode()
   return unpad(paddedPlainText)
