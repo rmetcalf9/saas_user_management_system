@@ -59,7 +59,7 @@ class personClass():
 
     authDict = None
     try:
-      enrichedCredentialDICT = authProviderObj.EnrichCredentialDictForAuth(credentialJSON)
+      enrichedCredentialDICT = authProviderObj.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(credentialJSON, appObj)
       authDict, objVer, creationDateTime, lastUpdateDateTime = authProviderObj.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, True)
     except constants.customExceptionClass as err:
       if err.id=="authNotFoundException":

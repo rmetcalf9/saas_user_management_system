@@ -157,21 +157,23 @@ def registerAPI(appObj):
           raise BadRequest('Invalid auth prov GUID')
         if not authProvObj.getAllowLink():
           raise BadRequest('Not allowed to link to this authProvider')
-        
+
         linkAuthResp = decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
 
         return {'result': "OK"}, 200
 
       try:
         return appObj.objectStore.executeInsideTransaction(dbfn)
-      except constants.notImplemented as excep:
-        raise BadRequest(excep.text)
-      except constants.customExceptionClass as excep:
-        if (excep.id=='linkAuthFailedException'):
-          raise BadRequest(excep.text)
-        if (excep.id=='InvalidAuthConfigException'):
-          raise BadRequest(excep.text)
-        raise excep
+      except constants.notImplemented as err:
+        raise BadRequest(err.text)
+      except constants.customExceptionClass as err:
+        if (err.id=='linkAuthFailedException'):
+          raise BadRequest(err.text)
+        if (err.id=='InvalidAuthConfigException'):
+          raise BadRequest(err.text)
+        if (err.id=='InvalidAuthCredentialsException'):
+          raise BadRequest(err.text)
+        raise err
 
   @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/delete')
   class loggedInUserAuths_DELETE(Resource):

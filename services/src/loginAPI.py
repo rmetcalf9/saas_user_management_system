@@ -72,6 +72,8 @@ def registerAPI(appObj):
             raise Unauthorized(err.text)
           if (err.id=='InvalidAuthConfigException'):
             raise BadRequest(err.text)
+          if (err.id=='InvalidAuthCredentialsException'):
+            raise BadRequest(err.text)
           if (err.id=='tryingToCreateDuplicateAuthException'):
             raise BadRequest(err.text)
           if (err.id=='TryingToCreateDuplicateUserException'):
@@ -148,6 +150,8 @@ def registerAPI(appObj):
             raise BadRequest('authProviderNotFoundException')
           if (err.id=='InvalidAuthConfigException'):
             raise Unauthorized('Invalid credentials provided')
+          if (err.id=='InvalidAuthCredentialsException'):
+            raise BadRequest(err.text)
           if (err.id=='UnknownUserIDException'):
             raise BadRequest(err.text)
           if (err.id=='ExternalAuthProviderNotReachableException'):

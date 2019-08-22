@@ -134,17 +134,7 @@ class authProviderHelperFunctions(testHelperAPIClient):
     }
 
 
-@wipd
 class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
-  def test_passwordEncrypt(self):
-    plainText="AAAAA"
-    salt=appObj.bcrypt.gensalt()
-
-    (iv, cypherText) = encryptPassword(plainText, salt)
-    plainText2 = decryptPassword(iv, cypherText, salt)
-
-    self.assertEqual(plainText, plainText2)
-
   def test_createAuth(self):
     resultJSON2 = self.setupLDAPAuthOnMainTenantForTests()
     self.assertEqual(resultJSON2["Tenant"]["AuthProviders"][0]["Type"],"internal", msg="First auth prov type wrong")

@@ -7,6 +7,7 @@ from persons import associatePersonWithAuthCalledWhenAuthIsCreated
 from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
 
 InvalidAuthConfigException = constants.customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
+InvalidAuthCredentialsException = constants.customExceptionClass('Invalid Auth Credentials','InvalidAuthCredentialsException')
 tryingToCreateDuplicateAuthException = constants.customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
 InvalidOperationException = constants.customExceptionClass('Invalid Operation','InvalidOperationException')
 NotOverriddenException = Exception('Not Overridden')
@@ -49,6 +50,9 @@ class authProvider():
       dataDict['AllowUnlink'] = False
     if not 'LinkText' in dataDict:
       dataDict['LinkText'] = 'Unlink ' + dataDict['Type']
+    #salt not provided during delete operaiton
+    #if not 'saltForPasswordHashing' in dataDict:
+    #  raise Exception("ERROR No saltForPasswordHashing")
 
     if not typeSupportsUserCreation:
       if dataDict['AllowUserCreation']:
@@ -89,6 +93,8 @@ class authProvider():
     return self.dataDict['LinkText']
   def getPublicStaticDataDict(self):
     return {}
+  def getSaltUsedForPasswordHashing(self):
+    return self.dataDict['saltForPasswordHashing']
 
   #Return the unique identifier for a particular auth
   def _makeKey(self, credentialDICT):
@@ -128,29 +134,47 @@ class authProvider():
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
 
-  def AuthReturnAll(self, appObj, credentialDICT, storeConnection, supressAutocreate):
-    obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
-    if obj is None:
+  def AuthReturnAll(self, appObj, credentialDICT, storeConnection, supressAutocreate, authTPL=None, authTPLQueried=False):
+    #auth TPL will be (obj, objVer, creationDateTime, lastUpdateDateTime)
+    if not authTPLQueried:
+      authTPL = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
+    if authTPL[0] is None:
       if supressAutocreate:
         raise constants.authNotFoundException
       self._AuthActionToTakeWhenThereIsNoRecord(credentialDICT, storeConnection)
       #Assuming action results in an auth record
-      obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
-      if obj is None:
+      authTPL = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
+      if authTPL[0] is None:
         #Still no auth record so return failure
         raise constants.authNotFoundException
-    self._auth(appObj, obj, credentialDICT)
-    return obj, objVer, creationDateTime, lastUpdateDateTime
+    self._auth(appObj, authTPL[0], credentialDICT)
+    return authTPL
 
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
     raise constants.authNotFoundException
 
-  def EnrichCredentialDictForAuth(self, credentialDICT):
-    return self._enrichCredentialDictForAuth(credentialDICT)
+  def ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(self, credentialDICT, appObj):
+    return self._enrichCredentialDictForAuth(credentialDICT, appObj)
 
   def Auth(self, appObj, credentialDICT, storeConnection, supressAutocreate):
-    enrichedCredentialDICT = self.EnrichCredentialDictForAuth(credentialDICT)
-    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, supressAutocreate)
+    authTPL = None
+    authTPLQueried = False
+    if self.canMakeKeyWithoutEnrichment():
+      authTPL = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
+      authTPLQueried = True
+    enrichedCredentialDICT = credentialDICT
+    #If we can't create users then supress external validation unless we have an auth
+    supressEnrich = False
+    if authTPLQueried:
+      if authTPL[0] is None:
+        if not self.getAllowUserCreation():
+          supressEnrich = True
+        if not self.tenantObj.getAllowUserCreation():
+          supressEnrich = True
+
+    if not supressEnrich:
+      enrichedCredentialDICT = self.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(credentialDICT, appObj)
+    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, supressAutocreate, authTPL=authTPL, authTPLQueried=authTPLQueried)
     return obj
 
   # Normally overridden
@@ -199,9 +223,15 @@ class authProvider():
   ## e.g. for google Auth we recieve a Code, we will need to enrich that to get
   ## a refresh token, access token and a key
   ## This will raise authFailedException if the credentials are invalid (hence can't be enriched)
-  def _enrichCredentialDictForAuth(self, credentialDICT):
+  def _enrichCredentialDictForAuth(self, credentialDICT, appObj):
     return credentialDICT
 
   #Overidden for auth provider types that require a seperate call to the register function to create a user
   def requireRegisterCallToAutocreateUser(self):
     return False
+
+  #Can this auth provider generate a key without enriching the credentials?
+  #  google cna't becaue we only get a token to authenticate. we need to call the
+  #   enrichment process before we can make a unique key and look up local auth record
+  def canMakeKeyWithoutEnrichment(self):
+    return True

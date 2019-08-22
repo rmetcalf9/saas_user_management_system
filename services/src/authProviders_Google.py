@@ -22,30 +22,30 @@ Eample
 {
 "code": "AAA",
 "creds": {
-"access_token": "XXX", 
-"client_id": "XXX", 
-"client_secret": "XXX", 
-"refresh_token": "XXX", 
-"token_expiry": "2019-05-08T14:55:14Z", 
-"token_uri": "https://oauth2.googleapis.com/token", 
-"user_agent": null, 
-"revoke_uri": "https://oauth2.googleapis.com/revoke", 
+"access_token": "XXX",
+"client_id": "XXX",
+"client_secret": "XXX",
+"refresh_token": "XXX",
+"token_expiry": "2019-05-08T14:55:14Z",
+"token_uri": "https://oauth2.googleapis.com/token",
+"user_agent": null,
+"revoke_uri": "https://oauth2.googleapis.com/revoke",
 "id_token": {
-  "iss": "https://accounts.google.com", 
-  "azp": "???.apps.googleusercontent.com", 
-  "aud": "???.apps.googleusercontent.com", 
-  "sub": "56454656465454", 
-  "email": "rmetcalf9@googlemail.com", 
-  "email_verified": true, 
-  "at_hash": "???", 
-  "name": "Robert Metcalf", 
-  "picture": "https://lh6.googleusercontent.com/dsaddsaffs/s96-c/photo.jpg", 
-  "given_name": "Robert", 
-  "family_name": "Metcalf", 
-  "locale": "en-GB", 
-  "iat": 342543, 
+  "iss": "https://accounts.google.com",
+  "azp": "???.apps.googleusercontent.com",
+  "aud": "???.apps.googleusercontent.com",
+  "sub": "56454656465454",
+  "email": "rmetcalf9@googlemail.com",
+  "email_verified": true,
+  "at_hash": "???",
+  "name": "Robert Metcalf",
+  "picture": "https://lh6.googleusercontent.com/dsaddsaffs/s96-c/photo.jpg",
+  "given_name": "Robert",
+  "family_name": "Metcalf",
+  "locale": "en-GB",
+  "iat": 342543,
   "exp": 324324
-}, 
+},
 }
 '''
 def credentialDictGet_email(credentialDICT):
@@ -82,13 +82,13 @@ class authProviderGoogle(authProvider):
       "family_name": credentialDICT["creds"]["id_token"]["family_name"],
       "locale": credentialDICT["creds"]["id_token"]["locale"]
     }
-  
+
   def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
     super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
 
     if 'clientSecretJSONFile' not in dataDict['ConfigJSON']:
       raise InvalidAuthConfigException
-    
+
     #Only load the static data once
     if not self.hasStaticData():
       #print('Static data not present loading')
@@ -100,7 +100,7 @@ class authProviderGoogle(authProvider):
 #          redirect_uri='https://localhost'
 #        )
 #        'flow': InstalledAppFlow.from_client_secrets_file(
-#          dataDict['ConfigJSON']['clientSecretJSONFile'], 
+#          dataDict['ConfigJSON']['clientSecretJSONFile'],
 #          scopes=['https://www.googleapis.com/auth/userinfo.email']
 #        )
       }
@@ -112,7 +112,7 @@ class authProviderGoogle(authProvider):
         raise constants.customExceptionClass('Google secret file invliad (missing web)','InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]:
         raise constants.customExceptionClass('Google secret file invliad (missing client_id)','InvalidAuthConfigException')
-        
+
     #else:
     #  print('authProviderGoogle static data present NOT loading')
 
@@ -138,7 +138,7 @@ class authProviderGoogle(authProvider):
   def getPublicStaticDataDict(self):
     return {"client_id": self.__getClientID()}
 
-  def _enrichCredentialDictForAuth(self, credentialDICT):
+  def _enrichCredentialDictForAuth(self, credentialDICT, appObj):
     credentials = None
     try:
       ##credentials = self.getStaticData()['flow'].run_console()
@@ -154,7 +154,7 @@ class authProviderGoogle(authProvider):
         scope = ['profile', 'email'],
         code = credentialDICT['code']
       )
-      
+
     except Exception as err:
       print(err) # for the repr
       print(str(err)) # for just the message
@@ -189,3 +189,6 @@ class authProviderGoogle(authProvider):
   def _auth(self, appObj, obj, credentialDICT):
     #not required as auths are checked at the enrichment stage
     pass
+
+  def canMakeKeyWithoutEnrichment(self):
+    return False

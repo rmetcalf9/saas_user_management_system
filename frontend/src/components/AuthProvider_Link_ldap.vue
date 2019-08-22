@@ -95,25 +95,40 @@ export default {
       var TTT = this
       // console.log('this.authProvData.saltForPasswordHashing:', this.authProvData.saltForPasswordHashing)
       // console.log('atob:', atob(this.authProvData.saltForPasswordHashing))
-      var salt32Bytes = get32BytesFromSalt(atob(this.authProvData.saltForPasswordHashing))
-      var iv = CryptoJS.lib.WordArray.random(16)
-      console.log('saltBytes:', salt32Bytes)
-      console.log('iv:', iv)
       // TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
 
-      console.log('C:', CryptoJS)
-
-      // var MODE = CryptoJS.mode.CFB(CryptoJS.pad.ZeroPadding)
-
       // var options = {iv: iv, asBytes: true, mode: MODE}
-      var options = {iv: iv, asBytes: true}
+      // var options = {iv: iv, asBytes: true}
 
-      var encryptedPassword = CryptoJS.AES.encrypt(this.ldapLoginDialogModel.password, salt32Bytes, {options})
+      // var encryptedObj = CryptoJS.AES.encrypt(this.ldapLoginDialogModel.password, salt32Bytes, {options})
+
+      // console.log('encryptedObj', encryptedObj)
+      // console.log('saltBytes:', salt32Bytes)
+      // console.log('iv BASE64:', iv.toString(CryptoJS.enc.Base64))
+      // console.log('cipherText:', encryptedObj.toString())
+
+      console.log('CryptoJS:', CryptoJS)
+
+      var KEY = CryptoJS.enc.Base64.parse(btoa(get32BytesFromSalt(atob(this.authProvData.saltForPasswordHashing))))
+      var IV = CryptoJS.lib.WordArray.random(16)
+      var plaintext = this.ldapLoginDialogModel.password
+
+      console.log('KEY:', KEY)
+      console.log('typeofkey', typeof (KEY))
+      console.log('IV:', IV.toString(CryptoJS.enc.Base64))
+      console.log('plaintext:', plaintext)
+
+      var encryptedObj = CryptoJS.AES.encrypt(plaintext, KEY, {
+        iv: IV
+      })
+
+      console.log('encryptedObj.toString():', encryptedObj.toString())
+      console.log('encryptedObj.ciphertext.toString():', encryptedObj.ciphertext.toString())
 
       var credentialJSON = {
         username: this.ldapLoginDialogModel.username,
-        password: btoa(encryptedPassword.ciphertext.toString()),
-        ivx: btoa(iv.toString())
+        password: encryptedObj.toString(),
+        iv: IV.toString(CryptoJS.enc.Base64)
       }
       // console.log('credentialJSON:', credentialJSON)
       TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
