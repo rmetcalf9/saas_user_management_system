@@ -3,6 +3,69 @@ from Crypto.Random import OSRNG
 from base64 import b64decode, b64encode
 
 
+'''
+Test code put in console to make sure Javascript and Python matches
+Python Encryption
+
+from Crypto.Cipher import AES
+from Crypto.Random import OSRNG
+from base64 import b64decode, b64encode
+from encryption import pad, unpad, __INT__get32BytesFromSalt
+
+passphraseBase64=b64encode('tyttt'.encode())
+passphrase=__INT__get32BytesFromSalt(b64decode(passphraseBase64))
+plainText='aa'
+IV=b'\xffH\x93\xdeh\xd1\xcd\xab1;ZSB\x08\x19\n'
+
+##print(bytes(IV).hex())
+
+aes = AES.new(passphrase, AES.MODE_CBC, IV)
+cipherText = aes.encrypt(pad(plainText))
+
+print("Base64 IV:", b64encode(IV).decode("utf-8"))
+print("HEX IV:", bytes(IV).hex())
+print("Result cipherText = ", b64encode(cipherText).decode("utf-8"))
+
+
+##  Fbv+GmrmrO+YeLfm/g2kVw==
+
+
+Javascript Encryption
+
+console.log('CryptoJS:', CryptoJS)
+function get32BytesFromSalt (salt) {
+  var retBytes = ''
+  for (let i = 0; i < 32; i++) {
+    retBytes += salt[i % salt.length]
+  }
+  // idx = x % len(salt)
+  // retBytes = retBytes + salt[idx:(idx+1)]
+  return retBytes
+}
+
+var passphraseBase64=btoa('tyttt')
+var passphrase = get32BytesFromSalt(atob(passphraseBase64))
+var plainText='aa'
+// var IV = CryptoJS.lib.WordArray.random(16)
+var IV = CryptoJS.enc.Base64.parse("/0iT3mjRzasxO1pTQggZCg==")
+var passphraseWordArray = CryptoJS.enc.Base64.parse(btoa(passphrase))
+
+var enc_options = {
+  iv: IV,
+  mode: CryptoJS.mode.CBC,
+  padding: CryptoJS.pad.Pkcs7,
+}
+var encrypted = CryptoJS.AES.encrypt(plainText, passphraseWordArray, enc_options)
+
+console.log("Result IV = ", IV.toString(CryptoJS.enc.Base64))
+console.log("Result cipherText = ", encrypted.ciphertext.toString(CryptoJS.enc.Base64))
+
+
+// Fbv+GmrmrO+YeLfm/g2kVw==
+
+
+'''
+
 def __INT__get32BytesFromSalt(salt):
   retBytes = b''
   for x in range(0,32):
@@ -13,6 +76,8 @@ def __INT__get32BytesFromSalt(salt):
 
 
 BLOCK_SIZE = 16
+
+#Pad with a number that is the length of the padding that is added
 def pad(data):
     length = BLOCK_SIZE - (len(data) % BLOCK_SIZE)
     return data + chr(length)*length
@@ -43,6 +108,9 @@ def decryptPassword(iv, cypherText, salt):
   cypherTexti=b64decode(cypherText)
   passphrase=__INT__get32BytesFromSalt(salt)
 
+  ##passphrase="12345678901234567890123456789012"
+
+  print("Decrypting Password:")
   print("ivi", ivi)
   print("cypherTexti", cypherTexti)
   print("passphrase", passphrase)

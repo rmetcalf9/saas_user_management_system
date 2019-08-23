@@ -99,6 +99,8 @@ export default {
       // msgString is expected to be Utf8 encoded
       var iv = CryptoJS.lib.WordArray.random(16)
       var key = get32BytesFromSalt(atob(this.authProvData.saltForPasswordHashing))
+
+      key = '1234567890123456789012'
       var msgString = this.ldapLoginDialogModel.password
 
       var encrypted = CryptoJS.AES.encrypt(msgString, key, {
