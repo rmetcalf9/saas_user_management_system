@@ -94,44 +94,33 @@ export default {
     okLoginDialog () {
       var TTT = this
 
-      console.log('CryptoJS:', CryptoJS)
+      // console.log('saltForPasswordHashing:', this.authProvData.saltForPasswordHashing)
+      // console.log('atob:', atob(this.authProvData.saltForPasswordHashing))
 
-      // msgString is expected to be Utf8 encoded
-      var iv = CryptoJS.lib.WordArray.random(16)
-      var key = get32BytesFromSalt(atob(this.authProvData.saltForPasswordHashing))
+      // var passphraseBase64 = btoa('tyttt')
+      var passphraseBase64 = this.authProvData.saltForPasswordHashing
+      var passphrase = get32BytesFromSalt(atob(passphraseBase64))
+      var plainText = this.ldapLoginDialogModel.password
+      // var IV = CryptoJS.lib.WordArray.random(16)
+      var IV = CryptoJS.enc.Base64.parse('/0iT3mjRzasxO1pTQggZCg==')
+      var passphraseWordArray = CryptoJS.enc.Base64.parse(btoa(passphrase))
 
-      key = '1234567890123456789012'
-      var msgString = this.ldapLoginDialogModel.password
+      var encOptions = {
+        iv: IV,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      }
+      var encrypted = CryptoJS.AES.encrypt(plainText, passphraseWordArray, encOptions)
 
-      var encrypted = CryptoJS.AES.encrypt(msgString, key, {
-        iv: iv
-      })
+      // console.log("Result IV = ", IV.toString(CryptoJS.enc.Base64))
+      // console.log("Result cipherText = ", encrypted.ciphertext.toString(CryptoJS.enc.Base64))
 
       var credentialJSON = {
         username: this.ldapLoginDialogModel.username,
         password: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
-        iv: iv.toString(CryptoJS.enc.Base64)
+        iv: IV.toString(CryptoJS.enc.Base64)
       }
 
-      // console.log('this.authProvData.saltForPasswordHashing:', this.authProvData.saltForPasswordHashing)
-      // console.log('atob:', atob(this.authProvData.saltForPasswordHashing))
-      // TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
-
-      // var options = {iv: iv, asBytes: true, mode: MODE}
-      // var options = {iv: iv, asBytes: true}
-
-      // var encryptedObj = CryptoJS.AES.encrypt(this.ldapLoginDialogModel.password, salt32Bytes, {options})
-
-      // console.log('encryptedObj', encryptedObj)
-      // console.log('saltBytes:', salt32Bytes)
-      // console.log('iv BASE64:', iv.toString(CryptoJS.enc.Base64))
-      // console.log('cipherText:', encryptedObj.toString())
-
-      // var KEY = CryptoJS.enc.Base64.parse(btoa(get32BytesFromSalt(atob(this.authProvData.saltForPasswordHashing))))
-      // var IV = CryptoJS.lib.WordArray.random(16)
-      // var plaintext = this.ldapLoginDialogModel.password
-
-      // console.log('credentialJSON:', credentialJSON)
       TTT.$emit('completeOK', TTT.authProvData, credentialJSON)
     },
     cancelLoginDialog () {

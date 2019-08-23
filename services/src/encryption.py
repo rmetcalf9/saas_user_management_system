@@ -12,8 +12,8 @@ from Crypto.Random import OSRNG
 from base64 import b64decode, b64encode
 from encryption import pad, unpad, __INT__get32BytesFromSalt
 
-passphraseBase64=b64encode('tyttt'.encode())
-passphrase=__INT__get32BytesFromSalt(b64decode(passphraseBase64))
+passphraseBase64 = b64encode('tyttt'.encode())
+passphrase = __INT__get32BytesFromSalt(b64decode(passphraseBase64))
 plainText='aa'
 IV=b'\xffH\x93\xdeh\xd1\xcd\xab1;ZSB\x08\x19\n'
 
@@ -45,7 +45,7 @@ function get32BytesFromSalt (salt) {
 
 var passphraseBase64=btoa('tyttt')
 var passphrase = get32BytesFromSalt(atob(passphraseBase64))
-var plainText='aa'
+var plainText = 'aa'
 // var IV = CryptoJS.lib.WordArray.random(16)
 var IV = CryptoJS.enc.Base64.parse("/0iT3mjRzasxO1pTQggZCg==")
 var passphraseWordArray = CryptoJS.enc.Base64.parse(btoa(passphrase))
@@ -110,14 +110,17 @@ def decryptPassword(iv, cypherText, salt):
 
   ##passphrase="12345678901234567890123456789012"
 
-  print("Decrypting Password:")
-  print("ivi", ivi)
-  print("cypherTexti", cypherTexti)
-  print("passphrase", passphrase)
+  #print("Decrypting Password:")
+  #print("ivi", ivi)
+  #print("cypherTexti", cypherTexti)
+  #print("passphrase", passphrase)
 
   aes = AES.new(passphrase, AES.MODE_CBC, ivi)
-  paddedPlainText = aes.decrypt(cypherTexti).decode()
-  return unpad(paddedPlainText)
+  unpaddedPlainText = unpad(aes.decrypt(cypherTexti).decode())
+
+  #print("Res:", unpaddedPlainText)
+
+  return unpaddedPlainText
 
 def encryptPasswordX(plainText, salt):
   if (type(salt)) is not bytes:
@@ -140,10 +143,6 @@ def decryptPasswordX(iv, cypherText, salt):
   ivi=b64decode(iv)
   cypherTexti=b64decode(cypherText)
   salti=__INT__get32BytesFromSalt(salt)
-
-  print("decryptPassword salt:", salti)
-  print("decryptPassword IV:", ivi)
-  print("decryptPassword cypherTexti:", cypherTexti)
 
   #recieved val is BYTES
   #returned val needs to be STRING
