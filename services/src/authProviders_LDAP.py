@@ -185,7 +185,8 @@ class authProviderLDAP(authProvider):
     if password == "":
       return False
     try:
-      ldap_connection.simple_bind_s(self.getConfig()['UserAttribute'] + "=" + username + "," + self.getConfig()['UserBaseDN'], password)
+      ldap_query_string = self.getConfig()['UserAttribute'] + "=" + username + "," + self.getConfig()['UserBaseDN']
+      ldap_connection.simple_bind_s(ldap_query_string, password)
     except ldap.INVALID_CREDENTIALS:
       return False
     except ldap.SERVER_DOWN:

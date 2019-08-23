@@ -138,6 +138,7 @@ class authProvider():
     #auth TPL will be (obj, objVer, creationDateTime, lastUpdateDateTime)
     if not authTPLQueried:
       authTPL = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
+      authTPLQueried = True
     if authTPL[0] is None:
       if supressAutocreate:
         raise constants.authNotFoundException
@@ -173,6 +174,7 @@ class authProvider():
           supressEnrich = True
 
     if not supressEnrich:
+      # print("authProvBase supressEnrich")
       enrichedCredentialDICT = self.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(credentialDICT, appObj)
     obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, supressAutocreate, authTPL=authTPL, authTPLQueried=authTPLQueried)
     return obj

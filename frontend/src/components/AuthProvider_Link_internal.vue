@@ -96,7 +96,10 @@ export default {
         password: '',
         password2: ''
       }
-      this.$refs.usernameDialogInput.focus()
+      var TTT = this
+      this.$nextTick(function () {
+        TTT.$refs.usernameDialogInput.focus()
+      })
     },
     okCreateAccountDialog () {
       var TTT = this

@@ -167,6 +167,7 @@ export default {
           Notify.create({color: 'positive', message: 'New Login method added'})
         },
         error: function (response) {
+          Loading.hide()
           console.log('response:', response)
           Notify.create({color: 'negative', message: 'Link error - ' + callbackHelper.getErrorFromResponse(response)})
         }

@@ -84,6 +84,11 @@ const routes = [
     beforeEnter: ensurePassedTenantIsLoaded
   },
   {
+    path: '/:tenantName/AuthProvider/ldap',
+    component: () => import('pages/AuthProvider_ldap.vue'),
+    beforeEnter: ensurePassedTenantIsLoaded
+  },
+  {
     path: '/:tenantName/SecuritySettings',
     component: () => import('pages/SecuritySettings.vue'),
     beforeEnter: ensurePassedTenantIsLoaded
