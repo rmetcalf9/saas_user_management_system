@@ -27,6 +27,11 @@ export default {
       }
       if (gotLogin) {
         var returnAddressToUse = null
+
+        // jwt-auth-cookie can sometimes be set by older apps (dockjob)
+        // and needs to be cleared
+        TTT.$q.cookies.remove('jwt-auth-cookie')
+
         if (frontendFns.isSet(TTT.$store.state.globalDataStore.usersystemReturnaddressInternal)) {
           TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
           var a = TTT.$store.state.globalDataStore.usersystemReturnaddressInternal
@@ -41,8 +46,7 @@ export default {
           returnAddressToUse = TTT.$store.state.globalDataStore.usersystemReturnaddress
         }
 
-        // Not setting cookie - this should now be done by the frontend once it has done inital refresh
-        // TTT.$q.cookies.set('usersystemUserCredentials', response.data, {expires: 1, path: '/'})
+        // Not setting jwt-auth-cookie - this should now be done by the frontend once it has done inital refresh
         // console.log('AA:' + JSON.stringify(response.data))
         if ((returnAddressToUse.match(/&/g) || []).length === 0) {
           returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
