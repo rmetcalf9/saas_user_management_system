@@ -148,7 +148,7 @@ class authProviderFacebook(authProvider):
         raise constants.authFailedException
 
       if resultDICT["id"] != credentialDICT["authResponse"]["userID"]:
-        print("Facebook vefiry failed")
+        print("Facebook verify failed")
         raise constants.authFailedException
 
     except Exception as err:

@@ -141,22 +141,22 @@ def registerAPI(appObj):
 
         except customExceptionClass as err:
           if (err.id=='authFailedException'):
-            raise Unauthorized('authFailedException')
+            raise Unauthorized(err.text)
           if (err.id=='authNotFoundException'):
-            raise Unauthorized('authFailedException')
+            raise Unauthorized(err.text)
           if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
-            raise Unauthorized('PersonHasNoAccessToAnyIdentitiesException')
+            raise Unauthorized(err.text)
           if (err.id=='authProviderNotFoundException'):
-            raise BadRequest('authProviderNotFoundException')
+            raise BadRequest(err.text)
           if (err.id=='InvalidAuthConfigException'):
-            raise Unauthorized('Invalid credentials provided')
+            raise Unauthorized(err.text)
           if (err.id=='InvalidAuthCredentialsException'):
             raise BadRequest(err.text)
           if (err.id=='UnknownUserIDException'):
             raise BadRequest(err.text)
           if (err.id=='ExternalAuthProviderNotReachableException'):
             print(err.text)
-            raise Exception('ExternalAuthProviderNotReachable')
+            raise Exception(err.text)
           raise Exception('InternalServerError')
         except:
           raise InternalServerError
