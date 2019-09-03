@@ -77,7 +77,7 @@ class authProviderFacebook(authProvider):
         return #Do nothing
       raise err
 
-  def _enrichCredentialDictForAuth(self, credentialDICT):
+  def _enrichCredentialDictForAuth(self, credentialDICT, appObj):
     # This process MUST verify the token we got from facebook is Invalid
     #  otherwise users can send anything and pretend they logged into
     #  facebook as anyone!
