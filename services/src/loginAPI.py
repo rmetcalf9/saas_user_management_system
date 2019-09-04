@@ -149,7 +149,11 @@ def registerAPI(appObj):
           if (err.id=='authProviderNotFoundException'):
             raise BadRequest(err.text)
           if (err.id=='InvalidAuthConfigException'):
+            #import traceback
+            #traceback.print_exc()
             raise Unauthorized(err.text)
+          if (err.id=='MissingAuthCredentialsException'):
+            raise BadRequest(err.text)
           if (err.id=='InvalidAuthCredentialsException'):
             raise BadRequest(err.text)
           if (err.id=='UnknownUserIDException'):

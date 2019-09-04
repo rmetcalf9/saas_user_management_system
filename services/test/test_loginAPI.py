@@ -231,9 +231,9 @@ class test_loginapi_norm(test_api):
       content_type='application/json',
       headers={"Origin": httpOrigin}
     )
-    self.assertEqual(result2.status_code, 401)
+    self.assertEqual(result2.status_code, 400)
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expectedResult = {'message': 'Invalid credentials provided'}
+    expectedResult = {'message': 'Missing Credentials'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
   def test_attemptToLoginProvidingValidUserWithNoPassword(self):
@@ -257,9 +257,9 @@ class test_loginapi_norm(test_api):
       content_type='application/json',
       headers={"Origin": httpOrigin}
     )
-    self.assertEqual(result2.status_code, 401)
+    self.assertEqual(result2.status_code, 400)
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expectedResult = {'message': 'Invalid credentials provided'}
+    expectedResult = {'message': 'Invalid Auth Credentials'}
     self.assertJSONStringsEqualWithIgnoredKeys(result2JSON, expectedResult, [ ], msg="Wrong error message provided")
 
   def test_getMutipleIdentityResponseOnlyReturnsUsersForThisTenant(self):

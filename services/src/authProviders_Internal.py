@@ -1,5 +1,5 @@
 #Provides auth provider functions
-from authProviders_base import authProvider, InvalidAuthConfigException
+from authProviders_base import authProvider, InvalidAuthConfigException, MissingAuthCredentialsException, InvalidAuthCredentialsException
 from constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
 from base64 import b64decode, b64encode
 from constants import customExceptionClass
@@ -56,7 +56,7 @@ class authProviderInternal(authProvider):
 
   def _makeKey(self, credentialDICT):
     if 'username' not in credentialDICT:
-      raise InvalidAuthConfigException
+      raise MissingAuthCredentialsException
     #print(self.getConfig()['userSufix'])
     return credentialDICT['username'] + self.getConfig()['userSufix'] + uniqueKeyCombinator + self.getType()
 
@@ -82,7 +82,7 @@ class authProviderInternal(authProvider):
     #print("_getAuthData call with:")
     #print(" credentialDICT['password']:",credentialDICT['password'], ' (', type(credentialDICT['password']), ')')
     if 'password' not in credentialDICT:
-      raise InvalidAuthConfigException
+      raise InvalidAuthCredentialsException
     self.__normalizeCredentialDICT(credentialDICT)
 
     hashedPass = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])

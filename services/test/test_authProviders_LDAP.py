@@ -227,7 +227,7 @@ class test_addGoogleAuthProviderToMasterTenant(authProviderHelperFunctions):
       expectedResults = [401]
     )
 
-    self.assertEqual(resp["message"],"authFailedException",msg="Wrong error message")
+    self.assertEqual(resp["message"],"authNotFoundException",msg="Wrong error message")
 
   @patch('ldap.ldapobject.SimpleLDAPObject.simple_bind_s', return_value=None, side_effect=ldap.INVALID_CREDENTIALS)
   def test_basPasswordFails(self, patchSimpleBindS):

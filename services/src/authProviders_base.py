@@ -8,6 +8,7 @@ from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteA
 
 InvalidAuthConfigException = constants.customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
 InvalidAuthCredentialsException = constants.customExceptionClass('Invalid Auth Credentials','InvalidAuthCredentialsException')
+MissingAuthCredentialsException = constants.customExceptionClass('Missing Credentials','MissingAuthCredentialsException')
 tryingToCreateDuplicateAuthException = constants.customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
 InvalidOperationException = constants.customExceptionClass('Invalid Operation','InvalidOperationException')
 NotOverriddenException = Exception('Not Overridden')

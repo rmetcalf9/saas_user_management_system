@@ -89,7 +89,7 @@ class test_adminAPIAuths(parent_test_api):
     )
     self.assertEqual(result.status_code, 400, msg="Create auth did not fail - " + result.get_data(as_text=True))
 
-  def test_createAuthInvalidauthConfig(self):
+  def test_createAuthInvalidCredentials(self):
     newAuthDICT = self.getNewAuthDICT()
     newAuthDICT['credentialJSON'] = {"aa":"invalid"}
 

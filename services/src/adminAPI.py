@@ -714,6 +714,8 @@ def registerAPI(appObj):
           raise BadRequest(err.text)
         if (err.id=='InvalidAuthConfigException'):
           raise BadRequest(err.text)
+        if (err.id=='MissingAuthCredentialsException'):
+          raise BadRequest(err.text)
         if (err.id=='tryingToCreateDuplicateAuthException'):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
