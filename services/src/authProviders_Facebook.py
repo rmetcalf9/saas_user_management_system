@@ -26,6 +26,7 @@ class authProviderFacebook(authProvider):
     super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
 
     if 'clientSecretJSONFile' not in dataDict['ConfigJSON']:
+      print('ERROR - clientSecretJSONFile not in authConfig')
       raise InvalidAuthConfigException
 
     #Only load the static data once
@@ -39,19 +40,19 @@ class authProviderFacebook(authProvider):
         raise constants.customExceptionClass('loadStaticData returned None','InvalidAuthConfigException')
 
       if "web" not in self.getStaticData()['secretJSON']:
-        raise constants.customExceptionClass('Facebook secret file invliad (missing web)','InvalidAuthConfigException')
+        raise constants.customExceptionClass('Facebook secret file invalid (missing web)','InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invliad (missing client_id)','InvalidAuthConfigException')
+        raise constants.customExceptionClass('Facebook secret file invalid (missing client_id)','InvalidAuthConfigException')
       if "client_secret" not in self.getStaticData()['secretJSON']["web"]:
         raise constants.customExceptionClass('Facebook secret file invliad (missing client_id)','InvalidAuthConfigException')
       if "redirect_uri" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invliad (missing redirect_uri)','InvalidAuthConfigException')
+        raise constants.customExceptionClass('Facebook secret file invalid (missing redirect_uri)','InvalidAuthConfigException')
       if "auth_uri" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invliad (missing auth_uri)','InvalidAuthConfigException')
+        raise constants.customExceptionClass('Facebook secret file invalid (missing auth_uri)','InvalidAuthConfigException')
 
   def _makeKey(self, credentialDICT):
     if 'creds' not in credentialDICT:
-      raise InvalidAuthConfigException
+      raise constants.customExceptionClass('creds not in credentialDICT - this means the credentials have not been enriched','InvalidAuthConfigException')
     return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'facebook'
 
   def __getClientID(self):
@@ -174,3 +175,6 @@ class authProviderFacebook(authProvider):
 
   def _getAuthData(self, appObj, credentialDICT):
     return {}
+
+  def canMakeKeyWithoutEnrichment(self):
+    return False
