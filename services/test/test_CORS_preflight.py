@@ -2,10 +2,10 @@
 Test the preflight options return values are correct
 '''
 from TestHelperSuperClass import tenantWithNoAuthProviders, env, httpOrigin, testHelperAPIClient
+from baseapp_for_restapi_backend_with_swagger import uniqueCommaSeperatedListClass
 import constants
 import json
 import copy
-from uniqueCommaSeperatedList import uniqueCommaSeperatedListClass
 
 #Origin can only have one value
 ## http://blog.crashtest-security.com/multiple-values-access-control-allow-origin
@@ -64,7 +64,7 @@ class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
     requiredOriginList = uniqueCommaSeperatedListClass(env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com").data
     for x in requiredOriginList:
       a = self.findCORSReturnVals(constants.masterTenantName, x)
-      self.assertEqual(a.get("Access-Control-Allow-Origin"),x)
+      self.assertEqual(a.get("Access-Control-Allow-Origin"),x, msg="Failed to return an origin in optoins call")
 
     a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
     self.assertEqual(a.get("Access-Control-Allow-Origin"),None)

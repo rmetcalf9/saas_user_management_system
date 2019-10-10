@@ -6,7 +6,7 @@
 
 import pytz
 
-from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, readFromEnviroment
+from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, readFromEnviroment, uniqueCommaSeperatedListClass
 from flask_restplus import fields
 from flask import request
 import time
@@ -27,7 +27,6 @@ from refreshTokenGeneration import RefreshTokenManager
 from persons import GetPerson
 from userPersonCommon import GetUser
 from authProviders_base import resetStaticData as authProviders_resetStaticData
-from uniqueCommaSeperatedList import uniqueCommaSeperatedListClass
 
 import logging
 import sys
@@ -55,7 +54,6 @@ class appObjClass(parAppObj):
   refreshTokenManager = None
   scheduler = None
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
-  accessControlAllowOriginObj = None
 
   def setupLogging(self):
     root = logging.getLogger()
@@ -100,14 +98,8 @@ class appObjClass(parAppObj):
 
     self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
 
-    originCommaSeperatedList = readFromEnviroment(
-      env,
-      'APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN',
-      self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD,
-      None
-    )
-    self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(originCommaSeperatedList)
-
+    # add to the baseapp default so allowed oriigns are in this list and extra vals
+    self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD + ", " + self.accessControlAllowOriginObj.toString())
 
     print('APIAPP_JWT_TOKEN_TIMEOUT:'+str(self.APIAPP_JWT_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
@@ -163,17 +155,6 @@ class appObjClass(parAppObj):
     registerCurAuthApi(self)
     self.flastRestPlusAPIObject.title = "SAAS User Management"
     self.flastRestPlusAPIObject.description = "API for saas_user_management_system\nhttps://github.com/rmetcalf9/saas_user_management_system"
-
-    @self.flaskAppObject.after_request
-    def after_request(response):
-      originHeader = request.headers.get('Origin')
-      if originHeader in self.accessControlAllowOriginObj.data:
-        if (not self.globalParamObject.getDeveloperMode()):
-          # base app will allow any origin if developer mode is selected
-          response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
-          response.headers.add('Access-Control-Allow-Headers', '*')
-          response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-      return response
 
   def stopThread(self):
     ##print("stopThread Called")
