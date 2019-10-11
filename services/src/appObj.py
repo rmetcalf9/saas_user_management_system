@@ -101,6 +101,8 @@ class appObjClass(parAppObj):
     # add to the baseapp default so allowed oriigns are in this list and extra vals
     self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD + ", " + self.accessControlAllowOriginObj.toString())
 
+    # print('uniqueCommaSeperatedListClass:', self.accessControlAllowOriginObj.toString())
+
     print('APIAPP_JWT_TOKEN_TIMEOUT:'+str(self.APIAPP_JWT_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
