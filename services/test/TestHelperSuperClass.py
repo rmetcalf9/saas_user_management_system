@@ -219,6 +219,7 @@ class testClassWithTestClient(testHelperSuperClass):
   testClient = None
   standardStartupTime = pytz.timezone('Europe/London').localize(datetime.datetime(2018,1,1,13,46,0,0))
 
+  serverinfoAPIPrefix = '/api/public/info'
   loginAPIPrefix = '/api/public/login'
   adminAPIPrefix = '/api/authed/admin'
   currentAuthAPIPrefix = '/api/authed/currentAuth'

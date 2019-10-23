@@ -11,6 +11,7 @@ securityTestAPIEndpoint = '/securityTestEndpoint'
 
 #THESE ARE DIFFERENT THAN IN TEST HELPER SUPERCLASS
 ## They are reversed because container test go through nginx which switches them abound
+serverinfoAPIPrefix = '/public/api/info'
 loginAPIPrefix = '/public/api/login'
 adminAPIPrefix = '/authed/api/admin'
 
@@ -28,17 +29,19 @@ if ('HTTPORIGIN_TO_TEST' in os.environ):
   httpOrigin=os.environ['HTTPORIGIN_TO_TEST']
 
 
-BASE = [0,1,2,3,4]
+BASE = [0,1,2,3,4,5]
 LOGIN = 0
 ADMIN = 1
 APIDOCS = 2
 FRONTEND = 3
 ADMINFRONTEND = 4
+SERVERINFO = 5
 BASE[LOGIN]=baseURL + loginAPIPrefix
 BASE[ADMIN]=baseURL + adminAPIPrefix
 BASE[APIDOCS]=baseURL + '/public/web/apidocs'
 BASE[FRONTEND]=baseURL + '/public/web/frontend'
 BASE[ADMINFRONTEND]=baseURL + '/public/web/adminfrontend'
+BASE[SERVERINFO]=baseURL + serverinfoAPIPrefix
 
 def getEnviromentVariable(name):
   return readFromEnviroment(os.environ, name, None, None, False)
@@ -122,7 +125,7 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
     print("Got response ",result.status_code)
     print("     ",result.text)
     raise Exception("Did not get expected response")
-  if api in [LOGIN, ADMIN]:
+  if api in [LOGIN, ADMIN, SERVERINFO]:
     return json.loads(result.text), result.status_code
   return result.text, result.status_code
 

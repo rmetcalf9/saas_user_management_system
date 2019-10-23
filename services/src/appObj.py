@@ -75,7 +75,7 @@ class appObjClass(parAppObj):
       self.defaultUserGUID = conDefaultUserGUID
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
 
-    super(appObjClass, self).init(env, serverStartTime, testingMode)
+    super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='public/info')
 
     #This app always needs a JWT key
     if self.APIAPP_JWTSECRET is None:

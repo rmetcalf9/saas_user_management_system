@@ -8,7 +8,6 @@ from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
 from constants import customExceptionClass
 from apiSharedModels import getTenantModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
-from serverInfoAPI import registerServerInfoAPIFn
 import copy
 from userPersonCommon import GetUser
 
@@ -37,8 +36,6 @@ def getValidTenantObj(appObj, tenant, storeConnection, validateOrigin):
 def registerAPI(appObj):
 
   nsLogin = appObj.flastRestPlusAPIObject.namespace('public/login', description='Public API for displaying login pages.')
-  registerServerInfoAPIFn(appObj, nsLogin)
-
 
   @nsLogin.route('/<string:tenant>/register')
   class register(Resource):

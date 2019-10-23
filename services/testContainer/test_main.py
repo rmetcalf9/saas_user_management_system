@@ -19,7 +19,8 @@ class test_containerAPI(unittest.TestCase):
 
   def test_ContainerVersionMatchesEnviromentVariable(self):
     self.assertTrue('EXPECTED_CONTAINER_VERSION' in os.environ, msg="EXPECTED_CONTAINER_VERSION missing from enviroment")
-    resultJSON, status = callGetService(containerTestCommon.LOGIN, "/serverinfo", [200], None, None, None)
+    resultJSON, status = callGetService(containerTestCommon.SERVERINFO, "/serverinfo", [200], None, None, None)
+    print(resultJSON)
     self.assertEqual(resultJSON['Server']['Version'], os.environ['EXPECTED_CONTAINER_VERSION'])
 
   #TODO Test apidocs url retrieved from serverinfo works
