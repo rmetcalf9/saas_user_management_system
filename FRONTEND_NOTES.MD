@@ -9,13 +9,14 @@ The frontend is the userinterface for the management system
  | login Webpage       | http://host:8081/                  | http://host:80/public/web/frontend/#/       | https://api.metcarob.com/saas_user_management/test/v0/public/web/frontend/      | http://host:X/frontend/#/                 |
  | login Admin Webpage | http://host:8082/                  | http://host:80/public/web/adminfrontend/#/  | https://api.metcarob.com/saas_user_management/test/v0/public/web/adminfrontend/ | http://host:X/adminfrontend/#/usersystem  |
  | API Docs            | http://host:8098/apidocs/          | http://host:80/public/web/apidocs/          | https://api.metcarob.com/saas_user_management/test/v0/public/web/apidocs/       |                                           |
- | public login API    | http://host:8098/api/public/login/ | http://host:80/public/api/login/            | https://api.metcarob.com/saas_user_management/test/v0/public/api/login/         | http://host:X/api/public/login/serverinfo |
+ | public login API    | http://host:8098/api/public/login/ | http://host:80/public/api/login/            | https://api.metcarob.com/saas_user_management/test/v0/public/api/login/         | http://host:X/api/public/login/XXserverinfo |
+ | public serverinfo API    | http://host:8098/api/public/login/ | http://host:80/public/api/info/            | https://api.metcarob.com/saas_user_management/test/v0/public/api/info/         | http://host:X/api/public/info/serverinfo |
  | authed admin API    | http://host:8098/api/authed/admin/ | http://host:80/authed/api/admin/            | https://api.metcarob.com/saas_user_management/test/v0/authed/api/admin/         |                                           |
- 
+
 Note: due to Python limitations the API switchs from /api/public to /public/api because python needs it one way and Kong security needs it the other way round. This is only for the api section and dosen't affect the web.
 
-Remove /test/ for prod endpoint 
- 
+Remove /test/ for prod endpoint
+
 Endpoints setup in Kong
 
  | Endpoint in Kong | Endpoint mapped to on server | Notes |
@@ -36,7 +37,7 @@ On development machine these must run on different ports, accessed by root on al
  - /vx/public/__web__/frontend  -> / (8091)
  - /vx/public/__web__/adminfrontend  -> / (8092)
  - /vx/public/__api__  -> / (8098)
- 
+
 Frontend globalDataSTore action checkAuthProviders has logic to navigate this
 
 ## Example Public Web Access
@@ -71,8 +72,3 @@ If Authed this maps to:
 apiPrefix + '/authed/api' + api
 Not Authed:
 apiPrefix + '/public/api' + api
-
-
-
-
-

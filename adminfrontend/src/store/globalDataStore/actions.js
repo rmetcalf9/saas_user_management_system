@@ -38,7 +38,7 @@ function readServerInfo (state, commit, currentHREF, callback) {
       callback.error(response)
     }
   }
-  shared.TryToConnectToAPI(currentHREF, state.tenantName, callback2, '/login/serverinfo')
+  shared.TryToConnectToAPI(currentHREF, state.tenantName, callback2, '/info/serverinfo')
 }
 
 function _getRefreshFunctions (commit, state) {
