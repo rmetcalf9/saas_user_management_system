@@ -99,7 +99,7 @@ function TryToConnectToAPIRecurring (locationsToTry, callback, apiPath) {
     method: 'GET',
     url: getAPIPathToCall(apiPrefix, false, apiPath)
   }
-  console.log('Tyring to reach API at ' + config.url)
+  console.log('Trying to reach API at ' + config.url)
   axios(config).then(
     (response) => {
       console.log('SUCCESS!')
