@@ -1,6 +1,6 @@
 // import something here
 // var gapi = require('gapi')
-import './googleclient'
+// import './googleclient'
 // https://www.npmjs.com/package/gapi
 
 // leave the export, even if you don't use it
