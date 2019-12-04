@@ -65,28 +65,27 @@ function getAPIPrefixPossibilities (currentURL, tenantName) {
   if (prodVer.prod === false) {
     console.log('NON prod detected url and tenantName: ', currentURL, ': tenantName:', tenantName)
     return [
-      { prefix: 'http://somefunnyhostname.com:5098/', kong: false }, // work run all parts on dev machine
-      { prefix: 'http://localhost:8098/', kong: false }, // home run all parts on dec machine
-      { prefix: 'http://somefunnyhostname.com:5080/', kong: true }, // work container on dev machine
-      { prefix: 'http://localhost:80/', kong: true } // home container on dev machine
-      // { prefix: 'http://localhost:8082/', kong: false },
-      // { prefix: 'http://somefunnyhostname.com:8098/', kong: false }
+      { prefix: 'http://127.0.0.1:8098/', connectingthroughnginx: false }, // run all parts on dev machine
+      { prefix: 'http://127.0.0.1:8099/', connectingthroughnginx: true }, // dev container on dev machine
+      { prefix: 'http://127.0.0.1:80/', connectingthroughnginx: true } // home container on dev machine
+      // { prefix: 'http://localhost:8082/', connectingthroughnginx: false },
+      // { prefix: 'http://somefunnyhostname.com:8098/', connectingthroughnginx: false }
     ]
   }
   console.log('prod detected url and tenantName: ', currentURL, tenantName)
   return [
-    { prefix: prodVer.prefix, kong: true } // container via Kong redirects
+    { prefix: prodVer.prefix, connectingthroughnginx: true } // container via Kong redirects
   ]
 }
 
 function getAPIPathToCall (APIprefix, authed, apiPath) {
   if (authed) {
-    if (APIprefix.kong) {
+    if (APIprefix.connectingthroughnginx) {
       return APIprefix.prefix + 'authed/api' + apiPath
     }
     return APIprefix.prefix + 'api/authed' + apiPath
   }
-  if (APIprefix.kong) {
+  if (APIprefix.connectingthroughnginx) {
     return APIprefix.prefix + 'public/api' + apiPath
   }
   return APIprefix.prefix + 'api/public' + apiPath
@@ -99,7 +98,7 @@ function TryToConnectToAPIRecurring (locationsToTry, callback, apiPath) {
     method: 'GET',
     url: getAPIPathToCall(apiPrefix, false, apiPath)
   }
-  console.log('Tyring to reach API at ' + config.url)
+  console.log('Trying to reach API at ' + config.url)
   axios(config).then(
     (response) => {
       console.log('SUCCESS!')
