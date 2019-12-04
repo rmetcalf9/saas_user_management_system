@@ -1,9 +1,9 @@
-from TestHelperSuperClass import testHelperSuperClass, wipd
+import TestHelperSuperClass
 from appObj import appObj
 from encryption import decryptPassword, encryptPassword
 
-@wipd
-class test_encryption(testHelperSuperClass):
+#@TestHelperSuperClass.wipd
+class test_encryption(TestHelperSuperClass.testHelperSuperClass):
   def test_passwordEncrypt(self):
     plainText="AAAAA"
     salt=appObj.bcrypt.gensalt()
@@ -13,16 +13,14 @@ class test_encryption(testHelperSuperClass):
 
     self.assertEqual(plainText, plainText2)
 
-
-  def test_passwordEncrypt(self):
+  def test_passwordEncrypt2(self):
     plainText="AAAAA\n\n\n"
     salt=appObj.bcrypt.gensalt()
 
     (iv, cypherText) = encryptPassword(plainText, salt)
     plainText2 = decryptPassword(iv, cypherText, salt)
 
-
-  def test_passwordEncrypt(self):
+  def test_passwordEncrypt3(self):
     plainText="AAAAA\0\0\0"
     salt=appObj.bcrypt.gensalt()
 
@@ -31,7 +29,7 @@ class test_encryption(testHelperSuperClass):
 
     self.assertEqual(plainText, plainText2)
 
-  def test_passwordEncrypt(self):
+  def test_passwordEncrypt4(self):
     plainText="AAAAA\0\0\0sadrgfrg"
     salt=appObj.bcrypt.gensalt()
 
