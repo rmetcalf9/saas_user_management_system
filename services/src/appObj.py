@@ -28,6 +28,8 @@ from persons import GetPerson
 from userPersonCommon import GetUser
 from authProviders_base import resetStaticData as authProviders_resetStaticData
 
+import autoConfigRunner as autoConfig
+
 import logging
 import sys
 
@@ -48,6 +50,7 @@ class appObjClass(parAppObj):
   APIAPP_REFRESH_SESSION_TIMEOUT = None
   APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = None
   APIAPP_OBJECTSTOREDETAILLOGGING = None
+  APIAPP_AUTOCONFIG = None # will mainly be read from file by baseapp
   gateway = None
   defaultUserGUID = None
   testingDefaultPersonGUID = None
@@ -88,6 +91,22 @@ class appObjClass(parAppObj):
     self.APIAPP_JWT_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 5, None)) #default to five minutes
     self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 10, None)) #default to ten minutes
     self.APIAPP_REFRESH_SESSION_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 48, None)) #default to 48 hours
+
+    autoconfigraw = readFromEnviroment(
+      env=env,
+      envVarName='APIAPP_AUTOCONFIG',
+      defaultValue='',
+      acceptableValues=None,
+      nullValueAllowed=False
+    ).strip()
+    if autoconfigraw == '':
+      self.APIAPP_AUTOCONFIG = None
+    else:
+      try:
+        self.APIAPP_AUTOCONFIG = json.loads(autoconfigraw)
+      except:
+        print("ERROR - APIAPP_AUTOCONFIG is not valid json")
+        raise invalidConfigurationException
 
     if self.APIAPP_REFRESH_TOKEN_TIMEOUT < self.APIAPP_JWT_TOKEN_TIMEOUT:
       print("ERROR - APIAPP_REFRESH_TOKEN_TIMEOUT should never be less than APIAPP_JWT_TOKEN_TIMEOUT")
@@ -149,6 +168,10 @@ class appObjClass(parAppObj):
     self.refreshTokenManager = RefreshTokenManager(self)
 
     self.scheduler.start()
+
+    if self.APIAPP_AUTOCONFIG != None:
+      autoConfigRunner = autoConfig.AutoConfigRunner(self.APIAPP_AUTOCONFIG)
+      autoConfigRunner.run(self)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
