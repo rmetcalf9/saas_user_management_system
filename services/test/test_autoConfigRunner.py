@@ -65,7 +65,6 @@ class test_appObjClass(helpers):
     l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStepData["tenantName"])
     self.assertTail(mocked_print, l)
 
-    print(testStepData["tenantName"])
     def runFn(storeConnection):
       return GetTenant(testStepData["tenantName"], storeConnection, appObj=appObj)
     tenantObj = appObj.objectStore.executeInsideTransaction(runFn)

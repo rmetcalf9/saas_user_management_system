@@ -173,7 +173,7 @@ class appObjClass(parAppObj):
       autoConfigRunner = autoConfig.AutoConfigRunner(self.APIAPP_AUTOCONFIG)
       def configRunnerFn(storeConnection):
         autoConfigRunner.run(self, storeConnection)
-      self.objectStore.executeInsideConnectionContext(configRunnerFn)
+      self.objectStore.executeInsideTransaction(configRunnerFn)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
