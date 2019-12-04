@@ -27,6 +27,17 @@ class helpers(TestHelperSuperClass.testHelperAPIClient):
       return
     self.assertEqual(l, len(mocked_print.mock_calls), msg="Not enough lines in output (next line=" + str(mocked_print.mock_calls[l]) + ")")
 
+  def getCreateTenantStep(self):
+    testStepData = {
+      "tenantName": "newTenant",
+      "description": "descrition of new tenant",
+      "allowUserCreation": True,
+      "JWTCollectionAllowedOriginList": [ "a", "b", "https://a.b.c.com" ]
+    }
+    return { "type": "createTenant", "data": testStepData}
+
+
+
 @TestHelperSuperClass.wipd
 class test_appObjClass(helpers):
 #Actual tests below
@@ -54,7 +65,7 @@ class test_appObjClass(helpers):
       "JWTCollectionAllowedOriginList": [ "a", "b", "https://a.b.c.com" ]
     }
     autoConfigRunner = autoConfig.AutoConfigRunner(
-      {"steps": [{ "type": testType, "data": testStepData}]}
+      {"steps": [self.getCreateTenantStep()]}
     )
     tenantObj = None
     with patch('builtins.print') as mocked_print:
@@ -75,3 +86,75 @@ class test_appObjClass(helpers):
     self.assertEqual(tenantObj._mainDict["Description"], testStepData["description"])
     self.assertEqual(tenantObj.getAllowUserCreation(), testStepData["allowUserCreation"])
     self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), testStepData["JWTCollectionAllowedOriginList"])
+
+  def test_AddAuthProviderTenantNonExistantTenant(self):
+    testType = "addAuthProvider"
+    testStepData = {
+      "tenantName": "newTenant",
+      "menuText": "Test Menu Text",
+      "iconLink": "Test Icon Link",
+      "Type": "internal",
+      "AllowUserCreation": True,
+      "configJSON": {"userSufix": "@internalDataStore"},
+      "AllowLink": True,
+      "AllowUnlink": True,
+      "LinkText": "Test Link Text"
+    }
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [{ "type": testType, "data": testStepData}]}
+    )
+    tenantObj = None
+    def runFn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        autoConfigRunner.run(appObj, storeConnection)
+      self.assertEqual(str(context.exception), "AddAuthProvider: Tenant " + testStepData["tenantName"] + " does not exist")
+    appObj.objectStore.executeInsideTransaction(runFn)
+
+  def test_AddTenantAndAuthProvider(self):
+    testType = "addAuthProvider"
+    testStepData = {
+      "tenantName": "newTenant",
+      "menuText": "Test Menu Text",
+      "iconLink": "Test Icon Link",
+      "Type": "internal",
+      "AllowUserCreation": True,
+      "configJSON": {"userSufix": "@internalDataStore"},
+      "AllowLink": True,
+      "AllowUnlink": True,
+      "LinkText": "Test Link Text"
+    }
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        self.getCreateTenantStep(),
+        { "type": testType, "data": testStepData}
+      ]}
+    )
+    tenantObj = None
+    with patch('builtins.print') as mocked_print:
+      def runFn(storeConnection):
+        autoConfigRunner.run(appObj, storeConnection)
+      appObj.objectStore.executeInsideTransaction(runFn)
+    l = self.assertHead(mocked_print)
+    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStepData["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'AddAuthProvider: Type ' + testStepData["Type"] + " added to Tenant " + testStepData["tenantName"])
+    self.assertTail(mocked_print, l)
+
+    def runFn(storeConnection):
+      return GetTenant(testStepData["tenantName"], storeConnection, appObj=appObj)
+    tenantObj = appObj.objectStore.executeInsideTransaction(runFn)
+
+    self.assertEqual(tenantObj.getNumberOfAuthProviders(),1)
+
+    authProvAdded = tenantObj.getAuthProvider(list(tenantObj.getAuthProviderGUIDList())[0])
+
+    expected = {
+      "AllowLink": True,
+      "AllowUnlink": True,
+      "AllowUserCreation": True,
+      "ConfigJSON": {"userSufix": "@internalDataStore"},
+      "IconLink": "Test Icon Link",
+      "LinkText": "Test Link Text",
+      "MenuText": "Test Menu Text",
+      "Type": "internal"
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(authProvAdded, expected, ignoredKeys=["guid", "saltForPasswordHashing"])

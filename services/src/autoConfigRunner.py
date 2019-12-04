@@ -1,4 +1,5 @@
-from tenants import CreateTenant
+from tenants import CreateTenant, AddAuthProvider
+import constants
 
 class AutoConfigRunner():
   steps = None
@@ -14,6 +15,9 @@ class AutoConfigRunner():
     print("----------------------------")
     for step in self.steps:
       step.run(appObj, storeConnection)
+      if not step.passed:
+        print("Autoconfig errored!!!")
+        raise Exception("Auto config errored")
     print("----------------------------")
     print("Autoconfig run complete")
     print("----------------------------\n\n")
@@ -24,14 +28,21 @@ def AutoConfigRunStepFactory(stepDict):
     return AutoConfigRunStepEcho(stepDict["data"])
   elif stepDict["type"] == "createTenant":
     return AutoConfigRunStepCreateTenant(stepDict["data"])
+  elif stepDict["type"] == "addAuthProvider":
+    return AutoConfigRunStepAddAuthProvider(stepDict["data"])
 
   raise Exception("Unknown step type")
 
 
 class AutoConfigRunStep():
   stepDict = None
+  passed = None
   def __init__(self, stepDict, storeConnection):
     self.stepDict = stepDict
+    self.passed = False
+
+  def setPassed(self):
+    self.passed = True
 
   def run(self, appObj, storeConnection):
     raise Exception("Should be overridden")
@@ -42,6 +53,7 @@ class AutoConfigRunStepEcho(AutoConfigRunStep):
     self.text = stepDict["text"]
   def run(self, appObj, storeConnection):
     print("Echo: " + self.text)
+    self.setPassed()
 
 class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
   tenantName = None
@@ -63,3 +75,47 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
       JWTCollectionAllowedOriginList=self.JWTCollectionAllowedOriginList
     )
     print("CreateTenant: " + retVal.getName())
+    self.setPassed()
+
+class AutoConfigRunStepAddAuthProvider(AutoConfigRunStep):
+  tenantName = None
+  menuText = None
+  iconLink = None
+  Type = None
+  AllowUserCreation = None
+  configJSON = None
+  AllowLink = None
+  AllowUnlink = None
+  LinkText = None
+
+  def __init__(self, stepDict):
+    self.tenantName = stepDict["tenantName"]
+    self.menuText = stepDict["menuText"]
+    self.iconLink = stepDict["iconLink"]
+    self.Type = stepDict["Type"]
+    self.AllowUserCreation = stepDict["AllowUserCreation"]
+    self.configJSON = stepDict["configJSON"]
+    self.AllowLink = stepDict["AllowLink"]
+    self.AllowUnlink = stepDict["AllowUnlink"]
+    self.LinkText = stepDict["LinkText"]
+  def run(self, appObj, storeConnection):
+    try:
+      retVal = AddAuthProvider(
+        appObj=appObj,
+        tenantName=self.tenantName,
+        menuText=self.menuText,
+        iconLink=self.iconLink,
+        Type=self.Type,
+        AllowUserCreation=self.AllowUserCreation,
+        configJSON=self.configJSON,
+        storeConnection=storeConnection,
+        AllowLink=self.AllowLink,
+        AllowUnlink=self.AllowUnlink,
+        LinkText=self.LinkText
+        )
+      print("AddAuthProvider: Type " + retVal["Type"] + " added to Tenant " + self.tenantName)
+    except constants.customExceptionClass as err:
+      if (err.id=='tenantDosentExistException'):
+        raise Exception("AddAuthProvider: Tenant " + self.tenantName + " does not exist")
+      raise x
+    self.setPassed()
