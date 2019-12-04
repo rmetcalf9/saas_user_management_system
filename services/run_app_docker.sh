@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#Hardcoded here
-export APIAPP_MODE=DOCKER
-
 if [ E${APP_DIR} = "E" ]; then
   echo 'APP_DIR not set'
   exit 1
@@ -20,8 +17,8 @@ if [ E${APIAPP_VERSION} = 'E' ]; then
   exit 1
 fi
 
-_term() { 
-  echo "run_app_docker.sh - Caught SIGTERM signal!" 
+_term() {
+  echo "run_app_docker.sh - Caught SIGTERM signal!"
   kill -TERM "$child_nginx" 2>/dev/null
   kill -TERM "$child_uwsgi" 2>/dev/null
 }
@@ -40,9 +37,9 @@ trap _term SIGTERM
 #echo "  ${C} variables evaluated"
 
 uwsgi --ini /uwsgi.ini &
-child_uwsgi=$! 
+child_uwsgi=$!
 nginx -g 'daemon off;' &
-child_nginx=$! 
+child_nginx=$!
 
 wait "$child_uwsgi"
 

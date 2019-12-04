@@ -24,7 +24,10 @@ ENV APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD "http://localhost"
 #Port for python app should always be 80 as this is is hardcoded in nginx config
 ENV APIAPP_PORT 80
 
-# APIAPP_MODE is not definable here as it is hardcoded to DOCKER in the shell script
+# APIAPP_MODE is now defined here instead of run_app_docker.sh
+#  this is to enable dev mode containers (and avoid dev cors errors)
+ENV APIAPP_MODE DOCKER
+
 # APIAPP_VERSION is not definable here as it is read from the VERSION file inside the image
 
 EXPOSE 80
