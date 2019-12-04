@@ -171,7 +171,9 @@ class appObjClass(parAppObj):
 
     if self.APIAPP_AUTOCONFIG != None:
       autoConfigRunner = autoConfig.AutoConfigRunner(self.APIAPP_AUTOCONFIG)
-      autoConfigRunner.run(self)
+      def configRunnerFn(storeConnection):
+        autoConfigRunner.run(self, storeConnection)
+      self.objectStore.executeInsideConnectionContext(configRunnerFn)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
