@@ -62,6 +62,17 @@ class tenantClass():
   def getAuthProviderGUIDList(self):
     return self._mainDict["AuthProviders"].keys()
 
+  def getSingleAuthProviderOfType(self, type):
+    # return None if there is no auth provider of this type or if there is more
+    #  than one
+    foundProv = None
+    for x in self._mainDict["AuthProviders"]:
+      if self._mainDict["AuthProviders"][x]["Type"] == type:
+        if foundProv is not None:
+          return None
+        foundProv = self._mainDict["AuthProviders"][x]
+    return foundProv
+
   def getName(self):
     return self._mainDict["Name"]
 

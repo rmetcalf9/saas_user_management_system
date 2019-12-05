@@ -3,7 +3,8 @@ import TestHelperSuperClass
 import autoConfigRunner as autoConfig
 from appObj import appObj
 from unittest.mock import Mock, patch, call
-from tenants import GetTenant
+from tenants import GetTenant, Login
+from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 
 class helpers(TestHelperSuperClass.testHelperAPIClient):
   def assertNextLine(self, mocked_print, cur_line, expected):
@@ -36,7 +37,29 @@ class helpers(TestHelperSuperClass.testHelperAPIClient):
     }
     return { "type": "createTenant", "data": testStepData}
 
+  def getAddAuthStep(self):
+    testStepData = {
+      "tenantName": "newTenant",
+      "menuText": "Test Menu Text",
+      "iconLink": "Test Icon Link",
+      "Type": "internal",
+      "AllowUserCreation": True,
+      "configJSON": {"userSufix": "@internalDataStore"},
+      "AllowLink": True,
+      "AllowUnlink": True,
+      "LinkText": "Test Link Text"
+    }
+    return { "type": "addAuthProvider", "data": testStepData}
 
+  def getAddInternalUserAccountStep(self):
+    testStepData = {
+      "tenantName": "newTenant",
+      "userID": "123gfdds",
+      "Username": "TestUser",
+      "Password": "TestUser",
+      "Roles": [] #has account always created
+    }
+    return { "type": "addInternalUserAccount", "data": testStepData}
 
 @TestHelperSuperClass.wipd
 class test_appObjClass(helpers):
@@ -57,15 +80,9 @@ class test_appObjClass(helpers):
     self.assertTail(mocked_print, l)
 
   def test_CreateTenant(self):
-    testType = "createTenant"
-    testStepData = {
-      "tenantName": "newTenant",
-      "description": "descrition of new tenant",
-      "allowUserCreation": True,
-      "JWTCollectionAllowedOriginList": [ "a", "b", "https://a.b.c.com" ]
-    }
+    testStep = self.getCreateTenantStep()
     autoConfigRunner = autoConfig.AutoConfigRunner(
-      {"steps": [self.getCreateTenantStep()]}
+      {"steps": [testStep]}
     )
     tenantObj = None
     with patch('builtins.print') as mocked_print:
@@ -73,60 +90,38 @@ class test_appObjClass(helpers):
         autoConfigRunner.run(appObj, storeConnection)
       appObj.objectStore.executeInsideTransaction(runFn)
     l = self.assertHead(mocked_print)
-    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStepData["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStep["data"]["tenantName"])
     self.assertTail(mocked_print, l)
 
     def runFn(storeConnection):
-      return GetTenant(testStepData["tenantName"], storeConnection, appObj=appObj)
+      return GetTenant(testStep["data"]["tenantName"], storeConnection, appObj=appObj)
     tenantObj = appObj.objectStore.executeInsideTransaction(runFn)
 
     self.assertNotEqual(tenantObj, None, msg="Tenant was not created")
 
-    self.assertEqual(tenantObj.getName(), testStepData["tenantName"])
-    self.assertEqual(tenantObj._mainDict["Description"], testStepData["description"])
-    self.assertEqual(tenantObj.getAllowUserCreation(), testStepData["allowUserCreation"])
-    self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), testStepData["JWTCollectionAllowedOriginList"])
+    self.assertEqual(tenantObj.getName(), testStep["data"]["tenantName"])
+    self.assertEqual(tenantObj._mainDict["Description"], testStep["data"]["description"])
+    self.assertEqual(tenantObj.getAllowUserCreation(), testStep["data"]["allowUserCreation"])
+    self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), testStep["data"]["JWTCollectionAllowedOriginList"])
 
   def test_AddAuthProviderTenantNonExistantTenant(self):
-    testType = "addAuthProvider"
-    testStepData = {
-      "tenantName": "newTenant",
-      "menuText": "Test Menu Text",
-      "iconLink": "Test Icon Link",
-      "Type": "internal",
-      "AllowUserCreation": True,
-      "configJSON": {"userSufix": "@internalDataStore"},
-      "AllowLink": True,
-      "AllowUnlink": True,
-      "LinkText": "Test Link Text"
-    }
+    testStep = self.getAddAuthStep()
     autoConfigRunner = autoConfig.AutoConfigRunner(
-      {"steps": [{ "type": testType, "data": testStepData}]}
+      {"steps": [testStep]}
     )
     tenantObj = None
     def runFn(storeConnection):
       with self.assertRaises(Exception) as context:
         autoConfigRunner.run(appObj, storeConnection)
-      self.assertEqual(str(context.exception), "AddAuthProvider: Tenant " + testStepData["tenantName"] + " does not exist")
+      self.assertEqual(str(context.exception), "AddAuthProvider: Tenant " + testStep["data"]["tenantName"] + " does not exist")
     appObj.objectStore.executeInsideTransaction(runFn)
 
   def test_AddTenantAndAuthProvider(self):
-    testType = "addAuthProvider"
-    testStepData = {
-      "tenantName": "newTenant",
-      "menuText": "Test Menu Text",
-      "iconLink": "Test Icon Link",
-      "Type": "internal",
-      "AllowUserCreation": True,
-      "configJSON": {"userSufix": "@internalDataStore"},
-      "AllowLink": True,
-      "AllowUnlink": True,
-      "LinkText": "Test Link Text"
-    }
+    testStep = self.getAddAuthStep()
     autoConfigRunner = autoConfig.AutoConfigRunner(
       {"steps": [
         self.getCreateTenantStep(),
-        { "type": testType, "data": testStepData}
+        testStep
       ]}
     )
     tenantObj = None
@@ -135,12 +130,12 @@ class test_appObjClass(helpers):
         autoConfigRunner.run(appObj, storeConnection)
       appObj.objectStore.executeInsideTransaction(runFn)
     l = self.assertHead(mocked_print)
-    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStepData["tenantName"])
-    l = self.assertNextLine(mocked_print, l, 'AddAuthProvider: Type ' + testStepData["Type"] + " added to Tenant " + testStepData["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStep["data"]["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'AddAuthProvider: Type ' + testStep["data"]["Type"] + " added to Tenant " + testStep["data"]["tenantName"])
     self.assertTail(mocked_print, l)
 
     def runFn(storeConnection):
-      return GetTenant(testStepData["tenantName"], storeConnection, appObj=appObj)
+      return GetTenant(testStep["data"]["tenantName"], storeConnection, appObj=appObj)
     tenantObj = appObj.objectStore.executeInsideTransaction(runFn)
 
     self.assertEqual(tenantObj.getNumberOfAuthProviders(),1)
@@ -158,3 +153,103 @@ class test_appObjClass(helpers):
       "Type": "internal"
     }
     self.assertJSONStringsEqualWithIgnoredKeys(authProvAdded, expected, ignoredKeys=["guid", "saltForPasswordHashing"])
+
+  def test_AddInternalUserAccountTenantNonExistantTenant(self):
+    testStep = self.getAddInternalUserAccountStep()
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        testStep
+      ]}
+    )
+    tenantObj = None
+    def runFn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        autoConfigRunner.run(appObj, storeConnection)
+      self.assertEqual(str(context.exception), "AddInternalUserAccount: Tenant " + testStep["data"]["tenantName"] + " does not exist")
+    appObj.objectStore.executeInsideTransaction(runFn)
+
+  def test_AddInternalUserAccountTenantNonExistantInternalAuth(self):
+    testStep = self.getAddInternalUserAccountStep()
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        self.getCreateTenantStep(),
+        testStep
+      ]}
+    )
+    tenantObj = None
+    def runFn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        self.getCreateTenantStep(),
+        autoConfigRunner.run(appObj, storeConnection)
+      self.assertEqual(str(context.exception), "AddInternalUserAccount: Tenant " + testStep["data"]["tenantName"] + " does not have (exactly) one internal auth provider")
+    appObj.objectStore.executeInsideTransaction(runFn)
+
+  def test_AddInternalUserAccountTenantTwoInternalAuth(self):
+    testStep = self.getAddInternalUserAccountStep()
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        self.getCreateTenantStep(),
+        self.getAddAuthStep(),
+        self.getAddAuthStep(),
+        testStep
+      ]}
+    )
+    tenantObj = None
+    def runFn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        self.getCreateTenantStep(),
+        autoConfigRunner.run(appObj, storeConnection)
+      self.assertEqual(str(context.exception), "AddInternalUserAccount: Tenant " + testStep["data"]["tenantName"] + " does not have (exactly) one internal auth provider")
+    appObj.objectStore.executeInsideTransaction(runFn)
+
+  def test_AddInternalUserAccountTenant(self):
+    authTestStep = self.getAddAuthStep()
+    testStep = self.getAddInternalUserAccountStep()
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        self.getCreateTenantStep(),
+        authTestStep,
+        testStep
+      ]}
+    )
+    with patch('builtins.print') as mocked_print:
+      def runFn(storeConnection):
+        autoConfigRunner.run(appObj, storeConnection)
+      appObj.objectStore.executeInsideTransaction(runFn)
+    l = self.assertHead(mocked_print)
+    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStep["data"]["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'AddAuthProvider: Type ' + authTestStep["data"]["Type"] + " added to Tenant " + authTestStep["data"]["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'AddInternalUserAccount: Add ' + testStep["data"]["Username"] + " to tenant " + testStep["data"]["tenantName"])
+    self.assertTail(mocked_print, l)
+
+    def connectedFn(storeConnection):
+      authProvider = GetTenant(authTestStep["data"]["tenantName"], storeConnection, appObj=appObj).getSingleAuthProviderOfType("internal")
+      return Login(
+        appObj=appObj,
+        tenantName=testStep["data"]["tenantName"],
+        authProviderGUID=authProvider["guid"],
+        credentialJSON={
+          "username": testStep["data"]["Username"],
+          "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+            appObj, testStep["data"]["Username"], testStep["data"]["Password"], authProvider['saltForPasswordHashing'])
+        },
+        requestedUserID=testStep["data"]["userID"],
+        storeConnection=storeConnection,
+        a=None,b= None,c=None
+      )
+    loginResDict = appObj.objectStore.executeInsideTransaction(connectedFn)
+
+    expected = {
+      "ThisTenantRoles": ["hasaccount"],
+      "possibleUserIDs": None,
+      "possibleUsers": None,
+      "currentlyUsedAuthKey": "TestUser@internalDataStore_`@\\/'internal",
+      "known_as": testStep["data"]["Username"],
+      "other_data": {
+        "createdBy": "autoConfigRunner/AddInternalUserAccount"
+      },
+      "userGuid": testStep["data"]["userID"]
+    }
+
+
+    self.assertJSONStringsEqualWithIgnoredKeys(loginResDict, expected, ignoredKeys=["authedPersonGuid", "currentlyUsedAuthProviderGuid", "jwtData", "refresh"])

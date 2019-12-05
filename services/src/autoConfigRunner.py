@@ -1,5 +1,8 @@
-from tenants import CreateTenant, AddAuthProvider
+from tenants import CreateTenant, AddAuthProvider, GetTenant, CreateUser, GetAuthProvider
 import constants
+from persons import CreatePerson
+from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from users import associateUserWithPerson
 
 class AutoConfigRunner():
   steps = None
@@ -30,6 +33,8 @@ def AutoConfigRunStepFactory(stepDict):
     return AutoConfigRunStepCreateTenant(stepDict["data"])
   elif stepDict["type"] == "addAuthProvider":
     return AutoConfigRunStepAddAuthProvider(stepDict["data"])
+  elif stepDict["type"] == "addInternalUserAccount":
+    return AutoConfigRunStepAddInternalUserAccount(stepDict["data"])
 
   raise Exception("Unknown step type")
 
@@ -118,4 +123,52 @@ class AutoConfigRunStepAddAuthProvider(AutoConfigRunStep):
       if (err.id=='tenantDosentExistException'):
         raise Exception("AddAuthProvider: Tenant " + self.tenantName + " does not exist")
       raise x
+    self.setPassed()
+
+class AutoConfigRunStepAddInternalUserAccount(AutoConfigRunStep):
+  tenantName = None
+  userID = None
+  Username = None
+  Password = None
+  Roles = None
+
+  def __init__(self, stepDict):
+    self.tenantName = stepDict["tenantName"]
+    self.userID = stepDict["userID"]
+    self.Username = stepDict["Username"]
+    self.Password = stepDict["Password"]
+    self.Roles = stepDict["Roles"]
+  def run(self, appObj, storeConnection):
+    tenantObj = GetTenant(self.tenantName, storeConnection, appObj=appObj)
+    if tenantObj is None:
+      raise Exception("AddInternalUserAccount: Tenant " + self.tenantName + " does not exist")
+    authProvDict = tenantObj.getSingleAuthProviderOfType("internal")
+    if authProvDict is None:
+      raise Exception("AddInternalUserAccount: Tenant " + self.tenantName + " does not have (exactly) one internal auth provider")
+
+    CreateUser(
+      appObj,
+      {"user_unique_identifier": self.userID, "known_as": self.Username},
+      self.tenantName,
+      'autoConfigRunner/AddInternalUserAccount',
+      storeConnection
+    )
+    person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
+    credentialJSON = {
+      "username": self.Username,
+      "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+        appObj, self.Username, self.Password, authProvDict['saltForPasswordHashing']
+      )
+    }
+    GetAuthProvider(
+      appObj=appObj,
+      tenantName=self.tenantName,
+      authProviderGUID=authProvDict['guid'],
+      storeConnection=storeConnection,
+      tenantObj=tenantObj
+    ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection)
+
+    associateUserWithPerson(appObj, self.userID, person['guid'], storeConnection)
+
+    print("AddInternalUserAccount: Add " + self.Username + " to tenant " + tenantObj.getName())
     self.setPassed()
