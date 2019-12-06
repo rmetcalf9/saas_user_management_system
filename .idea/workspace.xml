@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="" />
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/Continous_Test_wip_WHICHTESTS.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/continous_test.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/continous_test_wip.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/setup.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/continous_test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/services/continous_test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/insert_test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/insert_test_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_CORS_preflight.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_CORS_preflight.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -12,6 +22,10 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1UbKLxc5PmDQbVSZpI7wGAawlJn" />
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/services/continous_test.sh" />
+  </component>
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
@@ -23,6 +37,13 @@
         </RuleState>
       </list>
     </option>
+  </component>
+  <component name="RunManager" selected="Shell Script.Continous Test wip WHICHTESTS">
+    <list>
+      <item itemvalue="Shell Script.continous_test" />
+      <item itemvalue="Shell Script.continous_test wip" />
+      <item itemvalue="Shell Script.Continous Test wip WHICHTESTS" />
+    </list>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -36,5 +57,26 @@
       <updated>1575619803263</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

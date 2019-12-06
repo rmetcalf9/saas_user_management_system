@@ -110,7 +110,6 @@ def errorInProcess(errMessage):
   a = input()
   exit(1)
 
-
 print("Start of script to insert test data")
 
 AuthProvidersDICT,res = callGetService(LOGIN, "/" + masterTenantName + "/authproviders", [200])

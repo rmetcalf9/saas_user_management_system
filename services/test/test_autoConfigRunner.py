@@ -61,7 +61,7 @@ class helpers(TestHelperSuperClass.testHelperAPIClient):
     }
     return { "type": "addInternalUserAccount", "data": testStepData}
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_appObjClass(helpers):
 #Actual tests below
 

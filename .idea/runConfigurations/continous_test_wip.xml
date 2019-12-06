@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="continous_test wip" type="ShConfigurationType">
+    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/services/continous_test.sh" />
+    <option name="SCRIPT_OPTIONS" value="wip" />
+    <option name="INTERPRETER_PATH" value="/bin/bash" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <method v="2" />
+  </configuration>
+</component>

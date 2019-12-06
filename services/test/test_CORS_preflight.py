@@ -1,7 +1,7 @@
 '''
 Test the preflight options return values are correct
 '''
-from TestHelperSuperClass import tenantWithNoAuthProviders, env, httpOrigin, testHelperAPIClient
+import TestHelperSuperClass
 from baseapp_for_restapi_backend_with_swagger import uniqueCommaSeperatedListClass
 import constants
 import json
@@ -10,7 +10,8 @@ import copy
 #Origin can only have one value
 ## http://blog.crashtest-security.com/multiple-values-access-control-allow-origin
 
-class corsPreflight_helpers(testHelperAPIClient):
+@TestHelperSuperClass.wipd
+class corsPreflight_helpers(TestHelperSuperClass.testHelperAPIClient):
   def findCORSReturnVals(self, tenantName, origin):
     loginJSON = {}
     result2 = self.testClient.options(
@@ -23,9 +24,9 @@ class corsPreflight_helpers(testHelperAPIClient):
 
 class test_corsPreflight(corsPreflight_helpers):
   def test_simpleCorsCall(self):
-    a = self.findCORSReturnVals(constants.masterTenantName, httpOrigin)
+    a = self.findCORSReturnVals(constants.masterTenantName, TestHelperSuperClass.httpOrigin)
 
-    requiredOriginList = uniqueCommaSeperatedListClass(env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"]).data
+    requiredOriginList = uniqueCommaSeperatedListClass(TestHelperSuperClass.env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"]).data
     for x in requiredOriginList:
       a = self.findCORSReturnVals(constants.masterTenantName, x)
       self.assertEqual(a.get("Access-Control-Allow-Origin"),x)
@@ -49,7 +50,7 @@ class test_corsPreflight(corsPreflight_helpers):
 #Test for combinations of data
 class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
   def test_twoTenantsCall(self):
-    tenantWithDifferentAllowedOrigin = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWithDifferentAllowedOrigin = copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders)
     tenantWithDifferentAllowedOrigin["JWTCollectionAllowedOriginList"] = ["http://h.com", "hyyp://i.com"]
     tenantJSON = self.createTenantForTesting(tenantWithDifferentAllowedOrigin)
 
@@ -61,7 +62,7 @@ class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
     )
     self.assertEqual(result.status_code, 200)
 
-    requiredOriginList = uniqueCommaSeperatedListClass(env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com").data
+    requiredOriginList = uniqueCommaSeperatedListClass(TestHelperSuperClass.env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com").data
     for x in requiredOriginList:
       a = self.findCORSReturnVals(constants.masterTenantName, x)
       self.assertEqual(a.get("Access-Control-Allow-Origin"),x, msg="Failed to return an origin in optoins call")
