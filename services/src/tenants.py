@@ -19,6 +19,21 @@ UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associa
 UnknownUserIDException = customExceptionClass('Unknown UserID', 'UnknownUserIDException')
 authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not found', 'authProviderTypeNotFoundException')
 
+def onAppInit(appObj):
+  def getAllTenantsFn(storeConnection):
+    allTenants = storeConnection.getAllRowsForObjectType(
+      objectType="tenants",
+      filterFN=None,
+      outputFN=None,
+      whereClauseText=None
+    )
+  allTenants = appObj.objectStore.executeInsideConnectionContext(getAllTenantsFn)
+  if allTenants is None:
+    return
+  for curTenant in allTenants:
+    #function works with python lists and uniqueCommaSepeartedListClass
+    appObj.accessControlAllowOriginObj.addList(curTenant["JWTCollectionAllowedOriginList"])
+
 #only called on intial setup Creates a master tenant with single internal auth provider
 def CreateMasterTenant(appObj, testingMode, storeConnection):
   print("Creating master tenant")
@@ -145,6 +160,13 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       raise tenantDosentExistException
     return jsonForTenant
   storeConnection.updateJSONObject("tenants", tenantName, updTenant, objectVersion)
+
+  #Note: origins are not removed as they may be required by other tenants
+  #  origins will come off the list when service is reastarted
+  #  this only affects the browser origin check
+  #  this is not an issue a origin is checked in the login function
+  appObj.accessControlAllowOriginObj.addList(jsonForTenant["JWTCollectionAllowedOriginList"])
+
   return GetTenant(tenantName, storeConnection, appObj=appObj)
 
 def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
@@ -155,6 +177,10 @@ def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
     raise tenantDosentExistException
   ##print("DeleteTenant objectVersion:", objectVersion)
   storeConnection.removeJSONObject("tenants", tenantName, objectVersion)
+
+  #no origins are removed when a tennat is deleted
+  # see note in edit section
+
   return tenantObj
 
 def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection):
@@ -216,6 +242,8 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
     "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList
   }
   createdTenantVer = storeConnection.saveJSONObject("tenants", tenantName, jsonForTenant)
+
+  appObj.accessControlAllowOriginObj.addList(jsonForTenant["JWTCollectionAllowedOriginList"])
 
   return tenantClass(jsonForTenant, createdTenantVer, appObj)
 

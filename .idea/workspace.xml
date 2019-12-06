@@ -2,15 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/Continous_Test_wip_WHICHTESTS.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/continous_test.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/continous_test_wip.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/setup.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/continous_test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/services/continous_test.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/insert_test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/insert_test_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/appObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/appObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/loginAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/loginAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_CORS_preflight.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_CORS_preflight.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -56,6 +53,14 @@
       <option name="presentableId" value="Default" />
       <updated>1575619803263</updated>
     </task>
+    <task id="LOCAL-00001" summary="Added pycharm project">
+      <created>1575620998026</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1575620998026</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -78,5 +83,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added pycharm project" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added pycharm project" />
   </component>
 </project>

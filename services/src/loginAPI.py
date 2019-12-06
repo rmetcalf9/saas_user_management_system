@@ -98,7 +98,8 @@ def registerAPI(appObj):
      '''Get list of auth providers supported by this service'''
      def dbfn(storeConnection):
        tenantObj = getValidTenantObj(appObj, tenant, storeConnection, validateOrigin=False)
-       appObj.accessControlAllowOriginObj.addList(tenantObj.getJWTCollectionAllowedOriginList())
+       #Origin list maintained when tenants are updated
+       ##appObj.accessControlAllowOriginObj.addList(tenantObj.getJWTCollectionAllowedOriginList())
 
        #print(tenantObj.getJSONRepresenation())
        return tenantObj.getJSONRepresenation()

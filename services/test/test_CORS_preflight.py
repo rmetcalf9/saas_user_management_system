@@ -6,11 +6,12 @@ from baseapp_for_restapi_backend_with_swagger import uniqueCommaSeperatedListCla
 import constants
 import json
 import copy
+import tenants
 
 #Origin can only have one value
 ## http://blog.crashtest-security.com/multiple-values-access-control-allow-origin
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class corsPreflight_helpers(TestHelperSuperClass.testHelperAPIClient):
   def findCORSReturnVals(self, tenantName, origin):
     loginJSON = {}
@@ -22,6 +23,7 @@ class corsPreflight_helpers(TestHelperSuperClass.testHelperAPIClient):
     self.assertEqual(result2.status_code, 200, msg="Options request did not return 200")
     return result2.headers
 
+#@TestHelperSuperClass.wipd
 class test_corsPreflight(corsPreflight_helpers):
   def test_simpleCorsCall(self):
     a = self.findCORSReturnVals(constants.masterTenantName, TestHelperSuperClass.httpOrigin)
@@ -48,24 +50,26 @@ class test_corsPreflight(corsPreflight_helpers):
 
 
 #Test for combinations of data
+@TestHelperSuperClass.wipd
 class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
   def test_twoTenantsCall(self):
     tenantWithDifferentAllowedOrigin = copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders)
     tenantWithDifferentAllowedOrigin["JWTCollectionAllowedOriginList"] = ["http://h.com", "hyyp://i.com"]
     tenantJSON = self.createTenantForTesting(tenantWithDifferentAllowedOrigin)
 
+    #We should not need to call allow auth to have the origin added to list
     #Getting auth providers for a tennant should cause it's allowed origin entries to be included in cors corsPreflight_helpers
-    result = self.testClient.get(
-      self.loginAPIPrefix + '/' + tenantWithDifferentAllowedOrigin["Name"] + '/authproviders',
-      #headers={"Origin": httpOrigin}
-      headers=None #aet auth prov should not require an origin header
-    )
-    self.assertEqual(result.status_code, 200)
+    #result = self.testClient.get(
+    #  self.loginAPIPrefix + '/' + tenantWithDifferentAllowedOrigin["Name"] + '/authproviders',
+    #  #headers={"Origin": httpOrigin}
+    #  headers=None #aet auth prov should not require an origin header
+    #)
+    #self.assertEqual(result.status_code, 200)
 
     requiredOriginList = uniqueCommaSeperatedListClass(TestHelperSuperClass.env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] + ", http://h.com, hyyp://i.com").data
     for x in requiredOriginList:
       a = self.findCORSReturnVals(constants.masterTenantName, x)
-      self.assertEqual(a.get("Access-Control-Allow-Origin"),x, msg="Failed to return an origin in optoins call")
+      self.assertEqual(a.get("Access-Control-Allow-Origin"),x, msg="Failed to return an origin in options call")
 
     a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
     self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
@@ -75,3 +79,22 @@ class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
 
     a = self.findCORSReturnVals(constants.masterTenantName, "")
     self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+
+  def test_originAddedToListWhenTenantUpdated(self):
+    tenantWithDifferentAllowedOrigin = copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders)
+    tenantWithDifferentAllowedOrigin["JWTCollectionAllowedOriginList"] = ["http://h.com", "hyyp://i.com"]
+    tenantJSON = self.createTenantForTesting(tenantWithDifferentAllowedOrigin)
+    updatedTenantJSON = copy.deepcopy(tenantJSON)
+    updatedTenantJSON["JWTCollectionAllowedOriginList"].append("http://addedinchange.com")
+    self.updateTenant(tenantDICT=updatedTenantJSON, expectedResults=[200])
+
+    requiredOriginList = uniqueCommaSeperatedListClass(
+      TestHelperSuperClass.env["APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN"] +
+      ", http://h.com, hyyp://i.com, http://addedinchange.com").data
+    for x in requiredOriginList:
+      a = self.findCORSReturnVals(constants.masterTenantName, x)
+      self.assertEqual(a.get("Access-Control-Allow-Origin"),x, msg="Failed to return an origin in options call")
+
+    a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
+    self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
+

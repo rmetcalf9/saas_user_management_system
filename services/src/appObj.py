@@ -16,7 +16,7 @@ from loginAPI import registerAPI as registerLoginApi
 from adminAPI import registerAPI as registerAdminApi
 from currentAuthAPI import registerAPI as registerCurAuthApi
 
-from tenants import GetTenant, CreateMasterTenant, RegisterUser
+from tenants import GetTenant, CreateMasterTenant, RegisterUser, onAppInit as tenantOnAppInit
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID, customExceptionClass
 import constants
 from object_store_abstraction import createObjectStoreInstance
@@ -174,6 +174,8 @@ class appObjClass(parAppObj):
       def configRunnerFn(storeConnection):
         autoConfigRunner.run(self, storeConnection)
       self.objectStore.executeInsideTransaction(configRunnerFn)
+
+    tenantOnAppInit(self)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
