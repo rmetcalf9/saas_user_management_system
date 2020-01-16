@@ -136,6 +136,7 @@ steps:
             -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/frontend
             -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api.metcarob.com"
             -e APIAPP_OBJECTSTOREDETAILLOGGING="N"
+            --constraint \'node.labels.legacy == true\'
             metcarob/saas_user_management:${{RJM_VERSION}}
       environment:
         - SSH_KEY=${{SSH_KEY_COMMAS}}
