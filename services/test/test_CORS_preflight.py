@@ -50,7 +50,7 @@ class test_corsPreflight(corsPreflight_helpers):
 
 
 #Test for combinations of data
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
   def test_twoTenantsCall(self):
     tenantWithDifferentAllowedOrigin = copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders)

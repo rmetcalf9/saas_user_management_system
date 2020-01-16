@@ -51,17 +51,19 @@ class helpers(TestHelperSuperClass.testHelperAPIClient):
     }
     return { "type": "addAuthProvider", "data": testStepData}
 
-  def getAddInternalUserAccountStep(self):
+  def getAddInternalUserAccountStep(self, tenantName="newTenant", extraRoles=[]):
     testStepData = {
-      "tenantName": "newTenant",
+      "tenantName": tenantName,
       "userID": "123gfdds",
       "Username": "TestUser",
       "Password": "TestUser",
-      "Roles": [] #has account always created
+      "Roles": {
+        tenantName: extraRoles
+      } #has account always created
     }
     return { "type": "addInternalUserAccount", "data": testStepData}
 
-#@TestHelperSuperClass.wipd
+@TestHelperSuperClass.wipd
 class test_appObjClass(helpers):
 #Actual tests below
 
@@ -204,7 +206,7 @@ class test_appObjClass(helpers):
 
   def test_AddInternalUserAccountTenant(self):
     authTestStep = self.getAddAuthStep()
-    testStep = self.getAddInternalUserAccountStep()
+    testStep = self.getAddInternalUserAccountStep(tenantName="newTenant", extraRoles=["otherroletoadd"])
     autoConfigRunner = autoConfig.AutoConfigRunner(
       {"steps": [
         self.getCreateTenantStep(),
@@ -240,7 +242,7 @@ class test_appObjClass(helpers):
     loginResDict = appObj.objectStore.executeInsideTransaction(connectedFn)
 
     expected = {
-      "ThisTenantRoles": ["hasaccount"],
+      "ThisTenantRoles": ["hasaccount", "otherroletoadd"],
       "possibleUserIDs": None,
       "possibleUsers": None,
       "currentlyUsedAuthKey": "TestUser@internalDataStore_`@\\/'internal",
@@ -250,6 +252,5 @@ class test_appObjClass(helpers):
       },
       "userGuid": testStep["data"]["userID"]
     }
-
 
     self.assertJSONStringsEqualWithIgnoredKeys(loginResDict, expected, ignoredKeys=["authedPersonGuid", "currentlyUsedAuthProviderGuid", "jwtData", "refresh"])
