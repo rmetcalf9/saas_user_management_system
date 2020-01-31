@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#File run on developers machine to test the container
+
 cp ../src/constants.py copy_of_main_constants_do_not_edit.py
 
 docker run --rm --network main_net \
