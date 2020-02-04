@@ -21,6 +21,7 @@ steps:
       - export RJM_MAJOR_VERSION=$(echo ${RJM_VERSION%%.*})
       - export RJM_WS_NAME=$(echo "saas_user_management")
       - export RJM_DOCKER_SERVICE_NAME=${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}
+      - export RJM_DOCKER_SERVICE_URL=tasks.${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}
       - export RJM_KONG_UPSTREAM_NAME=${RJM_WS_NAME}_${RJM_MAJOR_VERSION}
       - export JWT_COOKIE_NAME="jwt-auth-token"
       - export AUTHED_ACL_WHITELIST="saas_user_management"
@@ -32,6 +33,7 @@ steps:
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
       - cf_export RJM_WS_NAME=${RJM_WS_NAME}
       - cf_export RJM_DOCKER_SERVICE_NAME=${RJM_DOCKER_SERVICE_NAME}
+      - cf_export RJM_DOCKER_SERVICE_URL=${RJM_DOCKER_SERVICE_URL}
       - cf_export RJM_KONG_UPSTREAM_NAME=${RJM_KONG_UPSTREAM_NAME}
       - cf_export JWT_COOKIE_NAME="${JWT_COOKIE_NAME}"
       - cf_export AUTHED_ACL_WHITELIST="${AUTHED_ACL_WHITELIST}"
@@ -156,7 +158,7 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
         ${{RJM_DOCKERWSCALLER_IMAGE}}
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_NAME}} 80 /public/
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_URL}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/public null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -174,7 +176,7 @@ steps:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
         ${{RJM_DOCKERWSCALLER_IMAGE}}
         http://kong:8001
-        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_NAME}} 80 /authed/
+        ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_URL}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/authed null null null true
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
@@ -296,7 +298,7 @@ steps:
         ${{RJM_DOCKERWSCALLER_IMAGE}}
         http://kong:8001
         ${{RJM_KONG_UPSTREAM_NAME}}
-        ${{RJM_DOCKER_SERVICE_NAME}}:80
+        ${{RJM_DOCKER_SERVICE_URL}}:80
         remove_other_targets
     environment:
       - SSH_KEY=${{SSH_KEY_COMMAS}}
