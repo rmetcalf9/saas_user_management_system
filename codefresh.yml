@@ -28,6 +28,7 @@ steps:
       - export AUTHED_ACL_BLACKLIST=""
       - export RJM_BUILDQUASARAPP_IMAGE="metcarob/docker-build-quasar-app:0.0.12"
       - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.6.4"
+      - export RJM_DOCKER_KONG_API_URL="http://tasks.kong:8001"
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
       - cf_export RJM_MAJOR_VERSION=${RJM_MAJOR_VERSION}
@@ -40,6 +41,7 @@ steps:
       - cf_export AUTHED_ACL_BLACKLIST="${AUTHED_ACL_BLACKLIST}"
       - cf_export RJM_BUILDQUASARAPP_IMAGE="${RJM_BUILDQUASARAPP_IMAGE}"
       - cf_export RJM_DOCKERWSCALLER_IMAGE="${RJM_DOCKERWSCALLER_IMAGE}"
+      - cf_export RJM_DOCKER_KONG_API_URL="${RJM_DOCKER_KONG_API_URL}"
 
   unit_test:
     description: Make sure all the unit tests pass
@@ -157,7 +159,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_PUBLIC http ${{RJM_DOCKER_SERVICE_URL}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/public null null null true
     environment:
@@ -175,7 +177,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED http ${{RJM_DOCKER_SERVICE_URL}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}/authed null null null true
     environment:
@@ -194,7 +196,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_TEST_AUTHED
         \"${{JWT_COOKIE_NAME}}\"
         \"${{AUTHED_ACL_WHITELIST}}\"
@@ -238,7 +240,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_PUBLIC http ${{RJM_KONG_UPSTREAM_NAME}} 80 /public/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/public null null null true
     environment:
@@ -256,7 +258,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED http ${{RJM_KONG_UPSTREAM_NAME}} 80 /authed/
         https api.metcarob.com /${{RJM_WS_NAME}}/v${{RJM_MAJOR_VERSION}}/authed null null null true
     environment:
@@ -275,7 +277,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_WS_NAME}}_v${{RJM_MAJOR_VERSION}}_AUTHED
         \"${{JWT_COOKIE_NAME}}\"
         \"${{AUTHED_ACL_WHITELIST}}\"
@@ -296,7 +298,7 @@ steps:
     commands:
       - rdocker ${{RDOCKER_HOST}} docker run --rm -it --network main_net --entrypoint kong_add_upstream
         ${{RJM_DOCKERWSCALLER_IMAGE}}
-        http://kong:8001
+        ${{RJM_DOCKER_KONG_API_URL}}
         ${{RJM_KONG_UPSTREAM_NAME}}
         ${{RJM_DOCKER_SERVICE_URL}}:80
         remove_other_targets
