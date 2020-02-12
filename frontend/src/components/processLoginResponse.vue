@@ -10,6 +10,29 @@ import {
 } from 'quasar'
 import frontendFns from '../frontendFns.js'
 
+var removeParamsFromUrlPath = function (params, path) {
+  var a = path.split('?')
+  if (a.length === 1) {
+    return path // There are no params
+  }
+  var output = a[0]
+  var b = a[1].split('&')
+  var numAdded = 0
+  for (var idx in b) {
+    var c = b[idx].split('=')
+    if (!params.includes(c[0])) {
+      numAdded += 1
+      if (numAdded === 1) {
+        output += '?'
+      } else {
+        output += '&'
+      }
+      output += b[idx]
+    }
+  }
+  return output
+}
+
 export default {
   name: 'SecuritySettings',
   data () {
@@ -50,6 +73,8 @@ export default {
         // console.log('AA:' + JSON.stringify(response.data))
 
         // no string contains in chrome: https://stackoverflow.com/questions/19589465/why-javascript-contains-property-is-not-working-in-chrome-browser
+
+        returnAddressToUse = removeParamsFromUrlPath(['jwtretervialtoken'], returnAddressToUse)
 
         if (returnAddressToUsethis.indexOf('?') > -1) {
           returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
