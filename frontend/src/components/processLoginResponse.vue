@@ -48,11 +48,17 @@ export default {
 
         // Not setting jwt-auth-cookie - this should now be done by the frontend once it has done inital refresh
         // console.log('AA:' + JSON.stringify(response.data))
-        if ((returnAddressToUse.match(/&/g) || []).length === 0) {
-          returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
-        } else {
+        if (returnAddressToUse.contains('?')) {
           returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
+        } else {
+          returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
         }
+        // if ((returnAddressToUse.match(/&/g) || []).length === 0) {
+        //   returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
+        // } else {
+        //   returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
+        // }
+
         console.log('Redirecting back to main site:', returnAddressToUse)
         window.location.href = returnAddressToUse
       } else {
