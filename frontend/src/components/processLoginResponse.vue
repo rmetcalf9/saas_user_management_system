@@ -76,7 +76,7 @@ export default {
 
         returnAddressToUse = removeParamsFromUrlPath(['jwtretervialtoken'], returnAddressToUse)
 
-        if (returnAddressToUsethis.indexOf('?') > -1) {
+        if (returnAddressToUse.indexOf('?') > -1) {
           returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
         } else {
           returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
