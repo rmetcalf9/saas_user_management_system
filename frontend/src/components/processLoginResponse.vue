@@ -48,7 +48,10 @@ export default {
 
         // Not setting jwt-auth-cookie - this should now be done by the frontend once it has done inital refresh
         // console.log('AA:' + JSON.stringify(response.data))
-        if (returnAddressToUse.contains('?')) {
+
+        // no string contains in chrome: https://stackoverflow.com/questions/19589465/why-javascript-contains-property-is-not-working-in-chrome-browser
+
+        if (returnAddressToUsethis.indexOf('?') > -1) {
           returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
         } else {
           returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
