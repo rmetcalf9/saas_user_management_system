@@ -76,16 +76,16 @@ export default {
 
         returnAddressToUse = removeParamsFromUrlPath(['jwtretervialtoken'], returnAddressToUse)
 
-        if (returnAddressToUse.indexOf('?') > -1) {
-          returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
-        } else {
-          returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
-        }
-        // if ((returnAddressToUse.match(/&/g) || []).length === 0) {
-        //   returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
-        // } else {
+        // if (returnAddressToUse.indexOf('?') > -1) {
         //   returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
+        // } else {
+        //   returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
         // }
+        if ((returnAddressToUse.match(/\?/g) || []).length === 0) {
+         returnAddressToUse = returnAddressToUse + '&jwtretervialtoken=' + response.data.refresh.token
+        } else {
+         returnAddressToUse = returnAddressToUse + '?jwtretervialtoken=' + response.data.refresh.token
+        }
 
         console.log('Redirecting back to main site:', returnAddressToUse)
         window.location.href = returnAddressToUse
