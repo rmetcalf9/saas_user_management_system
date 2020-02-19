@@ -117,7 +117,7 @@ class appObjClass(parAppObj):
 
     self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
 
-    # add to the baseapp default so allowed oriigns are in this list and extra vals
+    # add to the baseapp default so allowed origns are in this list and extra vals
     self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD + ", " + self.accessControlAllowOriginObj.toString())
 
     # print('uniqueCommaSeperatedListClass:', self.accessControlAllowOriginObj.toString())
@@ -168,6 +168,16 @@ class appObjClass(parAppObj):
     self.refreshTokenManager = RefreshTokenManager(self)
 
     self.scheduler.start()
+
+    # Load origins from tenants
+    def dbfn(storeConnection):
+      for curTenant in storeConnection.getAllRowsForObjectType("tenants", None, None, ""):
+        print("Loading allowed origins for " + curTenant[0]["Name"] + ":" + str(curTenant[0]["JWTCollectionAllowedOriginList"]))
+        appObj.accessControlAllowOriginObj.addList(curTenant[0]["JWTCollectionAllowedOriginList"])
+
+      ##return storeConnection.getPaginatedResult("tenants", paginatedParamValues, outputFN)
+    self.objectStore.executeInsideConnectionContext(dbfn)
+
 
     if self.APIAPP_AUTOCONFIG != None:
       autoConfigRunner = autoConfig.AutoConfigRunner(self.APIAPP_AUTOCONFIG)
