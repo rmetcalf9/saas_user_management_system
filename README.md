@@ -11,7 +11,7 @@ Generic SAAS user account management Microservice which preforms authorization a
  - *Admin configuration web interface
  - *Manage roles
  - *Integrates with kong to setup consumers and allow kong to secure services
- 
+
  *Feature planned and not yet developed
 
 ## Notes for Client Web Apps
@@ -23,8 +23,8 @@ Generally client web apps are setup to work from the same URL as the login endpo
  - Direct browser to /login/tennant_name endpoint passing a return URL as browser paramater
  - Once auth is completed a cookie named jwt-auth-cookie is set in the users browser and the user is sent to the return URL
  - Client Web Apps can use the jwt token to determine the username, tennants the user has access to and roles the user has configured
- - Client Web Apps can send the jwt token as auth header when calling services 
- 
+ - Client Web Apps can send the jwt token as auth header when calling services
+
 ### Token renewal
 
 JWT tokens will expire and need to be renewed.
@@ -84,12 +84,13 @@ All components are designed to be deployed in a single container and a codefresh
 
 ## Env Vars
 
-APIAPP_MASTERPASSWORDFORPASSHASH - Must be set for security
-APIAPP_DEFAULTHOMEADMINUSERNAME -
-APIAPP_DEFAULTHOMEADMINPASSWORD  -
-APIAPP_GATEWAYINTERFACECONFIG
-APIAPP_JWT_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for Defaulted to 5 minutes
-APIAPP_REFRESH_TOKEN_TIMEOUT - Number of seconds the jwt tokens are valid for, must be greater than APIAPP_JWT_TOKEN_TIMEOUT. Defaulted to 10 minutes
-APIAPP_REFRESH_SESSION_TIMEOUT- Number of seconds the refresh tokens are valid for. Once this timout has finished users are forced to resupply credentials. must be greater than APIAPP_REFRESH_TOKEN_TIMEOUT. Defaulted to 2 hours.
-
-APIAPP_EBOAPIDOCSURL
+ | Variable | Usage | Default |
+ |--|--|--|
+ | APIAPP_MASTERPASSWORDFORPASSHASH | Must be set for security | |
+ | APIAPP_DEFAULTHOMEADMINUSERNAME | | |
+ | APIAPP_DEFAULTHOMEADMINPASSWORD  | | |
+ | APIAPP_GATEWAYINTERFACECONFIG | | |
+ | APIAPP_JWT_TOKEN_TIMEOUT | Number of seconds the jwt tokens are valid for | 10 minutes |
+ | APIAPP_REFRESH_TOKEN_TIMEOUT | Number of seconds the refresh tokens are valid for, must be greater than APIAPP_JWT_TOKEN_TIMEOUT. If a user is idle for this amount of time they will have to login again. | 2 hours |
+ | APIAPP_REFRESH_SESSION_TIMEOUT | Amount of time until the refresh session expires. Even if the user is active in the app for this amount of time they will need to re-login after this period. Must be greater than  APIAPP_REFRESH_TOKEN_TIMEOUT. | 12 hours. |
+ | APIAPP_EBOAPIDOCSURL | | |
