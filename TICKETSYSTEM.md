@@ -19,9 +19,17 @@ If used
 
  # Ticket Data
 
+```
  {
    id: Unique GUID user for verification
    expiry: Expiry date
    foreignkey: Any text to link to foreign data
    useddate: Date the invite was used or None
+   tanant: tenant this ticket is valid for
+   roles: {
+     name: name of role to give to user
+   }
  }
+```
+
+Validation - hasaccount role is not allowed
