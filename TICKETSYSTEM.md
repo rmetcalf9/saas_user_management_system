@@ -17,7 +17,7 @@ If expired
 If used
  - User message displayed
 
- # Ticket Data
+# Ticket Data
 
 ```
  {
