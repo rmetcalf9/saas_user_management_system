@@ -44,6 +44,11 @@ If used
 ```
 Validation - hasaccount role is not allowed
 
+### Operations
+ - ADMIN Create
+ - ADMIN Edit (Covers disable, add role etc.)
+ - ADMIN Delete
+
 ## Ticket
 
 I need a bulk method of creating tickets which will accept a list of foreign keys and output a list of urls.
@@ -59,14 +64,20 @@ I need a bulk method of creating tickets which will accept a list of foreign key
    reactivationRequested: Date reactivation was requested or None
    reactivatedTicketID: ID of reactivated ticket
  }
+
+type: Extra field in query - this is all the fileds in ticket type model including metadata!
+isUsable: Extra field in query - returns isUsable information
 ```
 ### Operations:
  - ADMIN Create - sets id, typeId, expiry and externalKey
- - LOGIN isUsable - checks and returns INVALID, EXPIRED or USABLE
-   - ticket type enabled
-   - if ticket has been used
-   - expiry date
- - LOGIN Use - checks "AllowUserCreate" and isUsable then sets usedDate and useWithUserID
  - ADMIN RequestReactivation - sets reactivationRequested
  - ADMIN Reactivate - sets reactivatedTicketID
  - ADMIN Delete - deletes ticket (works with status of ticket)
+
+ - LOGIN get ticket - retrieves ticket
+   - extra field: type - embeded ticket type model
+   - extra field: isUsable - checks and returns INVALID, EXPIRED or USABLE
+     - ticket type enabled
+     - if ticket has been used
+     - expiry date
+ - LOGIN Use - checks "AllowUserCreate" and isUsable then sets usedDate and useWithUserID

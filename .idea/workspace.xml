@@ -70,7 +70,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583149144253</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Adding Ticketsystem notes">
+      <created>1583153209083</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1583153209084</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -100,6 +107,7 @@
     <MESSAGE value="Added pycharm project" />
     <MESSAGE value="Changing cors behavour to maintain internal list when tenants are updated" />
     <MESSAGE value="Updating to latest object store abstraction version" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updating to latest object store abstraction version" />
+    <MESSAGE value="Adding Ticketsystem notes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding Ticketsystem notes" />
   </component>
 </project>
