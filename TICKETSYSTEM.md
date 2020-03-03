@@ -31,7 +31,8 @@ If used
   welcomeMessage: {
     agreementRequired: boolean
     title: 'a',
-    body: 'b'
+    body: 'b',
+    okbuttontext: 'Ok'
   },
   allowUserCreation: boolean,
   issueDuration: hours to issue ticket for on creation

@@ -56,7 +56,7 @@ class helpers(unittest.TestCase):
       currentlyUsedAuthKey='aaa'
     )
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class testExpiringDictClass(helpers):
 
   def test_canUseTokenOnce(self):
