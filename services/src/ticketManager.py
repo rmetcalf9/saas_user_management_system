@@ -8,4 +8,5 @@ class ticketManagerClass():
     self.repositoryTicketType = repositoryTicketType.TicketTypeRepositoryClass()
 
   def upsertTicketType(self, ticketTypeDict, objectVersion, storeConnection):
+    #TODO Check tenant exists
     return self.repositoryTicketType.upsert(ticketTypeDict, objectVersion, storeConnection)

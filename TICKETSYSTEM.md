@@ -24,15 +24,15 @@ If used
 ```
 {
   id: GUID for ticket Type
-  tenant: tenant this ticket is valid for
-  tenantName: for admin screens
+  tenantName: tenant this ticket is valid for
+  ticketTypeName: for admin screens
   description: for admin screens
   enabled: boolean 
   welcomeMessage: {
     agreementRequired: boolean
     title: 'a',
     body: 'b',
-    okbuttontext: 'Ok'
+    okButtonText: 'Ok'
   },
   allowUserCreation: boolean,
   issueDuration: hours to issue ticket for on creation

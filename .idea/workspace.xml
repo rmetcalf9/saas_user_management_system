@@ -2,13 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/src/repositoryTicketType.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/test/test_ticketManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TICKETSYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/TICKETSYSTEM.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_refreshTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_refreshTokenGeneration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketType.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketType.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -89,7 +87,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583153538949</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Created test for validating upserted tickettype data">
+      <created>1583243110101</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1583243110101</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -121,6 +126,7 @@
     <MESSAGE value="Updating to latest object store abstraction version" />
     <MESSAGE value="Adding Ticketsystem notes" />
     <MESSAGE value="Tweaking Ticketsystem" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tweaking Ticketsystem" />
+    <MESSAGE value="Created test for validating upserted tickettype data" />
+    <option name="LAST_COMMIT_MESSAGE" value="Created test for validating upserted tickettype data" />
   </component>
 </project>
