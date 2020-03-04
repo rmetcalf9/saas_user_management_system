@@ -2,9 +2,11 @@ import TestHelperSuperClass
 from ticketManager import ticketManagerClass
 from appObj import appObj
 import object_store_abstraction
+import copy
+import constants
 
 validTicketTypeDict = {
-  "tenantName": "todo_xx",
+  "tenantName": constants.masterTenantName,
   "ticketTypeName": "TestTicketType001",
   "description": "Created by unittest",
   "enabled": True,
@@ -25,7 +27,7 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
   def createTicketTypeFromDict(self, sampleTypeObj):
     def fn(storeConnection):
       ticketManager = ticketManagerClass()
-      return ticketManager.upsertTicketType(ticketTypeDict=sampleTypeObj, objectVersion=None, storeConnection=storeConnection)
+      return ticketManager.upsertTicketType(ticketTypeDict=sampleTypeObj, objectVersion=None, storeConnection=storeConnection, appObj=appObj)
     return appObj.objectStore.executeInsideTransaction(fn)
 
 @TestHelperSuperClass.wipd
@@ -39,10 +41,9 @@ class corsPreflight_helpers(helper):
     self.createTicketTypeFromDict(validTicketTypeDict)
 
   def test_createTicketTypeWithInvalidTenantName(self):
-    invalidTickertTypeDict = copy.deepcopt(validTicketTypeDict)
+    invalidTickertTypeDict = copy.deepcopy(validTicketTypeDict)
     invalidTickertTypeDict["tenantName"] = "InvalidTenantName"
     with self.assertRaises(Exception) as context:
       self.createTicketTypeFromDict(invalidTickertTypeDict)
-    # TODO Work out which exception I want
-    self.checkGotRightExceptionType(context, object_store_abstraction.RepositoryValidationException)
+    self.checkGotRightException(context, constants.tenantDosentExistException)
 
