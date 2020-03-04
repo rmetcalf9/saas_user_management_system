@@ -123,7 +123,7 @@ def getTicketTypeModel(appObj):
     'enabled': fields.Boolean(default=False,description='Can the ticket type currently be used'),
     'welcomeMessage': fields.Nested(getCreateTicketTypeModel_welcomeMessage(appObj), skip_none=True),
     'allowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users when using this ticket.'),
-    'issueDuration': fields.Integer(default='DEFAULT', description='Hours to issue ticket for on creation'),
+    'issueDuration': fields.Integer(default=None, description='Hours to issue ticket for on creation'),
     'roles': fields.List(fields.String(default='DEFAULT', description='List of roles this tickert type will assign')),
     'postUseURL': fields.String(default='DEFAULT', description='URL to send user to after ticket is used'),
     'postInvalidURL': fields.String(default='DEFAULT', description='URL to send user to after invalid or request validaiton'),

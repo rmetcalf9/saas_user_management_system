@@ -7,3 +7,17 @@ class TickertTypeObjClass(RepositoryObjBaseClass):
   def __init__(self, obj, objVersion, creationDateTime, lastUpdateDateTime, objKey, repositoryObj, storeConnection):
     RepositoryObjBaseClass.__init__(self, obj, objVersion, creationDateTime, lastUpdateDateTime, objKey, repositoryObj)
 
+  def containsQueryString(self, upperCaseQueryString):
+    # id: GUID for ticket Type
+    # tenantName: tenant this ticket is valid for
+    # ticketTypeName: for admin screens
+    # description: for admin screens
+    if self.obj["id"].upper().find(upperCaseQueryString) != -1:
+      return True
+    if self.obj["tenantName"].upper().find(upperCaseQueryString) != -1:
+      return True
+    if self.obj["ticketTypeName"].upper().find(upperCaseQueryString) != -1:
+      return True
+    if self.obj["description"].upper().find(upperCaseQueryString) != -1:
+      return True
+    return False

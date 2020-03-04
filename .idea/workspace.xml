@@ -2,16 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/test/ticketManagerTestCommon.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIadmin.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/appObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/appObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -120,7 +117,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583321111839</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Create valid ticket type api test created">
+      <created>1583329514924</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1583329514924</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -156,7 +160,8 @@
     <MESSAGE value="Adding tests" />
     <MESSAGE value="Adding tenant existance check" />
     <MESSAGE value="Renaming API files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Renaming API files" />
+    <MESSAGE value="Create valid ticket type api test created" />
+    <option name="LAST_COMMIT_MESSAGE" value="Create valid ticket type api test created" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

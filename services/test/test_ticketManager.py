@@ -9,7 +9,10 @@ import ticketManagerTestCommon
 class helper(TestHelperSuperClass.testHelperAPIClient):
   def createTicketTypeFromDict(self, sampleTypeObj):
     def fn(storeConnection):
-      return appObj.TicketManager.upsertTicketType(ticketTypeDict=sampleTypeObj, objectVersion=None, storeConnection=storeConnection, appObj=appObj)
+      tenantName = "NOTSET"
+      if "tenantName" in sampleTypeObj:
+        tenantName = sampleTypeObj["tenantName"]
+      return appObj.TicketManager.upsertTicketType(tenantName=tenantName, ticketTypeDict=sampleTypeObj, objectVersion=None, storeConnection=storeConnection, appObj=appObj)
     return appObj.objectStore.executeInsideTransaction(fn)
 
 @TestHelperSuperClass.wipd
