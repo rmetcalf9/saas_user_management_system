@@ -59,7 +59,7 @@ def registerAPI(appObj):
 
         try:
           #print("credentialJSON:",credentialJSON)
-          #print("loginAPI.py regis - authProviderGUID:",authProviderGUID)
+          #print("APIlogin.py regis - authProviderGUID:",authProviderGUID)
           def someFn(connectionContext):
             return RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register", connectionContext)
           userObj = storeConnection.executeInsideTransaction(someFn)
@@ -125,7 +125,7 @@ def registerAPI(appObj):
           UserID = request.get_json()['UserID']
 
         try:
-          #print("loginAPI.py login - authProviderGUID:",authProviderGUID)
+          #print("APIlogin.py login - authProviderGUID:",authProviderGUID)
           def someFn(connectionContext):
             return Login(
               appObj,

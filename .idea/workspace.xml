@@ -3,8 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/appObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/appObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/currentAuthAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/loginAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -99,7 +101,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583246793937</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Adding tenant existance check">
+      <created>1583320963751</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1583320963751</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -133,6 +142,7 @@
     <MESSAGE value="Tweaking Ticketsystem" />
     <MESSAGE value="Created test for validating upserted tickettype data" />
     <MESSAGE value="Adding tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding tests" />
+    <MESSAGE value="Adding tenant existance check" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding tenant existance check" />
   </component>
 </project>

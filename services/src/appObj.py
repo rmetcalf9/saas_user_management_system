@@ -12,9 +12,9 @@ from flask import request
 import time
 import datetime
 
-from loginAPI import registerAPI as registerLoginApi
-from adminAPI import registerAPI as registerAdminApi
-from currentAuthAPI import registerAPI as registerCurAuthApi
+from APIlogin import registerAPI as registerLoginApi
+from APIadmin import registerAPI as registerAdminApi
+from APIcurrentAuth import registerAPI as registerCurAuthApi
 
 from tenants import GetTenant, CreateMasterTenant, RegisterUser, onAppInit as tenantOnAppInit
 from constants import masterTenantName, conDefaultUserGUID, conTestingDefaultPersonGUID, customExceptionClass
