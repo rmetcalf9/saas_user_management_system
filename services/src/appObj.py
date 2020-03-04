@@ -11,6 +11,7 @@ from flask_restplus import fields
 from flask import request
 import time
 import datetime
+import ticketManager
 
 from APIlogin import registerAPI as registerLoginApi
 from APIadmin import registerAPI as registerAdminApi
@@ -57,6 +58,7 @@ class appObjClass(parAppObj):
   refreshTokenManager = None
   scheduler = None
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
+  TicketManager = None
 
   def setupLogging(self):
     root = logging.getLogger()
@@ -70,6 +72,8 @@ class appObjClass(parAppObj):
 
   def init(self, env, serverStartTime, testingMode = False):
     ##self.setupLogging() Comment in when debugging
+
+    self.TicketManager = ticketManager.ticketManagerClass()
 
     authProviders_resetStaticData()
     self.scheduler = BackgroundScheduler(timezone="UTC")

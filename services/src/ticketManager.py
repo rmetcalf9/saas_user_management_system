@@ -16,4 +16,6 @@ class ticketManagerClass():
     if tenantObj is None:
       raise tenants.tenantDosentExistException
 
-    return self.repositoryTicketType.upsert(ticketTypeDict, objectVersion, storeConnection)
+    objID, objectVersion = self.repositoryTicketType.upsert(ticketTypeDict, objectVersion, storeConnection)
+
+    return self.repositoryTicketType.get(id=objID, storeConnection=storeConnection)

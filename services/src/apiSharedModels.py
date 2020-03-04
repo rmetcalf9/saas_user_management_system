@@ -1,6 +1,7 @@
 # File to keep all the shared models that are required
 #  for both the login and admin API's
 from flask_restplus import fields
+from object_store_abstraction import RepositoryObjBaseClass
 
 def getTenantModel(appObj):
   AuthProviderModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
@@ -89,5 +90,43 @@ def getLoginResponseModel(appObj):
     'other_data': fields.Raw(description='Any other data supplied by auth provider', required=True),
     'currentlyUsedAuthProviderGuid': fields.String(description='GUID of auth provider used to login with'),
     'currentlyUsedAuthKey': fields.String(description='Key of auth used to login with')
+  })
+
+def getCreateTicketTypeModel_welcomeMessage(appObj):
+  return appObj.flastRestPlusAPIObject.model('CreateTicketType_welcomeMessage', {
+    'agreementRequired': fields.Boolean(default=False, description='Prompt user to agree'),
+    'title': fields.String(default='DEFAULT', description='Title'),
+    'body': fields.String(default='DEFAULT', description='Body'),
+    'okButtonText': fields.String(default='DEFAULT', description='Ok button text')
+  })
+
+def getCreateTicketTypeModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('CreateTicketType', {
+    'tenantName': fields.String(default='DEFAULT', description='Tenant name for this ticket type'),
+    'ticketTypeName': fields.String(default='DEFAULT', description='Name displayed on admin screent'),
+    'description': fields.String(default='DEFAULT', description='Description of ticket type'),
+    'enabled': fields.Boolean(default=False,description='Can the ticket type currently be used'),
+    'welcomeMessage': fields.Nested(getCreateTicketTypeModel_welcomeMessage(appObj), skip_none=True),
+    'allowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users when using this ticket.'),
+    'issueDuration': fields.Integer(default='DEFAULT', description='Hours to issue ticket for on creation'),
+    'roles': fields.List(fields.String(default='DEFAULT', description='List of roles this tickert type will assign')),
+    'postUseURL': fields.String(default='DEFAULT', description='URL to send user to after ticket is used'),
+    'postInvalidURL': fields.String(default='DEFAULT', description='URL to send user to after invalid or request validaiton')
+  })
+
+def getTicketTypeModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('TicketType', {
+    'id': fields.String(default='DEFAULT', description='Unique identifier of User from login system'),
+    'tenantName': fields.String(default='DEFAULT', description='Tenant name for this ticket type'),
+    'ticketTypeName': fields.String(default='DEFAULT', description='Name displayed on admin screent'),
+    'description': fields.String(default='DEFAULT', description='Description of ticket type'),
+    'enabled': fields.Boolean(default=False,description='Can the ticket type currently be used'),
+    'welcomeMessage': fields.Nested(getCreateTicketTypeModel_welcomeMessage(appObj), skip_none=True),
+    'allowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users when using this ticket.'),
+    'issueDuration': fields.Integer(default='DEFAULT', description='Hours to issue ticket for on creation'),
+    'roles': fields.List(fields.String(default='DEFAULT', description='List of roles this tickert type will assign')),
+    'postUseURL': fields.String(default='DEFAULT', description='URL to send user to after ticket is used'),
+    'postInvalidURL': fields.String(default='DEFAULT', description='URL to send user to after invalid or request validaiton'),
+    RepositoryObjBaseClass.getMetadataElementKey(): fields.Nested(RepositoryObjBaseClass.getMetadataModel(appObj, flaskrestplusfields=fields))
   })
 
