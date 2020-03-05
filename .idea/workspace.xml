@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TICKETSYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/TICKETSYSTEM.md" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +144,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583428742206</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Added ticket system notes">
+      <created>1583432839528</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1583432839528</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -188,7 +192,8 @@
     <MESSAGE value="Ticket Type AdminAPIs Complete" />
     <MESSAGE value="Adding extra validation checks" />
     <MESSAGE value="Update API created" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update API created" />
+    <MESSAGE value="Added ticket system notes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added ticket system notes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
