@@ -64,21 +64,52 @@ I need a bulk method of creating tickets which will accept a list of foreign key
    useWithUserID: GUID of user that used ticket
    reactivationRequested: Date reactivation was requested or None
    reactivatedTicketID: ID of reactivated ticket
+   disabled: Allow to disable single key without whole type. Not possible to re-enable - instead new key must be issued
  }
 
 type: Extra field in query - this is all the fileds in ticket type model including metadata!
 isUsable: Extra field in query - returns isUsable information
 ```
+
+externalKey - This must be unique per ticket type, so I can look up if I know both External Key and Ticker Type GUID.
+
 ### Operations:
- - ADMIN Create - sets id, typeId, expiry and externalKey
- - ADMIN RequestReactivation - sets reactivationRequested
+ - ADMIN CreateBatch
+  - accepts a list of externalKeys
+  - sets id, typeId, expiry and externalKey
+  - must check for uniqueness of typeGUID | externalKey
+  - Returns report with created and errored external keys
+ - ADMIN Disable - sets disabled (one way)
  - ADMIN Reactivate - sets reactivatedTicketID
- - ADMIN Delete - deletes ticket (works with status of ticket)
+ - ADMIN Get Paginated list - gets list of tickets of a particular type for admin screens
+
+NO Admin Delete operation - tickets are only deleted when the ticket type is deleted. They can be deactivated instead.
 
  - LOGIN get ticket - retrieves ticket
    - extra field: type - embeded ticket type model
    - extra field: isUsable - checks and returns INVALID, EXPIRED or USABLE
      - ticket type enabled
-     - if ticket has been used
+     - ticket not disabled
+     - ticket has not been used
      - expiry date
+ - LOGIN RequestReactivation - sets reactivationRequested
  - LOGIN Use - checks "AllowUserCreate" and isUsable then sets usedDate and useWithUserID
+
+### Reposiories needed for ticket:
+
+repositoryTicket
+ - key(ticketid)
+ - used for whole key data
+repositoryTicketTypeTickets
+ - key(tickettypeid)
+ - List of all forign keys for uniquness check
+ - List of all tickets???? 
+ 
+ (Should I split off the last two into seperate repositories?) 
+ - Pro - Tickets are given out per type so if I reach a limit of more than a 1000 a short term workaround would be to create duplicate types.
+ - Pro - repositoryTicketTypeTickets chnages will be infrequent. Only batch creation and ticket type deletion. We can't delete tickets without deleting the whole type so records will only change when batches are added.
+ - Not Concern - Paginated data will be required from the main repository so that is not a concern.
+ - Not Concern - Individual tickets are changed in their lifecycle but this happens in main table
+
+Secondary repositoryTicketTypeTickets will only be read from or written to in admin operation CreateBatch so it can handle lifecycle 
+

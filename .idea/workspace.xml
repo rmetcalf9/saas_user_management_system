@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/src/components/TicketTypesTable.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/components/TicketTypesTable.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/src/pages/TicketType.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/pages/TicketType.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/src/pages/TicketTypes.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/pages/TicketTypes.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/src/pages/Tickets.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TICKETSYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/TICKETSYSTEM.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
