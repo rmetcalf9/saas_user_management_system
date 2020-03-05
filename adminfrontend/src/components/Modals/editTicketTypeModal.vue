@@ -12,7 +12,7 @@
 
       <q-page-container>
         <q-page padding>
-        <q-input v-model="objData.ticketTypeName" ref="textInput" label="Ticket Type Name" :label-width="3" />
+        <q-input v-model="objData.ticketTypeName" ref="textInput" label="Ticket Type Name" :label-width="3" :error="invalid_ticketTypeName" :error-message="invalidlabel_ticketTypeName" />
         <q-input v-model="objData.description" label="Description" :label-width="3" />
         <q-field helper="Enabled" :label-width="3">
           <q-toggle v-model="objData.enabled" label="Enabled" />
@@ -62,7 +62,7 @@
 </template>
 
 <script>
-// import { Notify } from 'quasar'
+import { Notify } from 'quasar'
 
 function getDefaultObjectData () {
   return {
@@ -103,6 +103,11 @@ export default {
     ok () {
       // var TTT = this
       // Validation checks
+      var x = this.invalidlabel_GLOB
+      if (typeof (x) !== 'undefined') {
+        Notify.create({color: 'negative', message: x})
+        return
+      }
 
       this.visible = false
       this.$emit('ok', this.callerData, this.objData)
@@ -140,11 +145,22 @@ export default {
   },
   computed: {
     okDisabled () {
+      if (typeof (this.invalidlabel_GLOB) !== 'undefined') {
+        return true
+      }
       return false
-      // if (this.dialogData.op === 'add') {
-      //   return false
-      // }
-      // return !this.changed
+    },
+    invalid_ticketTypeName () {
+      return this.objData.ticketTypeName.length < 4
+    },
+    invalidlabel_ticketTypeName () {
+      return 'Ticket Type Name must be more than 3 characters long'
+    },
+    invalidlabel_GLOB () {
+      if (this.invalid_ticketTypeName) {
+        return this.invalidlabel_ticketTypeName
+      }
+      return undefined
     }
   }
 }

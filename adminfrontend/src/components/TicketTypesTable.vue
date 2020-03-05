@@ -89,7 +89,36 @@ export default {
   },
   methods: {
     clickEditTicketTypeModalModalOK (callerData, objData) {
-      console.log('TODO clickEditTicketTypeModalModalOK ', callerData, objData)
+      var TTT = this
+      if (callerData.editing) {
+        console.log('EDITING NOT DONE')
+        // objData.id = TODO
+        return
+      }
+      // Common to edit and add - we need to call upsert
+      objData.tenantName = this.$route.params.selTenantNAME
+
+      console.log('TODO Call service', objData)
+
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', message: 'Ticket Type created'})
+          setTimeout(function () {
+            TTT.refresh()
+          }, 400)
+        },
+        error: function (error) {
+          Notify.create({color: 'negative', message: 'Request failed - ' + callbackHelper.getErrorFromResponse(error)})
+        }
+      }
+      this.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes',
+        method: 'post',
+        postdata: objData,
+        callback: callback,
+        curPath: this.$router.history.current.path,
+        headers: undefined
+      })
     },
     clickSingleCallbackFN (props) {
       console.log('TODO')
@@ -149,7 +178,7 @@ export default {
     createNewTicketTypeButton () {
       this.$refs.editTicketTypeModal.launchDialog({
         title: 'Create new ticket type for X',
-        callerData: {},
+        callerData: { editing: false },
         editingExisting: false
       })
     },
