@@ -113,7 +113,7 @@ export default {
     editTicketType () {
       this.$refs.editTicketTypeModal.launchDialog({
         title: 'Edit ' + this.$route.params.selTenantNAME + ' ticket type',
-        callerData: { editing: true, id: this.ticketTypeData.id, tenantName: this.ticketTypeData.tenantName },
+        callerData: { editing: true, id: this.ticketTypeData.id, tenantName: this.ticketTypeData.tenantName, metadata: this.ticketTypeData.metadata },
         editingExisting: true,
         initialValues: this.ticketTypeData
       })
@@ -122,12 +122,13 @@ export default {
       var TTT = this
       objData.id = callerData.id
       objData.tenantName = callerData.tenantName
+      objData.metadata = callerData.metadata
       var callback = {
         ok: function (response) {
           Loading.hide()
           Notify.create({color: 'positive', message: 'Ticket Type Updated'})
           setTimeout(function () {
-            TTT.refresh()
+            TTT.refreshTicketTypeData()
           }, 400)
         },
         error: function (error) {
