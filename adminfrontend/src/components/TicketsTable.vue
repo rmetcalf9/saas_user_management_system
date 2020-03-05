@@ -1,6 +1,6 @@
 <template><div>
   <q-table
-    title='Ticket Types'
+    title='Tickets'
     :rows-per-page-options="tableRowsPerPageOptions"
     :loading="tableLoading"
     :data="tableData"
@@ -11,13 +11,6 @@
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"
   >
-      <template slot="top-left" slot-scope="props">
-        <q-btn
-          color="primary"
-          push
-          @click="createNewTicketTypeButton"
-        >Create new Ticket Type</q-btn>
-      </template>
       <template slot="top-right" slot-scope="props">
         <selectColumns
           v-model="tablePersistSettings.visibleColumns"
@@ -36,26 +29,6 @@
         </q-input>
 
       </template>
-
-      <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
-        <q-btn flat no-caps dense :label="props.value" @click="clickSingleCallbackFN(props)" width="100%"/>
-      </q-td>
-      <q-td  slot="body-cell-WelcomeAgree" slot-scope="props" :props="props">
-        {{ props.row.welcomeMessage.agreementRequired }}
-      </q-td>
-      <q-td  slot="body-cell-WelcomeTitle" slot-scope="props" :props="props">
-        {{ props.row.welcomeMessage.title }}
-      </q-td>
-      <q-td  slot="body-cell-WelcomeBody" slot-scope="props" :props="props">
-        {{ props.row.welcomeMessage.body }}
-      </q-td>
-      <q-td  slot="body-cell-WelcomeOkText" slot-scope="props" :props="props">
-        {{ props.row.welcomeMessage.okButtonText }}
-      </q-td>
-
-      <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleCallbackFN(props)" />
-      </q-td>
   </q-table>
   <editTicketTypeModal
     ref="editTicketTypeModal"
@@ -64,7 +37,8 @@
 </div></template>
 
 <script>
-import { Notify, Loading } from 'quasar'
+import { Notify } from 'quasar'
+// import { Notify, Loading } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
 import selectColumns from '../components/selectColumns'
@@ -98,49 +72,11 @@ export default {
         { name: 'WelcomeAgree', required: false, label: 'Welcome Agreement', align: 'left', field: 'welcomeMessage.agreementRequired', sortable: false, filter: false },
         { name: 'WelcomeTitle', required: false, label: 'Welcome Title', align: 'left', field: 'welcomeMessage.title', sortable: false, filter: false },
         { name: 'WelcomeBody', required: false, label: 'Welcome Body', align: 'left', field: 'welcomeMessage.body', sortable: false, filter: false },
-        { name: 'WelcomeOkText', required: false, label: 'Welcome Ok Text', align: 'left', field: 'welcomeMessage.okButtonText', sortable: false, filter: false },
-        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: 'WelcomeOkText', required: false, label: 'Welcome Ok Text', align: 'left', field: 'welcomeMessage.okButtonText', sortable: false, filter: false }
       ]
     }
   },
   methods: {
-    clickEditTicketTypeModalModalOK (callerData, objData) {
-      var TTT = this
-      if (callerData.editing) {
-        console.log('EDITING NOT DONE')
-        // objData.id = TODO
-        return
-      }
-      // Common to edit and add - we need to call upsert
-      objData.tenantName = TTT.selectedTenantName
-
-      var callback = {
-        ok: function (response) {
-          Loading.hide()
-          Notify.create({color: 'positive', message: 'Ticket Type created'})
-          setTimeout(function () {
-            TTT.refresh()
-          }, 400)
-        },
-        error: function (error) {
-          Loading.hide()
-          Notify.create({color: 'negative', message: 'Request failed - ' + callbackHelper.getErrorFromResponse(error)})
-        }
-      }
-      Loading.show()
-      this.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/tenants/' + TTT.selectedTenantName + '/tickettypes',
-        method: 'post',
-        postdata: objData,
-        callback: callback,
-        curPath: this.$router.history.current.path,
-        headers: undefined
-      })
-    },
-    clickSingleCallbackFN (props) {
-      var TTT = this
-      TTT.$router.push('/' + TTT.$route.params.tenantName + '/tenants/' + TTT.selectedTenantName + '/tickettypes/' + props.row.id)
-    },
     request ({ pagination, filter }) {
       var TTT = this
       TTT.tableLoading = true
@@ -191,13 +127,6 @@ export default {
         callback: callback,
         curPath: this.$router.history.current.path,
         headers: undefined
-      })
-    },
-    createNewTicketTypeButton () {
-      this.$refs.editTicketTypeModal.launchDialog({
-        title: 'Create new ticket type for ' + this.selectedTenantName,
-        callerData: { editing: false },
-        editingExisting: false
       })
     },
     refresh () {

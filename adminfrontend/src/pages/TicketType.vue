@@ -21,57 +21,69 @@
       </q-item-section>
     </q-item>
   </q-list>
-  <q-item>
-    <q-item-section >
-      <q-item-label>Enabled:</q-item-label>
-      <q-item-label caption v-if="ticketTypeData.enabled">Tickets of this type can currently be used</q-item-label>
-      <q-item-label caption v-if="!ticketTypeData.enabled">Tickets of this type are not usable</q-item-label>
-    </q-item-section>
-  </q-item>
-  <q-item>
-    <q-item-section >
-      <q-item-label>Allow User Creation:</q-item-label>
-      <q-item-label caption v-if="ticketTypeData.allowUserCreation">Users without accounts can use this ticket to create an account</q-item-label>
-      <q-item-label caption v-if="!ticketTypeData.allowUserCreation">Only users with an account can use this ticket</q-item-label>
-    </q-item-section>
-  </q-item>
-  <q-item>
-    <q-item-section >
-      <q-item-label>Valid Duration</q-item-label>
-      <q-item-label caption>Tickets created are valid for {{ ticketTypeData.issueDuration }} hours. ({{ ticketTypeData.issueDuration / 24 }} days)</q-item-label>
-    </q-item-section>
-  </q-item>
-  <q-item>
-    <q-item-section >
-      <q-item-label>Post usage URLs</q-item-label>
-      <q-item-label caption>After successful use users are sent to: <a :href="ticketTypeData.postUseURL">{{ ticketTypeData.postUseURL }}</a></q-item-label>
-      <q-item-label caption>After unsuccessful use users are sent to: <a :href="ticketTypeData.postInvalidURL">{{ ticketTypeData.postUseURL }}</a></q-item-label>
-    </q-item-section>
-  </q-item>
+  <q-list>
+    <q-expansion-item
+      expand-separator
+      label="More ticket type information"
+    >
+      <q-item>
+        <q-item-section >
+          <q-item-label>Enabled:</q-item-label>
+          <q-item-label caption v-if="ticketTypeData.enabled">Tickets of this type can currently be used</q-item-label>
+          <q-item-label caption v-if="!ticketTypeData.enabled">Tickets of this type are not usable</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Allow User Creation:</q-item-label>
+          <q-item-label caption v-if="ticketTypeData.allowUserCreation">Users without accounts can use this ticket to create an account</q-item-label>
+          <q-item-label caption v-if="!ticketTypeData.allowUserCreation">Only users with an account can use this ticket</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Valid Duration</q-item-label>
+          <q-item-label caption>Tickets created are valid for {{ ticketTypeData.issueDuration }} hours. ({{ ticketTypeData.issueDuration / 24 }} days)</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Post usage URLs</q-item-label>
+          <q-item-label caption>After successful use users are sent to: <a :href="ticketTypeData.postUseURL">{{ ticketTypeData.postUseURL }}</a></q-item-label>
+          <q-item-label caption>After unsuccessful use users are sent to: <a :href="ticketTypeData.postInvalidURL">{{ ticketTypeData.postUseURL }}</a></q-item-label>
+        </q-item-section>
+      </q-item>
 
-  <q-item>
-    <q-item-section >
-      <q-item-label>Welcome Message</q-item-label>
-      <q-item-label caption>Title: {{ ticketTypeData.welcomeMessage.title }}</q-item-label>
-      <q-item-label caption>Body: {{ ticketTypeData.welcomeMessage.body }}</q-item-label>
-      <q-item-label caption v-if="ticketTypeData.welcomeMessage.agreementRequired">User must agree in order to proceed</q-item-label>
-      <q-item-label caption v-if="!ticketTypeData.welcomeMessage.agreementRequired">User not prompted for agreement</q-item-label>
-      <q-item-label caption>Ok button text: {{ ticketTypeData.welcomeMessage.okButtonText }}</q-item-label>
-    </q-item-section>
-  </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Welcome Message</q-item-label>
+          <q-item-label caption>Title: {{ ticketTypeData.welcomeMessage.title }}</q-item-label>
+          <q-item-label caption>Body: {{ ticketTypeData.welcomeMessage.body }}</q-item-label>
+          <q-item-label caption v-if="ticketTypeData.welcomeMessage.agreementRequired">User must agree in order to proceed</q-item-label>
+          <q-item-label caption v-if="!ticketTypeData.welcomeMessage.agreementRequired">User not prompted for agreement</q-item-label>
+          <q-item-label caption>Ok button text: {{ ticketTypeData.welcomeMessage.okButtonText }}</q-item-label>
+        </q-item-section>
+      </q-item>
 
-  <q-item>
-    <q-item-section >
-      <q-item-label>Roles granted by tickets of this type</q-item-label>
-      <q-item-label caption><q-chip size="10px" v-for="curVal in ticketTypeData.roles" :key=curVal>{{ curVal }}</q-chip></q-item-label>
-    </q-item-section>
-  </q-item>
-  <q-item>
-    <q-item-section >
-      <q-item-label>Ticket Type metadata</q-item-label>
-      <q-item-label caption>{{ ticketTypeData.metadata }}</q-item-label>
-    </q-item-section>
-  </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Roles granted by tickets of this type</q-item-label>
+          <q-item-label caption><q-chip size="10px" v-for="curVal in ticketTypeData.roles" :key=curVal>{{ curVal }}</q-chip></q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Ticket Type metadata</q-item-label>
+          <q-item-label caption>{{ ticketTypeData.metadata }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-expansion-item>
+  </q-list>
+  <TicketsTable
+    :defaultDisplayedColumns="['Name', 'Description']"
+    persistantSettingsSlot="ticketsMain"
+    :selectedTenantName="$route.params.selTenantNAME"
+  />
 
   <strictConfirmation
     ref="strictConfirmation"
@@ -81,6 +93,7 @@
     ref="editTicketTypeModal"
     @ok="clickEditTicketTypeModalModalOK"
   />
+
 </q-page>
 </template>
 
@@ -93,6 +106,8 @@ import callbackHelper from '../callbackHelper'
 import strictConfirmation from '../components/Modals/StrictConfirmation.vue'
 import editTicketTypeModal from '../components/Modals/editTicketTypeModal.vue'
 
+import TicketsTable from '../components/TicketsTable'
+
 function getEmptyTicketTypeData () {
   return {
   }
@@ -102,7 +117,8 @@ export default {
   name: 'TicketTypePage',
   components: {
     strictConfirmation,
-    editTicketTypeModal
+    editTicketTypeModal,
+    TicketsTable
   },
   data () {
     return {

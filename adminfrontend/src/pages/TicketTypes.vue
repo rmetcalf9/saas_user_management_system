@@ -3,6 +3,7 @@
     <TicketTypesTable
       :defaultDisplayedColumns="['Name', 'Description']"
       persistantSettingsSlot="ticketTypesMain"
+      :selectedTenantName="$route.params.selTenantNAME"
     />
   </q-page>
 </template>
