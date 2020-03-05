@@ -35,9 +35,9 @@
     </q-item>
     <q-item clickable v-ripple highlight @click.native="viewTicketTypes">
       <q-item-section>
-        <q-item-label>Auth Ticket Types (TODO CODE TO POPULATE)</q-item-label>
+        <q-item-label>Auth Ticket Types</q-item-label>
         <q-item-label caption>
-          <q-chip size="10px" v-for="curVal in ticketTypeList" :key=curVal.id>{{ curVal.text }}</q-chip>
+          <q-chip size="10px" v-for="curVal in ticketTypeList" :key=curVal.id  @click.native="viewTicketType(curVal)">{{ curVal.text }}</q-chip>
         </q-item-label>
       </q-item-section>
       <q-item-section avatar>
@@ -191,12 +191,21 @@ function getEmptyTenantData () {
     AuthProviders: []
   }
 }
+function getEmptyTicketTypeData () {
+  return {
+    pagination: {
+      total: 999
+    },
+    result: []
+  }
+}
 
 export default {
   name: 'PageIndex',
   data () {
     return {
       tenantData: getEmptyTenantData(),
+      ticketTypeData: getEmptyTicketTypeData(),
       tableColumns: [
         { name: 'Type', required: true, label: 'Type', align: 'left', field: 'Type', sortable: true, filter: false },
         { name: 'AllowUserCreation', required: true, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: true, filter: false },
@@ -243,13 +252,23 @@ export default {
     },
     ticketTypeList () {
       var ret = []
-      ret.push({ id: undefined, text: '...' })
+      this.ticketTypeData.result.map(function (resItem) {
+        ret.push({ id: resItem.id, text: resItem.ticketTypeName })
+      })
+      if (this.ticketTypeData.pagination.total > this.ticketTypeData.result.length) {
+        ret.push({ id: undefined, text: '...' })
+      }
       return ret
     }
   },
   methods: {
     viewTicketTypes () {
       this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes')
+    },
+    viewTicketType (val) {
+      this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes/' + val.id)
+      event.preventDefault()
+      event.stopPropagation()
     },
     addAuthProv () {
       this.editAuthProvModalDialogData.AddMode = true
@@ -430,14 +449,35 @@ export default {
         TTT.$refs.descriptionInput.focus()
       }, 5)
     },
+    refreshTicketTypeData () {
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          TTT.ticketTypeData = response.data
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create({color: 'negative', message: 'Ticket Type query failed - ' + callbackHelper.getErrorFromResponse(error)})
+          TTT.ticketTypeData = getEmptyTicketTypeData()
+        }
+      }
+      Loading.show()
+      this.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes?pagesize=5',
+        method: 'get',
+        postdata: null,
+        callback: callback,
+        curPath: this.$router.history.current.path,
+        headers: undefined
+      })
+    },
     refreshTenantData () {
       var jobNameToLoad = this.$route.params.selTenantNAME
       var TTT = this
       var callback = {
         ok: function (response) {
-          Loading.hide()
-          TTT.tenantData = response.data
-          // TTT.stores().commit('globalDataStore/SET_PAGE_TITLE', 'Tenant ' + response.data.Name)
+          TTT.refreshTicketTypeData()
         },
         error: function (error) {
           Loading.hide()
