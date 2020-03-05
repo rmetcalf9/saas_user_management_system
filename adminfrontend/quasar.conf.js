@@ -58,6 +58,9 @@ module.exports = function (ctx) {
         'QInput',
         'QField',
         'QItem',
+        'QCard',
+        'QCardSection',
+        'QCardActions',
 
         'QHeader',
         'QFooter',

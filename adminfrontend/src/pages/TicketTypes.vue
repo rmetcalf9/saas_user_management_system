@@ -1,6 +1,9 @@
 <template>
-  <q-page class="flex flex-center">
-    TODO - ticket types
+  <q-page>
+    <TicketTypesTable
+      :defaultDisplayedColumns="['Name', 'Description']"
+      persistantSettingsSlot="ticketTypesMain"
+    />
   </q-page>
 </template>
 
@@ -8,7 +11,16 @@
 </style>
 
 <script>
+import TicketTypesTable from '../components/TicketTypesTable'
+
 export default {
-  name: 'TicketTypesPage'
+  name: 'TicketTypesPage',
+  components: {
+    TicketTypesTable
+  },
+  data () {
+    return {
+    }
+  }
 }
 </script>
