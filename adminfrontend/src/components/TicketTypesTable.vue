@@ -64,7 +64,7 @@
 </div></template>
 
 <script>
-import { Notify } from 'quasar'
+import { Notify, Loading } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
 import selectColumns from '../components/selectColumns'
@@ -115,15 +115,18 @@ export default {
 
       var callback = {
         ok: function (response) {
+          Loading.hide()
           Notify.create({color: 'positive', message: 'Ticket Type created'})
           setTimeout(function () {
             TTT.refresh()
           }, 400)
         },
         error: function (error) {
+          Loading.hide()
           Notify.create({color: 'negative', message: 'Request failed - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
+      Loading.show()
       this.$store.dispatch('globalDataStore/callAdminAPI', {
         path: '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes',
         method: 'post',
@@ -191,7 +194,7 @@ export default {
     },
     createNewTicketTypeButton () {
       this.$refs.editTicketTypeModal.launchDialog({
-        title: 'Create new ticket type for X',
+        title: 'Create new ticket type for ' + this.$route.params.selTenantNAME,
         callerData: { editing: false },
         editingExisting: false
       })

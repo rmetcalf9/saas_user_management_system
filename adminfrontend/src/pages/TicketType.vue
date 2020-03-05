@@ -51,17 +51,35 @@
 
   <q-item>
     <q-item-section >
+      <q-item-label>Welcome Message</q-item-label>
+      <q-item-label caption>Title: {{ ticketTypeData.welcomeMessage.title }}</q-item-label>
+      <q-item-label caption>Body: {{ ticketTypeData.welcomeMessage.body }}</q-item-label>
+      <q-item-label caption v-if="ticketTypeData.welcomeMessage.agreementRequired">User must agree in order to proceed</q-item-label>
+      <q-item-label caption v-if="!ticketTypeData.welcomeMessage.agreementRequired">User not prompted for agreement</q-item-label>
+      <q-item-label caption>Ok button text: {{ ticketTypeData.welcomeMessage.okButtonText }}</q-item-label>
+    </q-item-section>
+  </q-item>
+
+  <q-item>
+    <q-item-section >
       <q-item-label>Roles granted by tickets of this type</q-item-label>
       <q-item-label caption><q-chip size="10px" v-for="curVal in ticketTypeData.roles" :key=curVal>{{ curVal }}</q-chip></q-item-label>
     </q-item-section>
   </q-item>
-
-"welcomeMessage": { "agreementRequired": false, "title": "Welcome Message Title", "body": "welcome message text", "okButtonText": "Ok" },
- "metadata": { "objectVersion": "1", "creationDateTime": "2020-03-05T12:54:28.663632+00:00", "lastUpdateDateTime": "2020-03-05T12:54:28.663632+00:00", "objectKey": "07a01cf9-3cf8-4a62-95dd-e942d70f352a" } }
+  <q-item>
+    <q-item-section >
+      <q-item-label>Ticket Type metadata</q-item-label>
+      <q-item-label caption>{{ ticketTypeData.metadata }}</q-item-label>
+    </q-item-section>
+  </q-item>
 
   <strictConfirmation
     ref="strictConfirmation"
     @ok="clickStrictConfirmationModalOK"
+  />
+  <editTicketTypeModal
+    ref="editTicketTypeModal"
+    @ok="clickEditTicketTypeModalModalOK"
   />
 </q-page>
 </template>
@@ -73,6 +91,7 @@
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import strictConfirmation from '../components/Modals/StrictConfirmation.vue'
+import editTicketTypeModal from '../components/Modals/editTicketTypeModal.vue'
 
 function getEmptyTicketTypeData () {
   return {
@@ -82,7 +101,8 @@ function getEmptyTicketTypeData () {
 export default {
   name: 'TicketTypePage',
   components: {
-    strictConfirmation
+    strictConfirmation,
+    editTicketTypeModal
   },
   data () {
     return {
@@ -91,7 +111,39 @@ export default {
   },
   methods: {
     editTicketType () {
-      console.log('editTicketType TODO')
+      this.$refs.editTicketTypeModal.launchDialog({
+        title: 'Edit ' + this.$route.params.selTenantNAME + ' ticket type',
+        callerData: { editing: true, id: this.ticketTypeData.id, tenantName: this.ticketTypeData.tenantName },
+        editingExisting: true,
+        initialValues: this.ticketTypeData
+      })
+    },
+    clickEditTicketTypeModalModalOK (callerData, objData) {
+      var TTT = this
+      objData.id = callerData.id
+      objData.tenantName = callerData.tenantName
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          Notify.create({color: 'positive', message: 'Ticket Type Updated'})
+          setTimeout(function () {
+            TTT.refresh()
+          }, 400)
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create({color: 'negative', message: 'Request failed - ' + callbackHelper.getErrorFromResponse(error)})
+        }
+      }
+      Loading.show()
+      this.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes/' + objData.id,
+        method: 'post',
+        postdata: objData,
+        callback: callback,
+        curPath: this.$router.history.current.path,
+        headers: undefined
+      })
     },
     deleteTicketType () {
       var TTT = this

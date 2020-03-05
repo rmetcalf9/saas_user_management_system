@@ -24,6 +24,16 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
     self.assertEqual(result.status_code, 201, msg="Err: " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
+  def updateTicketType(self, tenantTypeID, tenantTypesTenant, newDict):
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes' + tenantTypeID,
+      headers={constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(newDict),
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 201, msg="Err: " + result.get_data(as_text=True))
+    return json.loads(result.get_data(as_text=True))
+
   def getTicketType(self, tenantTypesTenant, ticketTypeID, checkAndParseResponse=True):
     result2 = self.testClient.get(
       self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes/' + ticketTypeID,
@@ -256,3 +266,41 @@ class ticketManager_helpers(helper):
     )
     self.assertEqual(deleteResultRAW.status_code, 404, msg="Should have failed to delete " + deleteResultRAW.get_data(as_text=True))
 
+  def test_updateView(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    responseJSON = self.updateTicketType(tenantTypeID=setupData["okTicketResultJSON"][1]["id"], tenantTypesTenant=constants.masterTenantName, newDict=changed)
+
+    expectedResult = copy.deepcopy(changed)
+    expectedResult["id"] = resultJSON["id"]
+    expectedResult[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()] = {
+      "creationDateTime": testTime1.isoformat(),
+      "lastUpdateDateTime": testTime2.isoformat(),
+      "objectKey": resultJSON["id"],
+      "objectVersion": "1"
+    }
+    python_Testing_Utilities.assertObjectsEqual(
+      unittestTestCaseClass=self,
+      first=resultJSON,
+      second=expectedResult,
+      msg="JSON of created Ticket Type is not the same",
+      ignoredRootKeys=[]
+    )
+
+    #Not get the ticket type we just created and make sure it matches
+    resultJSON2 = self.getTicketType(constants.masterTenantName, setupData["okTicketResultJSON"][1]["id"])
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2, expectedResult, [], msg='Get retrevial mismatch')
+
+#update url tenant must match
+
+#update can not change tenant
+
+#update id must match url id
+
+#update can not add has account role

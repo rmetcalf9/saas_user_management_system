@@ -3,8 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminfrontend/src/components/Modals/editTicketTypeModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/components/Modals/editTicketTypeModal.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminfrontend/src/components/TicketTypesTable.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/components/TicketTypesTable.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminfrontend/src/pages/TicketType.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/pages/TicketType.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketType.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketType.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -135,7 +136,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583398740215</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Adding extra validation checks">
+      <created>1583414546546</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1583414546546</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -174,7 +182,8 @@
     <MESSAGE value="Create valid ticket type api test created" />
     <MESSAGE value="Created upsert and query APIs for TicketType" />
     <MESSAGE value="Ticket Type AdminAPIs Complete" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ticket Type AdminAPIs Complete" />
+    <MESSAGE value="Adding extra validation checks" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding extra validation checks" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
