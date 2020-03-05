@@ -21,6 +21,9 @@ export default {
   data () {
     return {
     }
+  },
+  mounted () {
+    this.$store.commit('globalDataStore/SET_PAGE_TITLE', 'Ticket types for ' + this.$route.params.selTenantNAME)
   }
 }
 </script>

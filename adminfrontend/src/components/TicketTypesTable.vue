@@ -40,9 +40,17 @@
       <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
         <q-btn flat no-caps dense :label="props.value" @click="clickSingleCallbackFN(props)" width="100%"/>
       </q-td>
-
-      <q-td  slot="body-cell-JWTCollectionAllowedOriginList" slot-scope="props" :props="props">
-        {{ props.value }}
+      <q-td  slot="body-cell-WelcomeAgree" slot-scope="props" :props="props">
+        {{ props.row.welcomeMessage.agreementRequired }}
+      </q-td>
+      <q-td  slot="body-cell-WelcomeTitle" slot-scope="props" :props="props">
+        {{ props.row.welcomeMessage.title }}
+      </q-td>
+      <q-td  slot="body-cell-WelcomeBody" slot-scope="props" :props="props">
+        {{ props.row.welcomeMessage.body }}
+      </q-td>
+      <q-td  slot="body-cell-WelcomeOkText" slot-scope="props" :props="props">
+        {{ props.row.welcomeMessage.okButtonText }}
       </q-td>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
@@ -79,10 +87,17 @@ export default {
       tableLoading: false,
       tableData: [],
       tableColumns: [
-        { name: 'Name', required: true, label: 'Tenant Name', align: 'left', field: 'Name', sortable: false, filter: false },
-        { name: 'Description', required: false, label: 'Description', align: 'left', field: 'Description', sortable: false, filter: false },
-        { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'AllowUserCreation', sortable: false, filter: false },
-        { name: 'JWTCollectionAllowedOriginList', required: false, label: 'Allowed Origin List', align: 'left', field: 'JWTCollectionAllowedOriginList', sortable: false, filter: false },
+        { name: 'Name', required: true, label: 'Ticket Type Name', align: 'left', field: 'ticketTypeName', sortable: false, filter: false },
+        { name: 'Description', required: false, label: 'Description', align: 'left', field: 'description', sortable: false, filter: false },
+        { name: 'Enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: false },
+        { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'allowUserCreation', sortable: false, filter: false },
+        { name: 'Issue Duration', required: false, label: 'Issue Duration', align: 'left', field: 'issueDuration', sortable: false, filter: false },
+        { name: 'Post Use URL', required: false, label: 'Post Use URL', align: 'left', field: 'postUseURL', sortable: false, filter: false },
+        { name: 'Post Use Invalid URL', required: false, label: 'Post Use Invalid URL', align: 'left', field: 'postInvalidURL', sortable: false, filter: false },
+        { name: 'WelcomeAgree', required: false, label: 'Welcome Agreement', align: 'left', field: 'welcomeMessage.agreementRequired', sortable: false, filter: false },
+        { name: 'WelcomeTitle', required: false, label: 'Welcome Title', align: 'left', field: 'welcomeMessage.title', sortable: false, filter: false },
+        { name: 'WelcomeBody', required: false, label: 'Welcome Body', align: 'left', field: 'welcomeMessage.body', sortable: false, filter: false },
+        { name: 'WelcomeOkText', required: false, label: 'Welcome Ok Text', align: 'left', field: 'welcomeMessage.okButtonText', sortable: false, filter: false },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ]
     }
@@ -97,8 +112,6 @@ export default {
       }
       // Common to edit and add - we need to call upsert
       objData.tenantName = this.$route.params.selTenantNAME
-
-      console.log('TODO Call service', objData)
 
       var callback = {
         ok: function (response) {
@@ -121,7 +134,8 @@ export default {
       })
     },
     clickSingleCallbackFN (props) {
-      console.log('TODO')
+      var TTT = this
+      TTT.$router.push('/' + TTT.$route.params.tenantName + '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes/' + props.row.id)
     },
     request ({ pagination, filter }) {
       var TTT = this

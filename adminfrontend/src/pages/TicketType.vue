@@ -9,6 +9,9 @@
 
 <script>
 export default {
-  name: 'TicketTypePage'
+  name: 'TicketTypePage',
+  mounted () {
+    this.$store.commit('globalDataStore/SET_PAGE_TITLE', this.$route.params.selTenantNAME + ' ticket type')
+  }
 }
 </script>

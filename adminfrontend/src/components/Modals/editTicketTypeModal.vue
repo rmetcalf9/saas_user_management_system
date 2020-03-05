@@ -13,7 +13,7 @@
       <q-page-container>
         <q-page padding>
         <q-input v-model="objData.ticketTypeName" ref="textInput" label="Ticket Type Name" :label-width="3" :error="invalid_ticketTypeName" :error-message="invalidlabel_ticketTypeName" />
-        <q-input v-model="objData.description" label="Description" :label-width="3" />
+        <q-input v-model="objData.description" label="Description" :label-width="3" :error="invalid_description" :error-message="invalidlabel_description" />
         <q-field helper="Enabled" :label-width="3">
           <q-toggle v-model="objData.enabled" label="Enabled" />
           <q-toggle v-model="objData.allowUserCreation" label="Allow User Creation"  />
@@ -29,8 +29,8 @@
             <q-input v-model="objData.welcomeMessage.okButtonText" label="Ok button text" :label-width="3" />
           </q-card-section>
         </q-card>
-        <q-input v-model="objData.postUseURL" label="post Use URL" :label-width="3" />
-        <q-input v-model="objData.postInvalidURL" label="post Invalid URL" :label-width="3" />
+        <q-input v-model="objData.postUseURL" label="post Use URL" :label-width="3" :error="invalid_postUseURL" :error-message="invalidlabel_postUseURL"/>
+        <q-input v-model="objData.postInvalidURL" label="post Invalid URL" :label-width="3" :error="invalid_postInvalidURL" :error-message="invalidlabel_postInvalidURL"/>
         <q-select
           label="Roles this ticket grants to users"
           v-model="objData.roles"
@@ -156,14 +156,36 @@ export default {
     invalidlabel_ticketTypeName () {
       return 'Ticket Type Name must be more than 3 characters long'
     },
+    invalid_description () {
+      return this.objData.description.length < 4
+    },
+    invalidlabel_description () {
+      return 'Description must be more than 3 characters long'
+    },
+    invalid_postUseURL () {
+      return this.objData.postUseURL.length < 4
+    },
+    invalidlabel_postUseURL () {
+      return 'postUseURL must be more than 3 characters long'
+    },
+    invalid_postInvalidURL () {
+      return this.objData.postInvalidURL.length < 4
+    },
+    invalidlabel_postInvalidURL () {
+      return 'postInvalidURL must be more than 3 characters long'
+    },
     invalidlabel_GLOB () {
       if (this.invalid_ticketTypeName) {
         return this.invalidlabel_ticketTypeName
+      }
+      if (this.invalid_description) {
+        return this.invalidlabel_description
       }
       return undefined
     }
   }
 }
+
 </script>
 
 <style>
