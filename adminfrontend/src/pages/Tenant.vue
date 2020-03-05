@@ -33,7 +33,17 @@
         <q-item-label caption><q-chip size="10px" v-for="curVal in tenantData.JWTCollectionAllowedOriginList" :key=curVal>{{ curVal }}</q-chip></q-item-label>
       </q-item-section>
     </q-item>
-
+    <q-item clickable v-ripple highlight @click.native="viewTicketTypes">
+      <q-item-section>
+        <q-item-label>Auth Ticket Types (TODO CODE TO POPULATE)</q-item-label>
+        <q-item-label caption>
+          <q-chip size="10px" v-for="curVal in ticketTypeList" :key=curVal.id>{{ curVal.text }}</q-chip>
+        </q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
+    </q-item>
   </q-list>
 
   <q-table
@@ -230,9 +240,17 @@ export default {
         return true
       }
       return false
+    },
+    ticketTypeList () {
+      var ret = []
+      ret.push({ id: undefined, text: '...' })
+      return ret
     }
   },
   methods: {
+    viewTicketTypes () {
+      this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes')
+    },
     addAuthProv () {
       this.editAuthProvModalDialogData.AddMode = true
       this.editAuthProvModalDialogData.DeleteMode = false

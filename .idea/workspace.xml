@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,7 +123,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583344582031</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Ticket Type AdminAPIs Complete">
+      <created>1583398740215</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1583398740215</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -168,7 +168,8 @@
     <MESSAGE value="Renaming API files" />
     <MESSAGE value="Create valid ticket type api test created" />
     <MESSAGE value="Created upsert and query APIs for TicketType" />
-    <option name="LAST_COMMIT_MESSAGE" value="Created upsert and query APIs for TicketType" />
+    <MESSAGE value="Ticket Type AdminAPIs Complete" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ticket Type AdminAPIs Complete" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
