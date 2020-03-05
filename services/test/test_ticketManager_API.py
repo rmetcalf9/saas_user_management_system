@@ -133,6 +133,28 @@ class ticketManager_helpers(helper):
     )
     self.assertEqual(result.status_code, 400)
 
+  def test_createWithHasAccountRoleFail(self):
+    obj = copy.deepcopy(ticketManagerTestCommon.validTicketTypeDict)
+    obj["roles"].append(constants.DefaultHasAccountRole)
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + constants.masterTenantName + '/tickettypes',
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(obj),
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400)
+
+  def test_createWithNoRolesFail(self):
+    obj = copy.deepcopy(ticketManagerTestCommon.validTicketTypeDict)
+    obj["roles"] = []
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + constants.masterTenantName + '/tickettypes',
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(obj),
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400)
+
   def test_canOnlyRetrieveTicketTypeForURLTenant(self):
     tenantJSON = self.createTenantForTesting(TestHelperSuperClass.tenantWithNoAuthProviders)
     resultJSON = self.createTicketType(constants.masterTenantName)
@@ -233,3 +255,4 @@ class ticketManager_helpers(helper):
       checkAndParseResponse=False
     )
     self.assertEqual(deleteResultRAW.status_code, 404, msg="Should have failed to delete " + deleteResultRAW.get_data(as_text=True))
+

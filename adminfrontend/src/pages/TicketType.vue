@@ -10,7 +10,55 @@
     ></q-btn>
   </q-page-sticky>
 
-  {{ ticketTypeData }}
+  <q-list >
+    <q-item clickable v-ripple highlight @click.native="editTicketType">
+      <q-item-section >
+        <q-item-label>Tenant Name: {{ ticketTypeData.ticketTypeName }}</q-item-label>
+        <q-item-label caption>{{ ticketTypeData.description }}</q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
+    </q-item>
+  </q-list>
+  <q-item>
+    <q-item-section >
+      <q-item-label>Enabled:</q-item-label>
+      <q-item-label caption v-if="ticketTypeData.enabled">Tickets of this type can currently be used</q-item-label>
+      <q-item-label caption v-if="!ticketTypeData.enabled">Tickets of this type are not usable</q-item-label>
+    </q-item-section>
+  </q-item>
+  <q-item>
+    <q-item-section >
+      <q-item-label>Allow User Creation:</q-item-label>
+      <q-item-label caption v-if="ticketTypeData.allowUserCreation">Users without accounts can use this ticket to create an account</q-item-label>
+      <q-item-label caption v-if="!ticketTypeData.allowUserCreation">Only users with an account can use this ticket</q-item-label>
+    </q-item-section>
+  </q-item>
+  <q-item>
+    <q-item-section >
+      <q-item-label>Valid Duration</q-item-label>
+      <q-item-label caption>Tickets created are valid for {{ ticketTypeData.issueDuration }} hours. ({{ ticketTypeData.issueDuration / 24 }} days)</q-item-label>
+    </q-item-section>
+  </q-item>
+  <q-item>
+    <q-item-section >
+      <q-item-label>Post usage URLs</q-item-label>
+      <q-item-label caption>After successful use users are sent to: <a :href="ticketTypeData.postUseURL">{{ ticketTypeData.postUseURL }}</a></q-item-label>
+      <q-item-label caption>After unsuccessful use users are sent to: <a :href="ticketTypeData.postInvalidURL">{{ ticketTypeData.postUseURL }}</a></q-item-label>
+    </q-item-section>
+  </q-item>
+
+  <q-item>
+    <q-item-section >
+      <q-item-label>Roles granted by tickets of this type</q-item-label>
+      <q-item-label caption><q-chip size="10px" v-for="curVal in ticketTypeData.roles" :key=curVal>{{ curVal }}</q-chip></q-item-label>
+    </q-item-section>
+  </q-item>
+
+"welcomeMessage": { "agreementRequired": false, "title": "Welcome Message Title", "body": "welcome message text", "okButtonText": "Ok" },
+ "metadata": { "objectVersion": "1", "creationDateTime": "2020-03-05T12:54:28.663632+00:00", "lastUpdateDateTime": "2020-03-05T12:54:28.663632+00:00", "objectKey": "07a01cf9-3cf8-4a62-95dd-e942d70f352a" } }
+
   <strictConfirmation
     ref="strictConfirmation"
     @ok="clickStrictConfirmationModalOK"
@@ -42,6 +90,9 @@ export default {
     }
   },
   methods: {
+    editTicketType () {
+      console.log('editTicketType TODO')
+    },
     deleteTicketType () {
       var TTT = this
       this.$refs.strictConfirmation.launchDialog(

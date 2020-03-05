@@ -2,6 +2,7 @@
 
 from object_store_abstraction import RepositoryBaseClass, RepositoryValidationException
 from repositoryTicketTypeObj import factoryFn as ticketTypeObjFactoryFn
+import constants
 
 def requireBooleanElement(obj, elementName, objectName):
   RepositoryBaseClass.RequireStringElement(obj, elementName, objectName)
@@ -46,6 +47,10 @@ class TicketTypeRepositoryClass(RepositoryBaseClass):
         raise RepositoryValidationException(self.objName + " must have all roles as strings")
       if curRole=="":
         raise RepositoryValidationException(self.objName + " must have all roles as non-empty strings")
+      if curRole==constants.DefaultHasAccountRole:
+        raise RepositoryValidationException(self.objName + " not valid to assign " + constants.DefaultHasAccountRole + " role")
+    if len(obj["roles"]) == 0:
+      raise RepositoryValidationException(self.objName + " must have at least one role")
     RepositoryBaseClass.RequireStringElement(obj, "postUseURL", self.objName)
     RepositoryBaseClass.RequireStringElement(obj, "postInvalidURL", self.objName)
 
