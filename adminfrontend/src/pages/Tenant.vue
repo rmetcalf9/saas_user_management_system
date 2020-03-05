@@ -477,6 +477,7 @@ export default {
       var TTT = this
       var callback = {
         ok: function (response) {
+          TTT.tenantData = response.data
           TTT.refreshTicketTypeData()
         },
         error: function (error) {
