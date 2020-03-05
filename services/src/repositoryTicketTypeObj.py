@@ -14,8 +14,10 @@ class TickertTypeObjClass(RepositoryObjBaseClass):
     # description: for admin screens
     if self.obj["id"].upper().find(upperCaseQueryString) != -1:
       return True
-    if self.obj["tenantName"].upper().find(upperCaseQueryString) != -1:
-      return True
+    #Not filtering on tenant name as the query can only be for a single tenant so
+    # it dosen't make sense
+    #if self.obj["tenantName"].upper().find(upperCaseQueryString) != -1:
+    #  return True
     if self.obj["ticketTypeName"].upper().find(upperCaseQueryString) != -1:
       return True
     if self.obj["description"].upper().find(upperCaseQueryString) != -1:

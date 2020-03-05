@@ -7,7 +7,6 @@
       <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -36,7 +35,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Shell Script.continous_test wip">
+  <component name="RunManager" selected="Shell Script.continous_test">
     <list>
       <item itemvalue="Shell Script.continous_test" />
       <item itemvalue="Shell Script.continous_test wip" />
@@ -124,7 +123,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583329514924</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Created upsert and query APIs for TicketType">
+      <created>1583344582031</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1583344582031</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -161,7 +167,8 @@
     <MESSAGE value="Adding tenant existance check" />
     <MESSAGE value="Renaming API files" />
     <MESSAGE value="Create valid ticket type api test created" />
-    <option name="LAST_COMMIT_MESSAGE" value="Create valid ticket type api test created" />
+    <MESSAGE value="Created upsert and query APIs for TicketType" />
+    <option name="LAST_COMMIT_MESSAGE" value="Created upsert and query APIs for TicketType" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

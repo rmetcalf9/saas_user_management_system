@@ -93,3 +93,28 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         return ticketTypeObj.getDict(), 200
       return appObj.objectStore.executeInsideTransaction(dbfn)
 
+    @nsAdmin.doc('Delete TicketType')
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.marshal_with(apiSharedModels.responseModel(appObj), code=202, description='Ticket Type deleted', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User does not have required role')
+    def delete(self, tenant, tenantName, tickettypeID):
+      ''' Delete Ticket Type  '''
+      APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
+      if "objectversion" not in request.args:
+        raise BadRequest("Must supply object version to delete")
+      if request.args["objectversion"] == None:
+        raise BadRequest("Must supply object version to delete - can not be blank")
+      objVer = None
+      #if request.args["objectversion"] != 'LOOKUP': May need to add ability to lookup
+      objVer = request.args["objectversion"]
+
+      def dbfn(storeConnection):
+        return appObj.TicketManager.deleteTicketType(tenantName=tenantName, tickettypeID=tickettypeID, ObjectVersionNumber=objVer, storeConnection=storeConnection)
+      try:
+        return appObj.objectStore.executeInsideTransaction(dbfn)
+      except object_store_abstraction.RepositoryValidationException as err:
+        return {"response": "ERROR", "message": str(err)}, 400
+      except object_store_abstraction.WrongObjectVersionExceptionClass as err:
+        return { "response": "ERROR", "message": str(err) }, 409 #not using standard exception as it gives html response
+        #raise Conflict(err)
+

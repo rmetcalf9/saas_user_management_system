@@ -52,6 +52,46 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
     self.assertEqual(result2.status_code, 200)
     return json.loads(result2.get_data(as_text=True))
 
+  def deleteTicketType(self, tenantTypesTenant, ticketTypeID, objectVersionNumber, checkAndParseResponse=True):
+    result2 = self.testClient.delete(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes/' + ticketTypeID + "?objectversion=" + objectVersionNumber,
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=None,
+      content_type='application/json'
+    )
+    if not checkAndParseResponse:
+      return result2
+    self.assertEqual(result2.status_code, 202)
+    return json.loads(result2.get_data(as_text=True))
+
+  def setupTestTicketsInTwoTenants(self):
+    okTicketResultJSON = []
+    okTicketResultJSONIDMap = {}
+    okTicketResultJSON.append(self.createTicketType(constants.masterTenantName, overrideName="TestTicketType001"))
+    okTicketResultJSONIDMap[okTicketResultJSON[len(okTicketResultJSON)-1]["id"]] = len(okTicketResultJSON)-1
+    okTicketResultJSON.append(self.createTicketType(constants.masterTenantName, overrideName="TestTicketType002"))
+    okTicketResultJSONIDMap[okTicketResultJSON[len(okTicketResultJSON)-1]["id"]] = len(okTicketResultJSON)-1
+    okTicketResultJSON.append(self.createTicketType(constants.masterTenantName, overrideName="TestTicketType003"))
+    okTicketResultJSONIDMap[okTicketResultJSON[len(okTicketResultJSON)-1]["id"]] = len(okTicketResultJSON)-1
+
+    #Create some on another tenant
+    tenantJSON = self.createTenantForTesting(TestHelperSuperClass.tenantWithNoAuthProviders)
+    noiseTicketResultJSON = []
+    noiseTicketResultJSONMap = {}
+    noiseTicketResultJSON.append(self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType004"))
+    noiseTicketResultJSONMap[noiseTicketResultJSON[len(noiseTicketResultJSON)-1]["id"]] = len(noiseTicketResultJSON)-1
+    noiseTicketResultJSON.append(self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType005"))
+    noiseTicketResultJSONMap[noiseTicketResultJSON[len(noiseTicketResultJSON)-1]["id"]] = len(noiseTicketResultJSON)-1
+    noiseTicketResultJSON.append(self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType006"))
+    noiseTicketResultJSONMap[noiseTicketResultJSON[len(noiseTicketResultJSON)-1]["id"]] = len(noiseTicketResultJSON)-1
+
+    return {
+      "okTicketResultJSON": okTicketResultJSON,
+      "okTicketResultJSONIDMap": okTicketResultJSONIDMap,
+      "tenantJSON": tenantJSON,
+      "noiseTicketResultJSON": noiseTicketResultJSON,
+      "noiseTicketResultJSONMap": noiseTicketResultJSONMap
+    }
 
 @TestHelperSuperClass.wipd
 class ticketManager_helpers(helper):
@@ -121,26 +161,14 @@ class ticketManager_helpers(helper):
     self.assertEqual(len(foundIDs), 3)
 
   def test_TicketTypeListRetervalOnlyCountsOneTenant(self):
-    resultJSONIDS = {}
-    resultJSON = self.createTicketType(constants.masterTenantName, overrideName="TestTicketType001")
-    resultJSONIDS[resultJSON["id"]] = True
-    resultJSON = self.createTicketType(constants.masterTenantName, overrideName="TestTicketType002")
-    resultJSONIDS[resultJSON["id"]] = True
-    resultJSON = self.createTicketType(constants.masterTenantName, overrideName="TestTicketType003")
-    resultJSONIDS[resultJSON["id"]] = True
-
-    #Create some on another tenant
-    tenantJSON = self.createTenantForTesting(TestHelperSuperClass.tenantWithNoAuthProviders)
-    resultJSONNoise = self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType004")
-    resultJSONNoise = self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType005")
-    resultJSONNoise = self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType006")
+    setupData = self.setupTestTicketsInTwoTenants()
 
     queryResultJSON = self.getTicketTypes(constants.masterTenantName, queryString=None, checkAndParseResponse=True)
 
     self.assertEqual(queryResultJSON["pagination"]["total"], 3)
     foundIDs = []
     for x in queryResultJSON["result"]:
-      if x["id"] not in resultJSONIDS:
+      if x["id"] not in setupData["okTicketResultJSONIDMap"]:
         self.assertTrue(False, msg="Found unknown result")
       if x["id"] in foundIDs:
         self.assertTrue(False, msg="Found same TicketType twice")
@@ -148,19 +176,60 @@ class ticketManager_helpers(helper):
     self.assertEqual(len(foundIDs), 3)
 
   def test_QueryBackSingleTicketTypeUsingFilter(self):
-    resultJSON1 = self.createTicketType(constants.masterTenantName, overrideName="TestTicketType001")
-    resultJSON2 = self.createTicketType(constants.masterTenantName, overrideName="TestTicketType002")
-    resultJSON3 = self.createTicketType(constants.masterTenantName, overrideName="TestTicketType003")
+    setupData = self.setupTestTicketsInTwoTenants()
 
-    #Create some on another tenant
-    tenantJSON = self.createTenantForTesting(TestHelperSuperClass.tenantWithNoAuthProviders)
-    resultJSONNoise = self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType004")
-    resultJSONNoise = self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType005")
-    resultJSONNoise = self.createTicketType(TestHelperSuperClass.tenantWithNoAuthProviders["Name"], overrideName="TestTicketType006")
-
-    queryResultJSON = self.getTicketTypes(constants.masterTenantName, queryString=resultJSON2["ticketTypeName"], checkAndParseResponse=True)
+    queryResultJSON = self.getTicketTypes(constants.masterTenantName, queryString=setupData["okTicketResultJSON"][1]["ticketTypeName"], checkAndParseResponse=True)
 
     self.assertEqual(queryResultJSON["pagination"]["total"], 1)
-    self.assertEqual(queryResultJSON["result"][0]["id"], resultJSON2["id"])
+    self.assertEqual(queryResultJSON["result"][0]["id"], setupData["okTicketResultJSON"][1]["id"])
 
+  def test_DeleteTicketType(self):
+    setupData = self.setupTestTicketsInTwoTenants()
 
+    queryResultJSON = self.getTicketTypes(constants.masterTenantName, queryString=None, checkAndParseResponse=True)
+    self.assertEqual(queryResultJSON["pagination"]["total"], 3)
+
+    deleteResultJSON = self.deleteTicketType(
+      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      objectVersionNumber=setupData["okTicketResultJSON"][1][object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]
+    )
+    queryResultJSON2 = self.getTicketTypes(constants.masterTenantName, queryString=None, checkAndParseResponse=True)
+    for x in queryResultJSON2["result"]:
+      self.assertNotEqual(x["id"], setupData["okTicketResultJSON"][1]["id"], msg="Found deleted ticket in result")
+    self.assertEqual(queryResultJSON2["pagination"]["total"], 2)
+
+    #TODO When tickets are imlemented this should also delete all the tickets
+
+  def test_DeleteTicketTypeWrongObjectVersionNumFails(self):
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    deleteResultRAW = self.deleteTicketType(
+      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      objectVersionNumber="999",
+      checkAndParseResponse=False
+    )
+    self.assertEqual(deleteResultRAW.status_code, 409, msg="Should have failed to delete " + deleteResultRAW.get_data(as_text=True))
+
+  def test_DeleteTicketTypeWrongTenantFails(self):
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    deleteResultRAW = self.deleteTicketType(
+      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["noiseTicketResultJSON"][1]["id"],
+      objectVersionNumber=setupData["noiseTicketResultJSON"][1][object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"],
+      checkAndParseResponse=False
+    )
+    self.assertEqual(deleteResultRAW.status_code, 404, msg="Should have failed to delete " + deleteResultRAW.get_data(as_text=True))
+
+  def test_DeleteNonExistantticketTypeFails(self):
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    deleteResultRAW = self.deleteTicketType(
+      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID="EDFVF4",
+      objectVersionNumber=setupData["noiseTicketResultJSON"][1][object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"],
+      checkAndParseResponse=False
+    )
+    self.assertEqual(deleteResultRAW.status_code, 404, msg="Should have failed to delete " + deleteResultRAW.get_data(as_text=True))

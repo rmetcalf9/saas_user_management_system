@@ -130,3 +130,8 @@ def getTicketTypeModel(appObj):
     RepositoryObjBaseClass.getMetadataElementKey(): fields.Nested(RepositoryObjBaseClass.getMetadataModel(appObj, flaskrestplusfields=fields))
   })
 
+def responseModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('ResponseModel', {
+    'response': fields.String(default='FAIL', description='OK if the operation succeeded'),
+    'message': fields.String(default='None', description='Error message')
+  })

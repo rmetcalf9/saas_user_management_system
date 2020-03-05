@@ -42,3 +42,10 @@ class ticketManagerClass():
           return True
       return False
     return self.repositoryTicketType.getPaginatedResult(paginatedParamValues, outputFN, storeConnection, filterFn)
+
+  def deleteTicketType(self, tenantName, tickettypeID, ObjectVersionNumber, storeConnection):
+    ticketObj = self.getTicketType(tenantName, tickettypeID=tickettypeID, storeConnection=storeConnection)
+    if ticketObj is None:
+      return {"response": "ERROR", "message": "Ticket not found in this tenant"}, 404
+    self.repositoryTicketType.remove(id=tickettypeID, storeConnection=storeConnection, objectVersion=ObjectVersionNumber)
+    return {"response": "OK"}, 202
