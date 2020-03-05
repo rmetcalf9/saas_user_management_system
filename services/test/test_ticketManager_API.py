@@ -24,14 +24,16 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
     self.assertEqual(result.status_code, 201, msg="Err: " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
-  def updateTicketType(self, tenantTypeID, tenantTypesTenant, newDict):
+  def updateTicketType(self, tenantTypeID, tenantTypesTenant, newDict, checkAndParseResponse=True):
     result = self.testClient.post(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes' + tenantTypeID,
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes/' + tenantTypeID,
       headers={constants.jwtHeaderName: self.getNormalJWTToken()},
       data=json.dumps(newDict),
       content_type='application/json'
     )
-    self.assertEqual(result.status_code, 201, msg="Err: " + result.get_data(as_text=True))
+    if not checkAndParseResponse:
+      return result
+    self.assertEqual(result.status_code, 202, msg="Err: " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
   def getTicketType(self, tenantTypesTenant, ticketTypeID, checkAndParseResponse=True):
@@ -266,7 +268,7 @@ class ticketManager_helpers(helper):
     )
     self.assertEqual(deleteResultRAW.status_code, 404, msg="Should have failed to delete " + deleteResultRAW.get_data(as_text=True))
 
-  def test_updateView(self):
+  def test_updateTicketType(self):
     testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testTime1)
     setupData = self.setupTestTicketsInTwoTenants()
@@ -275,7 +277,7 @@ class ticketManager_helpers(helper):
     appObj.setTestingDateTime(testTime2)
     changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
-    responseJSON = self.updateTicketType(tenantTypeID=setupData["okTicketResultJSON"][1]["id"], tenantTypesTenant=constants.masterTenantName, newDict=changed)
+    resultJSON = self.updateTicketType(tenantTypeID=setupData["okTicketResultJSON"][1]["id"], tenantTypesTenant=constants.masterTenantName, newDict=changed)
 
     expectedResult = copy.deepcopy(changed)
     expectedResult["id"] = resultJSON["id"]
@@ -283,7 +285,7 @@ class ticketManager_helpers(helper):
       "creationDateTime": testTime1.isoformat(),
       "lastUpdateDateTime": testTime2.isoformat(),
       "objectKey": resultJSON["id"],
-      "objectVersion": "1"
+      "objectVersion": "2" #We expect an updated object
     }
     python_Testing_Utilities.assertObjectsEqual(
       unittestTestCaseClass=self,
@@ -297,10 +299,147 @@ class ticketManager_helpers(helper):
     resultJSON2 = self.getTicketType(constants.masterTenantName, setupData["okTicketResultJSON"][1]["id"])
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2, expectedResult, [], msg='Get retrevial mismatch')
 
-#update url tenant must match
+  def test_updateInvalidObjectID(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
 
-#update can not change tenant
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    changed["id"] = "WrongIDVal"
+    resultRAW = self.updateTicketType(
+      tenantTypeID=changed["id"],
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 404, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
 
-#update id must match url id
 
-#update can not add has account role
+  def test_updateIDMustMatchURLID_URLWRONG(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    resultRAW = self.updateTicketType(
+      tenantTypeID="someOtherID",
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 400, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
+
+  def test_updateIDMustMatchURLID_IDWRONG(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    changed["id"] = "WrongIDVal"
+    resultRAW = self.updateTicketType(
+      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 400, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
+
+
+  def test_updateURLTenantMismachFails(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    print(setupData["tenantJSON"]["Name"])
+    changed["tenantName"] = setupData["tenantJSON"]["Name"]
+    resultRAW = self.updateTicketType(
+      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 400, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
+
+  def test_updateChangingTenantFails(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    changed["tenantName"] = setupData["tenantJSON"]["Name"]
+    resultRAW = self.updateTicketType(
+      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
+      tenantTypesTenant=setupData["tenantJSON"]["Name"],
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    #Tried to change the tenant name on a ticket - result in it not being found
+    self.assertEqual(resultRAW.status_code, 404, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
+
+  def test_updateAddingUserAccountRoleFails(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    changed["roles"].append(constants.DefaultHasAccountRole)
+    resultRAW = self.updateTicketType(
+      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 400, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
+
+  def test_updateWrongObjectversionFails(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    changed[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"] = 999
+    resultRAW = self.updateTicketType(
+      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 400, msg="Err: should have failed " + resultRAW.get_data(as_text=True))
+
+  def tesT_updateMissingObjectversionElementFails(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setupData = self.setupTestTicketsInTwoTenants()
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
+    changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
+    del changed[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]
+    resultRAW = self.updateTicketType(
+      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
+      tenantTypesTenant=constants.masterTenantName,
+      newDict=changed,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(resultRAW.status_code, 400, msg="Err: should have failed " + resultRAW.get_data(as_text=True))

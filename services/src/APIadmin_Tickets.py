@@ -93,6 +93,31 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         return ticketTypeObj.getDict(), 200
       return appObj.objectStore.executeInsideTransaction(dbfn)
 
+    @nsAdmin.doc('update Ticket Type')
+    @nsAdmin.expect(apiSharedModels.getTicketTypeModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.marshal_with(apiSharedModels.getTicketTypeModel(appObj), code=202, description='Ticket Type updated', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User does not have required role')
+    def post(self, tenant, tenantName, tickettypeID):
+      ''' Update Ticket Type  '''
+      APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+
+      def dbfn(storeConnection):
+        return appObj.TicketManager.updateTicketType(
+          tenantName=tenantName,
+          tickettypeID=tickettypeID,
+          ticketTypeDict=content,
+          storeConnection=storeConnection,
+          appObj=appObj
+        ).getDict(), 202
+      try:
+        return appObj.objectStore.executeInsideTransaction(dbfn)
+      except object_store_abstraction.RepositoryValidationException as e:
+        raise BadRequest(str(e))
+      except object_store_abstraction.WrongObjectVersionExceptionClass as err:
+        raise Conflict(err)
+
     @nsAdmin.doc('Delete TicketType')
     @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
     @appObj.flastRestPlusAPIObject.marshal_with(apiSharedModels.responseModel(appObj), code=202, description='Ticket Type deleted', skip_none=True)

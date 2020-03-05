@@ -2,7 +2,7 @@
 import repositoryTicketType
 import object_store_abstraction
 import tenants
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, NotFound
 
 
 class ticketManagerClass():
@@ -10,6 +10,16 @@ class ticketManagerClass():
 
   def __init__(self):
     self.repositoryTicketType = repositoryTicketType.TicketTypeRepositoryClass()
+
+  def updateTicketType(self, tenantName, tickettypeID, ticketTypeDict, storeConnection, appObj):
+    if ticketTypeDict["id"] != tickettypeID:
+      raise BadRequest("URL and data ID mismatch")
+    object_store_abstraction.RepositoryBaseClass.RequireStringElement(ticketTypeDict, object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey(), "TicketType")
+    curObj = self.getTicketType(tenantName, tickettypeID, storeConnection=storeConnection)
+    if curObj is None:
+      raise NotFound("Ticket Type not found")
+
+    return self.upsertTicketType(tenantName, ticketTypeDict, ticketTypeDict[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"], storeConnection, appObj)
 
   def upsertTicketType(self, tenantName, ticketTypeDict, objectVersion, storeConnection, appObj):
     object_store_abstraction.RepositoryBaseClass.RequireStringElement(ticketTypeDict, "tenantName", "TicketType")
