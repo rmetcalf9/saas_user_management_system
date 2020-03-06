@@ -49,8 +49,9 @@ class TicketTypeRepositoryClass(RepositoryBaseClass):
         raise RepositoryValidationException(self.objName + " must have all roles as non-empty strings")
       if curRole==constants.DefaultHasAccountRole:
         raise RepositoryValidationException(self.objName + " not valid to assign " + constants.DefaultHasAccountRole + " role")
-    if len(obj["roles"]) == 0:
-      raise RepositoryValidationException(self.objName + " must have at least one role")
+    #We have a good use case for ticket type with no role
+    #if len(obj["roles"]) == 0:
+    #  raise RepositoryValidationException(self.objName + " must have at least one role")
     RepositoryBaseClass.RequireStringElement(obj, "postUseURL", self.objName)
     RepositoryBaseClass.RequireStringElement(obj, "postInvalidURL", self.objName)
 
