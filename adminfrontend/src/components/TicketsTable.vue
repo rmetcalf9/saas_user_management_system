@@ -50,7 +50,8 @@ export default {
   props: [
     'defaultDisplayedColumns',
     'persistantSettingsSlot',
-    'selectedTenantName'
+    'selectedTenantName',
+    'selectedTicketTypeID'
   ],
   components: {
     selectColumns,
@@ -62,21 +63,24 @@ export default {
       tableLoading: false,
       tableData: [],
       tableColumns: [
-        { name: 'Name', required: true, label: 'Ticket Type Name', align: 'left', field: 'ticketTypeName', sortable: false, filter: false },
-        { name: 'Description', required: false, label: 'Description', align: 'left', field: 'description', sortable: false, filter: false },
-        { name: 'Enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: false },
-        { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'allowUserCreation', sortable: false, filter: false },
-        { name: 'Issue Duration', required: false, label: 'Issue Duration', align: 'left', field: 'issueDuration', sortable: false, filter: false },
-        { name: 'Post Use URL', required: false, label: 'Post Use URL', align: 'left', field: 'postUseURL', sortable: false, filter: false },
-        { name: 'Post Use Invalid URL', required: false, label: 'Post Use Invalid URL', align: 'left', field: 'postInvalidURL', sortable: false, filter: false },
-        { name: 'WelcomeAgree', required: false, label: 'Welcome Agreement', align: 'left', field: 'welcomeMessage.agreementRequired', sortable: false, filter: false },
-        { name: 'WelcomeTitle', required: false, label: 'Welcome Title', align: 'left', field: 'welcomeMessage.title', sortable: false, filter: false },
-        { name: 'WelcomeBody', required: false, label: 'Welcome Body', align: 'left', field: 'welcomeMessage.body', sortable: false, filter: false },
-        { name: 'WelcomeOkText', required: false, label: 'Welcome Ok Text', align: 'left', field: 'welcomeMessage.okButtonText', sortable: false, filter: false }
+        { name: 'Name', required: true, label: 'Ticket Type Name', align: 'left', field: 'ticketTypeName', sortable: false, filter: false }
+        // { name: 'Description', required: false, label: 'Description', align: 'left', field: 'description', sortable: false, filter: false },
+        // { name: 'Enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: false },
+        // { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'allowUserCreation', sortable: false, filter: false },
+        // { name: 'Issue Duration', required: false, label: 'Issue Duration', align: 'left', field: 'issueDuration', sortable: false, filter: false },
+        // { name: 'Post Use URL', required: false, label: 'Post Use URL', align: 'left', field: 'postUseURL', sortable: false, filter: false },
+        // { name: 'Post Use Invalid URL', required: false, label: 'Post Use Invalid URL', align: 'left', field: 'postInvalidURL', sortable: false, filter: false },
+        // { name: 'WelcomeAgree', required: false, label: 'Welcome Agreement', align: 'left', field: 'welcomeMessage.agreementRequired', sortable: false, filter: false },
+        // { name: 'WelcomeTitle', required: false, label: 'Welcome Title', align: 'left', field: 'welcomeMessage.title', sortable: false, filter: false },
+        // { name: 'WelcomeBody', required: false, label: 'Welcome Body', align: 'left', field: 'welcomeMessage.body', sortable: false, filter: false },
+        // { name: 'WelcomeOkText', required: false, label: 'Welcome Ok Text', align: 'left', field: 'welcomeMessage.okButtonText', sortable: false, filter: false }
       ]
     }
   },
   methods: {
+    clickEditTicketTypeModalModalOK () {
+      console.log('TODO')
+    },
     request ({ pagination, filter }) {
       var TTT = this
       TTT.tableLoading = true
@@ -119,7 +123,8 @@ export default {
         }
         queryParams['sort'] = pagination.sortBy + postfix
       }
-      var queryString = restcallutils.buildQueryString('/tenants/' + TTT.selectedTenantName + '/tickettypes', queryParams)
+      var queryString = restcallutils.buildQueryString('/tenants/' + TTT.selectedTenantName + '/tickettypes/' + TTT.selectedTicketTypeID + '/tickets', queryParams)
+      console.log('xx', queryString)
       this.$store.dispatch('globalDataStore/callAdminAPI', {
         path: queryString,
         method: 'get',

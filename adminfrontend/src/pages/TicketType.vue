@@ -83,6 +83,7 @@
     :defaultDisplayedColumns="['Name', 'Description']"
     persistantSettingsSlot="ticketsMain"
     :selectedTenantName="$route.params.selTenantNAME"
+    :selectedTicketTypeID="$route.params.selTicketTypeID"
   />
 
   <strictConfirmation
@@ -110,6 +111,12 @@ import TicketsTable from '../components/TicketsTable'
 
 function getEmptyTicketTypeData () {
   return {
+    welcomeMessage: {
+      title: '',
+      body: '',
+      agreementRequired: false,
+      okButtonText: ''
+    }
   }
 }
 
