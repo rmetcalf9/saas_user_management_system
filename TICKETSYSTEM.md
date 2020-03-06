@@ -71,14 +71,25 @@ type: Extra field in query - this is all the fileds in ticket type model includi
 isUsable: Extra field in query - returns isUsable information
 ```
 
-externalKey - This must be unique per ticket type, so I can look up if I know both External Key and Ticker Type GUID.
+#### externalKey Uniqueness
+There can only be one active ticket for each External key for each Ticket Type.
 
 ### Operations:
  - ADMIN CreateBatch
+  - accepts an option "ReissueNonActive or Skip" which controls what it will do if it finds that external key is already used
+    - In both cases if an external key is used but the ticket is not active it will reissue
+    - If the key is found and it is not active then
+      - Skip - do nothing
+      - ReissueNonActive - Set current ticket to disabled and issue a new one
   - accepts a list of externalKeys
-  - sets id, typeId, expiry and externalKey
-  - must check for uniqueness of typeGUID | externalKey
+  - creates new tickets setting id, typeId, expiry and externalKey
+  - must check for uniqueness of typeGUID | externalKey | Active key
   - Returns report with created and errored external keys
+    - Key value pairs for all forign keys with their new ticket
+    - skipped foreign keys ARE NOT OUTPUT
+    - Number of new tickets issued
+    - Number of tickets reissued
+    - Number of foreign keys skipped
  - ADMIN Disable - sets disabled (one way)
  - ADMIN Reactivate - sets reactivatedTicketID
  - ADMIN Get Paginated list - gets list of tickets of a particular type for admin screens

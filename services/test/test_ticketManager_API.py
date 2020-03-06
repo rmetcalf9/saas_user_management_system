@@ -8,22 +8,9 @@ import python_Testing_Utilities
 import datetime
 import pytz
 from appObj import appObj
+from ticketManager__Common_API import ticketManagerAPICommonUtilsClass
 
-class helper(TestHelperSuperClass.testHelperAPIClient):
-  def createTicketType(self, tenantTypesTenant, overrideName=None):
-    jsonData = copy.deepcopy(ticketManagerTestCommon.validTicketTypeDict)
-    if overrideName is not None:
-      jsonData["ticketTypeName"] = overrideName
-    jsonData["tenantName"] = tenantTypesTenant
-    result = self.testClient.post(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes',
-      headers={constants.jwtHeaderName: self.getNormalJWTToken()},
-      data=json.dumps(jsonData),
-      content_type='application/json'
-    )
-    self.assertEqual(result.status_code, 201, msg="Err: " + result.get_data(as_text=True))
-    return json.loads(result.get_data(as_text=True))
-
+class helper(ticketManagerAPICommonUtilsClass):
   def updateTicketType(self, tenantTypeID, tenantTypesTenant, newDict, checkAndParseResponse=True):
     result = self.testClient.post(
       self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes/' + tenantTypeID,
@@ -105,7 +92,7 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
       "noiseTicketResultJSONMap": noiseTicketResultJSONMap
     }
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_helpers(helper):
   def test_createValidTicketType(self):
     testTime = datetime.datetime.now(pytz.timezone("UTC"))
@@ -362,7 +349,6 @@ class ticketManager_helpers(helper):
     appObj.setTestingDateTime(testTime2)
     changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
-    print(setupData["tenantJSON"]["Name"])
     changed["tenantName"] = setupData["tenantJSON"]["Name"]
     resultRAW = self.updateTicketType(
       tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
