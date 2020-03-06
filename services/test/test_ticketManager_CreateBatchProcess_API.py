@@ -48,7 +48,7 @@ class helper(ticketManagerAPICommonUtilsClass):
     self.assertEqual(resultJSON["stats"]["issued"],issued, msg="issued wrong - " + msg)
     self.assertEqual(resultJSON["stats"]["reissued"],reissued, msg="reissued wrong - " + msg)
     self.assertEqual(resultJSON["stats"]["skipped"],skipped, msg="skipped wrong - " + msg)
-    self.assertEqual(len(resultJSON["results"]), len(keysExpected), msg="num keys wrong - " + msg)
+    self.assertEqual(len(resultJSON["results"]), len(keysExpected), msg="num keys wrong (got " + str(len(resultJSON["results"])) + " expected " + str(len(keysExpected)) + ") - " + msg)
     keysExpectedMap = {}
     for x in keysExpected:
       keysExpectedMap[x] = False
@@ -65,8 +65,11 @@ class helper(ticketManagerAPICommonUtilsClass):
     params = {
       "query": foreignKey
     }
+    postfix = ""
+    if foreignKey is not None:
+      postfix = "?%s" % params
     result2 = self.testClient.get(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantName + '/tickettypes/' + ticketTypeID + '/tickets?%s' % params,
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantName + '/tickettypes/' + ticketTypeID + '/tickets' + postfix,
       headers={constants.jwtHeaderName: self.getNormalJWTToken()},
       data=None,
       content_type='application/json'
@@ -99,7 +102,7 @@ class ticketManager_CreateBatchProcess(helper):
       tenantName=setupData["tenantJSON"]["Name"],
       ticketTypeID="SomeUnknownTicketTypeID",
       foreignKeyList=["fk@testfj.com"],
-      foreignKeyDupAction="ReissueNonActive",
+      foreignKeyDupAction="ReissueAll",
       checkAndParseResponse=False
     )
     self.assertEqual(resultRAW.status_code, 404, msg="Err: " + resultRAW.get_data(as_text=True))
@@ -116,7 +119,7 @@ class ticketManager_CreateBatchProcess(helper):
       tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
       ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
       foreignKeyList= [ "fk@testfj.com" ],
-      foreignKeyDupAction= "ReissueNonActive",
+      foreignKeyDupAction= "ReissueAllActive",
       checkAndParseResponse = True
     )
     self.checkExpectedResults(resultJSON=resultJSON, keysExpected=[ "fk@testfj.com" ], issued=1, reissued=0, skipped=0, msg="None")
@@ -152,12 +155,162 @@ class ticketManager_CreateBatchProcess(helper):
       ignoredRootKeys=[]
     )
 
+  def test_createSingleValidTicketTwiceAndCheckWeHaveTwoTickets(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    testTicketTypeName = "TestType001"
+    setupData = self.setupNewTenantAndTicketType(tenantData=TestHelperSuperClass.tenantWithNoAuthProviders, ticketTypeName=testTicketTypeName)
 
-#Def run single process twice no conflicts
+    foreignKeyList001 = ["fk@testfj.com"]
+    foreignKeyList002 = ["second@testfj.com"]
 
-#Def run single process twice one conflicts - skip
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    resultJSON = self.callBatchProcess(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKeyList= foreignKeyList001,
+      foreignKeyDupAction= "ReissueAllActive",
+      checkAndParseResponse = True
+    )
+    self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList001, issued=1, reissued=0, skipped=0, msg="None")
 
-#Def run single process twice one conflicts - reissue
+    testTime3 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    resultJSON = self.callBatchProcess(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKeyList= foreignKeyList002,
+      foreignKeyDupAction= "ReissueAllActive",
+      checkAndParseResponse = True
+    )
+    self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList002, issued=1, reissued=0, skipped=0, msg="None")
+
+    ticketsJSON = self.getTicketsForForeignKey(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKey=None
+    )
+    self.assertEqual(len(ticketsJSON), 2, msg="Should have found two tickets")
+    allKeys = []
+    for curTicket in ticketsJSON:
+      allKeys.append(curTicket["foreignKey"])
+
+    python_Testing_Utilities.assertObjectsEqual(
+      unittestTestCaseClass=self,
+      first=allKeys,
+      second=foreignKeyList001 + foreignKeyList002,
+      msg="JSON of created Ticket is not what was expected",
+      ignoredRootKeys=[]
+    )
+
+  def test_createSameSingleValidTicketTwiceAndCheckWeHaveOneTicket_inSkipMode(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    testTicketTypeName = "TestType001"
+    setupData = self.setupNewTenantAndTicketType(tenantData=TestHelperSuperClass.tenantWithNoAuthProviders, ticketTypeName=testTicketTypeName)
+
+    foreignKeyList001 = ["fk@testfj.com"]
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    resultJSON = self.callBatchProcess(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKeyList= foreignKeyList001,
+      foreignKeyDupAction= "ReissueAllActive",
+      checkAndParseResponse = True
+    )
+    self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList001, issued=1, reissued=0, skipped=0, msg="None")
+
+    testTime3 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    resultJSON = self.callBatchProcess(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKeyList= foreignKeyList001,
+      foreignKeyDupAction= "Skip",
+      checkAndParseResponse = True
+    )
+    self.checkExpectedResults(resultJSON=resultJSON, keysExpected=[], issued=0, reissued=0, skipped=1, msg="None")
+
+    ticketsJSON = self.getTicketsForForeignKey(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKey=None # results in all being returned
+    )
+    self.assertEqual(len(ticketsJSON), 1, msg="Should have found one ticket")
+    allKeys = []
+    for curTicket in ticketsJSON:
+      allKeys.append(curTicket["foreignKey"])
+
+    python_Testing_Utilities.assertObjectsEqual(
+      unittestTestCaseClass=self,
+      first=allKeys,
+      second=foreignKeyList001,
+      msg="JSON of created Ticket is not what was expected",
+      ignoredRootKeys=[]
+    )
+
+  def test_createSameSingleValidTicketTwiceAndCheckWeHaveOneTicket_inReissueMode(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    testTicketTypeName = "TestType001"
+    setupData = self.setupNewTenantAndTicketType(tenantData=TestHelperSuperClass.tenantWithNoAuthProviders, ticketTypeName=testTicketTypeName)
+
+    foreignKeyList001 = ["fk@testfj.com"]
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    resultJSON = self.callBatchProcess(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKeyList= foreignKeyList001,
+      foreignKeyDupAction= "ReissueAllActive",
+      checkAndParseResponse = True
+    )
+    self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList001, issued=1, reissued=0, skipped=0, msg="None")
+    origTicketID = resultJSON["results"][0]["ticketGUID"]
+
+    testTime3 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+    resultJSON = self.callBatchProcess(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKeyList= foreignKeyList001,
+      foreignKeyDupAction= "ReissueAllActive",
+      checkAndParseResponse = True
+    )
+    self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList001, issued=0, reissued=1, skipped=0, msg="None")
+    reissuedTicketID = resultJSON["results"][0]["ticketGUID"]
+
+    ticketsJSON = self.getTicketsForForeignKey(
+      tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
+      ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
+      foreignKey=None # results in all being returned
+    )
+    self.assertEqual(len(ticketsJSON), 2, msg="Should have found two tickets because previous and new")
+    allKeys = []
+    for curTicket in ticketsJSON:
+      allKeys.append(curTicket["foreignKey"])
+
+    python_Testing_Utilities.assertObjectsEqual(
+      unittestTestCaseClass=self,
+      first=allKeys,
+      second=foreignKeyList001 + foreignKeyList001,
+      msg="JSON of created Ticket is not what was expected",
+      ignoredRootKeys=[]
+    )
+
+    #Make sure old ticket has new tickets reissueID
+    origTicket = None
+    for curTicket in ticketsJSON:
+      if curTicket["id"] == origTicketID:
+        if origTicket is not None:
+          self.assertTrue(False, msg="There should not be mutiple orig tickets in query result")
+        origTicket = curTicket
+
+    self.assertEqual(origTicket["reissuedTicketID"], reissuedTicketID, msg="Reissued ID not set on original ticket")
 
 
 

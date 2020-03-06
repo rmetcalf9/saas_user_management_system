@@ -167,7 +167,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         raise BadRequest('Bad foreignKeyList')
       if not isinstance(content["foreignKeyDupAction"], str):
         raise BadRequest('Bad foreignKeyDupAction')
-      if "ReissueNonActive" not in content["foreignKeyDupAction"]:
+      if "ReissueAll" not in content["foreignKeyDupAction"]:
         if "Skip" not in content["foreignKeyDupAction"]:
           raise BadRequest('Unknown foreignKeyDupAction')
       try:

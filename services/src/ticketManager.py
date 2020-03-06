@@ -87,6 +87,7 @@ class ticketManagerClass():
     return {"response": "OK"}, 202
 
   def createBatchProcess(self, tenantName, tickettypeID, foreignKeyDupAction, foreignKeyList, storeConnection, appObj):
+    #print("createBatchProcess", foreignKeyList)
     ticketTypeObj = self.getTicketType(tenantName, tickettypeID=tickettypeID, storeConnection=storeConnection)
     if ticketTypeObj is None:
       return {"response": "ERROR", "message": "Ticket Type not found in this tenant"}, 404
@@ -98,7 +99,7 @@ class ticketManagerClass():
     ticketTypeTicketsObj = self.repositoryTicketTypeTickets.get(id=tickettypeID, storeConnection=storeConnection)
     if ticketTypeTicketsObj is None:
       ticketTypeTicketsObj = repositoryTicketTypeTicketsObj.factoryFn(
-        obj=repositoryTicketTypeTicketsObj.TicketTypeTicketsObjClass.getNewTicketDict(),
+        obj=repositoryTicketTypeTicketsObj.TicketTypeTicketsObjClass.getNewTicketDict(ticketTypeID=tickettypeID),
         objVersion=None,
         creationDateTime=appObj.getCurDateTime(),
         lastUpdateDateTime=appObj.getCurDateTime(),
@@ -106,7 +107,6 @@ class ticketManagerClass():
         repositoryObj=self.repositoryTicketTypeTickets,
         storeConnection=storeConnection
       )
-
     for curForeignKey in foreignKeyList:
       existingTicketID = ticketTypeTicketsObj.getTicketIDFromForeignKey(foreignKey=curForeignKey)
       if existingTicketID is None:
@@ -120,10 +120,24 @@ class ticketManagerClass():
         results.append({ "foreignkey": curForeignKey, "ticketGUID": ticketGUID })
         issued += 1
       else:
-        raise Exception("Not Implemented")
+        # Foreign key is in use for this ticket type
+        if foreignKeyDupAction == "Skip":
+          skipped += 1
+        else:
+          #In reissue mode, need to reissue the ticket
+          (ticketGUID, _) = self.repositoryTicket.reissueTicket(
+            ForeignKey=curForeignKey,
+            existingTicketGUID=existingTicketID,
+            typeGUID=tickettypeID,
+            newexpiry=appObj.getCurDateTime() + datetime.timedelta(hours=int(ticketTypeObj.getDict()["issueDuration"])),
+            storeConnection=storeConnection
+          )
+          ticketTypeTicketsObj.registerTicketReIssuance(ForeignKey=curForeignKey, ticketGUID=ticketGUID)
+          results.append({"foreignkey": curForeignKey, "ticketGUID": ticketGUID})
+          reissued += 1
 
     objID, objectVersion = ticketTypeTicketsObj.save(storeConnection=storeConnection)
-
+    # print("Saved ticket Type Ticket", objID)
     return {
       "results": results,
       "stats": {

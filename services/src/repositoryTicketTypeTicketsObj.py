@@ -1,4 +1,5 @@
 from object_store_abstraction import RepositoryObjBaseClass
+import uuid
 
 def factoryFn(obj, objVersion, creationDateTime, lastUpdateDateTime, objKey, repositoryObj, storeConnection):
   return TicketTypeTicketsObjClass(obj, objVersion, creationDateTime, lastUpdateDateTime, objKey, repositoryObj=repositoryObj, storeConnection=storeConnection)
@@ -8,24 +9,20 @@ class TicketTypeTicketsObjClass(RepositoryObjBaseClass):
     RepositoryObjBaseClass.__init__(self, obj, objVersion, creationDateTime, lastUpdateDateTime, objKey, repositoryObj)
 
   @classmethod
-  def getNewTicketDict(cls):
+  def getNewTicketDict(cls, ticketTypeID):
     return {
+      "id": ticketTypeID,
       "fklu": {}
     }
 
   def getTicketIDFromForeignKey(self, foreignKey):
-    if "foreignKey" not in self.obj["fklu"]:
+    if foreignKey not in self.getDict()["fklu"]:
       return None
-    return self.obj["fklu"]["foreignKey"]
+    return self.obj["fklu"][foreignKey]
 
   def registerTicketIssuance(self, ForeignKey, ticketGUID):
-    self.obj["fklu"]["foreignKey"] = ticketGUID
+    self.obj["fklu"][ForeignKey] = ticketGUID
 
-  #candidate for putting into baseclass library
-  def save(self, storeConnection):
-    objID, objectVersion = self.repositoryObj.upsert(
-      self.getDict(),
-      self.getDict()[RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"],
-      storeConnection
-    )
-    return (objID, objectVersion)
+  def registerTicketReIssuance(self, ForeignKey, ticketGUID):
+    self.obj["fklu"][ForeignKey] = ticketGUID
+

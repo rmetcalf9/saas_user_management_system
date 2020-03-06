@@ -138,7 +138,7 @@ def responseModel(appObj):
 
 def getTicketTypeCreateBatchProcessModel(appObj):
   return appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessModel', {
-    'foreignKeyDupAction': fields.String(default='FAIL', description='Should be ReissueNonActive or Skip'),
+    'foreignKeyDupAction': fields.String(default='FAIL', description='Should be ReissueAll or Skip'),
     'foreignKeyList': fields.List(fields.String(default='FAIL', description='Foreign key'))
   })
 

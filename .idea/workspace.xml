@@ -9,9 +9,9 @@
       <change beforePath="$PROJECT_DIR$/services/src/repositoryTicket.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicket.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeTickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeTickets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeTicketsObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeTicketsObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_CreateBatchProcess_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_CreateBatchProcess_API.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/testContainer/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/requirements.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -169,7 +169,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583483841103</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Able to create a single valid ticket">
+      <created>1583501544155</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1583501544155</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -212,7 +219,8 @@
     <MESSAGE value="Update API created" />
     <MESSAGE value="Added ticket system notes" />
     <MESSAGE value="Setup first tests for create ticket batch" />
-    <option name="LAST_COMMIT_MESSAGE" value="Setup first tests for create ticket batch" />
+    <MESSAGE value="Able to create a single valid ticket" />
+    <option name="LAST_COMMIT_MESSAGE" value="Able to create a single valid ticket" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

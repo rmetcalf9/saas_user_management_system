@@ -76,11 +76,11 @@ There can only be one active ticket for each External key for each Ticket Type.
 
 ### Operations:
  - ADMIN CreateBatch
-  - accepts an foerignKeyDupAction option "ReissueNonActive or Skip" which controls what it will do if it finds that external key is already used
+  - accepts an foerignKeyDupAction option "ReissueAll or Skip" which controls what it will do if it finds that external key is already used
     - In both cases if an external key is used but the ticket is not active it will reissue
     - If the key is found and it is not active then
       - Skip - do nothing
-      - ReissueNonActive - Set current ticket to disabled and issue a new one
+      - ReissueNonActive - Set current ticket reissuedID and issue a new one (NOT SET TO DISABLED)
   - accepts a list of externalKeys
   - creates new tickets setting id, typeId, expiry and externalKey
   - must check for uniqueness of typeGUID | externalKey | Active key
@@ -91,7 +91,7 @@ There can only be one active ticket for each External key for each Ticket Type.
     - Number of tickets reissued
     - Number of foreign keys skipped
  - ADMIN Disable - sets disabled (one way)
- - ADMIN Reactivate - sets reactivatedTicketID
+ - ***ADMIN Reissue - sets reissuedTicketID Not NEEDED -> Just run create batch with this single ticker in ReissueAll mode 
  - ADMIN Get Paginated list - gets list of tickets of a particular type for admin screens
    - Query searches Foreign key ONLY
 
@@ -102,6 +102,7 @@ NO Admin Delete operation - tickets are only deleted when the ticket type is del
    - extra field: isUsable - checks and returns INVALID, EXPIRED or USABLE
      - ticket type enabled
      - ticket not disabled
+     - no reissuedTicketID set (reissued tickets don't get disabled) 
      - ticket has not been used
      - expiry date
  - LOGIN RequestReactivation - sets reactivationRequested
