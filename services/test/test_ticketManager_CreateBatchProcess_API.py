@@ -1,4 +1,4 @@
-# This file throughly tests the create batch process
+# This file thoroughly tests the create batch process
 import TestHelperSuperClass
 from appObj import appObj
 import object_store_abstraction
@@ -21,28 +21,6 @@ class helper(ticketManagerAPICommonUtilsClass):
       "ticketTypeMaster": ticketTypeMaster,
       "ticketTypeNewTanent": ticketTypeNewTanent
     }
-  def callBatchProcess(
-      self,
-      tenantName,
-      ticketTypeID,
-      foreignKeyList,
-      foreignKeyDupAction,
-      checkAndParseResponse = True
-  ):
-    postData = {
-      "foreignKeyDupAction": foreignKeyDupAction,
-      "foreignKeyList": foreignKeyList
-    }
-    result = self.testClient.post(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantName + '/tickettypes/' + ticketTypeID + '/createbatch',
-      headers={constants.jwtHeaderName: self.getNormalJWTToken()},
-      data=json.dumps(postData),
-      content_type='application/json'
-    )
-    if not checkAndParseResponse:
-      return result
-    self.assertEqual(result.status_code, 200, msg="Err: " + result.get_data(as_text=True))
-    return json.loads(result.get_data(as_text=True))
 
   def checkExpectedResults(self, resultJSON, keysExpected, issued, reissued, skipped, msg):
     self.assertEqual(resultJSON["stats"]["issued"],issued, msg="issued wrong - " + msg)
@@ -60,24 +38,6 @@ class helper(ticketManagerAPICommonUtilsClass):
       keysExpectedMap[curResult["foreignkey"]] = True
       self.assertNotEqual(curResult["ticketGUID"], None, msg = "ticketGUID missing - " + msg )
       #Other result value is "ticketGUID" which is ignored because it could be anything
-
-  def getTicketsForForeignKey(self, tenantName, ticketTypeID, foreignKey):
-    params = {
-      "query": foreignKey
-    }
-    postfix = ""
-    if foreignKey is not None:
-      postfix = "?%s" % params
-    result2 = self.testClient.get(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantName + '/tickettypes/' + ticketTypeID + '/tickets' + postfix,
-      headers={constants.jwtHeaderName: self.getNormalJWTToken()},
-      data=None,
-      content_type='application/json'
-    )
-    self.assertEqual(result2.status_code, 200)
-    ResultJSON = json.loads(result2.get_data(as_text=True))
-
-    return ResultJSON["result"]
 
 @TestHelperSuperClass.wipd
 class ticketManager_CreateBatchProcess(helper):
@@ -124,10 +84,10 @@ class ticketManager_CreateBatchProcess(helper):
     )
     self.checkExpectedResults(resultJSON=resultJSON, keysExpected=[ "fk@testfj.com" ], issued=1, reissued=0, skipped=0, msg="None")
 
-    ticketsJSON = self.getTicketsForForeignKey(
+    ticketsJSON = self.queryForTickets(
       tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
       ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
-      foreignKey="fk@testfj.com"
+      queryString="fk@testfj.com"
     )
     self.assertEqual(len(ticketsJSON), 1, msg="Should have found a single ticket")
     expectedTicketJSON = {
@@ -186,10 +146,10 @@ class ticketManager_CreateBatchProcess(helper):
     )
     self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList002, issued=1, reissued=0, skipped=0, msg="None")
 
-    ticketsJSON = self.getTicketsForForeignKey(
+    ticketsJSON = self.queryForTickets(
       tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
       ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
-      foreignKey=None
+      queryString=None
     )
     self.assertEqual(len(ticketsJSON), 2, msg="Should have found two tickets")
     allKeys = []
@@ -234,10 +194,10 @@ class ticketManager_CreateBatchProcess(helper):
     )
     self.checkExpectedResults(resultJSON=resultJSON, keysExpected=[], issued=0, reissued=0, skipped=1, msg="None")
 
-    ticketsJSON = self.getTicketsForForeignKey(
+    ticketsJSON = self.queryForTickets(
       tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
       ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
-      foreignKey=None # results in all being returned
+      queryString=None # results in all being returned
     )
     self.assertEqual(len(ticketsJSON), 1, msg="Should have found one ticket")
     allKeys = []
@@ -284,10 +244,10 @@ class ticketManager_CreateBatchProcess(helper):
     self.checkExpectedResults(resultJSON=resultJSON, keysExpected=foreignKeyList001, issued=0, reissued=1, skipped=0, msg="None")
     reissuedTicketID = resultJSON["results"][0]["ticketGUID"]
 
-    ticketsJSON = self.getTicketsForForeignKey(
+    ticketsJSON = self.queryForTickets(
       tenantName=setupData["ticketTypeNewTanent"]["tenantName"],
       ticketTypeID=setupData["ticketTypeNewTanent"]["id"],
-      foreignKey=None # results in all being returned
+      queryString=None # results in all being returned
     )
     self.assertEqual(len(ticketsJSON), 2, msg="Should have found two tickets because previous and new")
     allKeys = []
