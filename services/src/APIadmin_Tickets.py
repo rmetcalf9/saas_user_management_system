@@ -6,6 +6,11 @@ from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
+def requiredInPayload(content, fieldList):
+  for a in fieldList:
+    if a not in content:
+      raise BadRequest(a + ' not in payload')
+
 def registerAPI(appObj, APIAdminCommon, nsAdmin):
   @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>/tickettypes')
   class tickettypesInfo(Resource):
@@ -18,7 +23,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @appObj.addStandardSortParams(nsAdmin)
     def get(self, tenant, tenantName):
-      '''Get list of tenants'''
+      '''Get list of ticket types'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
       paginatedParamValues = object_store_abstraction.sanatizePaginatedParamValues(getPaginatedParamValues(request))
       try:
@@ -143,3 +148,77 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         return { "response": "ERROR", "message": str(err) }, 409 #not using standard exception as it gives html response
         #raise Conflict(err)
 
+  @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>/tickettypes/<string:tickettypeID>/createbatch')
+  class tickettypeCreateBatch(Resource):
+    '''Ticket Type Process - Create Batch'''
+
+    @nsAdmin.doc('run Ticket Type create Batch process')
+    @nsAdmin.expect(apiSharedModels.getTicketTypeCreateBatchProcessModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(200, 'Completed')
+    @appObj.flastRestPlusAPIObject.marshal_with(apiSharedModels.getTicketTypeCreateBatchProcessResponseModel(appObj), code=200, description='Ticket Type process complete', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant, tenantName, tickettypeID):
+      '''Create Ticket Batch Process'''
+      APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ['foreignKeyDupAction', 'foreignKeyList'])
+      if not isinstance(content["foreignKeyList"], list):
+        raise BadRequest('Bad foreignKeyList')
+      if not isinstance(content["foreignKeyDupAction"], str):
+        raise BadRequest('Bad foreignKeyDupAction')
+      if "ReissueNonActive" not in content["foreignKeyDupAction"]:
+        if "Skip" not in content["foreignKeyDupAction"]:
+          raise BadRequest('Unknown foreignKeyDupAction')
+      try:
+        def someFn(storeConnection):
+          (responseDict, responseStatus) = appObj.TicketManager.createBatchProcess(
+            tenantName=tenantName,
+            tickettypeID=tickettypeID,
+            foreignKeyDupAction=content["foreignKeyDupAction"],
+            foreignKeyList=content["foreignKeyList"],
+            storeConnection=storeConnection,
+            appObj=appObj
+          )
+          return responseDict, responseStatus
+        return appObj.objectStore.executeInsideTransaction(someFn)
+
+      except constants.customExceptionClass as err:
+        #if (err.id=='tenantAlreadtExistsException'):
+        #  raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except object_store_abstraction.RepositoryValidationException as e:
+        raise BadRequest(str(e))
+      except BadRequest as e:
+        raise e
+      except:
+        raise InternalServerError
+
+  @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>/tickettypes/<string:tickettypeID>/tickets')
+  class tickettypeticketsInfo(Resource):
+    '''Tickets'''
+
+    @nsAdmin.doc('get Tickets')
+    @nsAdmin.marshal_with(appObj.getResultModel(apiSharedModels.getTicketModel(appObj)))
+    @nsAdmin.response(200, 'Success', model=appObj.getResultModel(apiSharedModels.getTicketModel(appObj)))
+    @nsAdmin.response(401, 'Unauthorized')
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    @appObj.addStandardSortParams(nsAdmin)
+    def get(self, tenant, tenantName, tickettypeID):
+      '''Get list of tickets'''
+      APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
+      paginatedParamValues = object_store_abstraction.sanatizePaginatedParamValues(getPaginatedParamValues(request))
+      try:
+        def outputFunction(itemObj):
+          return itemObj.getDict()
+        def dbfn(storeConnection):
+          return appObj.TicketManager.getTicketPaginatedResults(
+            tenantName=tenantName,
+            tickettypeID=tickettypeID,
+            paginatedParamValues=paginatedParamValues,
+            outputFN=outputFunction,
+            storeConnection=storeConnection
+          )
+        return appObj.objectStore.executeInsideConnectionContext(dbfn)
+      except:
+        raise InternalServerError

@@ -135,3 +135,39 @@ def responseModel(appObj):
     'response': fields.String(default='FAIL', description='OK if the operation succeeded'),
     'message': fields.String(default='None', description='Error message')
   })
+
+def getTicketTypeCreateBatchProcessModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessModel', {
+    'foreignKeyDupAction': fields.String(default='FAIL', description='Should be ReissueNonActive or Skip'),
+    'foreignKeyList': fields.List(fields.String(default='FAIL', description='Foreign key'))
+  })
+
+def getTicketTypeCreateBatchProcessResponseModel(appObj):
+  statsModel = appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessResponseStatsModel', {
+    'issued': fields.Integer(default=None, description='Number of tickets issued'),
+    'reissued': fields.Integer(default=None, description='Number of tickets reissued'),
+    'skipped': fields.Integer(default=None, description='Number of tickets skipped')
+  })
+  resultModel = appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessResponseResultModel', {
+    'ticketGUID': fields.String(default='DEFAULT', description='GUID for this ticket'),
+    'foreignkey': fields.String(default='DEFAULT', description='foreignkey for this ticket'),
+  })
+
+  return appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessResponseModel', {
+    'results': fields.List(fields.Nested(resultModel)),
+    'stats': fields.Nested(statsModel)
+  })
+
+def getTicketModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('TicketType', {
+    'id': fields.String(default='DEFAULT', description='Unique identifier of Ticket - used in URL'),
+    'typeGUID': fields.String(default='DEFAULT', description='Unique identifier of Ticket - used in URL'),
+    'expiry': fields.DateTime(dt_format=u'iso8601', description='Datetime ticket will expire'),
+    'foreignKey': fields.String(default='DEFAULT', description='Unique identifier of Ticket - used in URL'),
+    'usedDate': fields.DateTime(dt_format=u'iso8601', description='Datetime ticket was used or none if it wasn\'t'),
+    'useWithUserID': fields.String(default=None, description='Unique identifier of Ticket - used in URL'),
+    'reissueRequestedDate': fields.DateTime(dt_format=u'iso8601', description='Datetime ticket was reissueRequestedDate'),
+    'reissuedTicketID': fields.String(default=None, description='Unique identifier of Ticket - used in URL'),
+    'disabled': fields.Boolean(default=False,description='Has this ticket been disabled'),
+    RepositoryObjBaseClass.getMetadataElementKey(): fields.Nested(RepositoryObjBaseClass.getMetadataModel(appObj, flaskrestplusfields=fields))
+  })

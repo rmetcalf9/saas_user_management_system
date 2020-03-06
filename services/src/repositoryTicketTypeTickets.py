@@ -3,7 +3,7 @@ from repositoryTicketObj import factoryFn as ticketObjFactoryFn
 import constants
 
 
-class TicketRepositoryClass(RepositoryBaseClass):
+class TicketTypeTicketsRepositoryClass(RepositoryBaseClass):
   objName = "TicketTypeTicket"
 
   def __init__(self):

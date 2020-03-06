@@ -59,11 +59,11 @@ I need a bulk method of creating tickets which will accept a list of foreign key
    id: Unique GUID user for verification
    typeGUID: link to Ticket Type
    expiry: Expiry date
-   externalKey: Any text to link to foreign data e.g. from mail list
+   foreignKey: Any text to link to foreign data e.g. from mail list
    usedDate: Date the invite was used or None
    useWithUserID: GUID of user that used ticket
-   reactivationRequested: Date reactivation was requested or None
-   reactivatedTicketID: ID of reactivated ticket
+   reissueRequested: Date reactivation was requested or None
+   reissuedTicketID: ID of reissued tickets (If reissueRequested is none it was the createbatch process that reissued it)
    disabled: Allow to disable single key without whole type. Not possible to re-enable - instead new key must be issued
  }
 
@@ -76,7 +76,7 @@ There can only be one active ticket for each External key for each Ticket Type.
 
 ### Operations:
  - ADMIN CreateBatch
-  - accepts an option "ReissueNonActive or Skip" which controls what it will do if it finds that external key is already used
+  - accepts an foerignKeyDupAction option "ReissueNonActive or Skip" which controls what it will do if it finds that external key is already used
     - In both cases if an external key is used but the ticket is not active it will reissue
     - If the key is found and it is not active then
       - Skip - do nothing
@@ -93,6 +93,7 @@ There can only be one active ticket for each External key for each Ticket Type.
  - ADMIN Disable - sets disabled (one way)
  - ADMIN Reactivate - sets reactivatedTicketID
  - ADMIN Get Paginated list - gets list of tickets of a particular type for admin screens
+   - Query searches Foreign key ONLY
 
 NO Admin Delete operation - tickets are only deleted when the ticket type is deleted. They can be deactivated instead.
 
@@ -119,7 +120,9 @@ repositoryTicketTypeTickets
  (Should I split off the last two into seperate repositories?) 
  - Pro - Tickets are given out per type so if I reach a limit of more than a 1000 a short term workaround would be to create duplicate types.
  - Pro - repositoryTicketTypeTickets chnages will be infrequent. Only batch creation and ticket type deletion. We can't delete tickets without deleting the whole type so records will only change when batches are added.
- - Not Concern - Paginated data will be required from the main repository so that is not a concern.
+ - Not Concern - Paginated data will be retrieved from the main repository so that is not a concern.
+   - > But that means that to get tickets I have to go through all the tickets and filter out the wrong type by typeGUID
+   - > Decided to live with this. (Alternaive is to create an index for every ticketType) 
  - Not Concern - Individual tickets are changed in their lifecycle but this happens in main table
 
 Secondary repositoryTicketTypeTickets will only be read from or written to in admin operation CreateBatch so it can handle lifecycle 
