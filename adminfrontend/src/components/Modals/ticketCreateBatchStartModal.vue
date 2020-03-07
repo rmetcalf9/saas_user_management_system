@@ -34,7 +34,6 @@
               </q-item>
             </template>
           </q-select>
-          XX {{ foreignKeyDupAction }}
           <div>&nbsp;</div>
           <q-btn
             @click="ok"

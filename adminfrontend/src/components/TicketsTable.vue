@@ -44,7 +44,6 @@
   />
   <ticketCreateBatchResultsModal
     ref="ticketCreateBatchResultsModal"
-    @ok="clickTicketCreateBatchResultsModalOK"
   />
 </div></template>
 
@@ -103,8 +102,11 @@ export default {
       var TTT = this
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', message: 'Batch created'})
-          // TODO Display result summary dialog
+          TTT.$refs.ticketCreateBatchResultsModal.launchDialog({
+            ticketTypeData: TTT.ticketTypeData,
+            callerData: { },
+            createBatchResult: response
+          })
           TTT.refresh()
         },
         error: function (error) {
@@ -123,9 +125,6 @@ export default {
         curPath: TTT.$router.history.current.path,
         headers: {}
       })
-    },
-    clickTicketCreateBatchResultsModalOK () {
-      console.log('TODO clickTicketCreateBatchResultsModalOK')
     },
     request ({ pagination, filter }) {
       var TTT = this
