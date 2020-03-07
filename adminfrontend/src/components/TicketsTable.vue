@@ -99,8 +99,30 @@ export default {
         callerData: { }
       })
     },
-    clickTicketCreateBatchStartModalOK ({ callerData, keymap }) {
-      console.log('TODO clickTicketCreateBatchStartModalOK', callerData, keymap)
+    clickTicketCreateBatchStartModalOK ({ callerData, keymap, foreignKeyDupAction }) {
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', message: 'Batch created'})
+          // TODO Display result summary dialog
+          TTT.refresh()
+        },
+        error: function (error) {
+          Notify.create({color: 'negative', message: 'Delete Ticket Type failed - ' + callbackHelper.getErrorFromResponse(error)})
+        }
+      }
+      var postData = {
+        'foreignKeyDupAction': foreignKeyDupAction,
+        'foreignKeyList': keymap
+      }
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/createbatch',
+        method: 'post',
+        postdata: postData,
+        callback: callback,
+        curPath: TTT.$router.history.current.path,
+        headers: {}
+      })
     },
     clickTicketCreateBatchResultsModalOK () {
       console.log('TODO clickTicketCreateBatchResultsModalOK')

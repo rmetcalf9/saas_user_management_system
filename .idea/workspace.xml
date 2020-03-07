@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminfrontend/src/components/Modals/ticketCreateBatchStartModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/components/Modals/ticketCreateBatchStartModal.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminfrontend/src/components/TicketsTable.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/components/TicketsTable.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/src/pages/TicketType.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/pages/TicketType.vue" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

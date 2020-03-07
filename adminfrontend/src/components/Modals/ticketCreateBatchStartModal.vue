@@ -16,6 +16,25 @@
           <q-input v-model="text" @keyup.enter="ok" ref="textInput" label="Text" :label-width="3" />
           (Your list contains {{ numberOfForeignKeys }} keys)<br>
           <p class="text-negative" v-if="repeatedKeys.length > 0">Repeated keys in input: {{ repeatedKeys }}</p>
+          <q-select
+            outlined v-model="foreignKeyDupAction"
+            :options="foreignKeyDupActionOptions"
+            label="Action to take for existing keys"
+            :display-value="foreignKeyDupAction.label"
+          >
+            <template v-slot:option="scope">
+              <q-item
+                v-bind="scope.itemProps"
+                v-on="scope.itemEvents"
+              >
+                <q-item-section>
+                  <q-item-label v-html="scope.opt.label" />
+                  <q-item-label caption>{{ scope.opt.description }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+          XX {{ foreignKeyDupAction }}
           <div>&nbsp;</div>
           <q-btn
             @click="ok"
@@ -39,6 +58,13 @@
 <script>
 // import { Notify } from 'quasar'
 
+function getforeignKeyDupActionOptions () {
+  return [
+    { label: 'Skip', value: 'Skip', description: 'Skip over any existing foreign keys' },
+    { label: 'Reissue All Active', value: 'ReissueAllActive', description: 'Any current tickets that are active for existing keys are disabled and re-issued' }
+  ]
+}
+
 export default {
   name: 'TicketCreateBatchStart',
   data () {
@@ -47,7 +73,9 @@ export default {
       text: 'x',
       tenantName: '',
       ticketTypeName: '',
-      callerData: {}
+      callerData: {},
+      foreignKeyDupAction: getforeignKeyDupActionOptions()[0],
+      foreignKeyDupActionOptions: getforeignKeyDupActionOptions()
     }
   },
   methods: {
@@ -61,7 +89,8 @@ export default {
       this.visible = false
       this.$emit('ok', {
         callerData: this.callerData,
-        keymap: this.keyList
+        keymap: this.keyList,
+        foreignKeyDupAction: this.foreignKeyDupAction.value
       })
     },
     cancel () {
