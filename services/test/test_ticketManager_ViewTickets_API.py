@@ -38,7 +38,7 @@ class helper(ticketManagerAPICommonUtilsClass):
 
 @TestHelperSuperClass.wipd
 class ticketManager_ViewTickets_API(helper):
-  def test_QueryBackThreeTickets(self):
+  def test_QueryBackAllTicketsOfType(self):
     setup = self.setupTenantsTicketTypesAndTickets()
 
     resultJSON = self.queryForTickets(tenantName=setup["tenants"][0]["tanantJSON"]["Name"], ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"], queryString=None)
@@ -59,6 +59,21 @@ class ticketManager_ViewTickets_API(helper):
       msg="Different tickets queried back",
       ignoredRootKeys=[]
     )
+
+  def test_QueryBackSingleTicket(self):
+    setup = self.setupTenantsTicketTypesAndTickets()
+
+    ticketToQueryBack = setup["tenants"][0]["ticketTypes"][1]["ticketCreationProcessResult"]["results"][4]
+
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString=ticketToQueryBack["foreignKey"]
+    )
+    self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
+
+    self.assertEqual(resultJSON[0]["id"], ticketToQueryBack["ticketGUID"])
+    self.assertEqual(resultJSON[0]["foreignKey"], ticketToQueryBack["foreignKey"])
 
 
 

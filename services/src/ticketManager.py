@@ -74,8 +74,9 @@ class ticketManagerClass():
         return True
       if whereClauseText == "":
         return True
-      if obj.containsQueryString(upperCaseQueryString=curWhereClause.upper()):
-        return True
+      for curWhereClause in whereClauseText.split(" "):
+        if obj.containsQueryString(upperCaseQueryString=curWhereClause.upper()):
+          return True
       return False
     return self.repositoryTicket.getPaginatedResult(paginatedParamValues, outputFN, storeConnection, filterFn)
 
@@ -117,7 +118,7 @@ class ticketManagerClass():
           storeConnection=storeConnection
         )
         ticketTypeTicketsObj.registerTicketIssuance(ForeignKey=curForeignKey, ticketGUID=ticketGUID)
-        results.append({ "foreignkey": curForeignKey, "ticketGUID": ticketGUID })
+        results.append({ "foreignKey": curForeignKey, "ticketGUID": ticketGUID })
         issued += 1
       else:
         # Foreign key is in use for this ticket type
@@ -133,7 +134,7 @@ class ticketManagerClass():
             storeConnection=storeConnection
           )
           ticketTypeTicketsObj.registerTicketReIssuance(ForeignKey=curForeignKey, ticketGUID=ticketGUID)
-          results.append({"foreignkey": curForeignKey, "ticketGUID": ticketGUID})
+          results.append({"foreignKey": curForeignKey, "ticketGUID": ticketGUID})
           reissued += 1
 
     objID, objectVersion = ticketTypeTicketsObj.save(storeConnection=storeConnection)

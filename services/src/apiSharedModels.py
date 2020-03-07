@@ -150,7 +150,7 @@ def getTicketTypeCreateBatchProcessResponseModel(appObj):
   })
   resultModel = appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessResponseResultModel', {
     'ticketGUID': fields.String(default='DEFAULT', description='GUID for this ticket'),
-    'foreignkey': fields.String(default='DEFAULT', description='foreignkey for this ticket'),
+    'foreignKey': fields.String(default='DEFAULT', description='foreignKey for this ticket'),
   })
 
   return appObj.flastRestPlusAPIObject.model('TicketTypeCreateBatchProcessResponseModel', {

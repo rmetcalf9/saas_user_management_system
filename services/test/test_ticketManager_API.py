@@ -143,16 +143,17 @@ class ticketManager_helpers(helper):
     )
     self.assertEqual(result.status_code, 400)
 
-  def test_createWithNoRolesFail(self):
-    obj = copy.deepcopy(ticketManagerTestCommon.validTicketTypeDict)
-    obj["roles"] = []
-    result = self.testClient.post(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + constants.masterTenantName + '/tickettypes',
-      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
-      data=json.dumps(obj),
-      content_type='application/json'
-    )
-    self.assertEqual(result.status_code, 400)
+  #Feature changed we not accept no roles
+  #def test_createWithNoRolesFail(self):
+  #  obj = copy.deepcopy(ticketManagerTestCommon.validTicketTypeDict)
+  #  obj["roles"] = []
+  #  result = self.testClient.post(
+  #    self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + constants.masterTenantName + '/tickettypes',
+  #    headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+  #    data=json.dumps(obj),
+  #    content_type='application/json'
+  #  )
+  #  self.assertEqual(result.status_code, 400)
 
   def test_canOnlyRetrieveTicketTypeForURLTenant(self):
     tenantJSON = self.createTenantForTesting(TestHelperSuperClass.tenantWithNoAuthProviders)

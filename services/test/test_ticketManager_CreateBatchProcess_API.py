@@ -31,11 +31,11 @@ class helper(ticketManagerAPICommonUtilsClass):
     for x in keysExpected:
       keysExpectedMap[x] = False
     for curResult in resultJSON["results"]:
-      if curResult["foreignkey"] not in keysExpectedMap:
-        self.assertTrue(False, msg="returned foreignkey not expected " + curResult["foreignkey"] + " - " + msg)
-      if keysExpectedMap[curResult["foreignkey"]]:
-        self.assertTrue(False, msg="foreignkey not in result more than once " + curResult["foreignkey"] + " - " + msg)
-      keysExpectedMap[curResult["foreignkey"]] = True
+      if curResult["foreignKey"] not in keysExpectedMap:
+        self.assertTrue(False, msg="returned foreignKey not expected " + curResult["foreignKey"] + " - " + msg)
+      if keysExpectedMap[curResult["foreignKey"]]:
+        self.assertTrue(False, msg="foreignKey not in result more than once " + curResult["foreignKey"] + " - " + msg)
+      keysExpectedMap[curResult["foreignKey"]] = True
       self.assertNotEqual(curResult["ticketGUID"], None, msg = "ticketGUID missing - " + msg )
       #Other result value is "ticketGUID" which is ignored because it could be anything
 

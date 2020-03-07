@@ -3,6 +3,7 @@ import copy
 import ticketManagerTestCommon
 import constants
 import json
+from urllib.parse import urlencode, quote_plus
 
 class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient):
   def createTicketType(self, tenantTypesTenant, overrideName=None):
@@ -48,9 +49,10 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
     }
     postfix = ""
     if queryString is not None:
-      postfix = "?%s" % params
+      postfix = "?" + urlencode(params, quote_via=quote_plus)
+    url = self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantName + '/tickettypes/' + ticketTypeID + '/tickets' + postfix
     result2 = self.testClient.get(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantName + '/tickettypes/' + ticketTypeID + '/tickets' + postfix,
+      url,
       headers={constants.jwtHeaderName: self.getNormalJWTToken()},
       data=None,
       content_type='application/json'
