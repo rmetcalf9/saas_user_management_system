@@ -84,6 +84,7 @@
     persistantSettingsSlot="ticketsMain"
     :selectedTenantName="$route.params.selTenantNAME"
     :selectedTicketTypeID="$route.params.selTicketTypeID"
+    :ticketTypeData="ticketTypeData"
   />
 
   <strictConfirmation

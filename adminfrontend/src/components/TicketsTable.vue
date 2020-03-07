@@ -11,6 +11,14 @@
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"
   >
+    <template slot="top-left" slot-scope="props">
+      <q-btn
+        color="primary"
+        push
+        @click="createBatchButton"
+      >Create Batch</q-btn>
+    </template>
+
       <template slot="top-right" slot-scope="props">
         <selectColumns
           v-model="tablePersistSettings.visibleColumns"
@@ -30,9 +38,13 @@
 
       </template>
   </q-table>
-  <editTicketTypeModal
-    ref="editTicketTypeModal"
-    @ok="clickEditTicketTypeModalModalOK"
+  <ticketCreateBatchStartModal
+    ref="ticketCreateBatchStartModal"
+    @ok="clickTicketCreateBatchStartModalOK"
+  />
+  <ticketCreateBatchResultsModal
+    ref="ticketCreateBatchResultsModal"
+    @ok="clickTicketCreateBatchResultsModalOK"
   />
 </div></template>
 
@@ -43,7 +55,8 @@ import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
 import selectColumns from '../components/selectColumns'
 
-import editTicketTypeModal from './Modals/editTicketTypeModal.vue'
+import ticketCreateBatchStartModal from './Modals/ticketCreateBatchStartModal.vue'
+import ticketCreateBatchResultsModal from './Modals/ticketCreateBatchResultsModal.vue'
 
 export default {
   name: 'TicketTypesTable',
@@ -51,11 +64,13 @@ export default {
     'defaultDisplayedColumns',
     'persistantSettingsSlot',
     'selectedTenantName',
-    'selectedTicketTypeID'
+    'selectedTicketTypeID',
+    'ticketTypeData'
   ],
   components: {
     selectColumns,
-    editTicketTypeModal
+    ticketCreateBatchStartModal,
+    ticketCreateBatchResultsModal
   },
   data () {
     return {
@@ -78,8 +93,17 @@ export default {
     }
   },
   methods: {
-    clickEditTicketTypeModalModalOK () {
-      console.log('TODO')
+    createBatchButton () {
+      this.$refs.ticketCreateBatchStartModal.launchDialog({
+        ticketTypeData: this.ticketTypeData,
+        callerData: { }
+      })
+    },
+    clickTicketCreateBatchStartModalOK ({ callerData, keymap }) {
+      console.log('TODO clickTicketCreateBatchStartModalOK', callerData, keymap)
+    },
+    clickTicketCreateBatchResultsModalOK () {
+      console.log('TODO clickTicketCreateBatchResultsModalOK')
     },
     request ({ pagination, filter }) {
       var TTT = this
@@ -124,7 +148,6 @@ export default {
         queryParams['sort'] = pagination.sortBy + postfix
       }
       var queryString = restcallutils.buildQueryString('/tenants/' + TTT.selectedTenantName + '/tickettypes/' + TTT.selectedTicketTypeID + '/tickets', queryParams)
-      console.log('xx', queryString)
       this.$store.dispatch('globalDataStore/callAdminAPI', {
         path: queryString,
         method: 'get',
