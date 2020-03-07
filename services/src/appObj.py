@@ -73,7 +73,7 @@ class appObjClass(parAppObj):
   def init(self, env, serverStartTime, testingMode = False):
     ##self.setupLogging() Comment in when debugging
 
-    self.TicketManager = ticketManager.ticketManagerClass()
+    self.TicketManager = ticketManager.ticketManagerClass(appObj=self)
 
     authProviders_resetStaticData()
     self.scheduler = BackgroundScheduler(timezone="UTC")

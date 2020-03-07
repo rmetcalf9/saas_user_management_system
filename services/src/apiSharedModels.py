@@ -171,3 +171,21 @@ def getTicketModel(appObj):
     'disabled': fields.Boolean(default=False,description='Has this ticket been disabled'),
     RepositoryObjBaseClass.getMetadataElementKey(): fields.Nested(RepositoryObjBaseClass.getMetadataModel(appObj, flaskrestplusfields=fields))
   })
+
+def getTicketWithCaculatedFieldsModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('TicketTypeWithCaculated', {
+    'id': fields.String(default='DEFAULT', description='Unique identifier of Ticket - used in URL'),
+    'typeGUID': fields.String(default='DEFAULT', description='Unique identifier of Ticket - used in URL'),
+    'expiry': fields.DateTime(dt_format=u'iso8601', description='Datetime ticket will expire'),
+    'foreignKey': fields.String(default='DEFAULT', description='Unique identifier of Ticket - used in URL'),
+    'usedDate': fields.DateTime(dt_format=u'iso8601', description='Datetime ticket was used or none if it wasn\'t'),
+    'useWithUserID': fields.String(default=None, description='Unique identifier of Ticket - used in URL'),
+    'reissueRequestedDate': fields.DateTime(dt_format=u'iso8601', description='Datetime ticket was reissueRequestedDate'),
+    'reissuedTicketID': fields.String(default=None, description='Unique identifier of Ticket - used in URL'),
+    'disabled': fields.Boolean(default=False,description='Has this ticket been disabled'),
+    RepositoryObjBaseClass.getMetadataElementKey(): fields.Nested(RepositoryObjBaseClass.getMetadataModel(appObj, flaskrestplusfields=fields)),
+    # Extra below
+    'usableState': fields.String(default='DEFAULT', description='Usable state of this ticket')
+  })
+
+

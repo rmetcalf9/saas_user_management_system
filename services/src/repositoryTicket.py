@@ -4,9 +4,11 @@ import constants
 
 class TicketRepositoryClass(RepositoryBaseClass):
   objName = "Ticket"
+  appObj = None
 
-  def __init__(self):
+  def __init__(self, appObj):
     RepositoryBaseClass.__init__(self, "tickets", ticketObjFactoryFn)
+    self.appObj = appObj
 
 
   def issueTicket(self, ForeignKey, typeGUID, expiry, storeConnection):

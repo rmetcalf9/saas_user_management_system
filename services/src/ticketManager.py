@@ -9,15 +9,14 @@ from werkzeug.exceptions import BadRequest, NotFound
 import datetime
 import pytz
 
-
 class ticketManagerClass():
   repositoryTicketType = None
   repositoryTicket = None
   repositoryTicketTypeTickets = None
 
-  def __init__(self):
+  def __init__(self, appObj):
     self.repositoryTicketType = repositoryTicketType.TicketTypeRepositoryClass()
-    self.repositoryTicket = repositoryTicket.TicketRepositoryClass()
+    self.repositoryTicket = repositoryTicket.TicketRepositoryClass(appObj)
     self.repositoryTicketTypeTickets = repositoryTicketTypeTickets.TicketTypeTicketsRepositoryClass()
 
   def updateTicketType(self, tenantName, tickettypeID, ticketTypeDict, storeConnection, appObj):
@@ -56,9 +55,10 @@ class ticketManagerClass():
         return True
       if whereClauseText == "":
         return True
+      # I want to combine clauses using AND
       for curWhereClause in whereClauseText.split(" "):
-        if obj.containsQueryString(upperCaseQueryString=curWhereClause.upper()):
-          return True
+        if not obj.containsQueryString(upperCaseQueryString=curWhereClause.upper()):
+          return False
       return False
     return self.repositoryTicketType.getPaginatedResult(paginatedParamValues, outputFN, storeConnection, filterFn)
 

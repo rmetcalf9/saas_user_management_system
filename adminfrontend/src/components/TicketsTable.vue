@@ -81,6 +81,7 @@ export default {
       tableColumns: [
         { name: 'foreignKey', required: false, label: 'Foreign Key', align: 'left', field: 'foreignKey', sortable: false, filter: false },
         { name: 'id', required: true, label: 'ID', align: 'left', field: 'id', sortable: false, filter: false },
+        { name: 'usableState', required: true, label: 'Usable State', align: 'left', field: 'usableState', sortable: false, filter: false },
         { name: 'expiry', required: false, label: 'expiry', align: 'left', field: 'expiry', sortable: false, filter: false },
         { name: 'usedDate', required: false, label: 'usedDate', align: 'left', field: 'usedDate', sortable: false, filter: false },
         { name: 'useWithUserID', required: false, label: 'useWithUserID', align: 'left', field: 'useWithUserID', sortable: false, filter: false },

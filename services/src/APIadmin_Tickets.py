@@ -199,8 +199,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     '''Tickets'''
 
     @nsAdmin.doc('get Tickets')
-    @nsAdmin.marshal_with(appObj.getResultModel(apiSharedModels.getTicketModel(appObj)))
-    @nsAdmin.response(200, 'Success', model=appObj.getResultModel(apiSharedModels.getTicketModel(appObj)))
+    @nsAdmin.marshal_with(appObj.getResultModel(apiSharedModels.getTicketWithCaculatedFieldsModel(appObj)))
+    @nsAdmin.response(200, 'Success', model=appObj.getResultModel(apiSharedModels.getTicketWithCaculatedFieldsModel(appObj)))
     @nsAdmin.response(401, 'Unauthorized')
     @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
     @appObj.addStandardSortParams(nsAdmin)
@@ -210,7 +210,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
       paginatedParamValues = object_store_abstraction.sanatizePaginatedParamValues(getPaginatedParamValues(request))
       try:
         def outputFunction(itemObj):
-          return itemObj.getDict()
+          return itemObj.getDictWithCaculatedFields()
         def dbfn(storeConnection):
           return appObj.TicketManager.getTicketPaginatedResults(
             tenantName=tenantName,

@@ -80,7 +80,7 @@
     </q-expansion-item>
   </q-list>
   <TicketsTable
-    :defaultDisplayedColumns="['foreignKey', 'id']"
+    :defaultDisplayedColumns="['foreignKey', 'id', 'usableState']"
     persistantSettingsSlot="ticketsMain"
     :selectedTenantName="$route.params.selTenantNAME"
     :selectedTicketTypeID="$route.params.selTicketTypeID"

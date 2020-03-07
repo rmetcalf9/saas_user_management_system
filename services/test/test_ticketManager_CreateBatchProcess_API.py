@@ -105,7 +105,8 @@ class ticketManager_CreateBatchProcess(helper):
         "lastUpdateDateTime": testTime2.isoformat(),
         "objectKey": resultJSON["results"][0]["ticketGUID"],
         "objectVersion": "1"
-      }
+      },
+      "usableState": "US_USABLEIFTICKETTYPEISENABLED"
     }
     python_Testing_Utilities.assertObjectsEqual(
       unittestTestCaseClass=self,

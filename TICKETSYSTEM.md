@@ -67,8 +67,12 @@ I need a bulk method of creating tickets which will accept a list of foreign key
    disabled: Allow to disable single key without whole type. Not possible to re-enable - instead new key must be issued
  }
 
+Extra fields for normal get:
+UsableState: See respoitoryTIcketObj get usable state for values
+
+Extra fields in login API:
+??? TODO
 type: Extra field in query - this is all the fileds in ticket type model including metadata!
-isUsable: Extra field in query - returns isUsable information
 ```
 
 #### externalKey Uniqueness
@@ -100,7 +104,7 @@ NO Admin Delete operation - tickets are only deleted when the ticket type is del
  - LOGIN get ticket - retrieves ticket
    - extra field: type - embeded ticket type model
    - extra field: isUsable - checks and returns INVALID, EXPIRED or USABLE
-     - ticket type enabled
+     - ticket type enabled (Not done via ticketObj check)
      - ticket not disabled
      - no reissuedTicketID set (reissued tickets don't get disabled) 
      - ticket has not been used

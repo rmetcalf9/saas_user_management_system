@@ -2,6 +2,9 @@ import TestHelperSuperClass
 from ticketManager__Common_API import ticketManagerAPICommonUtilsClass
 import copy
 import python_Testing_Utilities
+import datetime
+import pytz
+from appObj import appObj
 
 class helper(ticketManagerAPICommonUtilsClass):
   def setupTenantsTicketTypesAndTickets(self, tenantData=TestHelperSuperClass.tenantWithNoAuthProviders):
@@ -74,6 +77,74 @@ class ticketManager_ViewTickets_API(helper):
 
     self.assertEqual(resultJSON[0]["id"], ticketToQueryBack["ticketGUID"])
     self.assertEqual(resultJSON[0]["foreignKey"], ticketToQueryBack["foreignKey"])
+    self.assertEqual(resultJSON[0]["usableState"], "US_USABLEIFTICKETTYPEISENABLED")
 
+  def test_QueryBackTicketAfterExpiry(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setup = self.setupTenantsTicketTypesAndTickets()
 
+    ticketToQueryBack = setup["tenants"][0]["ticketTypes"][1]["ticketCreationProcessResult"]["results"][4]
 
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC")) + datetime.timedelta(hours=int(1 + setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["issueDuration"]))
+    appObj.setTestingDateTime(testTime2)
+
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString=ticketToQueryBack["foreignKey"]
+    )
+    self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
+
+    self.assertEqual(resultJSON[0]["id"], ticketToQueryBack["ticketGUID"])
+    self.assertEqual(resultJSON[0]["foreignKey"], ticketToQueryBack["foreignKey"])
+    self.assertEqual(resultJSON[0]["usableState"], "US_EXPIRED")
+
+  def test_queryBackOnlyExpiredTickets(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    setup = self.setupTenantsTicketTypesAndTickets()
+
+    ticketTypeToQueryBack = setup["tenants"][0]["ticketTypes"][1]
+    ticketToQueryBack = ticketTypeToQueryBack["ticketCreationProcessResult"]["results"][4]
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC")) + datetime.timedelta(hours=int(1 + setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["issueDuration"]))
+    appObj.setTestingDateTime(testTime2)
+
+    # Add a ticket that is not expired
+    ticketCreationProcessResult = self.callBatchProcess(
+      tenantName=ticketTypeToQueryBack["createTicketTypeResult"]["tenantName"],
+      ticketTypeID=ticketTypeToQueryBack["createTicketTypeResult"]["id"],
+      foreignKeyList=["testTicket_NOTEXP"],
+      foreignKeyDupAction="Skip",
+      checkAndParseResponse=True
+    )
+    NonExpiredTicketForignKey = ticketCreationProcessResult["results"][0]["foreignKey"]
+    NonExpiredTicketID = ticketCreationProcessResult["results"][0]["ticketGUID"]
+
+    #6 tickets should have expired, one has not.
+    ## Query back the 6 expired
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString="US_EXPIRED"
+    )
+    self.assertEqual(len(resultJSON),6,msg="Wrong number of tickets returned")
+
+    #=Query back just the expired ticket
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString="US_USABLEIFTICKETTYPEISENABLED"
+    )
+    self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
+    self.assertEqual(resultJSON[0]["id"], NonExpiredTicketID)
+
+    #=Query back just the expired ticket by name and status
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString="US_USABLEIFTICKETTYPEISENABLED " + NonExpiredTicketForignKey
+    )
+    self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
+    self.assertEqual(resultJSON[0]["id"], NonExpiredTicketID)
