@@ -59,7 +59,7 @@ class ticketManagerClass():
       for curWhereClause in whereClauseText.split(" "):
         if not obj.containsQueryString(upperCaseQueryString=curWhereClause.upper()):
           return False
-      return False
+      return True
     return self.repositoryTicketType.getPaginatedResult(paginatedParamValues, outputFN, storeConnection, filterFn)
 
   def getTicketPaginatedResults(self, tenantName, tickettypeID, paginatedParamValues, outputFN, storeConnection):
@@ -81,8 +81,8 @@ class ticketManagerClass():
     return self.repositoryTicket.getPaginatedResult(paginatedParamValues, outputFN, storeConnection, filterFn)
 
   def deleteTicketType(self, tenantName, tickettypeID, ObjectVersionNumber, storeConnection):
-    ticketObj = self.getTicketType(tenantName, tickettypeID=tickettypeID, storeConnection=storeConnection)
-    if ticketObj is None:
+    ticketTypeObj = self.getTicketType(tenantName, tickettypeID=tickettypeID, storeConnection=storeConnection)
+    if ticketTypeObj is None:
       return {"response": "ERROR", "message": "Ticket type not found in this tenant"}, 404
     self.repositoryTicketType.remove(id=tickettypeID, storeConnection=storeConnection, objectVersion=ObjectVersionNumber)
     return {"response": "OK"}, 202
@@ -147,3 +147,34 @@ class ticketManagerClass():
         "skipped": skipped
       }
     }, 200
+
+  def _disableTicket(self, ticketTypeObj, ticketObj, disableInputData, storeConnection):
+    if ticketObj is None:
+      return {"ticketGUID": disableInputData["ticketGUID"], "response": "ERROR", "message": "Ticket not found"}
+    if ticketObj.getDict()["typeGUID"] != ticketTypeObj.getDict()["id"]:
+      return {"ticketGUID": disableInputData["ticketGUID"],"response": "ERROR", "message": "Ticket data mismatch"}
+    try:
+      ticketObj.disable()
+      ticketObj.save(storeConnection=storeConnection)
+    except Exception as e:
+      return {"ticketGUID": disableInputData["ticketGUID"], "response": "ERROR", "message": "Exception - " + str(e)}
+
+    return {"ticketGUID": disableInputData["ticketGUID"],"response": "OK", "message": "OK"}
+
+  def disableTicketBatch(self,
+    tenantName,
+    tickettypeID,
+    ticketsToDisable,
+    storeConnection
+  ):
+    ticketTypeObj = self.getTicketType(tenantName, tickettypeID=tickettypeID, storeConnection=storeConnection)
+    if ticketTypeObj is None:
+      return {"response": "ERROR", "message": "Ticket type not found in this tenant", "results": []}, 404
+
+    res = []
+    for curTicket in ticketsToDisable["tickets"]:
+      ticketObj = self.repositoryTicket.get(id=curTicket["ticketGUID"], storeConnection=storeConnection)
+      res.append(self._disableTicket(ticketTypeObj=ticketTypeObj, ticketObj=ticketObj, disableInputData=curTicket, storeConnection=storeConnection))
+
+    return { "response": "OK", "message": "OK", "results": res }, 200
+

@@ -35,3 +35,7 @@ class TicketObjClass(RepositoryObjBaseClass):
     resDict = self.getDict()
     resDict["usableState"] = self.getUsableState()
     return resDict
+
+  def disable(self):
+    # if it is already disabled then just ignore
+    self.getDict()["disabled"] = True

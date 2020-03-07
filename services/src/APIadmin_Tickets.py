@@ -222,3 +222,29 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         return appObj.objectStore.executeInsideConnectionContext(dbfn)
       except:
         raise InternalServerError
+
+  @nsAdmin.route('/<string:tenant>/tenants/<string:tenantName>/tickettypes/<string:tickettypeID>/tickets/disablebatch')
+  class tickettypeticketsDisableProcess(Resource):
+    '''Disable Ticket'''
+
+    @nsAdmin.doc('disable batch of tickets')
+    @nsAdmin.expect(apiSharedModels.getTicketDisableBatchProcessModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(200, 'Completed')
+    @appObj.flastRestPlusAPIObject.marshal_with(apiSharedModels.getTicketDisableBatchProcessResponseModel(appObj), code=200, description='Ticket disable process complete', skip_none=True)
+    @nsAdmin.response(403, 'Forbidden - User dosen\'t have required role')
+    def post(self, tenant, tenantName, tickettypeID):
+      '''Disable Ticket'''
+      APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
+      content = request.get_json()
+      requiredInPayload(content, ['tickets'])
+      def dbfn(storeConnection):
+        return appObj.TicketManager.disableTicketBatch(
+          tenantName=tenantName,
+          tickettypeID=tickettypeID,
+          ticketsToDisable=content,
+          storeConnection=storeConnection
+        )
+        #return ticketTypeObj.getDict(), 200
+      return appObj.objectStore.executeInsideTransaction(dbfn)
+

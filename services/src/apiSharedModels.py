@@ -188,4 +188,27 @@ def getTicketWithCaculatedFieldsModel(appObj):
     'usableState': fields.String(default='DEFAULT', description='Usable state of this ticket')
   })
 
+def getTicketDisableBatchProcessModel(appObj):
+  subModel = appObj.flastRestPlusAPIObject.model('TicketDisableBatchProcessSubModel', {
+    'ticketGUID': fields.String(default='DEFAULT', description='GUID for this ticket'),
+    'objectVersion': fields.String(default='DEFAULT', description='Object version'),
+  })
 
+  return appObj.flastRestPlusAPIObject.model('TicketDisableBatchProcessModel', {
+    'tickets': fields.List(fields.Nested(subModel)),
+  }
+)
+
+def getTicketDisableBatchProcessResponseModel(appObj):
+  subModel = appObj.flastRestPlusAPIObject.model('TicketDisableBatchProcessResponseSubModel', {
+    'ticketGUID': fields.String(default='DEFAULT', description='GUID for this ticket'),
+    'response': fields.String(default='FAIL', description='OK if the sub operation succeeded'),
+    'message': fields.String(default='None', description='Error message')
+  })
+
+  return appObj.flastRestPlusAPIObject.model('TicketDisableBatchProcessResponseModel', {
+    'response': fields.String(default='FAIL', description='OK if the operation succeeded'),
+    'message': fields.String(default='None', description='Error message'),
+    'results': fields.List(fields.Nested(subModel)),
+  }
+)

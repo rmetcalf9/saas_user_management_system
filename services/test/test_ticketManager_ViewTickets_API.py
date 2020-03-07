@@ -5,6 +5,7 @@ import python_Testing_Utilities
 import datetime
 import pytz
 from appObj import appObj
+import object_store_abstraction
 
 class helper(ticketManagerAPICommonUtilsClass):
   def setupTenantsTicketTypesAndTickets(self, tenantData=TestHelperSuperClass.tenantWithNoAuthProviders):
@@ -148,3 +149,81 @@ class ticketManager_ViewTickets_API(helper):
     )
     self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
     self.assertEqual(resultJSON[0]["id"], NonExpiredTicketID)
+
+  def test_queryBackSingleDisabledTicket(self):
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+
+    setup = self.setupTenantsTicketTypesAndTickets()
+
+    ticketTypeToQueryBack = setup["tenants"][0]["ticketTypes"][1]
+    ticketToDisable = ticketTypeToQueryBack["ticketCreationProcessResult"]["results"][4]
+    disabledTicketID = ticketToDisable["ticketGUID"]
+    disabledForeignKey = ticketToDisable["foreignKey"]
+
+    #We need to find the object version number for this ticket
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString=disabledForeignKey
+    )
+    self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
+    self.assertEqual(resultJSON[0]["id"], disabledTicketID)
+    self.assertEqual(resultJSON[0]["foreignKey"], disabledForeignKey)
+
+    testTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime2)
+
+    disabledObjectVersion = resultJSON[0][object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]
+
+    disableResultJSON = self.disableTicket(
+      tenantName=ticketTypeToQueryBack["createTicketTypeResult"]["tenantName"],
+      ticketTypeID=ticketTypeToQueryBack["createTicketTypeResult"]["id"],
+      ticketID=disabledTicketID,
+      objectVersionNumber=disabledObjectVersion,
+      checkAndParseResponse = True
+    )
+
+    expectedDisableResult = {
+      "response": "OK",
+      "message": "OK",
+      "results": [{
+        "ticketGUID": disabledTicketID,
+        "response": "OK",
+        "message": "OK"
+      }]
+    }
+    python_Testing_Utilities.assertObjectsEqual(
+      unittestTestCaseClass=self,
+      first=disableResultJSON,
+      second=expectedDisableResult,
+      msg="Disable basic result wrong",
+      ignoredRootKeys=["results"]
+    )
+    self.assertEqual(len(disableResultJSON["results"]),1)
+    python_Testing_Utilities.assertObjectsEqual(
+      unittestTestCaseClass=self,
+      first=disableResultJSON["results"][0],
+      second=expectedDisableResult["results"][0],
+      msg="Disable result wrong",
+      ignoredRootKeys=[]
+    )
+
+    #5 tickets should not be disabled, one has is.
+    ## Query back the 5 not disabled
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString="US_USABLEIFTICKETTYPEISENABLED"
+    )
+    self.assertEqual(len(resultJSON),5,msg="Wrong number of tickets returned")
+
+    #Query back the one disabled
+    resultJSON = self.queryForTickets(
+      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
+      queryString="US_DISABLED"
+    )
+    self.assertEqual(len(resultJSON),1,msg="Wrong number of tickets returned")
+    self.assertEqual(resultJSON[0]["id"], disabledTicketID)
+    self.assertEqual(resultJSON[0]["foreignKey"], disabledForeignKey)

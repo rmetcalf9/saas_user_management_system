@@ -6,17 +6,23 @@
     :data="tableData"
     :columns="tableColumns"
     @request="request"
-    row-key="Name"
+    row-key="id"
     :visible-columns="tablePersistSettings.visibleColumns"
     :filter="tablePersistSettings.filter"
     :pagination.sync="tablePersistSettings.serverPagination"
+    selection="multiple"
+    :selected.sync="tableSelected"
   >
+  <template slot="top-selection" slot-scope="props">
+    <q-btn color="negative" @click="disableSelectedTickets">Disable Selected Tickets</q-btn>
+  </template>
+
     <template slot="top-left" slot-scope="props">
       <q-btn
         color="primary"
         push
         @click="createBatchButton"
-      >Create Batch</q-btn>
+      >Create Batch of Tickets</q-btn>
     </template>
 
       <template slot="top-right" slot-scope="props">
@@ -89,10 +95,40 @@ export default {
         { name: 'reissuedTicketID', required: false, label: 'reissuedTicketID', align: 'left', field: 'reissuedTicketID', sortable: false, filter: false },
         { name: 'disabled', required: false, label: 'disabled', align: 'left', field: 'disabled', sortable: false, filter: false },
         { name: 'creationDateTime', required: false, label: 'Creation Date', align: 'left', field: 'metadata.creationDateTime', sortable: false, filter: false }
-      ]
+      ],
+      tableSelected: []
     }
   },
   methods: {
+    disableSelectedTickets () {
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', message: 'Disable Ticket Sucessful'})
+          TTT.refresh()
+        },
+        error: function (error) {
+          Notify.create({color: 'negative', message: 'Disable Ticket(s) failed - ' + callbackHelper.getErrorFromResponse(error)})
+        }
+      }
+      var arr = this.tableSelected.map(function (ite) {
+        return {
+          ticketGUID: ite.id,
+          objectVersion: ite.metadata.objectVersion
+        }
+      })
+      var postData = {
+        tickets: arr
+      }
+      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/tickets/disablebatch',
+        method: 'post',
+        postdata: postData,
+        callback: callback,
+        curPath: TTT.$router.history.current.path,
+        headers: {}
+      })
+    },
     createBatchButton () {
       this.$refs.ticketCreateBatchStartModal.launchDialog({
         ticketTypeData: this.ticketTypeData,
