@@ -78,7 +78,7 @@ export default {
       get () {
         return this.results
           .map(function (result) {
-            return result.foreignkey + ', http://TODOticketurl?ticket=' + result.ticketGUID
+            return result.foreignKey + ', http://TODOticketurl?ticket=' + result.ticketGUID
           })
           .reduce(function (acculmator, result) {
             return acculmator + result + '\n'

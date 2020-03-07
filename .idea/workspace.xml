@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_CreateBatchProcess_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_CreateBatchProcess_API.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_ViewTickets_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_ViewTickets_API.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminfrontend/src/components/Modals/ticketCreateBatchResultsModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/components/Modals/ticketCreateBatchResultsModal.vue" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -188,7 +181,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583528310744</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Bug fix to querying tickets">
+      <created>1583582865860</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1583582865860</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -234,7 +234,8 @@
     <MESSAGE value="Able to create a single valid ticket" />
     <MESSAGE value="Added ticket type query test" />
     <MESSAGE value="There is a use case for ticket type with no roles" />
-    <option name="LAST_COMMIT_MESSAGE" value="There is a use case for ticket type with no roles" />
+    <MESSAGE value="Bug fix to querying tickets" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bug fix to querying tickets" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
