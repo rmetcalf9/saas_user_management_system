@@ -35,8 +35,10 @@
             <q-icon name="search" />
           </template>
         </q-input>
-
       </template>
+      <q-td  slot="body-cell-creationDateTime" slot-scope="props" :props="props">
+        {{ metadata.creationDateTime }}
+      </q-td>
   </q-table>
   <ticketCreateBatchStartModal
     ref="ticketCreateBatchStartModal"
@@ -77,17 +79,15 @@ export default {
       tableLoading: false,
       tableData: [],
       tableColumns: [
-        { name: 'Name', required: true, label: 'Ticket Type Name', align: 'left', field: 'ticketTypeName', sortable: false, filter: false }
-        // { name: 'Description', required: false, label: 'Description', align: 'left', field: 'description', sortable: false, filter: false },
-        // { name: 'Enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: false },
-        // { name: 'AllowUserCreation', required: false, label: 'AllowUserCreation', align: 'left', field: 'allowUserCreation', sortable: false, filter: false },
-        // { name: 'Issue Duration', required: false, label: 'Issue Duration', align: 'left', field: 'issueDuration', sortable: false, filter: false },
-        // { name: 'Post Use URL', required: false, label: 'Post Use URL', align: 'left', field: 'postUseURL', sortable: false, filter: false },
-        // { name: 'Post Use Invalid URL', required: false, label: 'Post Use Invalid URL', align: 'left', field: 'postInvalidURL', sortable: false, filter: false },
-        // { name: 'WelcomeAgree', required: false, label: 'Welcome Agreement', align: 'left', field: 'welcomeMessage.agreementRequired', sortable: false, filter: false },
-        // { name: 'WelcomeTitle', required: false, label: 'Welcome Title', align: 'left', field: 'welcomeMessage.title', sortable: false, filter: false },
-        // { name: 'WelcomeBody', required: false, label: 'Welcome Body', align: 'left', field: 'welcomeMessage.body', sortable: false, filter: false },
-        // { name: 'WelcomeOkText', required: false, label: 'Welcome Ok Text', align: 'left', field: 'welcomeMessage.okButtonText', sortable: false, filter: false }
+        { name: 'foreignKey', required: false, label: 'Foreign Key', align: 'left', field: 'foreignKey', sortable: false, filter: false },
+        { name: 'id', required: true, label: 'ID', align: 'left', field: 'id', sortable: false, filter: false },
+        { name: 'expiry', required: false, label: 'expiry', align: 'left', field: 'expiry', sortable: false, filter: false },
+        { name: 'usedDate', required: false, label: 'usedDate', align: 'left', field: 'usedDate', sortable: false, filter: false },
+        { name: 'useWithUserID', required: false, label: 'useWithUserID', align: 'left', field: 'useWithUserID', sortable: false, filter: false },
+        { name: 'reissueRequestedDate', required: false, label: 'reissueRequestedDate', align: 'left', field: 'reissueRequestedDate', sortable: false, filter: false },
+        { name: 'reissuedTicketID', required: false, label: 'reissuedTicketID', align: 'left', field: 'reissuedTicketID', sortable: false, filter: false },
+        { name: 'disabled', required: false, label: 'disabled', align: 'left', field: 'disabled', sortable: false, filter: false },
+        { name: 'creationDateTime', required: false, label: 'Creation Date', align: 'left', field: 'metadata.creationDateTime', sortable: false, filter: false }
       ]
     }
   },
