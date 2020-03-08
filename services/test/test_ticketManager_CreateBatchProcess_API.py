@@ -39,7 +39,7 @@ class helper(ticketManagerAPICommonUtilsClass):
       self.assertNotEqual(curResult["ticketGUID"], None, msg = "ticketGUID missing - " + msg )
       #Other result value is "ticketGUID" which is ignored because it could be anything
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_CreateBatchProcess(helper):
   def test_InvalidForeignKeyAction(self):
     testTicketTypeName = "TestType001"

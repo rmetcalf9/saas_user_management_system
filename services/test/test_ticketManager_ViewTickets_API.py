@@ -40,7 +40,7 @@ class helper(ticketManagerAPICommonUtilsClass):
       "tenants": tenants
     }
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_ViewTickets_API(helper):
   def test_QueryBackAllTicketsOfType(self):
     setup = self.setupTenantsTicketTypesAndTickets()

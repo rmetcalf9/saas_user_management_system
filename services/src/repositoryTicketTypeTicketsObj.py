@@ -12,7 +12,8 @@ class TicketTypeTicketsObjClass(RepositoryObjBaseClass):
   def getNewTicketDict(cls, ticketTypeID):
     return {
       "id": ticketTypeID,
-      "fklu": {}
+      "fklu": {}, #foreign key lookup
+      "at": [] #All ticket guids for this ticketype
     }
 
   def getTicketIDFromForeignKey(self, foreignKey):
@@ -22,7 +23,11 @@ class TicketTypeTicketsObjClass(RepositoryObjBaseClass):
 
   def registerTicketIssuance(self, ForeignKey, ticketGUID):
     self.obj["fklu"][ForeignKey] = ticketGUID
+    self.obj["at"].append(ticketGUID)
 
-  def registerTicketReIssuance(self, ForeignKey, ticketGUID):
-    self.obj["fklu"][ForeignKey] = ticketGUID
+  def registerTicketReIssuance(self, ForeignKey, newTicketGUID):
+    self.obj["fklu"][ForeignKey] = newTicketGUID
+    self.obj["at"].append(newTicketGUID)
 
+  def getAllTicketGUIDSForThisType(self):
+    return self.obj["at"]

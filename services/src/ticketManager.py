@@ -84,6 +84,20 @@ class ticketManagerClass():
     ticketTypeObj = self.getTicketType(tenantName, tickettypeID=tickettypeID, storeConnection=storeConnection)
     if ticketTypeObj is None:
       return {"response": "ERROR", "message": "Ticket type not found in this tenant"}, 404
+    #Early Object version check to stop any actions being taken if object version is wrong
+    if str(ObjectVersionNumber) != str(ticketTypeObj.getDict()[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]):
+      raise object_store_abstraction.WrongObjectVersionException
+
+    ticketTypeTicketsObj = self.repositoryTicketTypeTickets.get(id=tickettypeID, storeConnection=storeConnection)
+    print("*************** ticketTypeTicketsObj", ticketTypeTicketsObj, tickettypeID)
+    if ticketTypeTicketsObj is not None:
+      #There were tickets for this ticket type
+
+      for ticketGUID in ticketTypeTicketsObj.getAllTicketGUIDSForThisType():
+        self.repositoryTicket.remove(id=ticketGUID, storeConnection=storeConnection, objectVersion=None)
+      self.repositoryTicketTypeTickets.remove(id=tickettypeID, storeConnection=storeConnection, objectVersion=ticketTypeTicketsObj.getDict()[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"])
+
+
     self.repositoryTicketType.remove(id=tickettypeID, storeConnection=storeConnection, objectVersion=ObjectVersionNumber)
     return {"response": "OK"}, 202
 
@@ -133,7 +147,7 @@ class ticketManagerClass():
             newexpiry=appObj.getCurDateTime() + datetime.timedelta(hours=int(ticketTypeObj.getDict()["issueDuration"])),
             storeConnection=storeConnection
           )
-          ticketTypeTicketsObj.registerTicketReIssuance(ForeignKey=curForeignKey, ticketGUID=ticketGUID)
+          ticketTypeTicketsObj.registerTicketReIssuance(ForeignKey=curForeignKey, newTicketGUID=ticketGUID)
           results.append({"foreignKey": curForeignKey, "ticketGUID": ticketGUID})
           reissued += 1
 
