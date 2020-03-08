@@ -15,12 +15,12 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
       return appObj.TicketManager.upsertTicketType(tenantName=tenantName, ticketTypeDict=sampleTypeObj, objectVersion=None, storeConnection=storeConnection, appObj=appObj)
     return appObj.objectStore.executeInsideTransaction(fn)
 
-  def deleteTicketType(self, tenantName, ticketTypeObj):
+  def deleteTicketType(self, tenantName, ticketTypeDict):
     def fn(storeConnection):
       return appObj.TicketManager.deleteTicketType(
         tenantName=tenantName,
-        tickettypeID=ticketTypeObj.getDict()["id"],
-        ObjectVersionNumber=ticketTypeObj.getDict()[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"],
+        tickettypeID=ticketTypeDict["id"],
+        ObjectVersionNumber=ticketTypeDict[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"],
         storeConnection=storeConnection
       )
     return appObj.objectStore.executeInsideTransaction(fn)
@@ -47,6 +47,16 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
       return appObj.TicketManager.repositoryTicket.get(id=ticketID, storeConnection=storeConnection)
     return appObj.objectStore.executeInsideTransaction(fn)
 
+  def getTicketType(self, tenantName, tickettypeID):
+    def fn(storeConnection):
+      return appObj.TicketManager.getTicketType(
+        tenantName=tenantName,
+        tickettypeID=tickettypeID,
+        storeConnection=storeConnection
+      )
+    return appObj.objectStore.executeInsideTransaction(fn)
+
+
 @TestHelperSuperClass.wipd
 class ticketManagerTests(helper):
   def test_createTicketTypeWithEmptyDictThowsValidationException(self):
@@ -70,7 +80,7 @@ class ticketManagerTests(helper):
     self.createSomeTickets(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], tickettypeID=ticketTypeID)
     self.assertNotEqual(self.getTicketTypeTicketObject(ticketTypeID=ticketTypeID),None, msg="No tickettypeticket object created")
 
-    deleteResponse = self.deleteTicketType(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], ticketTypeObj=ticketTypeObj)
+    deleteResponse = self.deleteTicketType(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], ticketTypeDict=ticketTypeObj.getDict())
     self.assertEqual(deleteResponse[0]["response"],"OK", msg="Delete failed")
     ticketTypeTicketObj = self.getTicketTypeTicketObject(ticketTypeID=ticketTypeID)
     self.assertEqual(ticketTypeTicketObj, None, msg="TicketTypeTicket object was not cleanned up")
@@ -80,7 +90,7 @@ class ticketManagerTests(helper):
     ticketTypeID = ticketTypeObj.getDict()["id"]
     createTicketReturn = self.createSomeTickets(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], tickettypeID=ticketTypeID)
 
-    deleteResponse = self.deleteTicketType(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], ticketTypeObj=ticketTypeObj)
+    deleteResponse = self.deleteTicketType(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], ticketTypeDict=ticketTypeObj.getDict())
     self.assertEqual(deleteResponse[0]["response"],"OK", msg="Delete failed")
 
     for curResult in createTicketReturn[0]["results"]:
@@ -97,10 +107,12 @@ class ticketManagerTests(helper):
     self.assertEqual(reissueTicketReturn[1], 200)
     self.assertEqual(reissueTicketReturn[0]["stats"]["reissued"], 6)
 
-    ticketTypeObj2 = self.createTicketTypeFromDict(ticketManagerTestCommon.validTicketTypeDict)
+    # need to get a new object because object version will update
+    ticketTypeGetResponse = self.getTicketType(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], tickettypeID=ticketTypeID)
+    print("ticketTypeGetResponse", ticketTypeGetResponse.getDict())
     deleteResponse = self.deleteTicketType(
       tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"],
-      ticketTypeObj=ticketTypeObj2
+      ticketTypeDict=ticketTypeGetResponse.getDict()
     )
     self.assertEqual(deleteResponse[0]["response"],"OK", msg="Delete failed")
 

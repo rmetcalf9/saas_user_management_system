@@ -89,7 +89,6 @@ class ticketManagerClass():
       raise object_store_abstraction.WrongObjectVersionException
 
     ticketTypeTicketsObj = self.repositoryTicketTypeTickets.get(id=tickettypeID, storeConnection=storeConnection)
-    print("*************** ticketTypeTicketsObj", ticketTypeTicketsObj, tickettypeID)
     if ticketTypeTicketsObj is not None:
       #There were tickets for this ticket type
 
