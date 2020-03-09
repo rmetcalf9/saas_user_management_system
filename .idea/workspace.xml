@@ -2,9 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/src/APIlogin_Tickets.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TICKETSYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/TICKETSYSTEM.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_API.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_ViewTickets_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_ViewTickets_API.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -204,7 +214,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583662141282</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Completed tickettype cleanup">
+      <created>1583670004794</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1583670004794</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -253,7 +270,8 @@
     <MESSAGE value="Bug fix to querying tickets" />
     <MESSAGE value="Adding query by status" />
     <MESSAGE value="Adding ticket clean up tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding ticket clean up tests" />
+    <MESSAGE value="Completed tickettype cleanup" />
+    <option name="LAST_COMMIT_MESSAGE" value="Completed tickettype cleanup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

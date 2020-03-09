@@ -57,7 +57,7 @@ class helper(TestHelperSuperClass.testHelperAPIClient):
     return appObj.objectStore.executeInsideTransaction(fn)
 
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManagerTests(helper):
   def test_createTicketTypeWithEmptyDictThowsValidationException(self):
     with self.assertRaises(Exception) as context:
@@ -109,7 +109,7 @@ class ticketManagerTests(helper):
 
     # need to get a new object because object version will update
     ticketTypeGetResponse = self.getTicketType(tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"], tickettypeID=ticketTypeID)
-    print("ticketTypeGetResponse", ticketTypeGetResponse.getDict())
+
     deleteResponse = self.deleteTicketType(
       tenantName=ticketManagerTestCommon.validTicketTypeDict["tenantName"],
       ticketTypeDict=ticketTypeGetResponse.getDict()

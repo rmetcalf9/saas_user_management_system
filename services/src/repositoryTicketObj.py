@@ -39,3 +39,13 @@ class TicketObjClass(RepositoryObjBaseClass):
   def disable(self):
     # if it is already disabled then just ignore
     self.getDict()["disabled"] = True
+
+  def getUsable(self, ticketTypeObj):
+    if not ticketTypeObj.isEnabled():
+      return "INVALID"
+    usState = self.getUsableState()
+    if usState == "US_EXPIRED":
+      return "EXPIRED"
+    elif usState == "US_USABLEIFTICKETTYPEISENABLED":
+      return "USABLE"
+    return "INVALID"

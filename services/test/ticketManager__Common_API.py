@@ -86,5 +86,47 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
     self.assertEqual(result.status_code, 200, msg="Err: " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
+  def setupTenantsTicketTypesAndTickets(self, tenantData=TestHelperSuperClass.tenantWithNoAuthProviders):
+    tenants = []
+    for tenantIdx in range(1,10):
+      tenantData2Use = copy.deepcopy(tenantData)
+      tenantData2Use["Name"] = "TestTenant_" + "{:03d}".format(tenantIdx)
+      tenantJSON = self.createTenantForTesting(tenantData2Use)
 
+      ticketTypes = []
+      for ticketTypesIdx in range(1, 3):
+        createTicketTypeResult = self.createTicketType(tenantJSON["Name"], overrideName="TestTicketType_" + "{:03d}".format(ticketTypesIdx))
+
+        ticketCreationProcessResult = self.callBatchProcess(
+          tenantName=tenantJSON["Name"],
+          ticketTypeID=createTicketTypeResult["id"],
+          foreignKeyList=["testTicket_001", "testTicket_002", "testTicket_003", "testTicket_004", "testTicket_005", "testTicket_006"],
+          foreignKeyDupAction="Skip",
+          checkAndParseResponse=True
+        )
+        ticketTypes.append({
+          "createTicketTypeResult": createTicketTypeResult,
+          "ticketCreationProcessResult": ticketCreationProcessResult
+        })
+
+      tenants.append({
+        "tenantJSON": tenantJSON,
+        "ticketTypes": ticketTypes
+      })
+
+    return {
+      "tenants": tenants
+    }
+
+  def updateTicketType(self, ticketTypeID, ticketTypeTenant, newDict, checkAndParseResponse=True):
+    result = self.testClient.post(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + ticketTypeTenant + '/tickettypes/' + ticketTypeID,
+      headers={constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(newDict),
+      content_type='application/json'
+    )
+    if not checkAndParseResponse:
+      return result
+    self.assertEqual(result.status_code, 202, msg="Err: " + result.get_data(as_text=True))
+    return json.loads(result.get_data(as_text=True))
 

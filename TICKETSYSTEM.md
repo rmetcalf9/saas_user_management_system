@@ -102,7 +102,7 @@ There can only be one active ticket for each External key for each Ticket Type.
 NO Admin Delete operation - tickets are only deleted when the ticket type is deleted. They can be deactivated instead.
 
  - LOGIN get ticket - retrieves ticket
-   - extra field: type - embeded ticket type model
+   - extra field: ticketType - embeded ticket type model
    - extra field: isUsable - checks and returns INVALID, EXPIRED or USABLE
      - ticket type enabled (Not done via ticketObj check)
      - ticket not disabled

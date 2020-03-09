@@ -23,3 +23,6 @@ class TicketTypeObjClass(RepositoryObjBaseClass):
     if self.obj["description"].upper().find(upperCaseQueryString) != -1:
       return True
     return False
+
+  def isEnabled(self):
+    return self.getDict()["enabled"]

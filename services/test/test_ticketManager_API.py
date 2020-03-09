@@ -11,18 +11,6 @@ from appObj import appObj
 from ticketManager__Common_API import ticketManagerAPICommonUtilsClass
 
 class helper(ticketManagerAPICommonUtilsClass):
-  def updateTicketType(self, tenantTypeID, tenantTypesTenant, newDict, checkAndParseResponse=True):
-    result = self.testClient.post(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes/' + tenantTypeID,
-      headers={constants.jwtHeaderName: self.getNormalJWTToken()},
-      data=json.dumps(newDict),
-      content_type='application/json'
-    )
-    if not checkAndParseResponse:
-      return result
-    self.assertEqual(result.status_code, 202, msg="Err: " + result.get_data(as_text=True))
-    return json.loads(result.get_data(as_text=True))
-
   def getTicketType(self, tenantTypesTenant, ticketTypeID, checkAndParseResponse=True):
     result2 = self.testClient.get(
       self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantTypesTenant + '/tickettypes/' + ticketTypeID,
@@ -265,7 +253,7 @@ class ticketManager_helpers(helper):
     appObj.setTestingDateTime(testTime2)
     changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
-    resultJSON = self.updateTicketType(tenantTypeID=setupData["okTicketResultJSON"][1]["id"], tenantTypesTenant=constants.masterTenantName, newDict=changed)
+    resultJSON = self.updateTicketType(ticketTypeID=setupData["okTicketResultJSON"][1]["id"], ticketTypeTenant=constants.masterTenantName, newDict=changed)
 
     expectedResult = copy.deepcopy(changed)
     expectedResult["id"] = resultJSON["id"]
@@ -298,8 +286,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     changed["id"] = "WrongIDVal"
     resultRAW = self.updateTicketType(
-      tenantTypeID=changed["id"],
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=changed["id"],
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -316,8 +304,8 @@ class ticketManager_helpers(helper):
     changed = copy.deepcopy(setupData["okTicketResultJSON"][1])
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     resultRAW = self.updateTicketType(
-      tenantTypeID="someOtherID",
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID="someOtherID",
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -334,8 +322,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     changed["id"] = "WrongIDVal"
     resultRAW = self.updateTicketType(
-      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -352,8 +340,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     changed["tenantName"] = setupData["tenantJSON"]["Name"]
     resultRAW = self.updateTicketType(
-      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -369,8 +357,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     changed["tenantName"] = setupData["tenantJSON"]["Name"]
     resultRAW = self.updateTicketType(
-      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
-      tenantTypesTenant=setupData["tenantJSON"]["Name"],
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      ticketTypeTenant=setupData["tenantJSON"]["Name"],
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -388,8 +376,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     changed["roles"].append(constants.DefaultHasAccountRole)
     resultRAW = self.updateTicketType(
-      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -406,8 +394,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     changed[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"] = 999
     resultRAW = self.updateTicketType(
-      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )
@@ -424,8 +412,8 @@ class ticketManager_helpers(helper):
     changed["ticketTypeName"] = "okTicketResultJSONUPDATED"
     del changed[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]
     resultRAW = self.updateTicketType(
-      tenantTypeID=setupData["okTicketResultJSON"][1]["id"],
-      tenantTypesTenant=constants.masterTenantName,
+      ticketTypeID=setupData["okTicketResultJSON"][1]["id"],
+      ticketTypeTenant=constants.masterTenantName,
       newDict=changed,
       checkAndParseResponse=False
     )

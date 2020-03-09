@@ -191,3 +191,25 @@ class ticketManagerClass():
 
     return { "response": "OK", "message": "OK", "results": res }, 200
 
+  def getTicketAndTypeDict(self,
+    tenantName,
+    ticketGUID,
+    storeConnection
+  ):
+    ticketObj = self.repositoryTicket.get(id=ticketGUID, storeConnection=storeConnection)
+    if ticketObj is None:
+      return NotFound, 404
+    ticketTypeObj = self.getTicketType(tenantName=tenantName, tickettypeID=ticketObj.getDict()["typeGUID"], storeConnection=storeConnection)
+    if ticketTypeObj is None:
+      return NotFound, 404
+    #tenant check not required as it is in getTicketType
+    #if retObj.obj["tenantName"] != tenantName:
+    #  return None
+
+    return {
+      "ticketType": ticketTypeObj.getDict(),
+      "isUsable": ticketObj.getUsable(ticketTypeObj=ticketTypeObj),
+      "expiry": ticketObj.getDict()["expiry"]
+    }
+
+

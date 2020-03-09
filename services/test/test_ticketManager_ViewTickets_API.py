@@ -8,44 +8,14 @@ from appObj import appObj
 import object_store_abstraction
 
 class helper(ticketManagerAPICommonUtilsClass):
-  def setupTenantsTicketTypesAndTickets(self, tenantData=TestHelperSuperClass.tenantWithNoAuthProviders):
-    tenants = []
-    for tenantIdx in range(1,10):
-      tenantData2Use = copy.deepcopy(tenantData)
-      tenantData2Use["Name"] = "TestTenant_" + "{:03d}".format(tenantIdx)
-      tenantJSON = self.createTenantForTesting(tenantData2Use)
-
-      ticketTypes = []
-      for ticketTypesIdx in range(1, 3):
-        createTicketTypeResult = self.createTicketType(tenantJSON["Name"], overrideName="TestTicketType_" + "{:03d}".format(ticketTypesIdx))
-
-        ticketCreationProcessResult = self.callBatchProcess(
-          tenantName=tenantJSON["Name"],
-          ticketTypeID=createTicketTypeResult["id"],
-          foreignKeyList=["testTicket_001", "testTicket_002", "testTicket_003", "testTicket_004", "testTicket_005", "testTicket_006"],
-          foreignKeyDupAction="Skip",
-          checkAndParseResponse=True
-        )
-        ticketTypes.append({
-          "createTicketTypeResult": createTicketTypeResult,
-          "ticketCreationProcessResult": ticketCreationProcessResult
-        })
-
-      tenants.append({
-        "tanantJSON": tenantJSON,
-        "ticketTypes": ticketTypes
-      })
-
-    return {
-      "tenants": tenants
-    }
+  pass
 
 #@TestHelperSuperClass.wipd
 class ticketManager_ViewTickets_API(helper):
   def test_QueryBackAllTicketsOfType(self):
     setup = self.setupTenantsTicketTypesAndTickets()
 
-    resultJSON = self.queryForTickets(tenantName=setup["tenants"][0]["tanantJSON"]["Name"], ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"], queryString=None)
+    resultJSON = self.queryForTickets(tenantName=setup["tenants"][0]["tenantJSON"]["Name"], ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"], queryString=None)
     self.assertEqual(len(resultJSON),6,msg="Wrong number of tickets returned")
 
     issuedTicketIDS = []
@@ -70,7 +40,7 @@ class ticketManager_ViewTickets_API(helper):
     ticketToQueryBack = setup["tenants"][0]["ticketTypes"][1]["ticketCreationProcessResult"]["results"][4]
 
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString=ticketToQueryBack["foreignKey"]
     )
@@ -91,7 +61,7 @@ class ticketManager_ViewTickets_API(helper):
     appObj.setTestingDateTime(testTime2)
 
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString=ticketToQueryBack["foreignKey"]
     )
@@ -126,7 +96,7 @@ class ticketManager_ViewTickets_API(helper):
     #6 tickets should have expired, one has not.
     ## Query back the 6 expired
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString="US_EXPIRED"
     )
@@ -134,7 +104,7 @@ class ticketManager_ViewTickets_API(helper):
 
     #=Query back just the expired ticket
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString="US_USABLEIFTICKETTYPEISENABLED"
     )
@@ -143,7 +113,7 @@ class ticketManager_ViewTickets_API(helper):
 
     #=Query back just the expired ticket by name and status
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString="US_USABLEIFTICKETTYPEISENABLED " + NonExpiredTicketForignKey
     )
@@ -163,7 +133,7 @@ class ticketManager_ViewTickets_API(helper):
 
     #We need to find the object version number for this ticket
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString=disabledForeignKey
     )
@@ -212,7 +182,7 @@ class ticketManager_ViewTickets_API(helper):
     #5 tickets should not be disabled, one has is.
     ## Query back the 5 not disabled
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString="US_USABLEIFTICKETTYPEISENABLED"
     )
@@ -220,7 +190,7 @@ class ticketManager_ViewTickets_API(helper):
 
     #Query back the one disabled
     resultJSON = self.queryForTickets(
-      tenantName=setup["tenants"][0]["tanantJSON"]["Name"],
+      tenantName=setup["tenants"][0]["tenantJSON"]["Name"],
       ticketTypeID=setup["tenants"][0]["ticketTypes"][1]["createTicketTypeResult"]["id"],
       queryString="US_DISABLED"
     )
