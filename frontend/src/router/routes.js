@@ -92,6 +92,11 @@ const routes = [
     path: '/:tenantName/SecuritySettings',
     component: () => import('pages/SecuritySettings.vue'),
     beforeEnter: ensurePassedTenantIsLoaded
+  },
+  {
+    path: '/:tenantName/Ticket/:ticketGUID',
+    component: () => import('pages/Ticket.vue'),
+    beforeEnter: ensurePassedTenantIsLoaded
   }
 ]
 
