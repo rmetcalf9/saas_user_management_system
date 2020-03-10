@@ -14,7 +14,7 @@ class helper(ticketManagerAPICommonUtilsClass):
     response = self.updateTicketType(ticketTypeID=newDict["id"], ticketTypeTenant=newDict["tenantName"], newDict=newDict, checkAndParseResponse=True)
     return response
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_ViewTickets_API(helper):
   def test_GetTicket(self):
     testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
