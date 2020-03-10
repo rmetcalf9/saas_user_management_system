@@ -80,7 +80,7 @@ export default {
         var TTT = this
         return this.results
           .map(function (result) {
-            return result.foreignKey + ', ' + adminfrontendfns.getURLforTicketGUID(TTT.$store, result.ticketGUID)
+            return result.foreignKey + ', ' + adminfrontendfns.getURLforTicketGUID(TTT.$store, result.ticketGUID, TTT.tenantName)
           })
           .reduce(function (acculmator, result) {
             return acculmator + result + '\n'

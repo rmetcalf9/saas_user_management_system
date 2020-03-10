@@ -1,6 +1,6 @@
 
-function getURLforTicketGUID (stores, ticketGUID) {
-  return stores.state.globalDataStore.serverInfo.Server.APIAPP_FRONTENDURL + '/#/usersystem/Ticket/' + ticketGUID
+function getURLforTicketGUID (stores, ticketGUID, tenantName) {
+  return stores.state.globalDataStore.serverInfo.Server.APIAPP_FRONTENDURL + '/#/' + tenantName + '/Ticket/' + ticketGUID
 }
 
 export default {

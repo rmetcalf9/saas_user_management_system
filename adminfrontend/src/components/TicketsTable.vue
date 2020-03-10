@@ -106,7 +106,7 @@ export default {
   },
   methods: {
     getURLforTicketGUID (ticketGUID) {
-      return adminfrontendfns.getURLforTicketGUID(this.$store, ticketGUID)
+      return adminfrontendfns.getURLforTicketGUID(this.$store, ticketGUID, this.selectedTenantName)
     },
     disableSelectedTickets () {
       var TTT = this
