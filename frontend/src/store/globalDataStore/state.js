@@ -8,5 +8,6 @@ export default {
   selectedAuthProvGUID: null,
   usersystemReturnaddress: null,
   usersystemReturnaddressInternal: null,
-  messagePendingDisplay: null
+  messagePendingDisplay: null,
+  ticketInUse: null
 }

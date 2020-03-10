@@ -53,7 +53,9 @@ export default {
   },
   methods: {
     pressOK () {
-      Notify.create({color: 'negative', message: 'Not implemented'})
+      this.$store.commit('globalDataStore/updateUsersystemReturnaddress', this.ticket.ticketType.postUseURL)
+      this.$store.commit('globalDataStore/STORETICKETINUSE', this.ticket)
+      this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
     }
   },
   computed: {

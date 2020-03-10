@@ -44,3 +44,7 @@ export function RECORD_REFRESH_STORED_RESPONSE (state, callback) {
 export function REFRESH_STORED_RESPONSE_PROCESS_COMPLETE (state) {
   state.refeshTokenInfoStoredResponses = []
 }
+
+export function STORETICKETINUSE (state, ticketInUse) {
+  state.ticketInUse = ticketInUse
+}
