@@ -12,6 +12,9 @@ export const updateTenantName = (state, tenantName) => {
 }
 export const updateServerInfo = (state, serverInfo) => {
   state.serverInfo = serverInfo
+  if (typeof (state.serverInfo.Server.APIAPP_FRONTENDURL) === 'undefined') {
+    state.serverInfo.Server.APIAPP_FRONTENDURL = 'http://localhost:8081/'
+  }
 }
 
 export function SET_PAGE_TITLE (state, newTitle) {

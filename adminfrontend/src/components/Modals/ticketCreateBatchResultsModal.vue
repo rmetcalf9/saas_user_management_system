@@ -36,6 +36,7 @@
 
 <script>
 // import { Notify } from 'quasar'
+import adminfrontendfns from '../../adminfrontendfns.js'
 
 export default {
   name: 'TicketCreateBatchResults',
@@ -76,9 +77,10 @@ export default {
   computed: {
     resultsDisplay: {
       get () {
+        var TTT = this
         return this.results
           .map(function (result) {
-            return result.foreignKey + ', http://TODOticketurl?ticket=' + result.ticketGUID
+            return result.foreignKey + ', ' + adminfrontendfns.getURLforTicketGUID(TTT.$store, result.ticketGUID)
           })
           .reduce(function (acculmator, result) {
             return acculmator + result + '\n'

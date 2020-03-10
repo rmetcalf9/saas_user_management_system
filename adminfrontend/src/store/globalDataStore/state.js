@@ -11,7 +11,8 @@ export default {
   serverInfo: {
     Server: {
       Version: 'NotRead',
-      APIAPP_APIDOCSURL: '_'
+      APIAPP_APIDOCSURL: '_',
+      APIAPP_FRONTENDURL: 'http://localhost:8081/'
     }
   }
 }

@@ -45,6 +45,9 @@
       <q-td  slot="body-cell-creationDateTime" slot-scope="props" :props="props">
         {{ metadata.creationDateTime }}
       </q-td>
+      <q-td  slot="body-cell-url" slot-scope="props" :props="props">
+        <a :href="getURLforTicketGUID(props.row.id)">{{ getURLforTicketGUID(props.row.id) }}</a>
+      </q-td>
   </q-table>
   <ticketCreateBatchStartModal
     ref="ticketCreateBatchStartModal"
@@ -64,6 +67,7 @@ import selectColumns from '../components/selectColumns'
 
 import ticketCreateBatchStartModal from './Modals/ticketCreateBatchStartModal.vue'
 import ticketCreateBatchResultsModal from './Modals/ticketCreateBatchResultsModal.vue'
+import adminfrontendfns from '../adminfrontendfns.js'
 
 export default {
   name: 'TicketTypesTable',
@@ -94,12 +98,16 @@ export default {
         { name: 'reissueRequestedDate', required: false, label: 'reissueRequestedDate', align: 'left', field: 'reissueRequestedDate', sortable: false, filter: false },
         { name: 'reissuedTicketID', required: false, label: 'reissuedTicketID', align: 'left', field: 'reissuedTicketID', sortable: false, filter: false },
         { name: 'disabled', required: false, label: 'disabled', align: 'left', field: 'disabled', sortable: false, filter: false },
-        { name: 'creationDateTime', required: false, label: 'Creation Date', align: 'left', field: 'metadata.creationDateTime', sortable: false, filter: false }
+        { name: 'creationDateTime', required: false, label: 'Creation Date', align: 'left', field: 'metadata.creationDateTime', sortable: false, filter: false },
+        { name: 'url', required: false, label: 'URL', align: 'left', field: 'id', sortable: false, filter: false }
       ],
       tableSelected: []
     }
   },
   methods: {
+    getURLforTicketGUID (ticketGUID) {
+      return adminfrontendfns.getURLforTicketGUID(this.$store, ticketGUID)
+    },
     disableSelectedTickets () {
       var TTT = this
       var callback = {
