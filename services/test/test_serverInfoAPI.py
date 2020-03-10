@@ -6,11 +6,12 @@ import pytz
 import datetime
 
 serverInfo = {
-      'Server': {
-        'Version': env['APIAPP_VERSION'],
-        "APIAPP_APIDOCSURL": "_",
-        "APIAPP_FRONTENDURL": env["APIAPP_FRONTENDURL"]
-      }
+    'Server': {
+      'Version': env['APIAPP_VERSION'],
+      "APIAPP_APIDOCSURL": "_",
+      "APIAPP_FRONTENDURL": env["APIAPP_FRONTENDURL"]
+    },
+    'Derived': None
 }
 
 
