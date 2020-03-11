@@ -49,3 +49,7 @@ class TicketObjClass(RepositoryObjBaseClass):
     elif usState == "US_USABLEIFTICKETTYPEISENABLED":
       return "USABLE"
     return "INVALID"
+
+  def setUsed(self, appObj, userID):
+    self.getDict()["useWithUserID"] = userID
+    self.getDict()["usedDate"] = appObj.getCurDateTime().isoformat()

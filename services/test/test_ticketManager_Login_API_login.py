@@ -7,6 +7,7 @@ import object_store_abstraction
 import copy
 import constants
 import ticketManagerTestCommon
+import json
 
 twoRoleList = [ "TestRoleA", "TestRoleB" ]
 
@@ -26,17 +27,23 @@ class helper(ticketManagerAPICommonUtilsClass):
       objectVersionNumber=QueryRESJSON[0][object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"],
       checkAndParseResponse=True
     )
-    setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"] = resJSON
+    #print("O", setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"])
+    #print("R", resJSON)
+    #self.assertTrue(False)
+    #DO not update setup because
+    #  1. create process has no fields that are chaging
+    #  2. I would have to place it in exact sopt in array
     return setup
 
   def updateTicketTypeFromSetup(self, setup, tenant, ticketType, updFN):
     newDict = updFN(copy.deepcopy(setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]))
-    setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"] = self.updateTicketType(
+    res = self.updateTicketType(
       ticketTypeID=setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]["id"],
       ticketTypeTenant=setup["tenants"][tenant]["tenantJSON"]["Name"],
       newDict=newDict,
       checkAndParseResponse=True
     )
+    setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"] = res
     return setup
 
   def setRolesForTicketType(self, setup, tenant, ticketType, roles):
@@ -77,7 +84,9 @@ class helper(ticketManagerAPICommonUtilsClass):
       return {
         "tenantName": setup["tenants"][tenant]["tenantJSON"]["Name"],
         "tenantLoginInfo": setup["tenants"][tenant]["tenantLoginInfo"],
-        "ticketGUID": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["ticketGUID"]
+        "ticketGUID": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["ticketGUID"],
+        "foreignKey": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["foreignKey"],
+        "ticketTypeID": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]["id"]
       }
 
     return {
@@ -88,11 +97,32 @@ class helper(ticketManagerAPICommonUtilsClass):
       "ticketWithOneRoleAndAllowUserCreationFalse": getTicketInfo(tenant=1, ticketType=1, ticket=0)
     }
 
+  def assertTicketUsed(self,
+    tenantName,
+    foreignKey,
+    ticketGUID,
+    ticketTypeID,
+    userID,
+    timeUsed
+  ):
+    #There is no function to return full data on an individual ticket GUID (Only login)
+    # so doing full search on foreign key, only works where there is only one ticket
+    ###print("ticketTypeID:", ticketTypeID)
+    qryRes = self.queryForTickets(tenantName=tenantName, ticketTypeID=ticketTypeID, queryString=foreignKey)
+    self.assertEqual(len(qryRes), 1)
+    self.assertEqual(qryRes[0]["id"], ticketGUID)
+    self.assertEqual(qryRes[0]["typeGUID"], ticketTypeID)
+    self.assertEqual(qryRes[0]["useWithUserID"], userID, msg="Was not marked with user that used ticket")
+    self.assertEqual(qryRes[0]["usedDate"], timeUsed.isoformat())
+    self.assertEqual(qryRes[0]["usableState"], "US_ALREADYUSED")
+
 @TestHelperSuperClass.wipd
 class ticketManager_LoginAPI_login_API(helper):
   def test_ExistingUserUsingTicket(self):
     setup = self.mainSetup()
     ticketToUse = setup["ticketWithOneRoleAndAllowUserCreationTrue"]
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
     loginRespData = self.loginAsUser(
       tenant=ticketToUse["tenantName"],
       authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
@@ -111,6 +141,16 @@ class ticketManager_LoginAPI_login_API(helper):
       ticketToPass=None
     )
     self.assertEqual(loginRespData2["ThisTenantRoles"],[constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"])
+
+    #Make sure this ticket has the info recorded against it to show it has been used
+    self.assertTicketUsed(
+      tenantName=ticketToUse["tenantName"],
+      foreignKey=ticketToUse["foreignKey"],
+      ticketGUID=ticketToUse["ticketGUID"],
+      ticketTypeID=ticketToUse["ticketTypeID"],
+      userID=ticketToUse["tenantLoginInfo"]["userID"],
+      timeUsed=testTime1
+    )
 
 #  def test_ExistingUserUsingTicketTwoRoles(self):
     #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)

@@ -8,6 +8,7 @@ import tenants
 from werkzeug.exceptions import BadRequest, NotFound
 import datetime
 import pytz
+from users import AddUserRole
 
 class ticketManagerClass():
   repositoryTicketType = None
@@ -217,4 +218,23 @@ class ticketManagerClass():
       "expiry": ticketObj.getDict()["expiry"]
     }
 
-
+  def executeTicketForUser(self,
+    appObj,
+    userObj,
+    ticketObj,
+    ticketTypeObj,
+    storeConnection
+  ):
+    for curRole in ticketTypeObj.getDict()["roles"]:
+      if not userObj.hasRole(tenantName=ticketTypeObj.getDict()["tenantName"], rollName=curRole):
+        AddUserRole(
+          appObj=appObj,
+          userID=userObj.getReadOnlyDict()["UserID"],
+          tennantName=ticketTypeObj.getDict()["tenantName"],
+          roleName=curRole,
+          storeConnection=storeConnection
+        )
+        #Save to object so we can skip re-querying the db
+        userObj.addRole(tenantName=ticketTypeObj.getDict()["tenantName"], rollName=curRole)
+    ticketObj.setUsed(appObj=appObj, userID=userObj.getReadOnlyDict()["UserID"])
+    ticketObj.save(storeConnection=storeConnection)

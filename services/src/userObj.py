@@ -62,6 +62,14 @@ class userClass():
   def getReadOnlyDict(self):
     return self._mainDict
 
+  #This is NEVER saved to DB and only used temprarally in login
+  #  to save an extra read
+  def addRole(self, tenantName, rollName):
+    if tenantName not in self._mainDict["TenantRoles"]:
+      self._mainDict["TenantRoles"][tenantName] = [ rollName ]
+    else:
+      self._mainDict["TenantRoles"][tenantName].append(rollName)
+
   def hasRole(self, tenantName, rollName):
     if tenantName not in self._mainDict["TenantRoles"]:
       return False

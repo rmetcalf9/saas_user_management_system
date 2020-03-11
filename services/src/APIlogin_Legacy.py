@@ -123,6 +123,7 @@ def registerAPI(appObj, nsLogin):
         if 'UserID' in content:
           UserID = content['UserID']
         ticketObj = None
+        ticketTypeObj = None
         if 'ticket' in content:
           ticketObj = appObj.TicketManager.getTicketObj(ticketGUID=content['ticket'], storeConnection=storeConnection)
           if ticketObj is None:

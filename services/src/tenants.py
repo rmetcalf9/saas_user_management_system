@@ -347,7 +347,21 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     print('requestedUserID:',requestedUserID)
     raise UnknownUserIDException
 
-  userDict = GetUser(appObj,requestedUserID, storeConnection).getReadOnlyDict()
+  userObj = GetUser(appObj,requestedUserID, storeConnection)
+  if userObj is None:
+    raise Exception('Error userObj not found')
+  if ticketObj is not None:
+    #This updates the existing userObj
+    # and saves to the database if change was made
+    appObj.TicketManager.executeTicketForUser(
+      appObj=appObj,
+      userObj=userObj,
+      ticketObj=ticketObj,
+      ticketTypeObj=ticketTypeObj,
+      storeConnection=storeConnection
+    )
+
+  userDict = userObj.getReadOnlyDict()
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
