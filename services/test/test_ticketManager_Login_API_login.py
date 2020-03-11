@@ -69,12 +69,6 @@ class helper(ticketManagerAPICommonUtilsClass):
     appObj.setTestingDateTime(testTime1)
     setup = self.setupTenantsTicketTypesAndTickets()
 
-    #tenant 0, ticketType 0, result 0 - ticket with one role
-    #tenant 0, ticketType 0, result 1 - ticket has been disabled
-    #tenant 0, ticketType 1, result 0 - ticket with two roles
-    #tenant 0, ticketType 2, result 0 - ticket type usercreation is false
-    #tenant 1, ticketType 0, result 0 - ticket type is disabled
-
     setup = self.setDisabledForTicket(setup=setup, tenant=0, ticketType=0, ticket=1)
     setup = self.setRolesForTicketType(setup=setup, tenant=0, ticketType=1, roles=twoRoleList)
     setup = self.setAllowUserCreationForTicketType(setup=setup, tenant=1, ticketType=0, allowUserCreation=False)
@@ -87,13 +81,14 @@ class helper(ticketManagerAPICommonUtilsClass):
         "ticketGUID": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["ticketGUID"],
         "foreignKey": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["foreignKey"],
         "ticketTypeID": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]["id"]
+        #,"ticketType": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]
       }
 
     return {
       "setuptime": testTime1,
       "ticketWithOneRoleAndAllowUserCreationTrue": getTicketInfo(tenant=0, ticketType=0, ticket=0),
       "ticketOnDisabledTicketType": getTicketInfo(tenant=0, ticketType=0, ticket=1),
-      "ticketWithTwoRolesAndAllowUserCreationTrue": getTicketInfo(tenant=1, ticketType=0, ticket=0),
+      "ticketWithTwoRolesAndAllowUserCreationTrue": getTicketInfo(tenant=0, ticketType=1, ticket=0),
       "ticketWithOneRoleAndAllowUserCreationFalse": getTicketInfo(tenant=1, ticketType=1, ticket=0)
     }
 
@@ -152,8 +147,39 @@ class ticketManager_LoginAPI_login_API(helper):
       timeUsed=testTime1
     )
 
-#  def test_ExistingUserUsingTicketTwoRoles(self):
-    #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
+  def test_ExistingUserUsingTicketTwoRoles(self):
+    setup = self.mainSetup()
+    ticketToUse = setup["ticketWithTwoRolesAndAllowUserCreationTrue"]
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
+    loginRespData = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=ticketToUse["ticketGUID"]
+    )
+    self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
+
+    #Login again without ticket and make sure role sticks
+    loginRespData2 = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=None
+    )
+    self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
+
+    #Make sure this ticket has the info recorded against it to show it has been used
+    self.assertTicketUsed(
+      tenantName=ticketToUse["tenantName"],
+      foreignKey=ticketToUse["foreignKey"],
+      ticketGUID=ticketToUse["ticketGUID"],
+      ticketTypeID=ticketToUse["ticketTypeID"],
+      userID=ticketToUse["tenantLoginInfo"]["userID"],
+      timeUsed=testTime1
+    )
 
 #  def test_ExistingUserUsingTicketTwoRolesAlreadyGranted(self):
     #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
