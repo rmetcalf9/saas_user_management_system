@@ -87,6 +87,10 @@ class authProviderInternal(authProvider):
 
     hashedPass = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])
     if hashedPass != obj["AuthProviderJSON"]['password']:
+      #print("DEBUG LING IN AUTHPROVIDERS_INTERNAL TO BE REMOVED")
+      #print("Auth failed - hashedpass mismatch -")
+      #print("RECANDHASHED=" + str(hashedPass))
+      #print("      FROMDB=" + str(obj["AuthProviderJSON"]['password']))
       raise authFailedException
 
   def _getTypicalAuthData(self, credentialDICT):

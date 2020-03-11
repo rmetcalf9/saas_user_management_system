@@ -16,7 +16,7 @@ from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, ma
 import constants
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
-from users import associateUserWithPerson
+from users import associateUserWithPerson, AddUserRole
 
 from object_store_abstraction import createObjectStoreInstance
 
@@ -244,6 +244,42 @@ class testClassWithTestClient(testHelperSuperClass):
     return jwt.decode(JWTToken, b64decode(appObj.APIAPP_JWTSECRET), algorithms=['HS256'])
     #return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 
+  def createIntarnalLoginForTenant(self, tenantName, userID, InternalAuthUsername, InternalAuthPassword):
+    def fn(storeConnection):
+      tenant = GetTenant(tenantName, storeConnection, appObj=appObj)
+      CreateUser(
+        appObj,
+        {"user_unique_identifier": userID, "known_as": userID},
+        tenantName,
+        "test/createLoginForTenant",
+        storeConnection
+      )
+      ##Don't know if this is needed
+      ##AddUserRole(appObj, userID, tenantName, constants.DefaultHasAccountRole, storeConnection)
+
+      person = CreatePerson(appObj, storeConnection, None, 'a', 'b', 'c')
+      authProv = tenant.getSingleAuthProviderOfType(type="internal")
+      if authProv is None:
+        raise Exception("No internal auth prov")
+      authData = AddAuth(
+        appObj=appObj,
+        tenantName=tenantName,
+        authProviderGUID=authProv["guid"],
+        credentialDICT={
+          "username": InternalAuthUsername,
+          "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+            username=InternalAuthUsername,
+            password=InternalAuthPassword,
+            tenantAuthProvSalt=authProv["guid"]
+          )
+        },
+        personGUID=person['guid'],
+        storeConnection=storeConnection
+      )
+      associateUserWithPerson(appObj, userID, person['guid'], storeConnection)
+      return None
+    return appObj.objectStore.executeInsideTransaction(fn)
+
   def createTwoUsersForOnePerson(self, userID1, userID2, InternalAuthUsername, storeConnection):
     masterTenant = GetTenant(masterTenantName, storeConnection, appObj=appObj)
     CreateUser(appObj, {"user_unique_identifier": userID1, "known_as": userID1}, masterTenantName, "test/createTwoUsersForOnePerson", storeConnection)
@@ -386,13 +422,12 @@ class testClassWithTestClient(testHelperSuperClass):
   def loginAsDefaultUser(self):
     return self.loginAsUser(masterTenantName, self.getTenantInternalAuthProvDict(masterTenantName), env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'])
 
-  def loginAsUser(self, tenant, authProviderDICT, username, password, expectedResults = [200]):
+  def loginAsUser(self, tenant, authProviderDICT, username, password, expectedResults = [200], ticketToPass = None):
     hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       username,
       password,
       authProviderDICT['saltForPasswordHashing']
     )
-
     loginJSON = {
       "authProviderGUID": authProviderDICT['guid'],
       "credentialJSON": {
@@ -400,6 +435,8 @@ class testClassWithTestClient(testHelperSuperClass):
         "password": hashedPassword
        }
     }
+    if ticketToPass != None:
+      loginJSON["ticket"] = ticketToPass
     result2 = self.testClient.post(
       self.loginAPIPrefix + '/' + tenant + '/authproviders',
       data=json.dumps(loginJSON),
@@ -409,8 +446,8 @@ class testClassWithTestClient(testHelperSuperClass):
     for x in expectedResults:
       if result2.status_code == x:
         return json.loads(result2.get_data(as_text=True))
-    print(result2.get_data(as_text=True))
-    self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
+    #print(result2.get_data(as_text=True))
+    self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults) + " returned:" + result2.get_data(as_text=True))
     return None
 
   def getNewAuthDICT(self, userName="testUsername"):

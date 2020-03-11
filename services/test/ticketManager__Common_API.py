@@ -91,7 +91,17 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
     for tenantIdx in range(1,10):
       tenantData2Use = copy.deepcopy(tenantData)
       tenantData2Use["Name"] = "TestTenant_" + "{:03d}".format(tenantIdx)
-      tenantJSON = self.createTenantForTesting(tenantData2Use)
+      tenantJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantData2Use, [TestHelperSuperClass.sampleInternalAuthProv001_CREATE])
+
+      InternalAuthUsername = tenantJSON["Name"] + "_USR"
+      InternalAuthPassword = tenantJSON["Name"] + "_USRPASS"
+
+      self.createIntarnalLoginForTenant(
+        tenantName=tenantJSON["Name"],
+        userID=tenantJSON["Name"] + "_USR",
+        InternalAuthUsername=InternalAuthUsername,
+        InternalAuthPassword=InternalAuthPassword
+      )
 
       ticketTypes = []
       for ticketTypesIdx in range(1, 3):
@@ -111,6 +121,10 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
 
       tenants.append({
         "tenantJSON": tenantJSON,
+        "tenantLoginInfo": {
+          "InternalAuthUsername": InternalAuthUsername,
+          "InternalAuthPassword": InternalAuthPassword
+        },
         "ticketTypes": ticketTypes
       })
 

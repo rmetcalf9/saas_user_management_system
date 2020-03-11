@@ -112,15 +112,24 @@ def registerAPI(appObj, nsLogin):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Login and recieve JWT token'''
-      if 'authProviderGUID' not in request.get_json():
+      content = request.get_json()
+      if 'authProviderGUID' not in content:
         raise BadRequest('No authProviderGUID provided')
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection, validateOrigin=True)
 
-        authProviderGUID = request.get_json()['authProviderGUID']
+        authProviderGUID = content['authProviderGUID']
         UserID = None
-        if 'UserID' in request.get_json():
-          UserID = request.get_json()['UserID']
+        if 'UserID' in content:
+          UserID = content['UserID']
+        ticketObj = None
+        if 'ticket' in content:
+          ticketObj = appObj.TicketManager.getTicketObj(ticketGUID=content['ticket'], storeConnection=storeConnection)
+          if ticketObj is None:
+            raise BadRequest('Invalid Ticket')
+          ticketTypeObj = appObj.TicketManager.getTicketType(tenantName=tenant, tickettypeID=ticketObj.getDict()["typeGUID"],storeConnection=storeConnection)
+          if ticketTypeObj is None:
+            return NotFound, 404
 
         try:
           #print("APIlogin_Legacy.py login - authProviderGUID:",authProviderGUID)
@@ -129,9 +138,12 @@ def registerAPI(appObj, nsLogin):
               appObj,
               tenant,
               authProviderGUID,
-              request.get_json()['credentialJSON'],
+              content['credentialJSON'],
               UserID,
-              connectionContext, 'a','b','c'
+              connectionContext,
+              'a','b','c',
+              ticketObj=ticketObj,
+              ticketTypeObj=ticketTypeObj
             )
           loginResult = storeConnection.executeInsideTransaction(someFn)
 
@@ -157,6 +169,8 @@ def registerAPI(appObj, nsLogin):
           if (err.id=='ExternalAuthProviderNotReachableException'):
             print(err.text)
             raise Exception(err.text)
+          if (err.id=='ticketNotUsableException'):
+            raise BadRequest(err.text)
           raise Exception('InternalServerError')
         except:
           raise InternalServerError

@@ -18,6 +18,7 @@ UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With T
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
 UnknownUserIDException = customExceptionClass('Unknown UserID', 'UnknownUserIDException')
 authProviderTypeNotFoundException = customExceptionClass('Auth Provider Type not found', 'authProviderTypeNotFoundException')
+ticketNotUsableException = customExceptionClass('Ticket not usable', 'ticketNotUsableException')
 
 def onAppInit(appObj):
   def getAllTenantsFn(storeConnection):
@@ -274,7 +275,12 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tena
 # - if no identityGUID is specified and the user has mutiple identities a list of possible identities is returned
 # - if an identityGUID is specified and correct then the user and role info
 ### requestedUserID can be None
-def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID, storeConnection, a,b,c):
+#Only Found tickets and tickettype objects are passed here
+def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID, storeConnection, a,b,c, ticketObj=None, ticketTypeObj=None):
+  def loginTrace(*args):
+    pass
+    #print("Login Trace - ", args)
+
   resDict = {
     'possibleUserIDs': None,
     'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
@@ -287,15 +293,25 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'other_data': None,
     'currentlyUsedAuthProviderGuid': None
   }
-  #print("tenants.py Login credentialJSON:",credentialJSON)
+  if ticketObj is not None:
+    #If the ticket was for a different tenant then the ticket type would have
+    # come back as none and that is captured in the API code
+    if ticketObj.getUsable(ticketTypeObj=ticketTypeObj) != "USABLE":
+      raise ticketNotUsableException
+
+  loginTrace("tenants.py Login credentialJSON:",credentialJSON)
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
+  loginTrace("Login trace tenant FOUND")
 
   authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
+  loginTrace("Login trace authProvider FOUND")
   authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection, False)
   if authUserObj is None:
+    loginTrace("Login trace NO AUTH USER")
     raise Exception
+  loginTrace("Login trace USER AUTH OK")
 
   #We have authed with a single authMethod, we need to get a list of identities for that provider
   possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)

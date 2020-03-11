@@ -13,7 +13,7 @@ validTicketTypeDict = {
   },
   "allowUserCreation": True,
   "issueDuration": 123,
-  "roles": [ "role1", "secondRole" ],
+  "roles": [ "role1" ],
   "postUseURL": "http:dsadsd",
   "postInvalidURL": "http:dsadsd"
 }

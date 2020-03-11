@@ -20,6 +20,8 @@ class ticketManagerClass():
     self.repositoryTicketTypeTickets = repositoryTicketTypeTickets.TicketTypeTicketsRepositoryClass()
 
   def updateTicketType(self, tenantName, tickettypeID, ticketTypeDict, storeConnection, appObj):
+    if "id" not in ticketTypeDict:
+      raise BadRequest("No id supplied")
     if ticketTypeDict["id"] != tickettypeID:
       raise BadRequest("URL and data ID mismatch")
     object_store_abstraction.RepositoryBaseClass.RequireStringElement(ticketTypeDict, object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey(), "TicketType")
@@ -190,6 +192,9 @@ class ticketManagerClass():
       res.append(self._disableTicket(ticketTypeObj=ticketTypeObj, ticketObj=ticketObj, disableInputData=curTicket, storeConnection=storeConnection))
 
     return { "response": "OK", "message": "OK", "results": res }, 200
+
+  def getTicketObj(self, ticketGUID, storeConnection):
+    return self.repositoryTicket.get(id=ticketGUID, storeConnection=storeConnection)
 
   def getTicketAndTypeDict(self,
     tenantName,
