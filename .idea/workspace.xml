@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/frontendFns.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/frontendFns.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_facebook.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_facebook.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_google.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_google.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_internal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_internal.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_ldap.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_ldap.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/authProviders_base.py" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
