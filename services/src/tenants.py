@@ -184,12 +184,22 @@ def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
 
   return tenantObj
 
-def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection):
+def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection, ticketObj, ticketTypeObj):
+  ticketAllowsUsToCreateAUser = False
+  if ticketObj is not None:
+    #If the ticket was for a different tenant then the ticket type would have
+    # come back as none and that is captured in the API code
+    if ticketObj.getUsable(ticketTypeObj=ticketTypeObj) != "USABLE":
+      raise ticketNotUsableException
+    ticketAllowsUsToCreateAUser = ticketTypeObj.getAllowUserCreation()
+
   if not tenantObj.getAllowUserCreation():
-    raise userCreationNotAllowedException
+    if not ticketAllowsUsToCreateAUser:
+      raise userCreationNotAllowedException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
   if not authProvObj.getAllowUserCreation():
-    raise userCreationNotAllowedException
+    if not ticketAllowsUsToCreateAUser:
+      raise userCreationNotAllowedException
 
   userData = authProvObj.getTypicalAuthData(credentialDICT)
   CreateUser(appObj, userData, tenantObj.getName(), createdBy, storeConnection)
@@ -197,7 +207,19 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
   authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'], storeConnection)
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'], storeConnection)
 
-  return GetUser(appObj, userData['user_unique_identifier'], storeConnection)
+  userObj = GetUser(appObj, userData['user_unique_identifier'], storeConnection)
+  if ticketObj is not None:
+    #This updates the existing userObj
+    # and saves to the database if change was made
+    appObj.TicketManager.executeTicketForUser(
+      appObj=appObj,
+      userObj=userObj,
+      ticketObj=ticketObj,
+      ticketTypeObj=ticketTypeObj,
+      storeConnection=storeConnection
+    )
+
+  return userObj
 
 def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenantName, authProvGUID):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)

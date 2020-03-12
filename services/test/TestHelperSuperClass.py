@@ -397,7 +397,7 @@ class testClassWithTestClient(testHelperSuperClass):
   def getTenantInternalAuthProvDict(self, tenant):
     return self.getTenantSpercificAuthProvDict(tenant, 'internal')
 
-  def registerInternalUser(self, tenantName, username, password, authProvider):
+  def registerInternalUser(self, tenantName, username, password, authProvider, ticketGUID=None):
     hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       username,
       password,
@@ -410,6 +410,9 @@ class testClassWithTestClient(testHelperSuperClass):
         "password": hashedPassword
        }
     }
+    if ticketGUID is not None:
+      registerJSON["ticket"] = ticketGUID
+
     registerResult = self.testClient.put(
       self.loginAPIPrefix + '/' + tenantName + '/register',
       data=json.dumps(registerJSON),

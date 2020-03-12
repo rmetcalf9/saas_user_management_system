@@ -361,3 +361,68 @@ class test_loginapi_register(parent_test_api):
 
   #def test_AutocreateingGoogleAccountsInDifferentTenantsShareSameUser
   # See test_authPRoviders_Google for this test
+
+
+  def test_InternalUserRegisterWithTicket(self):
+    testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
+    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+
+    userName = "testSetUserName"
+    password = "delkjgn4rflkjwned"
+
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+
+    registerResultJSON = self.registerInternalUser(tenantWithNoAuthProviders['Name'], userName, password, tenantDict['AuthProviders'][0])
+
+
+    expectedUserDICT = {
+      "UserID": userName + internalUSerSufix,
+      "known_as": userName,
+      "ObjectVersion": "2",
+      "TenantRoles": [{
+        "TenantName": tenantWithNoAuthProviders['Name'],
+        "ThisTenantRoles": [DefaultHasAccountRole]
+      }],
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat()
+    }
+
+    self.assertFalse('other_data' in registerResultJSON, msg="Found other_data in user registerResultJSON")
+
+    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersonGUIDs'], msg='Incorrect response from registration')
+    self.assertEqual(len(registerResultJSON['associatedPersonGUIDs']),1)
+
+    loginResultJSON = self.loginAsUser(
+      tenantWithNoAuthProviders['Name'],
+      self.getTenantInternalAuthProvDict(tenantWithNoAuthProviders['Name']),
+      userName,
+      password
+    )
+
+    self.assertFalse('other_data' in loginResultJSON)
+
+    #Test other_data is filled in. This is only returned in the admin API get function so can't use login api to view
+    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + userName + internalUSerSufix, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+
+    userGetResultDICT = json.loads(result.get_data(as_text=True))
+    expectedResult = {
+      'UserID': userName + internalUSerSufix,
+      'known_as': userName,
+      'TenantRoles': [
+        {
+          'TenantName': tenantWithNoAuthProviders['Name'],
+          'ThisTenantRoles': [DefaultHasAccountRole]
+        }
+      ],
+      'other_data': {
+        "createdBy": "loginapi/register"
+      },
+      'ObjectVersion': '2',
+      "creationDateTime": testDateTime.isoformat(),
+      "lastUpdateDateTime": testDateTime.isoformat(),
+      "associatedPersonGUIDs": registerResultJSON['associatedPersonGUIDs']
+    }
+    self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, [], msg='Admin API User data wrong')

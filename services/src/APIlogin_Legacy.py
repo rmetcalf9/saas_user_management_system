@@ -19,8 +19,9 @@ def getRefreshPostDataModel(appObj):
   })
 def getRegisterPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('RegisterPostData', {
-  'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
-  'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True)
+    'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
+    'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
+    'ticket': fields.String(default='DEFAULT', description='If a user has a ticket to grant access')
   })
 
 def getValidTenantObj(appObj, tenant, storeConnection, validateOrigin):
@@ -48,18 +49,27 @@ def registerAPI(appObj, nsLogin):
       '''Register'''
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection, validateOrigin=True)
-        if 'authProviderGUID' not in request.get_json():
+        content = request.get_json()
+        if 'authProviderGUID' not in content:
           raise BadRequest('No authProviderGUID provided')
-        authProviderGUID = request.get_json()['authProviderGUID']
-        if 'credentialJSON' not in request.get_json():
+        authProviderGUID = content['authProviderGUID']
+        if 'credentialJSON' not in content:
           raise BadRequest('No credentialJSON provided')
-        credentialJSON = request.get_json()['credentialJSON']
+        credentialJSON = content['credentialJSON']
 
         try:
-          #print("credentialJSON:",credentialJSON)
-          #print("APIlogin_Legacy.py regis - authProviderGUID:",authProviderGUID)
+          ticketObj = None
+          ticketTypeObj = None
+          if 'ticket' in content:
+            ticketObj = appObj.TicketManager.getTicketObj(ticketGUID=content['ticket'], storeConnection=storeConnection)
+            if ticketObj is None:
+              raise BadRequest('Invalid Ticket')
+            ticketTypeObj = appObj.TicketManager.getTicketType(tenantName=tenant, tickettypeID=ticketObj.getDict()["typeGUID"],storeConnection=storeConnection)
+            if ticketTypeObj is None:
+              return BadRequest('Invalid Ticket Type')
+
           def someFn(connectionContext):
-            return RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register", connectionContext)
+            return RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register", connectionContext, ticketObj, ticketTypeObj)
           userObj = storeConnection.executeInsideTransaction(someFn)
 
         except customExceptionClass as err:
@@ -130,7 +140,7 @@ def registerAPI(appObj, nsLogin):
             raise BadRequest('Invalid Ticket')
           ticketTypeObj = appObj.TicketManager.getTicketType(tenantName=tenant, tickettypeID=ticketObj.getDict()["typeGUID"],storeConnection=storeConnection)
           if ticketTypeObj is None:
-            return NotFound, 404
+            return BadRequest('Invalid Ticket')
 
         try:
           #print("APIlogin_Legacy.py login - authProviderGUID:",authProviderGUID)

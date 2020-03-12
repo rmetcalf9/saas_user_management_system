@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI_register.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI_register.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -238,7 +245,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583950761962</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Ticket use with two roles working">
+      <created>1583951135685</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1583951135685</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -265,7 +279,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Updating to latest object store abstraction version" />
     <MESSAGE value="Adding Ticketsystem notes" />
     <MESSAGE value="Tweaking Ticketsystem" />
     <MESSAGE value="Created test for validating upserted tickettype data" />
@@ -290,7 +303,8 @@
     <MESSAGE value="Fixing failing test" />
     <MESSAGE value="Simple ticket use case test created" />
     <MESSAGE value="Ticket use with single role working" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ticket use with single role working" />
+    <MESSAGE value="Ticket use with two roles working" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ticket use with two roles working" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

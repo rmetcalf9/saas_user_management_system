@@ -80,36 +80,20 @@ class helper(ticketManagerAPICommonUtilsClass):
         "tenantLoginInfo": setup["tenants"][tenant]["tenantLoginInfo"],
         "ticketGUID": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["ticketGUID"],
         "foreignKey": setup["tenants"][tenant]["ticketTypes"][ticketType]["ticketCreationProcessResult"]["results"][ticket]["foreignKey"],
-        "ticketTypeID": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]["id"]
+        "ticketTypeID": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]["id"],
+        "ticketTypeIssueDuration": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]["issueDuration"]
         #,"ticketType": setup["tenants"][tenant]["ticketTypes"][ticketType]["createTicketTypeResult"]
       }
 
     return {
       "setuptime": testTime1,
       "ticketWithOneRoleAndAllowUserCreationTrue": getTicketInfo(tenant=0, ticketType=0, ticket=0),
-      "ticketOnDisabledTicketType": getTicketInfo(tenant=0, ticketType=0, ticket=1),
+      "disabledTicket": getTicketInfo(tenant=0, ticketType=0, ticket=1),
+      "ticketOnDisabledTicketType": getTicketInfo(tenant=1, ticketType=1, ticket=0),
       "ticketWithTwoRolesAndAllowUserCreationTrue": getTicketInfo(tenant=0, ticketType=1, ticket=0),
       "ticketWithOneRoleAndAllowUserCreationFalse": getTicketInfo(tenant=1, ticketType=1, ticket=0)
     }
 
-  def assertTicketUsed(self,
-    tenantName,
-    foreignKey,
-    ticketGUID,
-    ticketTypeID,
-    userID,
-    timeUsed
-  ):
-    #There is no function to return full data on an individual ticket GUID (Only login)
-    # so doing full search on foreign key, only works where there is only one ticket
-    ###print("ticketTypeID:", ticketTypeID)
-    qryRes = self.queryForTickets(tenantName=tenantName, ticketTypeID=ticketTypeID, queryString=foreignKey)
-    self.assertEqual(len(qryRes), 1)
-    self.assertEqual(qryRes[0]["id"], ticketGUID)
-    self.assertEqual(qryRes[0]["typeGUID"], ticketTypeID)
-    self.assertEqual(qryRes[0]["useWithUserID"], userID, msg="Was not marked with user that used ticket")
-    self.assertEqual(qryRes[0]["usedDate"], timeUsed.isoformat())
-    self.assertEqual(qryRes[0]["usableState"], "US_ALREADYUSED")
 
 @TestHelperSuperClass.wipd
 class ticketManager_LoginAPI_login_API(helper):
@@ -152,6 +136,8 @@ class ticketManager_LoginAPI_login_API(helper):
     ticketToUse = setup["ticketWithTwoRolesAndAllowUserCreationTrue"]
     testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testTime1)
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testTime1)
     loginRespData = self.loginAsUser(
       tenant=ticketToUse["tenantName"],
       authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
@@ -181,27 +167,111 @@ class ticketManager_LoginAPI_login_API(helper):
       timeUsed=testTime1
     )
 
+  def test_ticketTypeIsDisabled(self):
+    setup = self.mainSetup()
+    ticketToUse = setup["ticketOnDisabledTicketType"]
+    loginRespData = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=ticketToUse["ticketGUID"],
+      expectedResults=[400]
+    )
+    self.assertEqual(loginRespData["message"],"Ticket not usable")
+
+  def test_cantUseTicketTwice(self):
+    setup = self.mainSetup()
+    ticketToUse = setup["ticketWithOneRoleAndAllowUserCreationTrue"]
+    loginRespData = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=ticketToUse["ticketGUID"]
+    )
+    self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"])
+
+    #Login again without ticket and make sure role sticks
+    loginRespData2 = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=ticketToUse["ticketGUID"],
+      expectedResults=[400]
+    )
+    self.assertEqual(loginRespData2["message"],"Ticket not usable")
+
+  def test_cantUseDisabledTicket(self):
+    setup = self.mainSetup()
+    ticketToUse = setup["disabledTicket"]
+    loginRespData = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=ticketToUse["ticketGUID"],
+      expectedResults=[400]
+    )
+    self.assertEqual(loginRespData["message"],"Ticket not usable")
+
+  def test_cantUseExpiredTicket(self):
+    setup = self.mainSetup()
+    ticketToUse = setup["ticketWithOneRoleAndAllowUserCreationTrue"]
+    testTime1 = datetime.datetime.now(pytz.timezone("UTC")) + datetime.timedelta(hours=int(1 + ticketToUse["ticketTypeIssueDuration"]))
+    appObj.setTestingDateTime(testTime1)
+    loginRespData = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass=ticketToUse["ticketGUID"],
+      expectedResults=[400]
+    )
+    self.assertEqual(loginRespData["message"],"Ticket not usable")
+
+
+  def test_ExistingUserWithCompletlyInvalidTicketGUID(self):
+    setup = self.mainSetup()
+    ticketToUse = setup["ticketWithTwoRolesAndAllowUserCreationTrue"]
+    loginRespData = self.loginAsUser(
+      tenant=ticketToUse["tenantName"],
+      authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+      username=ticketToUse["tenantLoginInfo"]["InternalAuthUsername"],
+      password=ticketToUse["tenantLoginInfo"]["InternalAuthPassword"],
+      ticketToPass="BADTICKETGUID",
+      expectedResults=[400]
+    )
+    self.assertEqual(loginRespData["message"],"Invalid Ticket")
+
+  #def test_NewUserWithCompletlyInvalidTicketGUID(self):
+    #Test only applies to Google auth as internal auth users must use register API
+    # setup = self.mainSetup()
+    # ticketToUse = setup["ticketWithTwoRolesAndAllowUserCreationTrue"]
+    # loginRespData = self.loginAsUser(
+    #   tenant=ticketToUse["tenantName"],
+    #   authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
+    #   username="??",
+    #   password="??",
+    #   ticketToPass="BADTICKETGUID",
+    #   expectedResults=[400]
+    # )
+    # self.assertEqual(loginRespData["message"],"Invalid Ticket")
+
 #  def test_ExistingUserUsingTicketTwoRolesAlreadyGranted(self):
     #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
 
 #  def test_ExistingUserUsingTicketTwoRolesOneAlreadyGrantedOne(self):
     #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
 
-
 #  def test_NewUserUsingTicket(self):
 
-# def test_NewUserUsingTicketFailsBecauseAuthIsNone(self):
+# def test_NewUserUsingTicketFailsBecauseAllowUserCreationIsFalse(self):
 
-#def test_ticketTypeIsDisabled
 
-#def test_cantUseTicketTwice
 
-#def test_cantUseDisabledTicket
-
-#def test_cantUseExpiredTicket
-
-#def test_ExistingUserWithCompletlyInvalidTicket
-
-#def test_NewUserWithCompletlyInvalidTicket
+#Add tests where users have account on another tenant
+#Make sure this doesn't lead to allow user creation loophole on either tenant
 
 #TODO Think about how a person with mutiple users uses a ticket

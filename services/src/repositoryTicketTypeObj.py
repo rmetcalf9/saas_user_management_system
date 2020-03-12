@@ -26,3 +26,6 @@ class TicketTypeObjClass(RepositoryObjBaseClass):
 
   def isEnabled(self):
     return self.getDict()["enabled"]
+
+  def getAllowUserCreation(self):
+    return self.getDict()["allowUserCreation"]

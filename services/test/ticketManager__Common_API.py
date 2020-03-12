@@ -146,3 +146,22 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
     self.assertEqual(result.status_code, 202, msg="Err: " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
+
+  def assertTicketUsed(self,
+    tenantName,
+    foreignKey,
+    ticketGUID,
+    ticketTypeID,
+    userID,
+    timeUsed
+  ):
+    #There is no function to return full data on an individual ticket GUID (Only login)
+    # so doing full search on foreign key, only works where there is only one ticket
+    ###print("ticketTypeID:", ticketTypeID)
+    qryRes = self.queryForTickets(tenantName=tenantName, ticketTypeID=ticketTypeID, queryString=foreignKey)
+    self.assertEqual(len(qryRes), 1)
+    self.assertEqual(qryRes[0]["id"], ticketGUID)
+    self.assertEqual(qryRes[0]["typeGUID"], ticketTypeID)
+    self.assertEqual(qryRes[0]["useWithUserID"], userID, msg="Was not marked with user that used ticket")
+    self.assertEqual(qryRes[0]["usedDate"], timeUsed.isoformat())
+    self.assertEqual(qryRes[0]["usableState"], "US_ALREADYUSED")
