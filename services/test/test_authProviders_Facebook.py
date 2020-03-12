@@ -1,4 +1,6 @@
-from TestHelperSuperClass import httpOrigin, testHelperAPIClient, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+import TestHelperSuperClass
+from ticketManager__Common_API import ticketManagerAPICommonUtilsClass
+import ticketManagerTestCommon
 import os
 import copy
 import constants
@@ -43,7 +45,7 @@ facebookLoginAccounts.append({
   }
 })
 
-class facebook_auth_test_api_helper_functions(testHelperAPIClient):
+class facebook_auth_test_api_helper_functions(ticketManagerAPICommonUtilsClass):
   def addAuthProvider(self, currentTenantJSON, authProviderDICT):
     tenantJSON = copy.deepcopy(currentTenantJSON)
     tenantJSON['AuthProviders'].append(copy.deepcopy(authProviderDICT))
@@ -73,7 +75,7 @@ class facebook_auth_test_api_helper_functions(testHelperAPIClient):
         return x
     return None
 
-  def loginWithFacebook(self, accNum, tenantName, authProviderDICT, expectedResults):
+  def loginWithFacebook(self, facebookLoginAccountNum, tenantName, authProviderDICT, expectedResults, ticketToPass=None):
     loginJSON = {
       "credentialJSON": {
         "status": "connected",
@@ -88,13 +90,15 @@ class facebook_auth_test_api_helper_functions(testHelperAPIClient):
       },
       "authProviderGUID":authProviderDICT['guid']
     }
+    if ticketToPass is not None:
+      loginJSON["ticket"] = ticketToPass
     result2 = None
-    with patch("authProviders_Facebook.authProviderFacebook._enrichCredentialDictForAuth", return_value=facebookLoginAccounts[accNum]) as mock_loadStaticData:
+    with patch("authProviders_Facebook.authProviderFacebook._enrichCredentialDictForAuth", return_value=facebookLoginAccounts[facebookLoginAccountNum]) as mock_loadStaticData:
       result2 = self.testClient.post(
         self.loginAPIPrefix + '/' + tenantName + '/authproviders',
         data=json.dumps(loginJSON),
         content_type='application/json',
-        headers={"Origin": httpOrigin}
+        headers={"Origin": TestHelperSuperClass.httpOrigin}
       )
 
     for x in expectedResults:
@@ -104,8 +108,8 @@ class facebook_auth_test_api_helper_functions(testHelperAPIClient):
     self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
     return None
 
-
-class test_api(facebook_auth_test_api_helper_functions):
+@TestHelperSuperClass.wipd
+class test_facebook_api(facebook_auth_test_api_helper_functions):
 
   def test_createAuth(self):
     resultJSON2 = self.setupFacebookAuthOnMainTenantForTests()
@@ -176,7 +180,7 @@ class test_api(facebook_auth_test_api_helper_functions):
 
     result2JSON = self.loginWithFacebook(0, constants.masterTenantName, googleAuthProvider, [401])
 
-'''
+  '''
   def test_authWithUserCreation(self):
     #Test authentication via google.
     ## Must use mocks
@@ -236,3 +240,35 @@ class test_api(facebook_auth_test_api_helper_functions):
     self.assertNotEqual(acc1LoginJSON['userGuid'],acc2LoginJSON['userGuid'],msg="user accounts returned should not be the same")
     self.assertNotEqual(acc1LoginJSON['authedPersonGuid'],acc2LoginJSON['authedPersonGuid'],msg="person accounts used should not be the same")
   '''
+
+  def test_authWithUserCreationWithTicket(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(facebookAuthProv001_CREATE)
+    # Test authentication via google.
+    ## Must use mocks
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'facebook')
+    # print(googleAuthProvDict)
+    result2JSON = self.loginWithFacebook(
+      facebookLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[200]
+    )
+    self.assertEqual(result2JSON["ThisTenantRoles"], expectedRoles)
+
+    # Turn off auto user creation
+    tenantDict2 = self.getTenantDICT(setup['tenantName'])
+    tenantDict2['AllowUserCreation'] = False
+    tenantDict3 = self.updateTenant(tenantDict2, [200])
+
+    # Try and login - should not need to create so will suceed
+    result3JSON = self.loginWithFacebook(
+      facebookLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=None,
+      expectedResults=[200]
+    )
+    self.assertEqual(result3JSON["ThisTenantRoles"], expectedRoles)

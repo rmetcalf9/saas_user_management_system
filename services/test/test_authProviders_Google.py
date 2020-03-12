@@ -110,7 +110,6 @@ class google_auth_test_api_helper_functions(ticketManagerAPICommonUtilsClass):
       self.assertTrue(found, msg="Auth provider passed not found")
       return self.updateTenant(tenantDict2, [200])
 
-@TestHelperSuperClass.wipd
 class test_api(google_auth_test_api_helper_functions):
   def addAuthProvider(self, currentTenantJSON, authProviderDICT):
     tenantJSON = copy.deepcopy(currentTenantJSON)
@@ -141,6 +140,7 @@ class test_api(google_auth_test_api_helper_functions):
         return x
     return None
 
+@TestHelperSuperClass.wipd
 class test_addGoogleAuthProviderToMasterTenant(test_api):
   def test_createAuth(self):
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
