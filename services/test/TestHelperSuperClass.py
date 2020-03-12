@@ -423,9 +423,7 @@ class testClassWithTestClient(testHelperSuperClass):
       for x in expectedResults:
         if registerResult.status_code == x:
           return json.loads(registerResult.get_data(as_text=True))
-
-    self.assertEqual(registerResult.status_code, 201, msg="Registration failed - " + registerResult.get_data(as_text=True))
-    return json.loads(registerResult.get_data(as_text=True))
+    self.assertFalse(True, msg="Registration call unexpected response - status_code was " + str(registerResult.status_code) + " expected one of " + str(expectedResults) + " returned:" + registerResult.get_data(as_text=True))
 
   def loginAsDefaultUser(self):
     return self.loginAsUser(masterTenantName, self.getTenantInternalAuthProvDict(masterTenantName), env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'])

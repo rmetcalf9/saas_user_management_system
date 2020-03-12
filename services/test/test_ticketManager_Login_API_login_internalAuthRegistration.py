@@ -53,10 +53,12 @@ class helper(ticketManagerAPICommonUtilsClass):
       "tenantName": tenantDict["Name"],
       "ticketTypeWithAllowUserCreation": {
         "id": ticketTypeWithAllowUserCreation["id"],
+        "issueDuration": ticketTypeWithOUTAllowUserCreation["issueDuration"],
         "tickets": AllowUserCreationTickets["results"]
       },
       "ticketTypeWithOUTAllowUserCreation": {
         "id": ticketTypeWithOUTAllowUserCreation["id"],
+        "issueDuration": ticketTypeWithOUTAllowUserCreation["issueDuration"],
         "tickets": DISAllowUserCreationTickets["results"]
       }
     }
@@ -134,9 +136,56 @@ class ticketManager_LoginAPI_login_API_internalAuthRegistration(helper):
     )
     self.assertEqual(registerResultJSON2["message"],"Ticket not usable")
 
-  #def test_InternalAuthRegisterWithInvalidGUIDTicketFails(self):
-  #  pass
+  def test_InternalAuthRegisterWithInvalidGUIDTicketFails(self):
+    setup = self.setup()
 
-  #def test_InternalAuthRegisterWithExpiredTicketFails(self):
+    userName = "testSetUserName"
+    password = "delkjgn4rflkjwned"
 
-  #def test_InternalAuthRegisterWithTicketTypeWithNoUserCreationFails(self):
+    testDateTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime2)
+    registerResultJSON = self.registerInternalUser(
+      setup["tenantName"],
+      userName,
+      password,
+      self.getTenantInternalAuthProvDict(tenant=setup["tenantName"]),
+      ticketGUID="INVALIDTICKETID",
+      expectedResults=[400]
+    )
+    self.assertEqual(registerResultJSON["message"],"Invalid Ticket")
+
+  def test_InternalAuthRegisterWithExpiredTicketFails(self):
+    #Auth provider has no allow user creatoin. Ticket has
+    setup = self.setup()
+
+    userName = "testSetUserName"
+    password = "delkjgn4rflkjwned"
+
+    testDateTime2 = datetime.datetime.now(pytz.timezone("UTC")) + datetime.timedelta(hours=1 + int(setup["ticketTypeWithAllowUserCreation"]["issueDuration"]))
+    appObj.setTestingDateTime(testDateTime2)
+    registerResultJSON = self.registerInternalUser(
+      setup["tenantName"],
+      userName,
+      password,
+      self.getTenantInternalAuthProvDict(tenant=setup["tenantName"]),
+      ticketGUID=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"]
+      ,expectedResults=[400]
+    )
+    self.assertEqual(registerResultJSON["message"],"Ticket not usable")
+
+  def test_InternalAuthRegisterWithTicketTypeWithNoUserCreationFails(self):
+    #Auth provider has no allow user creatoin. Ticket has
+    setup = self.setup()
+
+    userName = "testSetUserName"
+    password = "delkjgn4rflkjwned"
+
+    registerResultJSON = self.registerInternalUser(
+      setup["tenantName"],
+      userName,
+      password,
+      self.getTenantInternalAuthProvDict(tenant=setup["tenantName"]),
+      ticketGUID=setup["ticketTypeWithOUTAllowUserCreation"]["tickets"][0]["ticketGUID"]
+      ,expectedResults=[401]
+    )
+    self.assertEqual(registerResultJSON["message"],"User Creation Not Allowed")

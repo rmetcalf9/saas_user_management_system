@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" afterDir="false" />
     </list>
@@ -254,7 +253,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584007281394</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Functionality for not registering with ticket twice">
+      <created>1584007664105</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1584007664105</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -281,7 +287,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Tweaking Ticketsystem" />
     <MESSAGE value="Created test for validating upserted tickettype data" />
     <MESSAGE value="Adding tests" />
     <MESSAGE value="Adding tenant existance check" />
@@ -306,7 +311,8 @@
     <MESSAGE value="Ticket use with single role working" />
     <MESSAGE value="Ticket use with two roles working" />
     <MESSAGE value="Register ticket for use with internal auth" />
-    <option name="LAST_COMMIT_MESSAGE" value="Register ticket for use with internal auth" />
+    <MESSAGE value="Functionality for not registering with ticket twice" />
+    <option name="LAST_COMMIT_MESSAGE" value="Functionality for not registering with ticket twice" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
