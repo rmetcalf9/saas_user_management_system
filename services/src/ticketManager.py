@@ -225,6 +225,8 @@ class ticketManagerClass():
     ticketTypeObj,
     storeConnection
   ):
+    if ticketObj.internalUseIndicator:
+      return # we already used this ticket in this session
     for curRole in ticketTypeObj.getDict()["roles"]:
       if not userObj.hasRole(tenantName=ticketTypeObj.getDict()["tenantName"], rollName=curRole):
         AddUserRole(

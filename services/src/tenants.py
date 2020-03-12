@@ -316,10 +316,14 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     'currentlyUsedAuthProviderGuid': None
   }
   if ticketObj is not None:
+    loginTrace("Login With a ticket")
+
     #If the ticket was for a different tenant then the ticket type would have
     # come back as none and that is captured in the API code
     if ticketObj.getUsable(ticketTypeObj=ticketTypeObj) != "USABLE":
       raise ticketNotUsableException
+  else:
+    loginTrace("Login NO ticket")
 
   loginTrace("tenants.py Login credentialJSON:",credentialJSON)
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
@@ -329,7 +333,14 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
 
   authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
   loginTrace("Login trace authProvider FOUND")
-  authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection, False, ticketObj, ticketTypeObj)
+  authUserObj = authProvider.Auth(
+    appObj=appObj,
+    credentialDICT=credentialJSON,
+    storeConnection=storeConnection,
+    supressAutocreate=False,
+    ticketObj=ticketObj,
+    ticketTypeObj=ticketTypeObj
+  )
   if authUserObj is None:
     loginTrace("Login trace NO AUTH USER")
     raise Exception

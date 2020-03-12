@@ -10,58 +10,7 @@ import constants
 
 class helper(ticketManagerAPICommonUtilsClass):
   def setup(self):
-    testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
-    appObj.setTestingDateTime(testDateTime)
-
-    tenantDict = self.createTenantWithAuthProvider(
-      TestHelperSuperClass.tenantWithNoAuthProviders,
-      True,
-      TestHelperSuperClass.sampleInternalAuthProv001_CREATE #allow user creation is false
-    )
-    ticketTypeWithAllowUserCreation = self.createTicketType(
-      tenantDict["Name"],
-      overrideName="TestTicketTypeWithAllowUserCreation"
-    )
-    AllowUserCreationTickets = self.callBatchProcess(
-      tenantName=tenantDict["Name"],
-      ticketTypeID=ticketTypeWithAllowUserCreation["id"],
-      foreignKeyList=["testTicket_001"],
-      foreignKeyDupAction="Skip",
-      checkAndParseResponse=True
-    )
-    ticketTypeWithOUTAllowUserCreation = self.createTicketType(
-      tenantDict["Name"],
-      overrideName="TestTicketTypeWithAllowUserCreation"
-    )
-    ticketTypeWithOUTAllowUserCreation["allowUserCreation"] = False
-    ticketTypeWithOUTAllowUserCreation = self.updateTicketType(
-      ticketTypeID=ticketTypeWithOUTAllowUserCreation["id"],
-      ticketTypeTenant=tenantDict["Name"],
-      newDict=ticketTypeWithOUTAllowUserCreation,
-      checkAndParseResponse=True
-    )
-    DISAllowUserCreationTickets = self.callBatchProcess(
-      tenantName=tenantDict["Name"],
-      ticketTypeID=ticketTypeWithOUTAllowUserCreation["id"],
-      foreignKeyList=["testTicket_001_NOCREATION"],
-      foreignKeyDupAction="Skip",
-      checkAndParseResponse=True
-    )
-
-    return {
-      "setupTime": testDateTime,
-      "tenantName": tenantDict["Name"],
-      "ticketTypeWithAllowUserCreation": {
-        "id": ticketTypeWithAllowUserCreation["id"],
-        "issueDuration": ticketTypeWithOUTAllowUserCreation["issueDuration"],
-        "tickets": AllowUserCreationTickets["results"]
-      },
-      "ticketTypeWithOUTAllowUserCreation": {
-        "id": ticketTypeWithOUTAllowUserCreation["id"],
-        "issueDuration": ticketTypeWithOUTAllowUserCreation["issueDuration"],
-        "tickets": DISAllowUserCreationTickets["results"]
-      }
-    }
+    return self.setupTenantWithTwoTicketTypesAndTickets()
 
 #@TestHelperSuperClass.wipd
 class ticketManager_LoginAPI_login_API_internalAuthRegistration(helper):

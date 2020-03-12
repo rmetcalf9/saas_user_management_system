@@ -392,6 +392,7 @@ class testClassWithTestClient(testHelperSuperClass):
     for x in resultJSON[ 'AuthProviders' ]:
       if x['Type'] == type:
         return x
+    print("GetAuthProvidersRsult:", resultJSON)
     raise Exception("Could not find " + str(type) + " auth provider in tenant " + str(tenant))
 
   def getTenantInternalAuthProvDict(self, tenant):

@@ -1,4 +1,5 @@
 import TestHelperSuperClass
+from ticketManager__Common_API import ticketManagerAPICommonUtilsClass
 from appObj import appObj
 from tenants import GetTenant
 import constants
@@ -8,6 +9,7 @@ import os
 from authProviders import authProviderFactory
 from unittest.mock import patch, mock_open
 from authProviders_base import resetStaticData
+import ticketManagerTestCommon
 
 
 client_cliental_json_filename = 'googleauth_client_public.json'
@@ -68,16 +70,18 @@ googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
 googleAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJSONFile\": \"badNonExistantFile.json\"}"
 
-class google_auth_test_api_helper_functions(TestHelperSuperClass.testHelperAPIClient):
-  def loginWithGoogle(self, accNum, tenantName, authProviderDICT, expectedResults):
+class google_auth_test_api_helper_functions(ticketManagerAPICommonUtilsClass):
+  def loginWithGoogle(self, googleLoginAccountNum, tenantName, authProviderDICT, expectedResults, ticketToPass=None):
     loginJSON = {
       "credentialJSON":{
         "code":"4/RAHaPqLEg_L2qv2Xw0iutaKfDgqXcfV6ji_C4YoweqfakHy2PLbE9_p1DK2TuwSU839sVlcJ0yu0ThKyVOcToZU"
       },
       "authProviderGUID":authProviderDICT['guid']
     }
+    if ticketToPass is not None:
+      loginJSON["ticket"] = ticketToPass
     result2 = None
-    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=googleLoginAccounts[accNum]) as mock_loadStaticData:
+    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=googleLoginAccounts[googleLoginAccountNum]) as mock_loadStaticData:
       result2 = self.testClient.post(
         self.loginAPIPrefix + '/' + tenantName + '/authproviders',
         data=json.dumps(loginJSON),
@@ -88,8 +92,23 @@ class google_auth_test_api_helper_functions(TestHelperSuperClass.testHelperAPICl
     for x in expectedResults:
       if x == result2.status_code:
         return json.loads(result2.get_data(as_text=True))
-    self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
+    self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults) + " " + result2.get_data(as_text=True))
     return None
+
+  def switchAllowUserCreationForTenantAndGoogleAuth(self,
+      tenantName,
+      authProviderDICT,
+      val
+    ):
+      tenantDict2 = self.getTenantDICT(tenantName)
+      tenantDict2['AllowUserCreation'] = val
+      found = False
+      for authPorvider in tenantDict2["AuthProviders"]:
+        if authPorvider["guid"]==authProviderDICT["guid"]:
+          authPorvider["AllowUserCreation"] = val
+          found = True
+      self.assertTrue(found, msg="Auth provider passed not found")
+      return self.updateTenant(tenantDict2, [200])
 
 @TestHelperSuperClass.wipd
 class test_api(google_auth_test_api_helper_functions):
@@ -256,3 +275,137 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
     self.assertNotEqual(acc1LoginJSON['userGuid'],acc2LoginJSON['userGuid'],msg="user accounts returned should not be the same")
     self.assertNotEqual(acc1LoginJSON['authedPersonGuid'],acc2LoginJSON['authedPersonGuid'],msg="person accounts used should not be the same")
+
+  def test_authWithUserCreationWithTicket(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
+    #Test authentication via google.
+    ## Must use mocks
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
+    #print(googleAuthProvDict)
+    result2JSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[200]
+    )
+    self.assertEqual(result2JSON["ThisTenantRoles"], expectedRoles)
+
+    #Turn off auto user creation
+    tenantDict2 = self.getTenantDICT(setup['tenantName'])
+    tenantDict2['AllowUserCreation'] = False
+    tenantDict3 = self.updateTenant(tenantDict2, [200])
+
+    #Try and login - should not need to create so will suceed
+    result3JSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=None,
+      expectedResults=[200]
+    )
+    self.assertEqual(result3JSON["ThisTenantRoles"], expectedRoles)
+
+  def test_authWithTicketTypeWithoutAllowUserCreationFails(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
+    #Test authentication via google.
+    ## Must use mocks
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
+    #print(googleAuthProvDict)
+    result2JSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithOUTAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[401]
+    )
+    #print(setup["ticketTypeWithOUTAllowUserCreation"]["tickets"][0]["ticketGUID"])
+
+  def test_authWithTicketTypeWithoutAllowUserCreationExistingUserWorks(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
+    #Test authentication via google.
+    ## Must use mocks
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
+
+    self.switchAllowUserCreationForTenantAndGoogleAuth(
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      val=True
+    )
+
+    #initial login causes user creation
+    resultJSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=None,
+      expectedResults=[200]
+    )
+    self.assertEqual(resultJSON["ThisTenantRoles"], [constants.DefaultHasAccountRole])
+
+    self.switchAllowUserCreationForTenantAndGoogleAuth(
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      val=False
+    )
+
+    result2JSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithOUTAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[200]
+    )
+    self.assertEqual(result2JSON["ThisTenantRoles"], expectedRoles)
+
+  def test_authWithUserCreationWithInvalidTicketFails(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
+    #Test authentication via google.
+    ## Must use mocks
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
+    #print(googleAuthProvDict)
+    result2JSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass="INVALIDTICKET",
+      expectedResults=[400]
+    )
+    self.assertEqual(result2JSON["message"], "Invalid Ticket")
+
+
+  def test_reuseOfTicketIsImpossible(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
+    #Test authentication via google.
+    ## Must use mocks
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
+    #print(googleAuthProvDict)
+    result2JSON = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[200]
+    )
+    self.assertEqual(result2JSON["ThisTenantRoles"], expectedRoles)
+
+    #second use
+    resultJSON3 = self.loginWithGoogle(
+      googleLoginAccountNum=0,
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[400]
+    )
+    self.assertEqual(resultJSON3["message"],"Ticket not usable")
+

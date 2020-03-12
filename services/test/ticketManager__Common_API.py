@@ -4,6 +4,9 @@ import ticketManagerTestCommon
 import constants
 import json
 from urllib.parse import urlencode, quote_plus
+import datetime
+import pytz
+from appObj import appObj
 
 class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient):
   def createTicketType(self, tenantTypesTenant, overrideName=None):
@@ -165,3 +168,57 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
     self.assertEqual(qryRes[0]["useWithUserID"], userID, msg="Was not marked with user that used ticket")
     self.assertEqual(qryRes[0]["usedDate"], timeUsed.isoformat())
     self.assertEqual(qryRes[0]["usableState"], "US_ALREADYUSED")
+
+  def setupTenantWithTwoTicketTypesAndTickets(self, authProv=TestHelperSuperClass.sampleInternalAuthProv001_CREATE):
+    testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime)
+
+    tenantDict = self.createTenantWithAuthProvider(
+      tenantBase=TestHelperSuperClass.tenantWithNoAuthProviders,
+      tenantUserCreation=False,
+      authProvDict=authProv
+    )
+    ticketTypeWithAllowUserCreation = self.createTicketType(
+      tenantDict["Name"],
+      overrideName="TestTicketTypeWithAllowUserCreation"
+    )
+    AllowUserCreationTickets = self.callBatchProcess(
+      tenantName=tenantDict["Name"],
+      ticketTypeID=ticketTypeWithAllowUserCreation["id"],
+      foreignKeyList=["testTicket_001"],
+      foreignKeyDupAction="Skip",
+      checkAndParseResponse=True
+    )
+    ticketTypeWithOUTAllowUserCreation = self.createTicketType(
+      tenantDict["Name"],
+      overrideName="TestTicketTypeWithAllowUserCreation"
+    )
+    ticketTypeWithOUTAllowUserCreation["allowUserCreation"] = False
+    ticketTypeWithOUTAllowUserCreation = self.updateTicketType(
+      ticketTypeID=ticketTypeWithOUTAllowUserCreation["id"],
+      ticketTypeTenant=tenantDict["Name"],
+      newDict=ticketTypeWithOUTAllowUserCreation,
+      checkAndParseResponse=True
+    )
+    DISAllowUserCreationTickets = self.callBatchProcess(
+      tenantName=tenantDict["Name"],
+      ticketTypeID=ticketTypeWithOUTAllowUserCreation["id"],
+      foreignKeyList=["testTicket_001_NOCREATION"],
+      foreignKeyDupAction="Skip",
+      checkAndParseResponse=True
+    )
+
+    return {
+      "setupTime": testDateTime,
+      "tenantName": tenantDict["Name"],
+      "ticketTypeWithAllowUserCreation": {
+        "id": ticketTypeWithAllowUserCreation["id"],
+        "issueDuration": ticketTypeWithOUTAllowUserCreation["issueDuration"],
+        "tickets": AllowUserCreationTickets["results"]
+      },
+      "ticketTypeWithOUTAllowUserCreation": {
+        "id": ticketTypeWithOUTAllowUserCreation["id"],
+        "issueDuration": ticketTypeWithOUTAllowUserCreation["issueDuration"],
+        "tickets": DISAllowUserCreationTickets["results"]
+      }
+    }

@@ -169,13 +169,12 @@ class authProvider():
     supressEnrich = False
     if authTPLQueried:
       if authTPL[0] is None:
-        if not self.getAllowUserCreation():
-          supressEnrich = True
-        if not self.tenantObj.getAllowUserCreation():
-          supressEnrich = True
-
+        if not ticketTypeObj.getAllowUserCreation(): #ticket object trumphs tenant and authprov
+          if not self.getAllowUserCreation():
+            supressEnrich = True
+          if not self.tenantObj.getAllowUserCreation():
+            supressEnrich = True
     if not supressEnrich:
-      # print("authProvBase supressEnrich")
       enrichedCredentialDICT = self.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(credentialDICT, appObj)
     obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(
       appObj, enrichedCredentialDICT, storeConnection, supressAutocreate,
@@ -219,7 +218,6 @@ class authProvider():
       authTPL=None, authTPLQueried=False,
       ticketObj=ticketObj, ticketTypeObj=ticketTypeObj
     )
-
     for x in self.operationFunctions[operationName]['requiredDictElements']:
       if x not in operationDICT:
         raise customExceptionClass('Missing operation paramater - ' + x,'OperationParamMissingException')
