@@ -3,7 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/authProviders_Facebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/authProviders_Facebook.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/authProviders_Google.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/authProviders_LDAP.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/authProviders_LDAP.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/authProviders_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/authProviders_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/personObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/personObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -260,7 +268,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584007664105</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Register user tests complete">
+      <created>1584009066821</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1584009066821</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -287,7 +302,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Created test for validating upserted tickettype data" />
     <MESSAGE value="Adding tests" />
     <MESSAGE value="Adding tenant existance check" />
     <MESSAGE value="Renaming API files" />
@@ -312,7 +326,8 @@
     <MESSAGE value="Ticket use with two roles working" />
     <MESSAGE value="Register ticket for use with internal auth" />
     <MESSAGE value="Functionality for not registering with ticket twice" />
-    <option name="LAST_COMMIT_MESSAGE" value="Functionality for not registering with ticket twice" />
+    <MESSAGE value="Register user tests complete" />
+    <option name="LAST_COMMIT_MESSAGE" value="Register user tests complete" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

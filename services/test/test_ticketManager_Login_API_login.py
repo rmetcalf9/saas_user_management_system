@@ -9,6 +9,9 @@ import constants
 import ticketManagerTestCommon
 import json
 
+#New Internal auth registratin tested inside test_ticketManager_Login_API_login_internalAuthRegistration
+#Using ticket with Google tested inside test_authProviders_Google.py
+
 twoRoleList = [ "TestRoleA", "TestRoleB" ]
 
 class helper(ticketManagerAPICommonUtilsClass):
@@ -95,7 +98,7 @@ class helper(ticketManagerAPICommonUtilsClass):
     }
 
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_LoginAPI_login_API(helper):
   def test_ExistingUserUsingTicket(self):
     setup = self.mainSetup()

@@ -168,7 +168,7 @@ class authProviderGoogle(authProvider):
       "creds": json.loads(credentials.to_json())
     }
 
-  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
     #if not self.getAllowUserCreation():
     #  return
     #if not self.tenantObj.getAllowUserCreation():
@@ -176,7 +176,7 @@ class authProviderGoogle(authProvider):
     #Allow user creation checks preformed in RegisterUser call
     #print("Passed checks - will do thingy:")
     try:
-      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection, ticketObj, ticketTypeObj)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing

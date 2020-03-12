@@ -221,12 +221,12 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
 
   return userObj
 
-def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenantName, authProvGUID):
+def ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenantName, authProvGUID, ticketObj, ticketTypeObj):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
-  authProvObj.executeAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT)
+  authProvObj.executeAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, ticketObj, ticketTypeObj)
 
 def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT, storeConnection):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
@@ -329,7 +329,7 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
 
   authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
   loginTrace("Login trace authProvider FOUND")
-  authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection, False)
+  authUserObj = authProvider.Auth(appObj, credentialJSON, storeConnection, False, ticketObj, ticketTypeObj)
   if authUserObj is None:
     loginTrace("Login trace NO AUTH USER")
     raise Exception

@@ -63,7 +63,7 @@ class helper(ticketManagerAPICommonUtilsClass):
       }
     }
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_LoginAPI_login_API_internalAuthRegistration(helper):
   def test_registerInternalAuthWithTicket(self):
     #Auth provider has no allow user creatoin. Ticket has

@@ -135,7 +135,7 @@ class authProvider():
     associatePersonWithAuthCalledWhenAuthIsCreated(appObj, personGUID, key, storeConnection)
     return mainObjToStore
 
-  def AuthReturnAll(self, appObj, credentialDICT, storeConnection, supressAutocreate, authTPL=None, authTPLQueried=False):
+  def AuthReturnAll(self, appObj, credentialDICT, storeConnection, supressAutocreate, authTPL, authTPLQueried, ticketObj, ticketTypeObj):
     #auth TPL will be (obj, objVer, creationDateTime, lastUpdateDateTime)
     if not authTPLQueried:
       authTPL = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
@@ -143,7 +143,7 @@ class authProvider():
     if authTPL[0] is None:
       if supressAutocreate:
         raise constants.authNotFoundException
-      self._AuthActionToTakeWhenThereIsNoRecord(credentialDICT, storeConnection)
+      self._AuthActionToTakeWhenThereIsNoRecord(credentialDICT, storeConnection, ticketObj, ticketTypeObj)
       #Assuming action results in an auth record
       authTPL = getAuthRecord(appObj, self._makeKey(credentialDICT), storeConnection)
       if authTPL[0] is None:
@@ -152,13 +152,13 @@ class authProvider():
     self._auth(appObj, authTPL[0], credentialDICT)
     return authTPL
 
-  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
     raise constants.authNotFoundException
 
   def ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(self, credentialDICT, appObj):
     return self._enrichCredentialDictForAuth(credentialDICT, appObj)
 
-  def Auth(self, appObj, credentialDICT, storeConnection, supressAutocreate):
+  def Auth(self, appObj, credentialDICT, storeConnection, supressAutocreate, ticketObj, ticketTypeObj):
     authTPL = None
     authTPLQueried = False
     if self.canMakeKeyWithoutEnrichment():
@@ -177,7 +177,11 @@ class authProvider():
     if not supressEnrich:
       # print("authProvBase supressEnrich")
       enrichedCredentialDICT = self.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(credentialDICT, appObj)
-    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, enrichedCredentialDICT, storeConnection, supressAutocreate, authTPL=authTPL, authTPLQueried=authTPLQueried)
+    obj, objVer, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(
+      appObj, enrichedCredentialDICT, storeConnection, supressAutocreate,
+      authTPL=authTPL, authTPLQueried=authTPLQueried,
+      ticketObj=ticketObj, ticketTypeObj=ticketTypeObj
+    )
     return obj
 
   # Normally overridden
@@ -199,7 +203,7 @@ class authProvider():
   def getDefaultKnownAs(self, credentialDICT):
     return self._getDefaultKnownAs(credentialDICT)
 
-  def executeAuthOperation(self, appObj, credentialDICT, storeConnection, operationName, operationDICT):
+  def executeAuthOperation(self, appObj, credentialDICT, storeConnection, operationName, operationDICT, ticketObj, ticketTypeObj):
     #for processing operations that change the auth record. This requires existing credentials.
     # one example of an auth operaiton is 'resetpassword' for the internal ath
 
@@ -210,7 +214,11 @@ class authProvider():
     ##Problem to do the auth we need to know the username
     ## but it is not a field in the JWT token
     ## IT is in the response to currentAuthInfo so the webapp can retrieve it from there and supply it correctly in credentials
-    authObj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(appObj, credentialDICT, storeConnection, False)
+    authObj, objectVersion, creationDateTime, lastUpdateDateTime = self.AuthReturnAll(
+      appObj, credentialDICT, storeConnection, False,
+      authTPL=None, authTPLQueried=False,
+      ticketObj=ticketObj, ticketTypeObj=ticketTypeObj
+    )
 
     for x in self.operationFunctions[operationName]['requiredDictElements']:
       if x not in operationDICT:

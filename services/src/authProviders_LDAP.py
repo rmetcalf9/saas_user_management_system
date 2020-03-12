@@ -112,14 +112,14 @@ class authProviderLDAP(authProvider):
 
 
   #No special action if there is no auth record - created if allowed
-  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
     #Checks in registeruserfn
     #if not self.getAllowUserCreation():
     #  return
     #if not self.tenantObj.getAllowUserCreation():
     #  return
     try:
-      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_LDAP/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_LDAP/_AuthActionToTakeWhenThereIsNoRecord", storeConnection, ticketObj, ticketTypeObj)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing

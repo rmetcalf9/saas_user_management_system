@@ -1,4 +1,4 @@
-from TestHelperSuperClass import httpOrigin, testHelperAPIClient, tenantWithNoAuthProviders, sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+import TestHelperSuperClass
 from appObj import appObj
 from tenants import GetTenant
 import constants
@@ -68,7 +68,7 @@ googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
 googleAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_badSecretFileParam['ConfigJSON'] = "{\"clientSecretJSONFile\": \"badNonExistantFile.json\"}"
 
-class google_auth_test_api_helper_functions(testHelperAPIClient):
+class google_auth_test_api_helper_functions(TestHelperSuperClass.testHelperAPIClient):
   def loginWithGoogle(self, accNum, tenantName, authProviderDICT, expectedResults):
     loginJSON = {
       "credentialJSON":{
@@ -82,7 +82,7 @@ class google_auth_test_api_helper_functions(testHelperAPIClient):
         self.loginAPIPrefix + '/' + tenantName + '/authproviders',
         data=json.dumps(loginJSON),
         content_type='application/json',
-        headers={"Origin": httpOrigin}
+        headers={"Origin": TestHelperSuperClass.httpOrigin}
       )
 
     for x in expectedResults:
@@ -91,6 +91,7 @@ class google_auth_test_api_helper_functions(testHelperAPIClient):
     self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
     return None
 
+@TestHelperSuperClass.wipd
 class test_api(google_auth_test_api_helper_functions):
   def addAuthProvider(self, currentTenantJSON, authProviderDICT):
     tenantJSON = copy.deepcopy(currentTenantJSON)
@@ -199,7 +200,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
   def test_authWithUserCreation(self):
     #Test authentication via google.
     ## Must use mocks
-    tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+    tenantDict = self.createTenantWithAuthProvider(TestHelperSuperClass.tenantWithNoAuthProviders, True, TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
 
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
     googleAuthProvider = resultJSON2["AuthProviders"][1]
@@ -218,8 +219,8 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
   #Test user with google auth in one tenant can't log into a tenant they don't have access too
   def test_CrossTenantLoginsDisallowed(self):
     #Second tenant has allow user creation set to FALSE for this test to work - otherwise account is just auto created
-    tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
-    tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
+    tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(TestHelperSuperClass.tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenantWithNoAuthProviders2 = copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders)
     tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
     tenantWhereUserHasNoAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders2, False, googleAuthProv001_CREATE_withAllowCreate)
 
@@ -235,8 +236,8 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
   #Test user with google auth creates a new account on second tenant the same user record is returned
   def test_AutocreateingGoogleAccountsInDifferentTenantsShareSameUser(self):
-    tenant1 = self.createTenantWithAuthProvider(copy.deepcopy(tenantWithNoAuthProviders), True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
-    tenant2D = copy.deepcopy(tenantWithNoAuthProviders)
+    tenant1 = self.createTenantWithAuthProvider(copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders), True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
+    tenant2D = copy.deepcopy(TestHelperSuperClass.tenantWithNoAuthProviders)
     tenant2D['Name'] = 'secondTestTenant'
     tenant2 = self.createTenantWithAuthProvider(tenant2D, True, copy.deepcopy(googleAuthProv001_CREATE_withAllowCreate))
 
@@ -248,7 +249,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     self.assertEqual(result2JSON['authedPersonGuid'],result3JSON['authedPersonGuid'],msg="Different person accounts used")
 
   def test_TwoUsersGetDifferentUserAndPersonIDs(self):
-    tenant1 = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
+    tenant1 = self.createTenantWithAuthProvider(TestHelperSuperClass.tenantWithNoAuthProviders, True, googleAuthProv001_CREATE_withAllowCreate)
 
     acc1LoginJSON = self.loginWithGoogle(0, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])
     acc2LoginJSON = self.loginWithGoogle(1, tenant1['Name'], self.getTenantSpercificAuthProvDict(tenant1['Name'], 'google'), [200])

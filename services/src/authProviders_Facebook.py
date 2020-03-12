@@ -69,10 +69,10 @@ class authProviderFacebook(authProvider):
     #not required as auths are checked at the enrichment stage
     pass
 
-  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection):
+  def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
     try:
       print("Facebook: _AuthActionToTakeWhenThereIsNoRecord")
-      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Facebook/_AuthActionToTakeWhenThereIsNoRecord", storeConnection)
+      self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Facebook/_AuthActionToTakeWhenThereIsNoRecord", storeConnection, ticketObj, ticketTypeObj)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing

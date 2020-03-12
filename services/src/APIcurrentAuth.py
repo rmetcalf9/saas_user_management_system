@@ -116,7 +116,7 @@ def registerAPI(appObj):
       operationName = request.get_json()['operationName']
 
       def dbfn(storeConnection):
-        ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenant, authProvGUID)
+        ExecuteAuthOperation(appObj, credentialDICT, storeConnection, operationName, operationDICT, tenant, authProvGUID, None, None)
         return {
           'Result': 'OK'
         }, 200
