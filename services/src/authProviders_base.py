@@ -169,7 +169,10 @@ class authProvider():
     supressEnrich = False
     if authTPLQueried:
       if authTPL[0] is None:
-        if not ticketTypeObj.getAllowUserCreation(): #ticket object trumphs tenant and authprov
+        ticketAllowsUserCreation = False
+        if ticketTypeObj is not None:
+          ticketAllowsUserCreation = ticketTypeObj.getAllowUserCreation()
+        if not ticketAllowsUserCreation: #ticket object trumphs tenant and authprov
           if not self.getAllowUserCreation():
             supressEnrich = True
           if not self.tenantObj.getAllowUserCreation():

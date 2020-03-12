@@ -1,4 +1,37 @@
 
+// callback dosent have to do anythin as proceeLoginResponse is called from here
+function callLoginAPI ({ store, credentialJSON, callback, processLoginResponseInstance, registering }) {
+  var loginRequestPostData = {
+    credentialJSON: credentialJSON,
+    authProviderGUID: store.state.globalDataStore.selectedAuthProvGUID
+  }
+  var localCallback = {
+    ok: function (response) {
+      callback.ok(response)
+      if (typeof (processLoginResponseInstance) !== 'undefined') {
+        processLoginResponseInstance.processLoginOKResponse(response, loginRequestPostData)
+      }
+    },
+    error: function (response) {
+      callback.error(response)
+    }
+  }
+  var method = 'POST'
+  var path = '/authproviders'
+  if (typeof (registering) !== 'undefined') {
+    if (registering) {
+      method = 'PUT'
+      path = '/register'
+    }
+  }
+  store.dispatch('globalDataStore/callLoginAPI', {
+    method: method,
+    path: path,
+    callback: localCallback,
+    postdata: loginRequestPostData
+  })
+}
+
 function passwordERRORMessage (passwordd, passwordd2) {
   if (/[A-Z]/.test(passwordd) !== true) {
     return 'Password must contain at least one uppercase letter'
@@ -33,5 +66,6 @@ function isSet (value) {
 
 export default {
   passwordERRORMessage: passwordERRORMessage,
-  isSet: isSet
+  isSet: isSet,
+  callLoginAPI: callLoginAPI
 }

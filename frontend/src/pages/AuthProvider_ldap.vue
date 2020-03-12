@@ -58,39 +58,30 @@ export default {
     }
   },
   methods: {
-    processLoginOKResponse (response, loginRequestPostData) {
-      Loading.hide()
-      this.$refs.processLoginResponseInstance.processLoginOKResponse(response, loginRequestPostData)
-    },
     usernamePassLogin () {
       var TTT = this
       if (this.$store.state.globalDataStore.selectedAuthProvGUID === null) {
-        Notify.create({color: 'negative', message: 'No AuthProvGUID selected - you shouldn\'t navigate here directly'})
+        Notify.create({color: 'negative', message: 'No AuthProvGUID selected - you should not navigate here directly'})
         return
       }
-      var loginRequestPostData = {
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+        },
+        error: function (response) {
+          Loading.hide()
+        }
+      }
+      Loading.show()
+      frontendFns.callLoginAPI({
+        store: this.$store,
         credentialJSON: ldapShared.getCredentialDict(
           TTT.authProvInfo.saltForPasswordHashing,
           this.usernamePass.username,
           this.usernamePass.password
         ),
-        authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
-      }
-      var callback = {
-        ok: function (response) {
-          TTT.processLoginOKResponse(response, loginRequestPostData)
-        },
-        error: function (response) {
-          Loading.hide()
-          Notify.create({color: 'negative', message: 'Login Failed'})
-        }
-      }
-      Loading.show()
-      this.$store.dispatch('globalDataStore/callLoginAPI', {
-        method: 'POST',
-        path: '/authproviders',
         callback: callback,
-        postdata: loginRequestPostData
+        processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
       })
     }
   },

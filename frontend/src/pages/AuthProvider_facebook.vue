@@ -16,6 +16,7 @@ import {
   Notify, Loading
 } from 'quasar'
 import processLoginResponse from '../components/processLoginResponse'
+import frontendFns from '../frontendFns.js'
 
 export default {
   name: 'AuthProvider_internal',
@@ -37,24 +38,20 @@ export default {
   methods: {
     signInCallback (responseFromFacebook) {
       var TTT = this
-      var loginRequestPostData = {
-        credentialJSON: responseFromFacebook,
-        authProviderGUID: TTT.$store.state.globalDataStore.selectedAuthProvGUID
-      }
       var callback = {
         ok: function (response) {
           Loading.hide()
-          TTT.$refs.processLoginResponseInstance.processLoginOKResponse(response, loginRequestPostData)
         },
         error: function (response) {
-          TTT.displayErrorToUserAndMoveToLoginSelectionScreen('Login Failed')
+          Loading.hide()
         }
       }
-      TTT.$store.dispatch('globalDataStore/callLoginAPI', {
-        method: 'POST',
-        path: '/authproviders',
+      Loading.show()
+      frontendFns.callLoginAPI({
+        store: this.$store,
+        credentialJSON: responseFromFacebook,
         callback: callback,
-        postdata: loginRequestPostData
+        processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
       })
     },
     displayErrorToUserAndMoveToLoginSelectionScreen (message) {

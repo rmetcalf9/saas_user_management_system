@@ -167,24 +167,21 @@ export default {
       }
       Loading.show()
       var passwordhash = bcrypt.hashSync(this.createAccountDialogModel.username + ':' + this.createAccountDialogModel.password + ':AG44', atob(this.authProvInfo.saltForPasswordHashing))
-      this.$store.dispatch('globalDataStore/callLoginAPI', {
-        method: 'PUT',
-        path: '/register',
+      frontendFns.callLoginAPI({
+        store: this.$store,
+        credentialJSON: {
+          username: this.createAccountDialogModel.username,
+          password: passwordhash
+        },
         callback: callback,
-        postdata: {
-          credentialJSON: {
-            username: this.createAccountDialogModel.username,
-            password: passwordhash
-          },
-          authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
-        }
+        processLoginResponseInstance: undefined,
+        registering: true
       })
     },
     cancelCreateAccountDialog () {
       this.createAccountDialogModel.visible = false
     },
     processLoginOKResponse (response, loginRequestPostData) {
-      Loading.hide()
       this.$refs.processLoginResponseInstance.processLoginOKResponse(response, loginRequestPostData)
     },
     usernamePassLogin () {
@@ -194,16 +191,9 @@ export default {
         return
       }
       var passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.authProvInfo.saltForPasswordHashing))
-      var loginRequestPostData = {
-        credentialJSON: {
-          username: this.usernamePass.username,
-          password: passwordhash
-        },
-        authProviderGUID: this.$store.state.globalDataStore.selectedAuthProvGUID
-      }
       var callback = {
         ok: function (response) {
-          TTT.processLoginOKResponse(response, loginRequestPostData)
+          Loading.hide()
         },
         error: function (response) {
           Loading.hide()
@@ -211,11 +201,14 @@ export default {
         }
       }
       Loading.show()
-      this.$store.dispatch('globalDataStore/callLoginAPI', {
-        method: 'POST',
-        path: '/authproviders',
+      frontendFns.callLoginAPI({
+        store: this.$store,
+        credentialJSON: {
+          username: this.usernamePass.username,
+          password: passwordhash
+        },
         callback: callback,
-        postdata: loginRequestPostData
+        processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
       })
     }
   },
