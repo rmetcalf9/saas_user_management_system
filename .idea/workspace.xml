@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Facebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Facebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -281,7 +277,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584026189807</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Single facebook test added">
+      <created>1584026922134</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1584026922134</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -308,7 +311,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Renaming API files" />
     <MESSAGE value="Create valid ticket type api test created" />
     <MESSAGE value="Created upsert and query APIs for TicketType" />
     <MESSAGE value="Ticket Type AdminAPIs Complete" />
@@ -333,7 +335,8 @@
     <MESSAGE value="Register user tests complete" />
     <MESSAGE value="Refactoring to prepare for auth creation in google auth" />
     <MESSAGE value="Google auth with ticket test complete" />
-    <option name="LAST_COMMIT_MESSAGE" value="Google auth with ticket test complete" />
+    <MESSAGE value="Single facebook test added" />
+    <option name="LAST_COMMIT_MESSAGE" value="Single facebook test added" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
