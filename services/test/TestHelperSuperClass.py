@@ -397,7 +397,7 @@ class testClassWithTestClient(testHelperSuperClass):
   def getTenantInternalAuthProvDict(self, tenant):
     return self.getTenantSpercificAuthProvDict(tenant, 'internal')
 
-  def registerInternalUser(self, tenantName, username, password, authProvider, ticketGUID=None):
+  def registerInternalUser(self, tenantName, username, password, authProvider, ticketGUID=None, expectedResults=[201]):
     hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
       username,
       password,
@@ -419,6 +419,11 @@ class testClassWithTestClient(testHelperSuperClass):
       content_type='application/json',
       headers={"Origin": httpOrigin}
     )
+    if expectedResults is not None:
+      for x in expectedResults:
+        if registerResult.status_code == x:
+          return json.loads(registerResult.get_data(as_text=True))
+
     self.assertEqual(registerResult.status_code, 201, msg="Registration failed - " + registerResult.get_data(as_text=True))
     return json.loads(registerResult.get_data(as_text=True))
 

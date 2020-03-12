@@ -83,6 +83,8 @@ def registerAPI(appObj, nsLogin):
             raise BadRequest(err.text)
           if (err.id=='TryingToCreateDuplicateUserException'):
             raise BadRequest(err.text)
+          if (err.id=='ticketNotUsableException'):
+            raise BadRequest(err.text)
 
           raise Exception('InternalServerError')
         except:

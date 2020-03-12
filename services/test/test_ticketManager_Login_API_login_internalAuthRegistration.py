@@ -105,7 +105,34 @@ class ticketManager_LoginAPI_login_API_internalAuthRegistration(helper):
       timeUsed=testDateTime2
     )
 
-  #def test_CanNotUseTicketTwice(self):
+  def test_CanNotUseTicketTwice(self):
+    setup = self.setup()
+
+    userName1 = "testSetUserName"
+    password1 = "delkjgn4rflkjwned"
+    userName2 = "testSetUserName22"
+    password2 = "delkjgn4rflkjwned22"
+
+    expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
+
+    testDateTime2 = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(testDateTime2)
+    _ = self.registerInternalUser(
+      setup["tenantName"],
+      userName1,
+      password1,
+      self.getTenantInternalAuthProvDict(tenant=setup["tenantName"]),
+      ticketGUID=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"]
+    )
+    registerResultJSON2 = self.registerInternalUser(
+      setup["tenantName"],
+      userName2,
+      password2,
+      self.getTenantInternalAuthProvDict(tenant=setup["tenantName"]),
+      ticketGUID=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[400]
+    )
+    self.assertEqual(registerResultJSON2["message"],"Ticket not usable")
 
   #def test_InternalAuthRegisterWithInvalidGUIDTicketFails(self):
   #  pass

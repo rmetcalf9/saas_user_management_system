@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketTypeObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI_register.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI_register.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/ticketManager__Common_API.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_internalAuthRegistration.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -252,7 +247,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583951135685</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Register ticket for use with internal auth">
+      <created>1584007281394</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1584007281394</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -279,7 +281,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Adding Ticketsystem notes" />
     <MESSAGE value="Tweaking Ticketsystem" />
     <MESSAGE value="Created test for validating upserted tickettype data" />
     <MESSAGE value="Adding tests" />
@@ -304,7 +305,8 @@
     <MESSAGE value="Simple ticket use case test created" />
     <MESSAGE value="Ticket use with single role working" />
     <MESSAGE value="Ticket use with two roles working" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ticket use with two roles working" />
+    <MESSAGE value="Register ticket for use with internal auth" />
+    <option name="LAST_COMMIT_MESSAGE" value="Register ticket for use with internal auth" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
