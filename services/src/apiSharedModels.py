@@ -7,7 +7,7 @@ def getTenantModel(appObj):
   AuthProviderModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
     'guid': fields.String(default='abc', description='Unique identifier of AuthProvider'),
     'Type': fields.String(default='internal', description='Authorization provider type'),
-    'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND Tenant level to work)'),   
+    'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND Tenant level to work)'),
     'AllowLink': fields.Boolean(default=False,description='Allow user to add this as a secondary auth method'),
     'AllowUnlink': fields.Boolean(default=False,description='Allow user to remove this auth method (As long as they have others availiable)'),
     'LinkText': fields.String(default='Link', description='Text to show on link button in Security settings UI'),
@@ -23,7 +23,7 @@ def getTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
     'AuthProviders': fields.List(fields.Nested(AuthProviderModel)),
     'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
-    'TicketOverrideURL': fields.String(default='DEFAULT', description='Overrider URL for tickets'),
+    'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
   })
 

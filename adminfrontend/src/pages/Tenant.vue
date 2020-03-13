@@ -44,6 +44,15 @@
         <q-icon color="primary" name="mode_edit" />
       </q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Ticket Override URL:</q-item-label>
+        <q-item-label caption v-if="tenantData.TicketOverrideURL === ''">None Set</q-item-label>
+        <q-item-label caption v-if="tenantData.TicketOverrideURL !== ''">
+          <a :href="tenantData.TicketOverrideURL">{{ tenantData.TicketOverrideURL }}</a>
+        </q-item-label>
+      </q-item-section>
+    </q-item>
   </q-list>
 
   <q-table
@@ -88,6 +97,8 @@
           input-debounce="0"
           @new-value="dialogEditJWTCollectionAllowedOriginListCreateValue"
         /> Origins which client apps will be allowed to collect JWT tokens from
+        <q-input v-model="editTenantModalDialogData.TicketOverrideURL" ref="TicketOverrideURLInput" label="Tenant spercific ticket endpoint" :label-width="3" clearable />Ticket Override URL
+
         <div>&nbsp;</div>
         <q-btn
           @click="okEditTenantDialog"
@@ -221,7 +232,8 @@ export default {
       editTenantModalDialogData: {
         Description: '',
         AllowUserCreation: false,
-        JWTCollectionAllowedOriginList: []
+        JWTCollectionAllowedOriginList: [],
+        TicketOverrideURL: ''
       },
       editTenantModalDialogVisible: false,
       editAuthProvModalDialogData: {
@@ -407,8 +419,10 @@ export default {
       if (this.editTenantModalDialogData.Description === this.tenantData.Description) {
         if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
           if (this.editTenantModalDialogData.JWTCollectionAllowedOriginList === this.tenantData.JWTCollectionAllowedOriginList) {
-            Notify.create({color: 'positive', message: 'No changes made'})
-            return // no change so do nothing
+            if (this.editTenantModalDialogData.TicketOverrideURL === this.tenantData.TicketOverrideURL) {
+              Notify.create({color: 'positive', message: 'No changes made'})
+              return // no change so do nothing
+            }
           }
         }
       }
@@ -416,6 +430,7 @@ export default {
       newTenantJSON.Description = this.editTenantModalDialogData.Description
       newTenantJSON.AllowUserCreation = this.editTenantModalDialogData.AllowUserCreation
       newTenantJSON.JWTCollectionAllowedOriginList = this.editTenantModalDialogData.JWTCollectionAllowedOriginList
+      newTenantJSON.TicketOverrideURL = this.editTenantModalDialogData.TicketOverrideURL
 
       var callback = {
         ok: function (response) {
@@ -442,6 +457,7 @@ export default {
       this.editTenantModalDialogData.Description = this.tenantData.Description
       this.editTenantModalDialogData.AllowUserCreation = this.tenantData.AllowUserCreation
       this.editTenantModalDialogData.JWTCollectionAllowedOriginList = this.tenantData.JWTCollectionAllowedOriginList
+      this.editTenantModalDialogData.TicketOverrideURL = this.tenantData.TicketOverrideURL
 
       this.editTenantModalDialogVisible = true
       var TTT = this
