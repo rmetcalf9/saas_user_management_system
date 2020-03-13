@@ -13,7 +13,8 @@ def GetUser(appObj, UserID, storeConnection):
   return CreateUserObjFromUserDict(appObj, jsonData, objVersion, creationDateTime, lastUpdateDateTime, storeConnection)
 
 def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime, storeConnection):
-  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2, _ = storeConnection.getObjectJSON("users_associatedPersons",UserDict['UserID'])
+  userID = UserDict['UserID']
+  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2, _ = storeConnection.getObjectJSON("users_associatedPersons",userID)
   return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
 
 

@@ -46,5 +46,6 @@ export function REFRESH_STORED_RESPONSE_PROCESS_COMPLETE (state) {
 }
 
 export function STORETICKETINUSE (state, ticketInUse) {
+  console.log('Storing ticket in use:', ticketInUse)
   state.ticketInUse = ticketInUse
 }

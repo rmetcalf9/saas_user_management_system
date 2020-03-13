@@ -10,7 +10,8 @@ from authProviders import authProviderFactory
 from unittest.mock import patch, mock_open
 from authProviders_base import resetStaticData
 import ticketManagerTestCommon
-
+import datetime
+import pytz
 
 client_cliental_json_filename = 'googleauth_client_public.json'
 #client_cliental_json_filename = 'googleauth_client_secret.json'
@@ -281,6 +282,9 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     #Test authentication via google.
     ## Must use mocks
 
+    ticketUseTime = datetime.datetime.now(pytz.timezone("UTC"))
+    appObj.setTestingDateTime(ticketUseTime)
+
     expectedRoles = [constants.DefaultHasAccountRole] + ticketManagerTestCommon.validTicketTypeDict["roles"]
     googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
     #print(googleAuthProvDict)
@@ -292,6 +296,15 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
       expectedResults=[200]
     )
     self.assertEqual(result2JSON["ThisTenantRoles"], expectedRoles)
+
+    self.assertTicketUsed(
+      tenantName=setup['tenantName'],
+      foreignKey=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["foreignKey"],
+      ticketGUID=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      ticketTypeID=setup["ticketTypeWithAllowUserCreation"]["id"],
+      userID=result2JSON["userGuid"],
+      timeUsed=ticketUseTime
+    )
 
     #Turn off auto user creation
     tenantDict2 = self.getTenantDICT(setup['tenantName'])

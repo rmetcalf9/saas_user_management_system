@@ -169,6 +169,13 @@ class ticketManagerAPICommonUtilsClass(TestHelperSuperClass.testHelperAPIClient)
     self.assertEqual(qryRes[0]["usedDate"], timeUsed.isoformat())
     self.assertEqual(qryRes[0]["usableState"], "US_ALREADYUSED")
 
+    userRES = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/users/' + userID, headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(userRES.status_code, 200)
+    userJSON = json.loads(userRES.get_data(as_text=True))
+
+    self.assertTrue("foreignKeysOfTicketsUsed" in userJSON["other_data"], msg="user other data shows no sign of tickets")
+    self.assertTrue(foreignKey in userJSON["other_data"]["foreignKeysOfTicketsUsed"], msg="Foreign key of ticket not registered against user")
+
   def setupTenantWithTwoTicketTypesAndTickets(self, authProv=TestHelperSuperClass.sampleInternalAuthProv001_CREATE):
     testDateTime = datetime.datetime.now(pytz.timezone("UTC"))
     appObj.setTestingDateTime(testDateTime)

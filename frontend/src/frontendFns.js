@@ -5,6 +5,13 @@ function callLoginAPI ({ store, credentialJSON, callback, processLoginResponseIn
     credentialJSON: credentialJSON,
     authProviderGUID: store.state.globalDataStore.selectedAuthProvGUID
   }
+  if (typeof (store.state.globalDataStore.ticketInUse) !== 'undefined') {
+    if (store.state.globalDataStore.ticketInUse !== null) {
+      if (store.state.globalDataStore.ticketInUse !== 'null') {
+        loginRequestPostData['ticket'] = store.state.globalDataStore.ticketInUse
+      }
+    }
+  }
   var localCallback = {
     ok: function (response) {
       callback.ok(response)

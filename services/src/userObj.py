@@ -75,3 +75,5 @@ class userClass():
       return False
     return rollName in self._mainDict["TenantRoles"][tenantName]
 
+  def getID(self):
+    return self._mainDict["UserID"]

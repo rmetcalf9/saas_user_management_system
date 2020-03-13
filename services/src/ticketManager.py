@@ -8,7 +8,7 @@ import tenants
 from werkzeug.exceptions import BadRequest, NotFound
 import datetime
 import pytz
-from users import AddUserRole
+import users
 
 class ticketManagerClass():
   repositoryTicketType = None
@@ -225,18 +225,36 @@ class ticketManagerClass():
     ticketTypeObj,
     storeConnection
   ):
+    userObjectChanged = False
     if ticketObj.internalUseIndicator:
       return # we already used this ticket in this session
     for curRole in ticketTypeObj.getDict()["roles"]:
       if not userObj.hasRole(tenantName=ticketTypeObj.getDict()["tenantName"], rollName=curRole):
-        AddUserRole(
+        userObjectChanged = True
+        users.AddUserRole(
           appObj=appObj,
           userID=userObj.getReadOnlyDict()["UserID"],
           tennantName=ticketTypeObj.getDict()["tenantName"],
           roleName=curRole,
           storeConnection=storeConnection
         )
-        #Save to object so we can skip re-querying the db
+        #Save to object so we can skip re-querying the db (Save that we did in case we are forced to get a new object version)
         userObj.addRole(tenantName=ticketTypeObj.getDict()["tenantName"], rollName=curRole)
     ticketObj.setUsed(appObj=appObj, userID=userObj.getReadOnlyDict()["UserID"])
     ticketObj.save(storeConnection=storeConnection)
+    foreignKeysForThisUser = []
+    if "foreignKeysOfTicketsUsed" in userObj.getReadOnlyDict()["other_data"]:
+      foreignKeysForThisUser = userObj.getReadOnlyDict()["other_data"]["foreignKeysOfTicketsUsed"]
+    if ticketObj.getDict()["foreignKey"] not in foreignKeysForThisUser:
+      foreignKeysForThisUser.append(ticketObj.getDict()["foreignKey"])
+    def updateFn(user):
+      user["other_data"]["foreignKeysOfTicketsUsed"]=foreignKeysForThisUser
+      return user
+    if userObjectChanged:
+      #we need to get new user object
+      userObj = users.GetUser(appObj, userObj.getID(), storeConnection)
+    users.UpdateUserObjUsingFunction(
+      userObj=userObj,
+      storeConnection=storeConnection,
+      updateFn=updateFn
+    )

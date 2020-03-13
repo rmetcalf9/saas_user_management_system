@@ -6,10 +6,27 @@
         <div class="fixed-center">This ticket is not valid</div>
       </q-page>
       <q-page padding v-if="ticket.isUsable === 'ERROR'">
-        <div class="fixed-center">Error with ticket</div>
+        <div class="fixed-center"><p>This ticket has an error</p>
+        <q-btn
+          @click="pressContinueToSite"
+          color="primary"
+          label="Continue"
+          class = "float-right q-ml-xs"
+        />
+        </div>
       </q-page>
       <q-page padding v-if="ticket.isUsable === 'EXPIRED'">
         <div class="fixed-center">TODO EXPIRED TICKET</div>
+      </q-page>
+      <q-page padding v-if="ticket.isUsable === 'INVALID'">
+        <div class="fixed-center"><p>This ticket has already been used or is invalid</p>
+        <q-btn
+          @click="pressContinueToSite"
+          color="primary"
+          label="Continue"
+          class = "float-right q-ml-xs"
+        />
+        </div>
       </q-page>
       <q-page padding v-if="ticket.isUsable === 'USABLE'">
         <div class="fixed-center">
@@ -54,8 +71,12 @@ export default {
   methods: {
     pressOK () {
       this.$store.commit('globalDataStore/updateUsersystemReturnaddress', this.ticket.ticketType.postUseURL)
-      this.$store.commit('globalDataStore/STORETICKETINUSE', this.ticket)
+      // this.$store.commit('globalDataStore/STORETICKETINUSE', this.ticket) Had issues with value disappearing
+      this.$store.commit('globalDataStore/STORETICKETINUSE', this.$route.params.ticketGUID)
       this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
+    },
+    pressContinueToSite () {
+      window.location.href = this.ticket.ticketType.postInvalidURL
     }
   },
   computed: {

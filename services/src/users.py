@@ -94,6 +94,13 @@ def DeleteUser(appObj, UserID, objectVersion, storeConnection):
 
   return userObj
 
+def UpdateUserObjUsingFunction(userObj, storeConnection, updateFn):
+  def updUser(user, storeConnection):
+    if user is None:
+      raise userNotFoundException
+    return updateFn(user)
+  storeConnection.updateJSONObject("users", userObj.getID(), updUser, userObj.getObjectVersion())
+
 def UpdateUser(appObj, UserID,TenantRoles,known_as,other_data, objectVersion, storeConnection):
   userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is None:
