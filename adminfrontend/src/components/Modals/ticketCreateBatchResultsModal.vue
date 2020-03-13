@@ -49,7 +49,9 @@ export default {
       results: [],
       statsissued: 0,
       statsreissued: 0,
-      statsskipped: 0
+      statsskipped: 0,
+      ticketTypeData: {},
+      tenantData: {}
     }
   },
   methods: {
@@ -60,7 +62,7 @@ export default {
       this.visible = false
       this.$emit('close', this.callerData)
     },
-    launchDialog ({ ticketTypeData, callerData, createBatchResult }) {
+    launchDialog ({ ticketTypeData, callerData, createBatchResult, tenantData }) {
       var TTT = this
       this.callerData = callerData
       this.tenantName = ticketTypeData.tenantName
@@ -71,6 +73,9 @@ export default {
       this.statsreissued = createBatchResult.data.stats.reissued
       this.statsskipped = createBatchResult.data.stats.skipped
 
+      this.ticketTypeData = ticketTypeData
+      this.tenantData = tenantData
+
       TTT.visible = true // Must be visible for ref to exist
     }
   },
@@ -80,7 +85,7 @@ export default {
         var TTT = this
         return this.results
           .map(function (result) {
-            return result.foreignKey + ', ' + adminfrontendfns.getURLforTicketGUID(TTT.$store, result.ticketGUID, TTT.tenantName)
+            return result.foreignKey + ', ' + adminfrontendfns.getURLforTicketGUID(TTT.$store, result.ticketGUID, TTT.tenantName, TTT.ticketTypeData, TTT.tenantData)
           })
           .reduce(function (acculmator, result) {
             return acculmator + result + '\n'

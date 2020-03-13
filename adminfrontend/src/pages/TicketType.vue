@@ -85,6 +85,7 @@
     :selectedTenantName="$route.params.selTenantNAME"
     :selectedTicketTypeID="$route.params.selTicketTypeID"
     :ticketTypeData="ticketTypeData"
+    :tenantData="tenantData"
   />
 
   <strictConfirmation
@@ -130,7 +131,8 @@ export default {
   },
   data () {
     return {
-      ticketTypeData: getEmptyTicketTypeData()
+      ticketTypeData: getEmptyTicketTypeData(),
+      tenantData: {}
     }
   },
   methods: {
@@ -202,16 +204,40 @@ export default {
         headers: {}
       })
     },
+    refreshTenantData () {
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+          TTT.tenantData = response.data
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create({color: 'negative', message: 'Get Tenant failed - ' + callbackHelper.getErrorFromResponse(error)})
+          TTT.tenantData = {}
+        }
+      }
+      Loading.show()
+      this.$store.dispatch('globalDataStore/callAdminAPI', {
+        path: '/tenants/' + this.$route.params.selTenantNAME,
+        method: 'get',
+        postdata: null,
+        callback: callback,
+        curPath: this.$router.history.current.path,
+        headers: undefined
+      })
+    },
     refreshTicketTypeData () {
       var TTT = this
       var callback = {
         ok: function (response) {
           Loading.hide()
           TTT.ticketTypeData = response.data
+          TTT.refreshTenantData()
         },
         error: function (error) {
           Loading.hide()
-          Notify.create({color: 'negative', message: 'Ticker Type failed - ' + callbackHelper.getErrorFromResponse(error)})
+          Notify.create({color: 'negative', message: 'Get Ticket Type failed - ' + callbackHelper.getErrorFromResponse(error)})
           TTT.ticketTypeData = getEmptyTicketTypeData()
         }
       }

@@ -76,7 +76,8 @@ export default {
     'persistantSettingsSlot',
     'selectedTenantName',
     'selectedTicketTypeID',
-    'ticketTypeData'
+    'ticketTypeData',
+    'tenantData'
   ],
   components: {
     selectColumns,
@@ -106,7 +107,7 @@ export default {
   },
   methods: {
     getURLforTicketGUID (ticketGUID) {
-      return adminfrontendfns.getURLforTicketGUID(this.$store, ticketGUID, this.selectedTenantName)
+      return adminfrontendfns.getURLforTicketGUID(this.$store, ticketGUID, this.selectedTenantName, this.ticketTypeData, this.tenantData)
     },
     disableSelectedTickets () {
       var TTT = this
@@ -150,7 +151,8 @@ export default {
           TTT.$refs.ticketCreateBatchResultsModal.launchDialog({
             ticketTypeData: TTT.ticketTypeData,
             callerData: { },
-            createBatchResult: response
+            createBatchResult: response,
+            tenantData: TTT.tenantData
           })
           TTT.refresh()
         },
