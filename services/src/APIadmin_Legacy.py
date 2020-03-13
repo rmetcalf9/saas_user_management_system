@@ -296,6 +296,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
 
       def dbfn(storeConnection):
         def defOutput(item):
+          print("getUSERSPaginated DEBUG - item[0]=", item[0])
           a = CreateUserObjFromUserDict(appObj, item[0],item[1],item[2],item[3], storeConnection).getJSONRepresenation()
           ##print("a:", a)
           return a
