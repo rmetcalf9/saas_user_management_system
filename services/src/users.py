@@ -1,4 +1,4 @@
-from constants import customExceptionClass, DefaultHasAccountRole
+from constants import customExceptionClass, DefaultHasAccountRole, objectType_users_associatedPersons
 
 from persons import GetPerson, DeletePerson
 from userPersonCommon import RemoveUserAssociation, GetUser, userDosentExistException
@@ -41,7 +41,7 @@ def CreateUser(appObj, userData, mainTenant, createdBy, storeConnection):
     "known_as": KnownAs,
     "other_data": OtherData
   })
-  storeConnection.saveJSONObject("users_associatedPersons", UserID, [])
+  storeConnection.saveJSONObject(objectType_users_associatedPersons, UserID, [])
   if mainTenant is not None:
     AddUserRole(appObj, UserID, mainTenant, DefaultHasAccountRole, storeConnection)
 
@@ -52,7 +52,7 @@ def associateUserWithPerson(appObj, UserID, personGUID, storeConnection):
     if personGUID not in user:
       user.append(personGUID)
     return user
-  storeConnection.updateJSONObject("users_associatedPersons", UserID, updUser)
+  storeConnection.updateJSONObject(objectType_users_associatedPersons, UserID, updUser)
 
   def upd(idfea, transactionContext):
     if idfea is None:
@@ -84,13 +84,13 @@ def DeleteUser(appObj, UserID, objectVersion, storeConnection):
   userObj = GetUser(appObj, UserID, storeConnection)
   if userObj is None:
     raise userDosentExistException
-  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("users_associatedPersons",UserID)
+  associatedPersonList, objVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON(objectType_users_associatedPersons,UserID)
 
   for personGUID in associatedPersonList:
     RemoveUserAssociation(appObj, UserID, personGUID, DeletePerson, storeConnection)
 
   storeConnection.removeJSONObject("users", UserID, objectVersion)
-  storeConnection.removeJSONObject("users_associatedPersons", UserID)
+  storeConnection.removeJSONObject(objectType_users_associatedPersons, UserID)
 
   return userObj
 

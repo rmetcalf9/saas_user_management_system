@@ -1,4 +1,4 @@
-from constants import DefaultHasAccountRole, customExceptionClass
+from constants import DefaultHasAccountRole, customExceptionClass, objectType_users_associatedPersons
 from userObj import userClass
 
 personDosentExistException = customExceptionClass('Person not found', 'personDosentExistException')
@@ -14,7 +14,7 @@ def GetUser(appObj, UserID, storeConnection):
 
 def CreateUserObjFromUserDict(appObj, UserDict, objVersion, creationDateTime, lastUpdateDateTime, storeConnection):
   userID = UserDict['UserID']
-  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2, _ = storeConnection.getObjectJSON("users_associatedPersons",userID)
+  associatedPersonsList, objVersion2, creationDateTime2, lastUpdateDateTime2, _ = storeConnection.getObjectJSON(objectType_users_associatedPersons,userID)
   return userClass(UserDict, objVersion, creationDateTime, lastUpdateDateTime, associatedPersonsList)
 
 
@@ -41,7 +41,7 @@ def RemoveUserAssociation(appObj, userID, personGUID, deletePersonFn, storeConne
 
 
     return associatedPersonList
-  storeConnection.updateJSONObject("users_associatedPersons", userID, updateTheUsersPersonListFn)
+  storeConnection.updateJSONObject(objectType_users_associatedPersons, userID, updateTheUsersPersonListFn)
 
 
   userListForThisPerson, objectVersion, creationDateTime, lastUpdateDateTime, _ = storeConnection.getObjectJSON("UsersForEachPerson",personGUID)
