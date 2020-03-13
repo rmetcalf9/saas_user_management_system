@@ -156,7 +156,11 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
         def someFn(connectionContext):
-          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'], connectionContext, JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, []))
+          return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],
+            connectionContext,
+            JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, []),
+            TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, "")
+          )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 
       except customExceptionClass as err:
@@ -213,7 +217,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
             content['AllowUserCreation'],
             content['AuthProviders'],
             content['ObjectVersion'], connectionContext,
-            JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, None)
+            JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, None),
+            TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, "")
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 

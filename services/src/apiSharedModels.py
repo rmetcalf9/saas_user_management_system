@@ -23,6 +23,7 @@ def getTenantModel(appObj):
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
     'AuthProviders': fields.List(fields.Nested(AuthProviderModel)),
     'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
+    'TicketOverrideURL': fields.String(default='DEFAULT', description='Overrider URL for tickets'),
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
   })
 

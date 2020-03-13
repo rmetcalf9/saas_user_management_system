@@ -82,6 +82,7 @@ class test_funcitonal(test_api):
     expectedResult["Name"] = constants.masterTenantName
     expectedResult["Description"] = constants.masterTenantDefaultDescription
     expectedResult["JWTCollectionAllowedOriginList"] = list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
+    expectedResult["TicketOverrideURL"] = "" #will always be blank for default tenant
 
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], expectedResult, ['AuthProviders',"ObjectVersion"])
     self.assertEqual(resultJSON["result"][0]["ObjectVersion"],"2")

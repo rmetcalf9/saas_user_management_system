@@ -25,6 +25,8 @@ class tenantClass():
       if not 'LinkText' in self._mainDict['AuthProviders'][curAuthProv]:
         self._mainDict['AuthProviders'][curAuthProv]['LinkText'] = 'Link ' + self._mainDict['AuthProviders'][curAuthProv]['Type']
 
+    if not "TicketOverrideURL" in self._mainDict:
+      self._mainDict["TicketOverrideURL"] = ""
 
     self._objectVersion = objectVersion
 

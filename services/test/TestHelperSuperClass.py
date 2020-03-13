@@ -40,7 +40,8 @@ tenantWithNoAuthProviders = {
   "Description": "Tenant with no auth providers",
   "AllowUserCreation": False,
   "AuthProviders": [],
-  "JWTCollectionAllowedOriginList": [httpOrigin]
+  "JWTCollectionAllowedOriginList": [httpOrigin],
+  "TicketOverrideURL": "TESTOVER"
 }
 sampleInternalAuthProv001_CREATE = {
   "guid": None,

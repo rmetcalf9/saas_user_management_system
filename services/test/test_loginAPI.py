@@ -52,7 +52,8 @@ class test_loginapi_norm(test_api):
         "ConfigJSON": "{\"userSufix\": \"@internalDataStore\"}",
         "StaticlyLoadedData": {}
       }],
-      "ObjectVersion": "2"
+      "ObjectVersion": "2",
+      "TicketOverrideURL": ""
     }
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders', "JWTCollectionAllowedOriginList" ])
     self.assertEqual(resultJSON["JWTCollectionAllowedOriginList"], expectedResult["JWTCollectionAllowedOriginList"])

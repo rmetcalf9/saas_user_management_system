@@ -189,6 +189,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
       }]
       expectedResult["ObjectVersion"] = 1
       expectedResult["JWTCollectionAllowedOriginList"] = []
+      expectedResult["TicketOverrideURL"] = ""
 
       self.assertJSONStringsEqualWithIgnoredKeys(jsonRep,expectedResult, [], msg="Invalid JSON representation of Object")
 

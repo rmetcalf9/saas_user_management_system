@@ -108,7 +108,7 @@ class facebook_auth_test_api_helper_functions(ticketManagerAPICommonUtilsClass):
     self.assertFalse(True, msg="Login status_code was " + str(result2.status_code) + " expected one of " + str(expectedResults))
     return None
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_facebook_api(facebook_auth_test_api_helper_functions):
 
   def test_createAuth(self):
