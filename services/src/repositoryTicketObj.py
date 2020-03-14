@@ -33,6 +33,8 @@ class TicketObjClass(RepositoryObjBaseClass):
       return "US_REISSUED"
     if self.getDict()["useWithUserID"] is not None:
       return "US_ALREADYUSED"
+    if self.getDict()["reissueRequestedDate"] is not None:
+      return "US_REISSUEREQUESTED"
     dt = parse(self.getDict()["expiry"])
     if self.repositoryObj.appObj.getCurDateTime() > dt:
       return "US_EXPIRED"
@@ -56,9 +58,14 @@ class TicketObjClass(RepositoryObjBaseClass):
       return "EXPIRED"
     elif usState == "US_USABLEIFTICKETTYPEISENABLED":
       return "USABLE"
+    elif usState == "US_REISSUEREQUESTED":
+      return "REISSUEREQUESTED"
     return "INVALID"
 
   def setUsed(self, appObj, userID):
     self.internalUseIndicator = True #This is not stored in DB
     self.getDict()["useWithUserID"] = userID
     self.getDict()["usedDate"] = appObj.getCurDateTime().isoformat()
+
+  def setReissueRequested(self, appObj):
+    self.getDict()["reissueRequestedDate"] = appObj.getCurDateTime().isoformat()

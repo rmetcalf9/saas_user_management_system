@@ -248,33 +248,3 @@ class ticketManager_LoginAPI_login_API(helper):
     )
     self.assertEqual(loginRespData["message"],"Invalid Ticket")
 
-  #def test_NewUserWithCompletlyInvalidTicketGUID(self):
-    #Test only applies to Google auth as internal auth users must use register API
-    # setup = self.mainSetup()
-    # ticketToUse = setup["ticketWithTwoRolesAndAllowUserCreationTrue"]
-    # loginRespData = self.loginAsUser(
-    #   tenant=ticketToUse["tenantName"],
-    #   authProviderDICT=self.getTenantInternalAuthProvDict(tenant=ticketToUse["tenantName"]),
-    #   username="??",
-    #   password="??",
-    #   ticketToPass="BADTICKETGUID",
-    #   expectedResults=[400]
-    # )
-    # self.assertEqual(loginRespData["message"],"Invalid Ticket")
-
-#  def test_ExistingUserUsingTicketTwoRolesAlreadyGranted(self):
-    #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
-
-#  def test_ExistingUserUsingTicketTwoRolesOneAlreadyGrantedOne(self):
-    #self.assertEqual(loginRespData["ThisTenantRoles"],[constants.DefaultHasAccountRole] + twoRoleList)
-
-#  def test_NewUserUsingTicket(self):
-
-# def test_NewUserUsingTicketFailsBecauseAllowUserCreationIsFalse(self):
-
-
-
-#Add tests where users have account on another tenant
-#Make sure this doesn't lead to allow user creation loophole on either tenant
-
-#TODO Think about how a person with mutiple users uses a ticket

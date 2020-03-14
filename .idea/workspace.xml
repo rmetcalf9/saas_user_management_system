@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_requestReissue.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/insert_test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/insert_test_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Ticket.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Ticket.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Tickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Tickets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryTicketObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryTicketObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/ticketManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/ticketManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -297,7 +302,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584093301601</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Adding ticket test data">
+      <created>1584178651394</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1584178651394</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -324,7 +336,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Created upsert and query APIs for TicketType" />
     <MESSAGE value="Ticket Type AdminAPIs Complete" />
     <MESSAGE value="Adding extra validation checks" />
     <MESSAGE value="Update API created" />
@@ -349,7 +360,8 @@
     <MESSAGE value="Google auth with ticket test complete" />
     <MESSAGE value="Single facebook test added" />
     <MESSAGE value="Write back foreign key list to user other data" />
-    <option name="LAST_COMMIT_MESSAGE" value="Write back foreign key list to user other data" />
+    <MESSAGE value="Adding ticket test data" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding ticket test data" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -358,6 +370,10 @@
           <url>file://$PROJECT_DIR$/services/src/APIadmin_Legacy.py</url>
           <line>1</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/services/src/APIlogin_Tickets.py</url>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

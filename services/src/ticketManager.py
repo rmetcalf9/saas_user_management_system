@@ -9,6 +9,7 @@ from werkzeug.exceptions import BadRequest, NotFound
 import datetime
 import pytz
 import users
+import constants
 
 class ticketManagerClass():
   repositoryTicketType = None
@@ -258,3 +259,30 @@ class ticketManagerClass():
       storeConnection=storeConnection,
       updateFn=updateFn
     )
+
+  def userRequestTicketReissue(
+    self,
+    tenantName,
+    ticketGUID,
+    storeConnection,
+    appObj
+  ):
+    ticketObj = self.repositoryTicket.get(id=ticketGUID, storeConnection=storeConnection)
+    if ticketObj is None:
+      return NotFound, 404
+    ticketTypeObj = self.getTicketType(tenantName=tenantName, tickettypeID=ticketObj.getDict()["typeGUID"], storeConnection=storeConnection)
+    if ticketTypeObj is None:
+      return NotFound, 404
+
+    if ticketObj.getUsable(ticketTypeObj=ticketTypeObj) != "EXPIRED":
+      raise constants.customExceptionClass(text="Not possible to renew this ticket", iid="notpostorenew")
+
+
+    ticketObj.setReissueRequested(appObj=appObj)
+    ticketObj.save(storeConnection=storeConnection)
+
+    return {
+      "ticketType": ticketTypeObj.getDict(),
+      "isUsable": ticketObj.getUsable(ticketTypeObj=ticketTypeObj),
+      "expiry": ticketObj.getDict()["expiry"]
+    }

@@ -16,7 +16,22 @@
         </div>
       </q-page>
       <q-page padding v-if="ticket.isUsable === 'EXPIRED'">
-        <div class="fixed-center">TODO EXPIRED TICKET</div>
+        <div class="fixed-center">
+          <p class="text-h4">Oops! Expired Ticket</p>
+          <p>This ticket has expired and can not be used. You can request for it to be reissued by our admins.</p>
+          <q-btn
+            @click="pressContinueToSite"
+            color="secondary"
+            label="Back to Site"
+            class = "float-left q-ml-xs"
+          />
+          <q-btn
+            @click="pressRequestReissue"
+            color="primary"
+            label="Request Reissue"
+            class = "float-right q-ml-xs"
+          />
+        </div>
       </q-page>
       <q-page padding v-if="ticket.isUsable === 'INVALID'">
         <div class="fixed-center"><p>This ticket has already been used or is invalid</p>
@@ -69,6 +84,9 @@ export default {
     }
   },
   methods: {
+    pressRequestReissue () {
+      Notify.create({color: 'negative', message: 'Not Implemented'})
+    },
     pressOK () {
       this.$store.commit('globalDataStore/updateUsersystemReturnaddress', this.ticket.ticketType.postUseURL)
       // this.$store.commit('globalDataStore/STORETICKETINUSE', this.ticket) Had issues with value disappearing
