@@ -374,6 +374,59 @@ else:
   addAuthProvider(creationDICT['Name'], authProvGoogleCreationDICT)
   addAuthProvider(creationDICT['Name'], authProvFacebookCreationDICT)
 
+validTicketTypeDict = {
+  "tenantName": masterTenantName,
+  "ticketTypeName": "TestTicketType001",
+  "description": "Created by insert_test_data.py",
+  "enabled": True,
+  "welcomeMessage": {
+    "agreementRequired": False,
+    "title": "Test Ticket Type Welcome Message Title",
+    "body": "Test Ticket Type Welcome Message Body",
+    "okButtonText": "ok button text"
+  },
+  "allowUserCreation": True,
+  "issueDuration": 123,
+  "roles": [ "role1" ],
+  "postUseURL": "http:dsadsd",
+  "postInvalidURL": "http:dsadsd"
+}
+
+def createTicketType(tenantTypesTenant, name="TestTicketType001", allowUserCreation=True, expiryDuration=123):
+  jsonData = copy.deepcopy(validTicketTypeDict)
+  jsonData["ticketTypeName"] = name
+  jsonData["tenantName"] = tenantTypesTenant
+  jsonData["allowUserCreation"] = allowUserCreation
+  jsonData["issueDuration"] = expiryDuration
+  jsonData["roles"] = [ "COMMONROLE", "ROLEFROM" + name ]
+  print("Creating ticket type " + name)
+  createTicketTypeResultDict, res = callPostService(
+    ADMIN,
+    "/" + masterTenantName + "/tenants/" + tenantTypesTenant + '/tickettypes',
+    jsonData,
+    [201]
+  )
+
+  jsonData = {
+    "foreignKeyDupAction": "Skip",
+    "foreignKeyList": [ "Tick001", "Tick002", "Tick003", "Tick004", "Tick005", "Tick006" ]
+  }
+  print(" - Creating 6 tickets " + str(jsonData["foreignKeyList"]))
+  resDICT, res = callPostService(
+    ADMIN,
+    "/" + masterTenantName + "/tenants/" + tenantTypesTenant + '/tickettypes/' + createTicketTypeResultDict["id"] + '/createbatch',
+    jsonData,
+    [200]
+  )
+
+  return
+
+print("Adding ticket types to " + creationDICT['Name'])
+createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeWithAllowUserCreation", allowUserCreation=True)
+createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeNOUserCreation", allowUserCreation=False)
+createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeWithAllowUserCreationNegativeExpiry", allowUserCreation=True, expiryDuration=-1)
+
+
 print("End")
 
 #/public/login/{tenant}/authproviders
