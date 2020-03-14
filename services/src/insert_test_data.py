@@ -388,8 +388,8 @@ validTicketTypeDict = {
   "allowUserCreation": True,
   "issueDuration": 123,
   "roles": [ "role1" ],
-  "postUseURL": "http:dsadsd",
-  "postInvalidURL": "http:dsadsd"
+  "postUseURL": "http://localhost:8082/#/usersystem/tenants/testData_Tenant_googleAuthWithInternal",
+  "postInvalidURL": "http://localhost:8082/#/usersystem/tenants/testData_Tenant_googleAuthWithInternal"
 }
 
 def createTicketType(tenantTypesTenant, name="TestTicketType001", allowUserCreation=True, expiryDuration=123):
