@@ -33,6 +33,18 @@
           />
         </div>
       </q-page>
+      <q-page padding v-if="ticket.isUsable === 'REISSUEREQUESTED'">
+        <div class="fixed-center">
+          <p class="text-h4">Reissue requested</p>
+          <p>A reissue request has been recieved and will be processed by our admins. You will recieve a new ticket shortly</p>
+          <q-btn
+            @click="pressContinueToSite"
+            color="secondary"
+            label="Back to Site"
+            class = "float-left q-ml-xs"
+          />
+        </div>
+      </q-page>
       <q-page padding v-if="ticket.isUsable === 'INVALID'">
         <div class="fixed-center"><p>This ticket has already been used or is invalid</p>
         <q-btn
@@ -85,7 +97,25 @@ export default {
   },
   methods: {
     pressRequestReissue () {
-      Notify.create({color: 'negative', message: 'Not Implemented'})
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          TTT.ticket = response.data
+          TTT.agreeselected = false
+          Loading.hide()
+        },
+        error: function (response) {
+          Notify.create({color: 'negative', message: 'Request  failed - ' + callbackHelper.getErrorFromResponse(response)})
+          Loading.hide()
+        }
+      }
+      Loading.show()
+      this.$store.dispatch('globalDataStore/callLoginAPI', {
+        method: 'GET',
+        path: '/tickets/' + this.$route.params.ticketGUID + '/requestreissue',
+        callback: callback,
+        postdata: undefined
+      })
     },
     pressOK () {
       this.$store.commit('globalDataStore/updateUsersystemReturnaddress', this.ticket.ticketType.postUseURL)
