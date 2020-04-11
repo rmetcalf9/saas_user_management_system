@@ -2,13 +2,15 @@
 
 ## Data Structure
 
+```
 APIKey
 {
     id: guid of API key,
     tenantid: id of tenant,
     createdByUserID: userID who created the API key.
-    restrictedToRoles: [] list of roles this API key is restricted to - undefined means all user roles are granted 
+    restrictedToRoles: [] list of roles this API key is restricted to - undefined means all user roles are granted
 }
+```
 
 ## Role inheritance
 API Keys inherit the roles they are granted from the user that created them. When the inital login is processed the roles are added
@@ -34,7 +36,7 @@ I will use the same properties as it's actually JWT token properties.
 
 ## Service calls required
 
-### Admin calls all for Tenant and UserID auther by userID 
+### Admin calls all for Tenant and UserID auther by userID
 
 Part of login api (public/login) under APIlogin_APIKeys.py
 
