@@ -37,3 +37,6 @@ UserAuths
  - AuthProviderType
  - AuthProviderJSON
  - PersonGUID
+ 
+APIKeys
+ -  See [apikeys doc](./APIKEYS.md) for structure
