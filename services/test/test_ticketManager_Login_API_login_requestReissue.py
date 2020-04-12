@@ -43,7 +43,7 @@ class helper(ticketManagerAPICommonUtilsClass):
     self.assertEqual(result.status_code, 200)
     return json.loads(result.get_data(as_text=True))
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class ticketManager_LoginAPI_login_API_loginRequestReissue(helper):
   def test_RequestReissueOfExpiredTicket(self):
     setup = self.setup()

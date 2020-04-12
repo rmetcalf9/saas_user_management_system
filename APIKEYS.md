@@ -5,12 +5,26 @@
 ```
 APIKey
 {
-    id: guid of API key,
+    id: guid,
+    apiKey: api Key is a GUID. field only returned in create api call, it's blank otherwise
     tenantid: id of tenant,
     createdByUserID: userID who created the API key.
-    restrictedToRoles: [] list of roles this API key is restricted to - undefined means all user roles are granted
+    restrictedToRoles: [], list of roles this API key is restricted to - undefined means all user roles are granted
+    externalData {
+        externalKey:
+        otherData: RAW
+    }
 }
 ```
+
+## ID
+ID is not the actual key. This is because the actual key has to be encrypted in DB we need a id for delete operation to work with
+
+## APIKey
+An API key is a guid.
+API keys are not stored in the DB.
+The value of hashfn(apikey, userid, instancepassword) is stored in the db
+This is a one way function used for lookups.
 
 ## Role inheritance
 API Keys inherit the roles they are granted from the user that created them. When the inital login is processed the roles are added
@@ -45,4 +59,4 @@ Part of login api (public/login) under APIlogin_APIKeys.py
  - /<string:tenant>/apikeys/<string:apikey> DELETE Delete API Key (no edit for different roles, just delete and reissue)
 
 ### Login
-Existing login call -> Accept API Keys. No creation allowed in this method
+Call sepcial login endpoint

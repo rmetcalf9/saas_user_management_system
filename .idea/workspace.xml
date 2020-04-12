@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/APIKEYS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DATASTRUCTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/DATASTRUCTURE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIKEYS.md" beforeDir="false" afterPath="$PROJECT_DIR$/APIKEYS.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_requestReissue.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_requestReissue.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -319,7 +320,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586608233815</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Adding api key plan">
+      <created>1586628781121</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1586628781121</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -346,7 +354,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Update API created" />
     <MESSAGE value="Added ticket system notes" />
     <MESSAGE value="Setup first tests for create ticket batch" />
     <MESSAGE value="Able to create a single valid ticket" />
@@ -371,7 +378,8 @@
     <MESSAGE value="Adding ticket test data" />
     <MESSAGE value="Tests for request reissue completed" />
     <MESSAGE value="Linking to library doc" />
-    <option name="LAST_COMMIT_MESSAGE" value="Linking to library doc" />
+    <MESSAGE value="Adding api key plan" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding api key plan" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
