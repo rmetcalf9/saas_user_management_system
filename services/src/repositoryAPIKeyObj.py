@@ -14,3 +14,9 @@ class APIKeyObjClass(RepositoryObjBaseClass):
       "apikey": APIKey,
       "apikeydata": self.getDict()
     }
+
+  def userCanRead(self, tenantName, userID):
+    if tenantName != self.getDict()["tenantName"]:
+      return False
+    return userID == self.getDict()["createdByUserID"]
+

@@ -52,7 +52,32 @@ def getAPIKeyCreateResponseModel(appObj): #APIKey model with extra raw APIKey fi
 def registerAPI(appObj, nsLogin):
 
   @nsLogin.route('/<string:tenant>/apikeys')
-  class APIKeyInfo(Resource):
+  class APIKeysInfo(Resource):
+
+    @nsLogin.doc('get API Keys')
+    @nsLogin.marshal_with(appObj.getResultModel(getAPIKeyModel(appObj)))
+    @nsLogin.response(200, 'Success', model=appObj.getResultModel(getAPIKeyModel(appObj)))
+    @nsLogin.response(401, 'Unauthorized')
+    @nsLogin.response(403, 'Forbidden - User dosen\'t have required role')
+    @appObj.addStandardSortParams(nsLogin)
+    def get(self, tenant):
+      '''Get list of ticket types'''
+      decodedJWTToken = verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj, request=request, tenant=tenant)
+      paginatedParamValues = object_store_abstraction.sanatizePaginatedParamValues(getPaginatedParamValues(request))
+      try:
+        def outputFunction(itemObj):
+          return itemObj.getDict()
+        def dbfn(storeConnection):
+          return appObj.ApiKeyManager.getAPIKeyPaginatedResults(
+            decodedJWTToken=decodedJWTToken,
+            tenantName=tenant,
+            paginatedParamValues=paginatedParamValues,
+            outputFN=outputFunction,
+            storeConnection=storeConnection
+          )
+        return appObj.objectStore.executeInsideConnectionContext(dbfn)
+      except:
+        raise InternalServerError
 
     @nsLogin.doc('create new apikey for user and tenant')
     @nsLogin.expect(getAPIKeyCreateRequestModel(appObj), validate=True)
@@ -88,3 +113,28 @@ def registerAPI(appObj, nsLogin):
       except:
         raise InternalServerError
 
+  @nsLogin.route('/<string:tenant>/apikeys/<string:apiKeyID>')
+  class APIKeysInfo(Resource):
+
+    '''Get API key data from id'''
+    @nsLogin.doc('get apikey')
+    @nsLogin.marshal_with(getAPIKeyModel(appObj))
+    @nsLogin.response(200, 'Success', model=getAPIKeyModel(appObj))
+    @nsLogin.response(400, 'Bad Request')
+    def get(self, tenant, apiKeyID):
+     '''Get ticket for login api to use'''
+     def dbfn(storeConnection):
+       decodedJWTToken = verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj,request=request,tenant=tenant)
+       try:
+         return appObj.ApiKeyManager.getAPIKeyDict(
+           decodedJWTToken=decodedJWTToken,
+           tenant=tenant,
+           apiKeyID=apiKeyID,
+           storeConnection=storeConnection
+         )
+       except constants.customExceptionClass as err:
+         raise err
+       except NotFound as e:
+         raise e
+
+     return appObj.objectStore.executeInsideTransaction(dbfn)

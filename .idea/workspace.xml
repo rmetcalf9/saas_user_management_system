@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/src/repositoryAPIKey.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/src/repositoryAPIKeyObj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/APIKEYS.md" beforeDir="false" afterPath="$PROJECT_DIR$/APIKEYS.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/apiKeyManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiKeyManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/repositoryAPIKeyObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/repositoryAPIKeyObj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -351,7 +350,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586770454237</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Creationg of APIKey object">
+      <created>1586773567242</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1586773567242</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -378,7 +384,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Able to create a single valid ticket" />
     <MESSAGE value="Added ticket type query test" />
     <MESSAGE value="There is a use case for ticket type with no roles" />
     <MESSAGE value="Bug fix to querying tickets" />
@@ -403,7 +408,8 @@
     <MESSAGE value="Adding api key plan" />
     <MESSAGE value="Creating apikey setup data" />
     <MESSAGE value="Create API key stub ready to be implemented" />
-    <option name="LAST_COMMIT_MESSAGE" value="Create API key stub ready to be implemented" />
+    <MESSAGE value="Creationg of APIKey object" />
+    <option name="LAST_COMMIT_MESSAGE" value="Creationg of APIKey object" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

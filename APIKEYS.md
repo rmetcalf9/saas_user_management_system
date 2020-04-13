@@ -19,6 +19,7 @@ APIKey
 ## ID
 The ID is the hashaed api key and is used like a normal id for gets and deletes.
 When the apikey is initally created the unhashed value is returned. This is one time only.
+UserID can not be used for the hash as when the key is used the userID is not known. Only the instance password and APIKEy is used for the hash.
 
 ## APIKey
 An API key is a guid.
