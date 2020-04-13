@@ -65,7 +65,7 @@ class helper(parent_test_api):
           tenant=constants.masterTenantName,
           userID=useInfo["name"],
           userAuthToken=userAuthToken,
-          restrictedRoles=None,
+          restrictedRoles=[],
           externalData=exampleExternalData
         )
 
@@ -91,6 +91,8 @@ class helper(parent_test_api):
     restrictedRoles,
     externalData
   ):
+    if restrictedRoles is None:
+      raise Exception("restrictedRoles can't be none - pass an empty list for no restriction")
     postJSON = {
       "restrictedRoles": restrictedRoles,
       "externalData": externalData
@@ -101,7 +103,7 @@ class helper(parent_test_api):
       data=json.dumps(postJSON),
       content_type='application/json'
     )
-    self.assertEqual(result.status_code, 201)
+    self.assertEqual(result.status_code, 201, msg="Unexpected return - " + result.get_data(as_text=True))
     resJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(resJSON["userID"],userID)
     return resJSON

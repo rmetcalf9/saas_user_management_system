@@ -5,6 +5,11 @@ from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 
+def requiredInPayload(content, fieldList):
+  for a in fieldList:
+    if a not in content:
+      raise BadRequest(a + ' not in payload')
+
 #Users must have the has account role for the specified tenant
 # 401 = unauthorized -> Goes back to refresh or login makes sense to retry
 # 403 = forbidden -> Will not re-prompt for login dosn't make sense to retry
@@ -24,8 +29,10 @@ def verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj
 
 def getAPIKeyCreateRequestModel(appObj):
   return appObj.flastRestPlusAPIObject.model('APIKeyCreateRequestModel', {
-    'todo': fields.String(default='', description='TODO create model')
+    'restrictedRoles': fields.List(fields.String(default=None, description='If not an empty list a subset of the users roles to be inherited by this APIKey'), required=True),
+    'externalData': fields.Raw(description='Any other data supplied during apikey creation', required=True)
   })
+
 def getAPIKeyModel(appObj):
   return appObj.flastRestPlusAPIObject.model('APIKeyModel', {
     'todo': fields.String(default='', description='TODO create model')
@@ -48,11 +55,24 @@ def registerAPI(appObj, nsLogin):
     @nsLogin.response(403, 'Forbidden - User dosen\'t have required role')
     def post(self, tenant):
       '''Create APIKey'''
-      verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj, request=request, tenant=tenant)
+      decodedJWTToken = verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj, request=request, tenant=tenant)
       content = request.get_json()
-      #requiredInPayload(content, ['Name','Description','AllowUserCreation'])
+      requiredInPayload(content, ['restrictedRoles','externalData'])
+      restrictedRoles = content['restrictedRoles']
+      if restrictedRoles == []:
+        restrictedRoles = None
+      externalDataDict = content['externalData']
       try:
-        raise Exception("Not Implemented")
+        def dbfn(storeConnection):
+          return appObj.ApiKeyManager.createAPIKey(
+            decodedJWTToken=decodedJWTToken,
+            restrictedRoles=restrictedRoles,
+            externalDataDict=externalDataDict,
+            storeConnection=storeConnection
+          )
+        (APIKeyObj, APIKey) = appObj.objectStore.executeInsideConnectionContext(dbfn)
+        return APIKeyObj.getCreateDict(APIKey=APIKey), 201
+
       except constants.customExceptionClass as err:
         raise Exception('InternalServerError')
       except object_store_abstraction.RepositoryValidationException as e:
@@ -61,7 +81,4 @@ def registerAPI(appObj, nsLogin):
         raise e
       except:
         raise InternalServerError
-
-      #Use getCreateDict as this returns the API key as well as the object
-      ##return APIKeyObj.getCreateDict(APIKey=apiKey), 201
 

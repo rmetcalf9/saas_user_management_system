@@ -12,6 +12,7 @@ from flask import request
 import time
 import datetime
 import ticketManager
+import apiKeyManager
 
 from APIlogin import registerAPI as registerLoginApi
 from APIadmin import registerAPI as registerAdminApi
@@ -59,6 +60,7 @@ class appObjClass(parAppObj):
   scheduler = None
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
   TicketManager = None
+  ApiKeyManager = None
 
   def setupLogging(self):
     root = logging.getLogger()
@@ -74,6 +76,7 @@ class appObjClass(parAppObj):
     ##self.setupLogging() Comment in when debugging
 
     self.TicketManager = ticketManager.ticketManagerClass(appObj=self)
+    self.ApiKeyManager = apiKeyManager.apiKeyManagerClass(appObj=self)
 
     authProviders_resetStaticData()
     self.scheduler = BackgroundScheduler(timezone="UTC")
