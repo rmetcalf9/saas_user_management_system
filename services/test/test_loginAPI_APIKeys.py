@@ -22,8 +22,8 @@ sampleCreateAPIKeyRequest = {
 
 secondTenantName="secondTenant"
 userTenantRoles = {
-  constants.masterTenantName: [ constants.DefaultHasAccountRole ],
-secondTenantName: [ constants.DefaultHasAccountRole ]
+  constants.masterTenantName: [ constants.DefaultHasAccountRole, "ExtraRoleA", "ExtraRoleB" ],
+  secondTenantName: [ constants.DefaultHasAccountRole ]
 }
 
 class helper(parent_test_api):
@@ -161,6 +161,19 @@ class helper(parent_test_api):
     resJSON = json.loads(result.get_data(as_text=True))
     return resJSON
 
+  def loginUsingAPIToken(self, tenant, apiKey, checkAndParseResponse=True):
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + tenant + '/apikeylogin',
+      headers={ "Authorization": "Bearer " + apiKey},
+      data=None,
+      content_type='application/json'
+    )
+    if not checkAndParseResponse:
+      return result
+    self.assertEqual(result.status_code, 200, msg="Unexpected return - " + result.get_data(as_text=True))
+    resDICT = json.loads(result.get_data(as_text=True))
+    return resDICT
+
 @TestHelperSuperClass.wipd
 class test_loginAPI_APIKeys(helper):
   def test_CreateAPIKeyandQueryBack(self):
@@ -246,16 +259,27 @@ class test_loginAPI_APIKeys(helper):
     for result in resultDict["result"]:
       self.assertNotEqual(result["id"], apiKeyDataToUse["id"])
 
+  # def test_loginUsingAPIToken(self):
+  #   setupData = self.setup()
+  #
+  #   user = setupData["users"][0]
+  #   apiKey = user["APIKeyCreationResults"][0]["res"]["apikey"]
+  #
+  #   JWTToken = self.loginUsingAPIToken(
+  #     tenant=constants.masterTenantName,
+  #     apiKey=apiKey
+  #   )
+  #
+  #   self.assertEqual(JWTToken,{})
 
-#Login with API key works
+
+#Login with API key works including roles
 
 #User can not use API key on wrong tenant
 
 #APIKey can be restricted to a single role (Login and check jwt token)
 
 #Deleted API key can not be used
-
-#Test Create API key not possible without valid user id
 
 
 

@@ -5,6 +5,7 @@ from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
 from object_store_abstraction import RepositoryObjBaseClass
+import apiSharedModels
 
 def requiredInPayload(content, fieldList):
   for a in fieldList:
@@ -122,7 +123,7 @@ def registerAPI(appObj, nsLogin):
     @nsLogin.response(200, 'Success', model=getAPIKeyModel(appObj))
     @nsLogin.response(400, 'Bad Request')
     def get(self, tenant, apiKeyID):
-     '''Get ticket for login api to use'''
+     '''Get apikey for login api to use'''
      def dbfn(storeConnection):
        decodedJWTToken = verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj,request=request,tenant=tenant)
        try:
@@ -132,6 +133,29 @@ def registerAPI(appObj, nsLogin):
            apiKeyID=apiKeyID,
            storeConnection=storeConnection
          )
+       except constants.customExceptionClass as err:
+         raise err
+       except NotFound as e:
+         raise e
+
+     return appObj.objectStore.executeInsideTransaction(dbfn)
+
+
+  @nsLogin.route('/<string:tenant>/apikeylogin')
+  class APIKeysInfo(Resource):
+
+    '''Login using API key and get JWT Token'''
+    @nsLogin.doc('get apikey')
+    @nsLogin.marshal_with(apiSharedModels.getLoginResponseModel(appObj))
+    @nsLogin.response(200, 'Success', model=apiSharedModels.getLoginResponseModel(appObj), skip_none=True)
+    @nsLogin.response(400, 'Bad Request')
+    @nsLogin.response(401, 'Unauthorized')
+
+    def get(self, tenant):
+     '''Login using API key and return JWT Token'''
+     def dbfn(storeConnection):
+       try:
+         return None, 200
        except constants.customExceptionClass as err:
          raise err
        except NotFound as e:
