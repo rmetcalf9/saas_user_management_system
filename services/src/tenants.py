@@ -316,18 +316,6 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
     pass
     #print("Login Trace - ", args)
 
-  resDict = {
-    'possibleUserIDs': None,
-    'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
-    'jwtData': None,
-    'refresh': None,
-    'userGuid': None,
-    'authedPersonGuid': None,
-    'ThisTenantRoles': None,
-    'known_as': None,
-    'other_data': None,
-    'currentlyUsedAuthProviderGuid': None
-  }
   if ticketObj is not None:
     loginTrace("Login With a ticket")
 
@@ -387,8 +375,18 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
       requestedUserID = possibleUserIDs[0]
     else:
       #mutiple userids supplied
-      resDict['possibleUserIDs'] = possibleUserIDs
-      return resDict
+      return {
+        'possibleUserIDs': possibleUserIDs,
+        'possibleUsers': None,
+        'jwtData': None,
+        'refresh': None,
+        'userGuid': None,
+        'authedPersonGuid': None,
+        'ThisTenantRoles': None,
+        'known_as': None,
+        'other_data': None,
+        'currentlyUsedAuthProviderGuid': None
+      }
   if requestedUserID not in possibleUserIDs:
     print('requestedUserID:',requestedUserID)
     raise UnknownUserIDException
@@ -407,25 +405,66 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
       storeConnection=storeConnection
     )
 
+  currentAuthUserKey = authUserObj['AuthUserKey']
+  authedPersonGuid = authUserObj['personGUID']
+  authProviderGuid = authProvider.guid
+
+  resDict = getLoginResult(
+    appObj=appObj,
+    userObj=userObj,
+    authedPersonGuid=authedPersonGuid,
+    currentAuthUserKey=currentAuthUserKey,
+    authProviderGuid=authProviderGuid,
+    tenantName=tenantName,
+    restrictRolesTo=[]
+  )
+
+  return resDict
+
+def getLoginResult(
+  appObj,
+  userObj,
+  authedPersonGuid,
+  currentAuthUserKey,
+  authProviderGuid,
+  tenantName,
+  restrictRolesTo
+):
+  resDict = {
+    'possibleUserIDs': None,
+    'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
+    'jwtData': None,
+    'refresh': None,
+    'userGuid': None,
+    'authedPersonGuid': None,
+    'ThisTenantRoles': None,
+    'known_as': None,
+    'other_data': None,
+    'currentlyUsedAuthProviderGuid': None
+  }
+
   userDict = userObj.getReadOnlyDict()
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
-
+  restrictingRoles = (restrictRolesTo == [])
   thisTenantRoles = []
   if tenantName in userDict["TenantRoles"]:
     #thisTenantRoles = copy.deepcopy(userDict["TenantRoles"][tenantName])
     for x in userDict["TenantRoles"][tenantName]:
-      thisTenantRoles.append(x)
+      if restrictingRoles: #not restricting roles
+        thisTenantRoles.append(x)
+      else:
+        if x in restrictRolesTo:
+          thisTenantRoles.append(x)
 
-  CurrentAuthUserKey = authUserObj['AuthUserKey']
   resDict['userGuid'] = userDict['UserID']
-  resDict['authedPersonGuid'] = authUserObj['personGUID']
+  resDict['authedPersonGuid'] = authedPersonGuid
   resDict['ThisTenantRoles'] = thisTenantRoles #Only roles valid for the current tenant are returned
   resDict['known_as'] = userDict["known_as"]
   resDict['other_data'] = userDict["other_data"]
-  resDict['currentlyUsedAuthProviderGuid'] = authProvider.guid
-  resDict['currentlyUsedAuthKey'] = CurrentAuthUserKey
+  resDict['currentlyUsedAuthProviderGuid'] = authProviderGuid
+  resDict['currentlyUsedAuthKey'] = currentAuthUserKey
 
   #This object is stored with the refresh token and the same value is always returned on each refresh
   tokenWithoutJWTorRefresh = {
@@ -440,8 +479,8 @@ def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID,
   }
 
   #These two sections are rebuilt every refresh
-  ##print("CurrentAuthUserKey:", CurrentAuthUserKey)
-  resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)
-  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authUserObj['personGUID'], resDict['currentlyUsedAuthProviderGuid'], CurrentAuthUserKey)
+  ##print("CurrentAuthUserKey:", currentAuthUserKey)
+  resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authedPersonGuid, resDict['currentlyUsedAuthProviderGuid'], currentAuthUserKey)
+  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authedPersonGuid, resDict['currentlyUsedAuthProviderGuid'], currentAuthUserKey)
 
   return resDict
