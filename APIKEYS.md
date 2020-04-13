@@ -5,8 +5,7 @@
 ```
 APIKey
 {
-    id: guid,
-    apiKey: api Key is a GUID. field only returned in create api call, it's blank otherwise
+    id: this is the hashed api Key. one way function from a guid
     tenantid: id of tenant,
     createdByUserID: userID who created the API key.
     restrictedToRoles: [], list of roles this API key is restricted to - undefined means all user roles are granted
@@ -18,7 +17,8 @@ APIKey
 ```
 
 ## ID
-ID is not the actual key. This is because the actual key has to be encrypted in DB we need a id for delete operation to work with
+The ID is the hashaed api key and is used like a normal id for gets and deletes.
+When the apikey is initally created the unhashed value is returned. This is one time only.
 
 ## APIKey
 An API key is a guid.
@@ -55,7 +55,7 @@ I will use the same properties as it's actually JWT token properties.
 Part of login api (public/login) under APIlogin_APIKeys.py
 
  - /<string:tenant>/apikeys GET - API Key List for tenant & userID combo
- - /<string:tenant>/apikeys POST - Add API Key tenant & user ID
+ - /<string:tenant>/apikeys POST - Add API Key for tenant & user ID. Return actual API key as well as object
  - /<string:tenant>/apikeys/<string:apikey> DELETE Delete API Key (no edit for different roles, just delete and reissue)
 
 ### Login

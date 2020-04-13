@@ -13,11 +13,11 @@ class APIAdminCommonClass():
 
     try:
       return appObj.apiSecurityCheck(
-        request,
-        tenant,
-        [constants.DefaultHasAccountRole, systemAdminRole],
-        [constants.jwtHeaderName],
-        [constants.jwtCookieName, constants.loginCookieName]
+        request=request,
+        tenant=tenant,
+        requiredRoleList=[constants.DefaultHasAccountRole, systemAdminRole],
+        headersToSearch=[constants.jwtHeaderName],
+        cookiesToSearch=[constants.jwtCookieName, constants.loginCookieName]
       )
     except constants.invalidPersonInToken as err:
       raise Unauthorized(err.text)

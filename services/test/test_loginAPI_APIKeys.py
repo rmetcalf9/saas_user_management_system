@@ -28,7 +28,7 @@ class helper(parent_test_api):
       "pass": "p001",
       "userDict": {
         "UserID": "testUser001",
-        "TenantRoles": { constants.masterTenantName: []}
+        "TenantRoles": { constants.masterTenantName: [ constants.DefaultHasAccountRole ]}
       }
     })
     userInfos.append({
@@ -36,7 +36,7 @@ class helper(parent_test_api):
       "pass": "p002",
       "userDict": {
         "UserID": "testUser001",
-        "TenantRoles": { constants.masterTenantName: []}
+        "TenantRoles": { constants.masterTenantName: [ constants.DefaultHasAccountRole ]}
       }
     })
     userInfos.append({
@@ -44,7 +44,7 @@ class helper(parent_test_api):
       "pass": "p003",
       "userDict": {
         "UserID": "testUser001",
-        "TenantRoles": { constants.masterTenantName: []}
+        "TenantRoles": { constants.masterTenantName: [ constants.DefaultHasAccountRole ]}
       }
     })
 
@@ -118,6 +118,7 @@ class test_loginAPI_APIKEys(helper):
     raise Exception("Not Implemented")
 
 
+#create api key on invalid tenant fails
 
 #User can not query back another users api keys
 

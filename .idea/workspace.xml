@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/APIKEYS.md" beforeDir="false" afterPath="$PROJECT_DIR$/APIKEYS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_requestReissue.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_ticketManager_Login_API_login_requestReissue.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIadmin.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -36,7 +38,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Shell Script.continous_test">
+  <component name="RunManager" selected="Shell Script.continous_test wip">
     <list>
       <item itemvalue="Shell Script.continous_test" />
       <item itemvalue="Shell Script.continous_test wip" />
@@ -327,7 +329,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586628781121</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Creating apikey setup data">
+      <created>1586696985380</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1586696985380</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -354,7 +363,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added ticket system notes" />
     <MESSAGE value="Setup first tests for create ticket batch" />
     <MESSAGE value="Able to create a single valid ticket" />
     <MESSAGE value="Added ticket type query test" />
@@ -379,7 +387,8 @@
     <MESSAGE value="Tests for request reissue completed" />
     <MESSAGE value="Linking to library doc" />
     <MESSAGE value="Adding api key plan" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding api key plan" />
+    <MESSAGE value="Creating apikey setup data" />
+    <option name="LAST_COMMIT_MESSAGE" value="Creating apikey setup data" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -388,10 +397,6 @@
           <url>file://$PROJECT_DIR$/services/src/APIadmin_Legacy.py</url>
           <line>1</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/services/src/APIlogin_Tickets.py</url>
-          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
