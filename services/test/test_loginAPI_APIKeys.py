@@ -4,12 +4,11 @@ import constants
 import json
 
 exampleExternalData = {
-  "externalKey": {
-    "otherData": {
-      "A": "a",
-      "B": "b",
-      "C": "c",
-    }
+  "externalKey": "someKeyXXX",
+  "otherData": {
+    "A": "a",
+    "B": "b",
+    "C": "c"
   }
 }
 
@@ -105,7 +104,11 @@ class helper(parent_test_api):
     )
     self.assertEqual(result.status_code, 201, msg="Unexpected return - " + result.get_data(as_text=True))
     resJSON = json.loads(result.get_data(as_text=True))
-    self.assertEqual(resJSON["userID"],userID)
+    self.assertEqual(resJSON["apikeydata"]["tenantName"],tenant)
+    self.assertEqual(resJSON["apikeydata"]["createdByUserID"],userID)
+    self.assertEqual(resJSON["apikeydata"]["restrictedRoles"],restrictedRoles)
+    self.assertEqual(resJSON["apikeydata"]["externalData"],externalData)
+    self.assertNotEqual(resJSON["apikeydata"]["id"],resJSON["apikey"], msg="APIKey must not be same as the id of the data (should be hashed with userid and instance password")
     return resJSON
 
 @TestHelperSuperClass.wipd
@@ -125,6 +128,8 @@ class test_loginAPI_APIKEys(helper):
 #User can not query back another users api keys
 
 #Login with API key works
+
+#User can not use API key on wrong tenant
 
 #APIKey can be restricted to a single role (Login and check jwt token)
 

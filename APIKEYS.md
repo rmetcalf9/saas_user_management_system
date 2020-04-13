@@ -6,7 +6,7 @@
 APIKey
 {
     id: this is the hashed api Key. one way function from a guid
-    tenantid: id of tenant,
+    tenantName: id of tenant,
     createdByUserID: userID who created the API key.
     restrictedToRoles: [], list of roles this API key is restricted to - undefined means all user roles are granted
     externalData {

@@ -4,6 +4,7 @@ import constants
 from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction
 from baseapp_for_restapi_backend_with_swagger import getPaginatedParamValues
+from object_store_abstraction import RepositoryObjBaseClass
 
 def requiredInPayload(content, fieldList):
   for a in fieldList:
@@ -35,11 +36,17 @@ def getAPIKeyCreateRequestModel(appObj):
 
 def getAPIKeyModel(appObj):
   return appObj.flastRestPlusAPIObject.model('APIKeyModel', {
-    'todo': fields.String(default='', description='TODO create model')
+    'id': fields.String(default='DEFAULT', description='Unique identifier of APIKey'),
+    'tenantName': fields.String(default='DEFAULT', description='Name of the Tenant this APIKey associated with'),
+    'createdByUserID': fields.String(default='DEFAULT', description='UserGUID of user who created this ticket'),
+    'restrictedRoles': fields.List(fields.String(default=None,description='If not an empty list a subset of the users roles to be inherited by this APIKey'),required=True),
+    'externalData': fields.Raw(description='Any other data supplied during apikey creation', required=True),
+    RepositoryObjBaseClass.getMetadataElementKey(): fields.Nested(RepositoryObjBaseClass.getMetadataModel(appObj, flaskrestplusfields=fields))
   })
 def getAPIKeyCreateResponseModel(appObj): #APIKey model with extra raw APIKey fiels
   return appObj.flastRestPlusAPIObject.model('APIKeyCreateResponseModel', {
-    'todo': fields.String(default='', description='TODO create model')
+    'apikey': fields.String(default='DEFAULT', description='APIKey'),
+    'apikeydata': fields.Nested(getAPIKeyModel(appObj))
   })
 
 def registerAPI(appObj, nsLogin):
@@ -59,18 +66,17 @@ def registerAPI(appObj, nsLogin):
       content = request.get_json()
       requiredInPayload(content, ['restrictedRoles','externalData'])
       restrictedRoles = content['restrictedRoles']
-      if restrictedRoles == []:
-        restrictedRoles = None
       externalDataDict = content['externalData']
       try:
         def dbfn(storeConnection):
           return appObj.ApiKeyManager.createAPIKey(
+            tenant=tenant,
             decodedJWTToken=decodedJWTToken,
             restrictedRoles=restrictedRoles,
             externalDataDict=externalDataDict,
             storeConnection=storeConnection
           )
-        (APIKeyObj, APIKey) = appObj.objectStore.executeInsideConnectionContext(dbfn)
+        (APIKeyObj, APIKey) = appObj.objectStore.executeInsideTransaction(dbfn)
         return APIKeyObj.getCreateDict(APIKey=APIKey), 201
 
       except constants.customExceptionClass as err:
