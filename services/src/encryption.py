@@ -1,11 +1,17 @@
 from Crypto.Cipher import AES
-from Crypto.Random import OSRNG
+####from Crypto.Random import OSRNG Deprecated in pycryptodome https://pycryptodome.readthedocs.io/en/latest/src/vs_pycrypto.html
 from base64 import b64decode, b64encode
+import Crypto.Random
 
 
 '''
 Test code put in console to make sure Javascript and Python matches
 Python Encryption
+
+2020-04-14 - Replaced pycrypto with PyCryptodome
+In future I want to look at the new python crypto library which may be simplier to use
+https://pypi.org/project/cryptography/
+See https://theartofmachinery.com/2017/02/02/dont_use_pycrypto.html
 
 from Crypto.Cipher import AES
 from Crypto.Random import OSRNG
@@ -92,10 +98,12 @@ def encryptPassword(plainText, salt):
 
   passphrase = __INT__get32BytesFromSalt(salt)
 
-  IV = OSRNG.posix.new().read(BLOCK_SIZE)
+  ##IV = OSRNG.posix.new().read(BLOCK_SIZE)
+  IV = Crypto.Random.get_random_bytes(BLOCK_SIZE)
+
   aes = AES.new(passphrase, AES.MODE_CBC, IV)
 
-  cipherText = aes.encrypt(pad(plainText))
+  cipherText = aes.encrypt(pad(plainText).encode("utf-8"))
 
   return b64encode(IV).decode("utf-8"), b64encode(cipherText).decode("utf-8")
 #  return (b64encode(iv).decode("utf-8"), b64encode(ciphertext).decode("utf-8"))
@@ -129,7 +137,9 @@ def encryptPasswordX(plainText, salt):
   #salt is bytes or string
   #plain text is STRING
   #return value is bytes
-  iv = OSRNG.posix.new().read(AES.block_size) #'This is an IV456'
+  ###iv = OSRNG.posix.new().read(AES.block_size) #'This is an IV456'
+  iv = Crypto.Random.get_random_bytes(AES.block_size)
+
   obj = AES.new(__INT__get32BytesFromSalt(salt), AES.MODE_CFB, iv)
   ciphertext = obj.encrypt(plainText)
 
