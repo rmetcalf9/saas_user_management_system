@@ -106,15 +106,6 @@ steps:
           - APIAPP_DEFAULTHOMEADMINUSERNAME=admin
           - APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 
-  push_to_dockerhub:
-    type: push
-    title: Push to Docker hub
-    description: description
-    candidate: ${{build_the_image}}
-    tag: ${{RJM_VERSION}}
-    image_name: metcarob/saas_user_management
-    registry: dockerhub
-
   #Deploy new container to my website swarm
   deploy_to_metcarob_swarm:
       image: codefresh/remote-docker
