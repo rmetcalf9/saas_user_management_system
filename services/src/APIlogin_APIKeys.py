@@ -140,6 +140,30 @@ def registerAPI(appObj, nsLogin):
 
      return appObj.objectStore.executeInsideTransaction(dbfn)
 
+    @nsLogin.doc('Delete APIKey')
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.marshal_with(apiSharedModels.responseModel(appObj), code=202, description='API Key deleted', skip_none=True)
+    @nsLogin.response(403, 'Forbidden - User does not have required role')
+    def delete(self, tenant, apiKeyID):
+      ''' Delete API Key  '''
+      decodedJWTToken = verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj,request=request,tenant=tenant)
+      if "objectversion" not in request.args:
+        raise BadRequest("Must supply object version to delete")
+      if request.args["objectversion"] == None:
+        raise BadRequest("Must supply object version to delete - can not be blank")
+      objVer = None
+      #if request.args["objectversion"] != 'LOOKUP': May need to add ability to lookup
+      objVer = request.args["objectversion"]
+
+      def dbfn(storeConnection):
+        return appObj.ApiKeyManager.deleteAPIKey(decodedJWTToken=decodedJWTToken, tenant=tenant, apiKeyID=apiKeyID, ObjectVersionNumber=objVer, storeConnection=storeConnection)
+      try:
+        return appObj.objectStore.executeInsideTransaction(dbfn)
+      except object_store_abstraction.RepositoryValidationException as err:
+        return {"response": "ERROR", "message": str(err)}, 400
+      except object_store_abstraction.WrongObjectVersionExceptionClass as err:
+        return { "response": "ERROR", "message": str(err) }, 409 #not using standard exception as it gives html response
+        #raise Conflict(err)
 
   @nsLogin.route('/<string:tenant>/apikeylogin')
   class APIKeysInfo(Resource):
@@ -153,12 +177,25 @@ def registerAPI(appObj, nsLogin):
 
     def get(self, tenant):
      '''Login using API key and return JWT Token'''
+     authHeader = request.headers.get('Authorization')
+     if authHeader is None:
+       raise BadRequest(str("Missing Authorization Header"))
+     if not authHeader.startswith("Bearer "):
+       raise BadRequest(str("Invalid Authorization Header"))
+     apiKey = authHeader[7:]
+
      def dbfn(storeConnection):
        try:
-         return None, 200
+         return appObj.ApiKeyManager.processAPIKeyLogin(
+           apiKey=apiKey,
+           tenant=tenant,
+           storeConnection=storeConnection
+         )
        except constants.customExceptionClass as err:
          raise err
        except NotFound as e:
+         raise e
+       except BadRequest as e:
          raise e
 
      return appObj.objectStore.executeInsideTransaction(dbfn)

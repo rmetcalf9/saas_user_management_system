@@ -7,3 +7,6 @@ class APIKeyRepositoryClass(RepositoryBaseClass):
 
   def __init__(self):
     RepositoryBaseClass.__init__(self, "apikeys", APIKeyObjFactoryFn)
+
+  def getAPIKEY(self, apiKey, storeConnection):
+    return self.get(apiKey, storeConnection)

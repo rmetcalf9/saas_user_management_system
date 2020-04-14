@@ -17,6 +17,7 @@ import constants
 from persons import CreatePerson
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson, AddUserRole
+import users
 
 from object_store_abstraction import createObjectStoreInstance
 
@@ -478,6 +479,34 @@ class testClassWithTestClient(testHelperSuperClass):
     }
     return copy.deepcopy(newAuthDICT)
 
+  def AddRoleToUser(
+    self,
+    userID,
+    tenantName,
+    rolesToAdd
+  ):
+    def fn(storeConnection):
+      for x in rolesToAdd:
+        AddUserRole(appObj, userID, tenantName, x, storeConnection)
+    return appObj.objectStore.executeInsideTransaction(fn)
+
+  def RemoveRoleFromUser(
+    self,
+    userID,
+    tenantName,
+    rolesToRemove
+  ):
+    def fn(storeConnection):
+      userObj = users.GetUser(appObj, userID, storeConnection)
+      def updateFn(user):
+        newTenantRoleList = []
+        for x in user["TenantRoles"][tenantName]:
+          if x not in rolesToRemove:
+            newTenantRoleList.append(x)
+        user["TenantRoles"][tenantName] = newTenantRoleList
+        return user
+      users.UpdateUserObjUsingFunction(userObj, storeConnection, updateFn)
+    return appObj.objectStore.executeInsideTransaction(fn)
 
 #helper class with setup for an APIClient
 class testHelperAPIClient(testClassWithTestClient):

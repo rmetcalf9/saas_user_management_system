@@ -447,16 +447,25 @@ def getLoginResult(
   if userDict is None:
     raise Exception('Error userID found in identity was never created')
 
-  restrictingRoles = (restrictRolesTo == [])
+  notrestrictingRoles = (restrictRolesTo == [])
   thisTenantRoles = []
   if tenantName in userDict["TenantRoles"]:
     #thisTenantRoles = copy.deepcopy(userDict["TenantRoles"][tenantName])
     for x in userDict["TenantRoles"][tenantName]:
-      if restrictingRoles: #not restricting roles
+      if notrestrictingRoles: #not restricting roles
         thisTenantRoles.append(x)
       else:
-        if x in restrictRolesTo:
+        # Always put in hasaccount role as this role can not be restricted
+        if x == constants.DefaultHasAccountRole:
           thisTenantRoles.append(x)
+        else:
+          if x in restrictRolesTo:
+            thisTenantRoles.append(x)
+
+  #Only include roles for the current tenant in the jwttoken
+  userDict["TenantRoles"] = {
+    tenantName: thisTenantRoles
+  }
 
   resDict['userGuid'] = userDict['UserID']
   resDict['authedPersonGuid'] = authedPersonGuid

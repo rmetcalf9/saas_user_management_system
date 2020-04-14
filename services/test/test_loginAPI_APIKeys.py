@@ -5,6 +5,7 @@ import json
 import uuid
 from appObj import appObj
 import python_Testing_Utilities
+import object_store_abstraction
 
 exampleExternalData = {
   "externalKey": "someKeyXXX",
@@ -21,8 +22,9 @@ sampleCreateAPIKeyRequest = {
 }
 
 secondTenantName="secondTenant"
+extraRoleGrantedToUser="ExtraRoleUserGranted"
 userTenantRoles = {
-  constants.masterTenantName: [ constants.DefaultHasAccountRole, "ExtraRoleA", "ExtraRoleB" ],
+  constants.masterTenantName: [ constants.DefaultHasAccountRole, extraRoleGrantedToUser, "ExtraRoleBUserNotGranted" ],
   secondTenantName: [ constants.DefaultHasAccountRole ]
 }
 
@@ -63,6 +65,11 @@ class helper(parent_test_api):
         userID=useInfo["name"],
         InternalAuthUsername=useInfo["name"],
         InternalAuthPassword=useInfo["pass"]
+      )
+      self.AddRoleToUser(
+        userID=useInfo["userDict"]["UserID"],
+        tenantName=constants.masterTenantName,
+        rolesToAdd=[ extraRoleGrantedToUser ]
       )
 
       userAuthToken = self.generateJWTToken(useInfo["userDict"])
@@ -160,6 +167,18 @@ class helper(parent_test_api):
     self.assertEqual(result.status_code, 200, msg="Unexpected return - " + result.get_data(as_text=True))
     resJSON = json.loads(result.get_data(as_text=True))
     return resJSON
+
+  def deleteAPIKey(self, tenant, userAuthToken, apiKeyID, objectVersionNumber, checkAndParseResponse=True):
+    result = self.testClient.delete(
+      self.loginAPIPrefix + '/' + tenant + '/apikeys/' + apiKeyID + "?objectversion=" + objectVersionNumber,
+      headers={ constants.jwtHeaderName: userAuthToken},
+      data=None,
+      content_type='application/json'
+    )
+    if not checkAndParseResponse:
+      return result
+    self.assertEqual(result.status_code, 202)
+    return json.loads(result.get_data(as_text=True))
 
   def loginUsingAPIToken(self, tenant, apiKey, checkAndParseResponse=True):
     result = self.testClient.get(
@@ -259,29 +278,187 @@ class test_loginAPI_APIKeys(helper):
     for result in resultDict["result"]:
       self.assertNotEqual(result["id"], apiKeyDataToUse["id"])
 
-  # def test_loginUsingAPIToken(self):
-  #   setupData = self.setup()
-  #
-  #   user = setupData["users"][0]
-  #   apiKey = user["APIKeyCreationResults"][0]["res"]["apikey"]
-  #
-  #   JWTToken = self.loginUsingAPIToken(
-  #     tenant=constants.masterTenantName,
-  #     apiKey=apiKey
-  #   )
-  #
-  #   self.assertEqual(JWTToken,{})
+  #************************************************************************
+  #************************ login tests below *****************************
+  #************************************************************************
+
+  def test_loginWithNoHeaderFails(self):
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + constants.masterTenantName + '/apikeylogin',
+      headers=None,
+      data=None,
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Unexpected return - " + result.get_data(as_text=True))
+    resultDict = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultDict["message"],"Missing Authorization Header")
+
+  def test_loginWithBadAuthHeaderFails(self):
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + constants.masterTenantName + '/apikeylogin',
+      headers={ "Authorization": "BadValue " + "ss" },
+      data=None,
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Unexpected return - " + result.get_data(as_text=True))
+    resultDict = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultDict["message"],"Invalid Authorization Header")
+
+  def test_loginWithInvliadAPIKeyFails(self):
+    apiKey = "InvalidAPIKey"
+    result = self.testClient.get(
+      self.loginAPIPrefix + '/' + constants.masterTenantName + '/apikeylogin',
+      headers={"Authorization": "Bearer " + apiKey},
+      data=None,
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg="Unexpected return - " + result.get_data(as_text=True))
+    resultDict = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultDict["message"], "Invalid API Key")
+
+  def test_UserCanNotUseAPIKeyOnWrongTenant(self):
+    setupData = self.setup()
+    user = setupData["users"][0]
+    apiKey = user["APIKeyCreationResults"][0]["res"]["apikey"]
+
+    result = self.loginUsingAPIToken(
+      tenant=secondTenantName,
+      apiKey=apiKey,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(result.status_code, 400, msg="Unexpected return - " + result.get_data(as_text=True))
+    resultDict = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultDict["message"], "Invalid API Key")
+
+  def test_loginUsingAPIToken(self):
+    setupData = self.setup()
+
+    user = setupData["users"][0]
+    apiKey = user["APIKeyCreationResults"][0]["res"]["apikey"]
+
+    JWTTokenResponse = self.loginUsingAPIToken(
+      tenant=constants.masterTenantName,
+      apiKey=apiKey
+    )
+
+    self.assertEqual(JWTTokenResponse["possibleUsers"],None)
+    self.assertEqual(JWTTokenResponse["known_as"],user["userID"])
+
+    jwtTokenDict = self.decodeToken(JWTTokenResponse[ 'jwtData' ]['JWTToken'])
+    self.assertEqual(jwtTokenDict["UserID"],user["userID"])
+    self.assertEqual(jwtTokenDict["TenantRoles"],{ constants.masterTenantName: [ constants.DefaultHasAccountRole, extraRoleGrantedToUser ] })
+
+  def test_loginWithUserWithNoHasACcountRoleFails(self):
+    setupData = self.setup()
+
+    user = setupData["users"][0]
+    apiKey = user["APIKeyCreationResults"][0]["res"]["apikey"]
+
+    # First login should be sucessful
+    JWTTokenResponse = self.loginUsingAPIToken(
+      tenant=constants.masterTenantName,
+      apiKey=apiKey
+    )
+
+    #Remove has account role for user
+    self.RemoveRoleFromUser(
+      userID=user["userID"],
+      tenantName=constants.masterTenantName,
+      rolesToRemove=[ constants.DefaultHasAccountRole ]
+    )
+
+    result = self.loginUsingAPIToken(
+      tenant=constants.masterTenantName,
+      apiKey=apiKey,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(result.status_code, 400, msg="Unexpected return - " + result.get_data(as_text=True))
+    resultDict = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultDict["message"], "Invalid API Key")
+
+  def test_apikey_with_restricted_roles(self):
+    # Note: Has account role is not restricted and is always present
+    # users with no hasaccount role have all their apitokens disabled
+    userWithManyRoles = {
+      "name": "testUserWithManyRoles",
+      "pass": "p001",
+      "userDict": {
+        "UserID": "testUserWithManyRoles",
+        "TenantRoles": userTenantRoles
+      }
+    }
+    self.createIntarnalLoginForTenant(
+      tenantName=constants.masterTenantName,
+      userID=userWithManyRoles["name"],
+      InternalAuthUsername=userWithManyRoles["name"],
+      InternalAuthPassword=userWithManyRoles["pass"]
+    )
+    self.AddRoleToUser(
+      userID=userWithManyRoles["userDict"]["UserID"],
+      tenantName=constants.masterTenantName,
+      rolesToAdd=[ "role001", "role002", "role003", "role004", "role005", "role006", "role007", "role008", "role009" ]
+    )
+
+    userAuthToken = self.generateJWTToken(userWithManyRoles["userDict"])
+
+    apiKeyWithRestrictedRoles = self.CreateAPIKey(
+      tenant=constants.masterTenantName,
+      userID=userWithManyRoles["name"],
+      userAuthToken=userAuthToken,
+      restrictedRoles=[ "role001", "role002", "role003" ],
+      externalData=exampleExternalData
+    )
+
+    JWTTokenResponse = self.loginUsingAPIToken(
+      tenant=constants.masterTenantName,
+      apiKey=apiKeyWithRestrictedRoles["apikey"]
+    )
+
+    self.assertEqual(JWTTokenResponse["possibleUsers"],None)
+    self.assertEqual(JWTTokenResponse["known_as"],userWithManyRoles["userDict"]["UserID"])
+
+    jwtTokenDict = self.decodeToken(JWTTokenResponse[ 'jwtData' ]['JWTToken'])
+    print("jwtTokenDict:", jwtTokenDict)
+    self.assertEqual(jwtTokenDict["UserID"],userWithManyRoles["userDict"]["UserID"])
+    self.assertEqual(jwtTokenDict["TenantRoles"][constants.masterTenantName],[ constants.DefaultHasAccountRole, "role001", "role002", "role003" ])
 
 
-#Login with API key works including roles
+  def test_loginUsingDeletedAPIKeyFails(self):
+    setupData = self.setup()
 
-#User can not use API key on wrong tenant
+    user = setupData["users"][0]
+    apiKeyDataToUse = user["APIKeyCreationResults"][0]["res"]["apikeydata"]
+    apiKey = user["APIKeyCreationResults"][0]["res"]["apikey"]
 
-#APIKey can be restricted to a single role (Login and check jwt token)
+    JWTTokenResponse = self.loginUsingAPIToken(
+      tenant=constants.masterTenantName,
+      apiKey=apiKey
+    )
 
-#Deleted API key can not be used
+    retrievedAPIKeyJSON = self.getAPIKey(
+      tenant=apiKeyDataToUse["tenantName"],
+      userAuthToken=user["userAuthToken"],
+      apiKeyID=apiKeyDataToUse["id"]
+    )
 
+    objectVersionNumber = retrievedAPIKeyJSON[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]
 
+    #Delete APIKey
+    self.deleteAPIKey(
+      tenant=apiKeyDataToUse["tenantName"],
+      userAuthToken = user["userAuthToken"],
+      apiKeyID=apiKeyDataToUse["id"],
+      objectVersionNumber=objectVersionNumber
+    )
+
+    result = self.loginUsingAPIToken(
+      tenant=constants.masterTenantName,
+      apiKey=apiKey,
+      checkAndParseResponse=False
+    )
+    self.assertEqual(result.status_code, 400, msg="Unexpected return - " + result.get_data(as_text=True))
+    resultDict = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultDict["message"], "Invalid API Key")
 
   def testHashFunction(self):
     #Make sure I get different reuslts with different API keys

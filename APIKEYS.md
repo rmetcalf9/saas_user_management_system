@@ -32,6 +32,7 @@ API Keys inherit the roles they are granted from the user that created them. Whe
 
 ### Restrict roles
 If this property is set only roles appearing in this list are included in the API key.
+The hasaccoutn role is always there even if it is not in the restricted list.
 
 ### Should API Keys belong to mutiple users
 If an integration relies on an API key it is possible the user will leave then the integration break. One possible solution would be for the same API key to be shared amounst mutiple users. This is a possible future enhancement but will not be included in V1.

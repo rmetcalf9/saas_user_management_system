@@ -2,7 +2,11 @@ import repositoryAPIKey
 import uuid
 ##import bcrypt
 from base64 import b64encode
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
+import userPersonCommon
+import tenants
+import constants
+import object_store_abstraction
 
 class apiKeyManagerClass():
   repositoryAPIKey = None
@@ -57,3 +61,43 @@ class apiKeyManagerClass():
     def filterFn(obj, whereClauseText):
       return obj.userCanRead(tenantName=tenantName, userID=userID)
     return self.repositoryAPIKey.getPaginatedResult(paginatedParamValues, outputFN, storeConnection, filterFn)
+
+  def deleteAPIKey(self, decodedJWTToken, tenant, apiKeyID, ObjectVersionNumber, storeConnection):
+    apiKeyObj =  self.repositoryAPIKey.get(apiKeyID, storeConnection)
+    if apiKeyObj is None:
+      raise NotFound
+    if not apiKeyObj.userCanRead(tenantName=tenant, userID=decodedJWTToken.getUserID()):
+      raise NotFound
+
+    #Early Object version check to stop any actions being taken if object version is wrong
+    if str(ObjectVersionNumber) != str(apiKeyObj.getDict()[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]):
+      raise object_store_abstraction.WrongObjectVersionException
+
+    self.repositoryAPIKey.remove(id=apiKeyID, storeConnection=storeConnection, objectVersion=ObjectVersionNumber)
+    return {"response": "OK"}, 202
+
+  def processAPIKeyLogin(self, apiKey, tenant, storeConnection):
+    apiKeyObj = self.repositoryAPIKey.getAPIKEY(self.getHashedAPIKey(APIKey=apiKey), storeConnection)
+    if apiKeyObj is None:
+      raise BadRequest("Invalid API Key")
+    if apiKeyObj.getTenant() != tenant:
+      raise BadRequest("Invalid API Key")
+
+    userObj = userPersonCommon.GetUser(self.appObj, apiKeyObj.getDict()["createdByUserID"], storeConnection)
+    if userObj is None:
+      raise BadRequest("Invalid API Key")
+
+    #User must have an account in this tenant to work at all
+    if not userObj.hasRole(tenant, constants.DefaultHasAccountRole):
+      raise BadRequest("Invalid API Key")
+
+    resDict = tenants.getLoginResult(
+      appObj=self.appObj,
+      userObj=userObj,
+      authedPersonGuid=None,
+      currentAuthUserKey=None,
+      authProviderGuid=None,
+      tenantName=tenant,
+      restrictRolesTo=apiKeyObj.getDict()["restrictedRoles"]
+    )
+    return resDict, 200
