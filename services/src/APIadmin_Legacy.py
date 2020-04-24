@@ -1,10 +1,10 @@
 #Admin API
 from flask import request
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, marshal
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound, Conflict
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole
 import constants
-from apiSharedModels import getTenantModel, getUserModel, getPersonModel
+from apiSharedModels import getTenantModel, getUserModel, getPersonModel, getAuthProviderModel
 from urllib.parse import unquote
 import json
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
@@ -48,7 +48,10 @@ def getCreateTenantModel(appObj):
   return appObj.flastRestPlusAPIObject.model('CreateTenantInfo', {
     'Name': fields.String(default='DEFAULT', description='Name and unique identifier of tenant'),
     'Description': fields.String(default='DEFAULT', description='Description of tenant'),
-    'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)')
+    'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
+    'AuthProviders': fields.List(fields.Nested(getAuthProviderModel(appObj))),
+    'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
+    'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
   })
 
 def getCreateUserModel(appObj):
@@ -149,11 +152,13 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant):
       '''Create Tenant'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getCreateTenantModel(appObj))
       requiredInPayload(content, ['Name','Description','AllowUserCreation'])
       if "AuthProviders" in content:
-        if len(content["AuthProviders"]) != 0:
-          raise BadRequest("Not possible to create a Tenant with AuthProviders ")
+        if content["AuthProviders"] is not None:
+          if len(content["AuthProviders"]) != 0:
+            raise BadRequest("Not possible to create a Tenant with AuthProviders ")
       try:
         def someFn(connectionContext):
           return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],
@@ -174,6 +179,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
 
   def getOrSomethngElse(ite, lis, somethingElse):
     if ite not in lis:
+      return somethingElse
+    if lis[ite] is None:
       return somethingElse
     return lis[ite]
 
@@ -205,7 +212,11 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def put(self, tenant, tenantName):
       '''Update Tenant'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getTenantModel(appObj))
+      if "ObjectVersion" not in content_raw:
+        del content["ObjectVersion"]
+
       requiredInPayload(content, ['Name','Description','AllowUserCreation','AuthProviders','ObjectVersion'])
 
       try:
@@ -322,7 +333,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant):
       '''Create User'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getCreateUserModel(appObj))
       requiredInPayload(content, ['UserID','known_as'])
       userData = {
         "user_unique_identifier": content["UserID"],
@@ -330,7 +342,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
       }
       def dbfn(storeConnection):
         tenant = None
-        if "mainTenant" in content:
+        if content["mainTenant"] is not None:
           if content["mainTenant"] != "":
             tenant = content["mainTenant"]
             tenantObj = GetTenant(tenant, storeConnection, appObj=appObj)
@@ -385,7 +397,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def put(self, tenant, userID):
       '''Update User'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getUserModel(appObj))
+
       requiredInPayload(content, ['UserID','TenantRoles','known_as','other_data', 'ObjectVersion'])
       if userID != content['UserID']:
         raise BadRequest("Inconsistent userID")
@@ -490,9 +504,12 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant):
       '''Create Person'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
-      if "guid" in content:
+      content_raw = request.get_json()
+      content = marshal(content_raw, getPersonModel(appObj))
+
+      if "guid" in content_raw:
         raise BadRequest("Can not supply guid when creating person")
+      del content["guid"]
       requiredInPayload(content, [])
       try:
         def someFn(connectionContext):
@@ -537,7 +554,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def put(self, tenant, personGUID):
       '''Update Person'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getPersonModel(appObj))
+
       requiredInPayload(content, ['guid', 'ObjectVersion'])
       if personGUID != content['guid']:
         raise BadRequest("Inconsistent guid")
@@ -601,7 +620,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant, userID, personGUID):
       '''Create userpersonlink'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getUserPersonLinkModel(appObj))
+
       requiredInPayload(content, ["UserID", "personGUID"])
       if userID != content['UserID']:
         raise BadRequest("UserID in payload not the same as in URL")
@@ -673,7 +694,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant):
       '''Create Auth'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getCreateAuthModel(appObj))
+
       requiredInPayload(content, ["personGUID", "authProviderGUID", "credentialJSON", "tenantName"])
       try:
 

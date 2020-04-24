@@ -125,6 +125,12 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
     "TicketOverrideURL": TicketOverrideURL
   }
   for authProv in authProvDict:
+    def getValue(dict, key, defaultValue):
+      if key not in dict:
+        return defaultValue
+      if dict[key] is None:
+        return defaultValue
+      return dict[key]
     newAuthDICT = {}
 
     if 'saltForPasswordHashing' not in authProv:
@@ -153,7 +159,9 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getExistingAuthProviderJSON(
         appObj, existingAuthProv, authProv['MenuText'], authProv['IconLink'], authProv['Type'],
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
-        authProv.get('AllowLink',existingAuthProv['AllowLink']), authProv.get('AllowUnlink',existingAuthProv['AllowUnlink']), authProv.get('LinkText',existingAuthProv['LinkText'])
+        getValue(authProv,'AllowLink', existingAuthProv['AllowLink']),
+        getValue(authProv,'AllowUnlink', existingAuthProv['AllowUnlink']),
+        getValue(authProv,'LinkText', existingAuthProv['LinkText'])
       )
     else:
       if authProv['saltForPasswordHashing'] is not None:
@@ -161,7 +169,9 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
       newAuthDICT = getNewAuthProviderJSON(
         appObj, authProv['MenuText'], authProv['IconLink'], authProv['Type'],
         authProv['AllowUserCreation'], authProv['ConfigJSON'],
-        authProv.get('AllowLink',False), authProv.get('AllowUnlink',False), authProv.get('LinkText','Link')
+        getValue(authProv, 'AllowLink', False),
+        getValue(authProv, 'AllowUnlink', False),
+        getValue(authProv, 'LinkText', 'Link')
       )
     jsonForTenant['AuthProviders'][newAuthDICT['guid']] = newAuthDICT
 

@@ -115,15 +115,6 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithNoAuthProviders, ["ObjectVersion"], msg='JSON of created Tenant is not the same')
     self.assertEqual(resultJSON["ObjectVersion"],"1")
 
-  def test_createTenantInvalidJSON(self):
-    result = self.testClient.post(
-      self.adminAPIPrefix + '/' + masterTenantName + '/tenants',
-      headers={ jwtHeaderName: self.getNormalJWTToken()},
-      data=json.dumps({}),
-      content_type='application/json'
-    )
-    self.assertEqual(result.status_code, 400)
-
   def test_createTenantWithDuplicateNameFails(self):
     result = self.testClient.post(
       self.adminAPIPrefix + '/' + masterTenantName + '/tenants',
@@ -327,7 +318,7 @@ class test_funcitonal(test_api):
       data=json.dumps(tenantDICT),
       content_type='application/json'
     )
-    self.assertEqual(result.status_code, 400)
+    self.assertEqual(result.status_code, 400, msg="Got wrong response - " + result.get_data(as_text=True))
 
   def test_updateAuthProviderDifferentSaltFails(self):
     resultJSON = self.createTenantForTestingWithMutipleAuthProviders(tenantWithNoAuthProviders, [sampleInternalAuthProv001_CREATE])

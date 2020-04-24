@@ -3,29 +3,34 @@
 from flask_restplus import fields
 from object_store_abstraction import RepositoryObjBaseClass
 
-def getTenantModel(appObj):
-  AuthProviderModel = appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
-    'guid': fields.String(default='abc', description='Unique identifier of AuthProvider'),
+def getAuthProviderModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('AuthProviderInfo', {
+    'guid': fields.String(default=None, description='Unique identifier of AuthProvider'),
     'Type': fields.String(default='internal', description='Authorization provider type'),
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND Tenant level to work)'),
-    'AllowLink': fields.Boolean(default=False,description='Allow user to add this as a secondary auth method'),
-    'AllowUnlink': fields.Boolean(default=False,description='Allow user to remove this auth method (As long as they have others availiable)'),
-    'LinkText': fields.String(default='Link', description='Text to show on link button in Security settings UI'),
+    'AllowLink': fields.Boolean(default=None, description='Allow user to add this as a secondary auth method'),
+    'AllowUnlink': fields.Boolean(default=None,description='Allow user to remove this auth method (As long as they have others availiable)'),
+    'LinkText': fields.String(default=None, description='Text to show on link button in Security settings UI'),
     'MenuText': fields.String(default='click here', description='Item text used in login method selection screen'),
     'IconLink': fields.String(default=None, description='Image link used in login method selection screen'),
     'ConfigJSON': fields.String(default=None, description='Extra configuration required per auth type'),
     'StaticlyLoadedData': fields.Raw(description='Other data loaded for this auth type'),
-    'saltForPasswordHashing': fields.String(default=None, description='Salt that can be used for password hashing (Depends on auth method)')
+    'saltForPasswordHashing': fields.String(default=None,description='Salt that can be used for password hashing (Depends on auth method)')
   })
+
+
+def getTenantModel(appObj):
   return appObj.flastRestPlusAPIObject.model('TenantInfo', {
     'Name': fields.String(default='DEFAULT', description='Name and unique identifier of tenant'),
     'Description': fields.String(default='DEFAULT', description='Description of tenant'),
     'AllowUserCreation': fields.Boolean(default=False,description='Allow unknown logins to create new users. (Must be set to true at this level AND AuthPRovider level to work)'),
-    'AuthProviders': fields.List(fields.Nested(AuthProviderModel)),
+    'AuthProviders': fields.List(fields.Nested(getAuthProviderModel(appObj))),
     'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
     'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
     'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
   })
+
+
 
 #register user responds with this model
 def getUserModel(appObj):

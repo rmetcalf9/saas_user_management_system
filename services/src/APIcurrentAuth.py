@@ -1,6 +1,6 @@
 #currentAuth API
 from flask import request
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, marshal
 import constants
 from apiSharedModels import getPersonModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 from tenants import ExecuteAuthOperation, GetTenant, GetAuthProvider
@@ -107,7 +107,8 @@ def registerAPI(appObj):
       '''Execute Auth Operation'''
       decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
 
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getExecuteAuthOperationModel(appObj))
       requiredInPayload(content, ['authProviderGUID', 'credentialJSON','operationData','operationName'])
 
       authProvGUID = request.get_json()['authProviderGUID']
@@ -142,7 +143,9 @@ def registerAPI(appObj):
     @nsCurAuth.response(400, 'Bad Request')
     @nsCurAuth.response(401, 'Unauthorized')
     def post(self, tenant):
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getLoginPostDataModel(appObj))
+
       requiredInPayload(content, ['authProviderGUID', 'credentialJSON'])
       authProviderGUID = content['authProviderGUID']
       credentialJSON = content['credentialJSON']
@@ -187,7 +190,8 @@ def registerAPI(appObj):
       '''Delete Auth'''
       decodedJWTToken = verifySecurityOfAPICall(appObj, request, tenant)
 
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getDeleteAuthModelRequest(appObj))
       requiredInPayload(content, ['AuthKey'])
       authKey = content["AuthKey"]
 
