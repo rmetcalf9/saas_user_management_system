@@ -152,8 +152,8 @@ def registerAPI(appObj, nsLogin):
       if request.args["objectversion"] == None:
         raise BadRequest("Must supply object version to delete - can not be blank")
       objVer = None
-      #if request.args["objectversion"] != 'LOOKUP': May need to add ability to lookup
-      objVer = request.args["objectversion"]
+      if request.args["objectversion"] != 'LOOKUP':
+        objVer = request.args["objectversion"]
 
       def dbfn(storeConnection):
         return appObj.ApiKeyManager.deleteAPIKey(decodedJWTToken=decodedJWTToken, tenant=tenant, apiKeyID=apiKeyID, ObjectVersionNumber=objVer, storeConnection=storeConnection)

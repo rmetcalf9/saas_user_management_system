@@ -460,7 +460,7 @@ class test_loginAPI_APIKeys(helper):
     resultDict = json.loads(result.get_data(as_text=True))
     self.assertEqual(resultDict["message"], "Invalid API Key")
 
-  def testHashFunction(self):
+  def test_HashFunction(self):
     #Make sure I get different reuslts with different API keys
     APIKeys = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
     Hashed = []
@@ -471,4 +471,31 @@ class test_loginAPI_APIKeys(helper):
       for cur2 in [0,1,2]:
         if cur != cur2:
           self.assertNotEqual(Hashed[cur], Hashed[cur2], msg="Got two identical hashes")
+
+  def test_deleteAPIKeyWithoutObjectVersion(self):
+    setupData = self.setup()
+
+    user = setupData["users"][0]
+    apiKeyDataToUse = user["APIKeyCreationResults"][0]["res"]["apikeydata"]
+
+    retrievedAPIKeyJSON = self.getAPIKey(
+      tenant=apiKeyDataToUse["tenantName"],
+      userAuthToken=user["userAuthToken"],
+      apiKeyID=apiKeyDataToUse["id"]
+    )
+
+    self.deleteAPIKey(
+      tenant=apiKeyDataToUse["tenantName"],
+      userAuthToken = user["userAuthToken"],
+      apiKeyID=apiKeyDataToUse["id"],
+      objectVersionNumber="LOOKUP"
+    )
+
+    retrievedAPIKeyResult = self.getAPIKey(
+      tenant=apiKeyDataToUse["tenantName"],
+      userAuthToken=user["userAuthToken"],
+      apiKeyID=apiKeyDataToUse["id"],
+      checkAndParseResponse=False
+    )
+    self.assertEqual(retrievedAPIKeyResult.status_code, 404, msg="Deleted API key should not be found")
 

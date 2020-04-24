@@ -52,6 +52,8 @@ class apiKeyManagerClass():
      storeConnection
    ):
     apiKeyObj =  self.repositoryAPIKey.get(apiKeyID, storeConnection)
+    if apiKeyObj is None:
+      raise NotFound
     if not apiKeyObj.userCanRead(tenantName=tenant, userID=decodedJWTToken.getUserID()):
       raise NotFound
     return apiKeyObj.getDict(), 200
@@ -70,8 +72,9 @@ class apiKeyManagerClass():
       raise NotFound
 
     #Early Object version check to stop any actions being taken if object version is wrong
-    if str(ObjectVersionNumber) != str(apiKeyObj.getDict()[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]):
-      raise object_store_abstraction.WrongObjectVersionException
+    if ObjectVersionNumber is not None:
+      if str(ObjectVersionNumber) != str(apiKeyObj.getDict()[object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey()]["objectVersion"]):
+        raise object_store_abstraction.WrongObjectVersionException
 
     self.repositoryAPIKey.remove(id=apiKeyID, storeConnection=storeConnection, objectVersion=ObjectVersionNumber)
     return {"response": "OK"}, 202
