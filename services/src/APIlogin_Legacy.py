@@ -1,7 +1,7 @@
 #This is the publiclly availiable loginAPI
 
 from flask import request
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, marshal
 import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
@@ -49,11 +49,14 @@ def registerAPI(appObj, nsLogin):
       '''Register'''
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection, validateOrigin=True)
-        content = request.get_json()
-        if 'authProviderGUID' not in content:
+        content_raw = request.get_json()
+        content = marshal(content_raw, getRegisterPostDataModel(appObj))
+        if "ticket" not in content_raw:
+          del content["ticket"]
+        if content['authProviderGUID'] is None:
           raise BadRequest('No authProviderGUID provided')
         authProviderGUID = content['authProviderGUID']
-        if 'credentialJSON' not in content:
+        if content['credentialJSON'] is None:
           raise BadRequest('No credentialJSON provided')
         credentialJSON = content['credentialJSON']
 
@@ -124,19 +127,21 @@ def registerAPI(appObj, nsLogin):
     @nsLogin.response(401, 'Unauthorized')
     def post(self, tenant):
       '''Login and recieve JWT token'''
-      content = request.get_json()
-      if 'authProviderGUID' not in content:
+      content_raw = request.get_json()
+      content = marshal(content_raw, getLoginPostDataModel(appObj))
+
+      if content['authProviderGUID'] is None:
         raise BadRequest('No authProviderGUID provided')
       def dbfn(storeConnection):
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection, validateOrigin=True)
 
         authProviderGUID = content['authProviderGUID']
         UserID = None
-        if 'UserID' in content:
+        if content['UserID'] is not None:
           UserID = content['UserID']
         ticketObj = None
         ticketTypeObj = None
-        if 'ticket' in content:
+        if content['ticket'] is not None:
           ticketObj = appObj.TicketManager.getTicketObj(ticketGUID=content['ticket'], storeConnection=storeConnection)
           if ticketObj is None:
             raise BadRequest('Invalid Ticket')

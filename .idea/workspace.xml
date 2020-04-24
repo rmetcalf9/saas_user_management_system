@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -392,7 +390,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587715633592</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="Migrated admin legacy to marshal input so extra fields are removed">
+      <created>1587747795208</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1587747795208</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -419,7 +424,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Completed tickettype cleanup" />
     <MESSAGE value="Adding login api ticket query" />
     <MESSAGE value="Fixing failing test" />
     <MESSAGE value="Simple ticket use case test created" />
@@ -444,16 +448,12 @@
     <MESSAGE value="Refactoring so that I can reuse login response code" />
     <MESSAGE value="APIKey api functinoality complete" />
     <MESSAGE value="APIKey api delete without objectversion number" />
-    <option name="LAST_COMMIT_MESSAGE" value="APIKey api delete without objectversion number" />
+    <MESSAGE value="Migrated admin legacy to marshal input so extra fields are removed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Migrated admin legacy to marshal input so extra fields are removed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/services/src/APIadmin_Legacy.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/services/src/encryption.py</url>
           <option name="timeStamp" value="2" />

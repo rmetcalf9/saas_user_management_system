@@ -1,5 +1,5 @@
 from flask import request
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, marshal
 import constants
 from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction
@@ -89,7 +89,8 @@ def registerAPI(appObj, nsLogin):
     def post(self, tenant):
       '''Create APIKey'''
       decodedJWTToken = verifyJWTTokenGivesUserWithAPIKeyPrivilagesAndReturnFormattedJWTToken(appObj=appObj, request=request, tenant=tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, getAPIKeyCreateRequestModel(appObj))
       requiredInPayload(content, ['restrictedRoles','externalData'])
       restrictedRoles = content['restrictedRoles']
       externalDataDict = content['externalData']

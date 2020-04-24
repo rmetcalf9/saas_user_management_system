@@ -70,10 +70,10 @@ def getPersonModel(appObj):
 #Used with both login and link
 def getLoginPostDataModel(appObj):
   return appObj.flastRestPlusAPIObject.model('LoginPostData', {
-    'authProviderGUID': fields.String(default='DEFAULT', description='Unique identifier of AuthProvider to log in with', required=True),
+    'authProviderGUID': fields.String(default=None, description='Unique identifier of AuthProvider to log in with', required=True),
     'credentialJSON': fields.Raw(description='JSON structure required depends on the Auth Provider type', required=True),
-    'UserID': fields.String(default='DEFAULT', description='If a person has access to mutiple Users then they specify the UserID of the one they need to login with'),
-    'ticket': fields.String(default='DEFAULT', description='If a user has a ticket to grant them extra roles on the tenant')
+    'UserID': fields.String(default=None, description='If a person has access to mutiple Users then they specify the UserID of the one they need to login with'),
+    'ticket': fields.String(default=None, description='If a user has a ticket to grant them extra roles on the tenant')
   })
 
 #Used with both login response and refresh response and link response
