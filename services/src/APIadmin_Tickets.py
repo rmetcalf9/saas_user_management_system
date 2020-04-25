@@ -1,6 +1,6 @@
 import apiSharedModels
 from flask import request
-from flask_restplus import Resource
+from flask_restplus import Resource, marshal
 import constants
 from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction
@@ -49,12 +49,15 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant, tenantName):
       '''Create Ticket Type'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, apiSharedModels.getCreateTicketTypeModel(appObj))
+
+
       #requiredInPayload(content, ['Name','Description','AllowUserCreation'])
       try:
-        if object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey() in content:
+        if object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey() in content_raw:
           raise object_store_abstraction.RepositoryValidationException(object_store_abstraction.RepositoryObjBaseClass.getMetadataElementKey() + " key should not be present when creating")
-        if "id" in content:
+        if "id" in content_raw:
           raise object_store_abstraction.RepositoryValidationException("id key should not be present when creating")
         def someFn(storeConnection):
           return appObj.TicketManager.upsertTicketType(
@@ -106,7 +109,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant, tenantName, tickettypeID):
       ''' Update Ticket Type  '''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, apiSharedModels.getTicketTypeModel(appObj))
 
       def dbfn(storeConnection):
         return appObj.TicketManager.updateTicketType(
@@ -161,7 +165,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant, tenantName, tickettypeID):
       '''Create Ticket Batch Process'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, apiSharedModels.getTicketTypeCreateBatchProcessModel(appObj))
+
       requiredInPayload(content, ['foreignKeyDupAction', 'foreignKeyList'])
       if not isinstance(content["foreignKeyList"], list):
         raise BadRequest('Bad foreignKeyList')
@@ -236,7 +242,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
     def post(self, tenant, tenantName, tickettypeID):
       '''Disable Ticket'''
       APIAdminCommon.verifySecurityOfAdminAPICall(appObj, request, tenant)
-      content = request.get_json()
+      content_raw = request.get_json()
+      content = marshal(content_raw, apiSharedModels.getTicketDisableBatchProcessModel(appObj))
+
       requiredInPayload(content, ['tickets'])
       def dbfn(storeConnection):
         return appObj.TicketManager.disableTicketBatch(

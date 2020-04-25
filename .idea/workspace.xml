@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -53,13 +51,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1575619803263</updated>
-    </task>
-    <task id="LOCAL-00001" summary="Added pycharm project">
-      <created>1575620998026</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1575620998026</updated>
     </task>
     <task id="LOCAL-00002" summary="Changing cors behavour to maintain internal list when tenants are updated">
       <created>1575624823981</created>
@@ -397,7 +388,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587747795208</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="Migrated login legacy to marshal input so extra fields are removed">
+      <created>1587748704201</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1587748704202</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -424,7 +422,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Adding login api ticket query" />
     <MESSAGE value="Fixing failing test" />
     <MESSAGE value="Simple ticket use case test created" />
     <MESSAGE value="Ticket use with single role working" />
@@ -449,7 +446,8 @@
     <MESSAGE value="APIKey api functinoality complete" />
     <MESSAGE value="APIKey api delete without objectversion number" />
     <MESSAGE value="Migrated admin legacy to marshal input so extra fields are removed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Migrated admin legacy to marshal input so extra fields are removed" />
+    <MESSAGE value="Migrated login legacy to marshal input so extra fields are removed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Migrated login legacy to marshal input so extra fields are removed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
