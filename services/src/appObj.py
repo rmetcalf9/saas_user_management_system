@@ -7,7 +7,7 @@
 import pytz
 
 from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, readFromEnviroment, uniqueCommaSeperatedListClass
-from flask_restplus import fields
+from flask_restx import fields
 from flask import request
 import time
 import datetime

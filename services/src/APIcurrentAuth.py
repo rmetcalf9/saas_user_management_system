@@ -1,6 +1,6 @@
 #currentAuth API
 from flask import request
-from flask_restplus import Resource, fields, marshal
+from flask_restx import Resource, fields, marshal
 import constants
 from apiSharedModels import getPersonModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 from tenants import ExecuteAuthOperation, GetTenant, GetAuthProvider

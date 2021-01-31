@@ -1,6 +1,6 @@
 import apiSharedModels
 from flask import request
-from flask_restplus import Resource, marshal
+from flask_restx import Resource, marshal
 import constants
 from werkzeug.exceptions import InternalServerError, BadRequest, NotFound
 import object_store_abstraction

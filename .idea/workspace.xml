@@ -3,6 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Tickets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIcurrentAuth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Tickets.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Tickets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/appObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/appObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/requirements.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

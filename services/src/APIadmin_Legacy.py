@@ -1,6 +1,6 @@
 #Admin API
 from flask import request
-from flask_restplus import Resource, fields, marshal
+from flask_restx import Resource, fields, marshal
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound, Conflict
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole
 import constants
@@ -249,7 +249,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         raise BadRequest(str(err))
         #raise err
       except WrongObjectVersionExceptionClass as err:
-        raise Conflict(err)
+        raise Conflict(str(err))
       except:
         raise InternalServerError
 
@@ -281,7 +281,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
       except WrongObjectVersionExceptionClass as err:
-        raise Conflict(err)
+        raise Conflict(str(err))
       except:
         raise InternalServerError
 
@@ -571,7 +571,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
       except WrongObjectVersionExceptionClass as err:
-        raise Conflict(err)
+        raise Conflict(str(err))
       except:
         raise InternalServerError
 
@@ -605,7 +605,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
       except WrongObjectVersionExceptionClass as err:
-        raise Conflict(err)
+        raise Conflict(str(err))
       except:
         raise InternalServerError
 

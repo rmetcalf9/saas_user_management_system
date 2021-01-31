@@ -1,7 +1,7 @@
 #This is the publiclly availiable loginAPI
 
 from flask import request
-from flask_restplus import Resource, fields, marshal
+from flask_restx import Resource, fields, marshal
 import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment

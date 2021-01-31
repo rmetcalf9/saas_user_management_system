@@ -1,10 +1,10 @@
 #Any change made here must be copied to the testContainer requirements file
 
 flask==1.0.2
-flask_restplus==0.11.0
+flask_restx==0.2.0
 pytz==2019.3
 sortedcontainers==1.5.9
-baseapp_for_restapi_backend_with_swagger==0.5.19
+baseapp_for_restapi_backend_with_swagger==0.5.22
 object_store_abstraction==0.3.26
 pyjwt==1.7.1
 apscheduler==3.5.3

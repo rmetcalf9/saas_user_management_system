@@ -1,6 +1,6 @@
 # File to keep all the shared models that are required
 #  for both the login and admin API's
-from flask_restplus import fields
+from flask_restx import fields
 from object_store_abstraction import RepositoryObjBaseClass
 
 def getAuthProviderModel(appObj):
