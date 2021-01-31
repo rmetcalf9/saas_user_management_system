@@ -5,5 +5,5 @@ python_Testing_Utilities==0.1.7
 # The following lines copied from main code requirements
 ## can't copy whole file due to dependencies
 pytz==2019.3
-baseapp_for_restapi_backend_with_swagger==0.5.18
+baseapp_for_restapi_backend_with_swagger==0.5.22
 requests==2.20.1
