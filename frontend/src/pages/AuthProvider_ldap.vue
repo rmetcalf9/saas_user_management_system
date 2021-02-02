@@ -1,19 +1,34 @@
 <template>
-  <div>
-    <div class="fixed-center">
-      <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
-      <br>
-      <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
-      <p class="text-center group">
-        <q-btn
-          color="primary"
-          push
-          @click="usernamePassLogin"
-        >
-          Login
-        </q-btn>
-      </p>
-    </div>
+  <div class="q-md">
+    <q-layout>
+      <q-page-container>
+        <q-page flex class="full-width column justify-center items-center">
+          <q-btn
+            round
+            icon="arrow_back" color="primary" style="position: fixed; left: 16px; top: 16px"
+            size="md"
+            v-if="hasMutipleLoginMethods"
+            @click="goBackToSelectAuthProviderScreen"
+          />
+          <div>
+            <div rows>
+              <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
+              <br>
+              <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
+              <p class="text-center group">
+                <q-btn
+                  color="primary"
+                  push
+                  @click="usernamePassLogin"
+                >
+                  Login
+                </q-btn>
+              </p>
+            </div>
+          </div>
+        </q-page>
+      </q-page-container>
+    </q-layout>
     <processLoginResponse ref="processLoginResponseInstance"></processLoginResponse>
   </div>
 </template>
@@ -43,21 +58,10 @@ export default {
       }
     }
   },
-  computed: {
-    tenantInfo () {
-      return this.$store.state.globalDataStore.tenantInfo
-    },
-    authProvInfo () {
-      return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
-    },
-    passwordERROR () {
-      return (this.passwordERRORMessage !== 'Password')
-    },
-    passwordERRORMessage () {
-      return frontendFns.passwordERRORMessage(this.createAccountDialogModel.password, this.createAccountDialogModel.password2)
-    }
-  },
   methods: {
+    goBackToSelectAuthProviderScreen () {
+      this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
+    },
     usernamePassLogin () {
       var TTT = this
       if (this.$store.state.globalDataStore.selectedAuthProvGUID === null) {
@@ -83,6 +87,23 @@ export default {
         callback: callback,
         processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
       })
+    }
+  },
+  computed: {
+    tenantInfo () {
+      return this.$store.state.globalDataStore.tenantInfo
+    },
+    authProvInfo () {
+      return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
+    },
+    passwordERROR () {
+      return (this.passwordERRORMessage !== 'Password')
+    },
+    passwordERRORMessage () {
+      return frontendFns.passwordERRORMessage(this.createAccountDialogModel.password, this.createAccountDialogModel.password2)
+    },
+    hasMutipleLoginMethods () {
+      return this.$store.state.globalDataStore.tenantInfo.AuthProviders.length !== 0
     }
   },
   mounted: function () {
