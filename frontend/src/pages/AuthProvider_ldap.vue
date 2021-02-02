@@ -12,8 +12,8 @@
           />
           <div>
             <div rows>
+              <div v-html="tenantInfoTenantBanner" />
               <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
-              <br>
               <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
               <p class="text-center group">
                 <q-btn
@@ -52,6 +52,7 @@ export default {
   },
   data () {
     return {
+      tenantInfoTenantBanner: '<div style="text-align: center;"><img src="https://challengeswipe.com/icons/icon-512x512.png" style="width: 200px;"/><br>ChallengeSwipe.com</div>',
       usernamePass: {
         username: '',
         password: ''
