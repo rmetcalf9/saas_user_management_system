@@ -1,83 +1,97 @@
 <template>
-  <div>
-    <div class="fixed-center">
-      <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
-      <br>
-      <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
-      <p class="text-center group">
-        <q-btn
-          color="primary"
-          push
-          @click="usernamePassLogin"
-        >
-          Login
-        </q-btn>
-        <q-btn
-          v-if='authProvInfo.AllowUserCreation && tenantInfo.AllowUserCreation'
-          color="secondary"
-          push
-          @click="createAccountClick"
-        >
-          Create Account
-        </q-btn>
-      </p>
-    </div>
+  <div class="q-md">
+    <q-layout>
+      <q-page-container>
+        <q-page flex class="full-width column justify-center items-center">
+          <q-btn
+            round
+            icon="arrow_back" color="primary" style="position: fixed; left: 16px; top: 16px"
+            size="md"
+            v-if="hasMutipleLoginMethods"
+            @click="goBackToSelectAuthProviderScreen"
+          />
+          <div>
+            <div rows>
+              <q-input v-model="usernamePass.username" placeholder="Username" ref="userNameInput" @keyup.enter="usernamePassLogin" />
+              <q-input type="password" v-model="usernamePass.password" placeholder="Password" @keyup.enter="usernamePassLogin" />
+              <p class="text-center group">
+                <q-btn
+                  color="primary"
+                  push
+                  @click="usernamePassLogin"
+                >
+                  Login
+                </q-btn>
+                <q-btn
+                  v-if='authProvInfo.AllowUserCreation && tenantInfo.AllowUserCreation'
+                  color="secondary"
+                  push
+                  @click="createAccountClick"
+                >
+                  Create Account
+                </q-btn>
+              </p>
+            </div>
+          </div>
+        </q-page>
+      </q-page-container>
 
-    <q-dialog v-model="createAccountDialogModel.visible">
-      <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
-        <q-header class="bg-primary">
-          <q-toolbar>
-            <q-toolbar-title>
-              Create Account
-            </q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
+      <q-dialog v-model="createAccountDialogModel.visible">
+        <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
+          <q-header class="bg-primary">
+            <q-toolbar>
+              <q-toolbar-title>
+                Create Account
+              </q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
 
-        <q-page-container>
-          <q-page padding>
-            <q-input
-              v-model="createAccountDialogModel.username"
-              ref="usernameDialogInput"
-              helper="Username"
-              label="Username"
-              :label-width="3"
-             />
-            <q-input
-              type="password"
-              v-model="createAccountDialogModel.password"
-              label="Password"
-              :label-width="3"
-              :error-message="passwordERRORMessage"
-              :error="passwordERROR"
-             />
-            <q-input
-              type="password"
-              v-model="createAccountDialogModel.password2"
-              @keyup.enter="okCreateAccountDialog"
-              label="Retype Password"
-              :label-width="3"
-              :error-message="passwordERRORMessage"
-              :error="passwordERROR"
-            />
-            <q-btn
-              @click="okCreateAccountDialog"
-              color="primary"
-              label="Ok"
-              class = "float-right q-ml-xs"
-            />
-            <q-btn
-              @click="cancelCreateAccountDialog"
-              label="Cancel"
-              class = "float-right"
-            />
-          </q-page>
-        </q-page-container>
+          <q-page-container>
+            <q-page padding>
+              <q-input
+                v-model="createAccountDialogModel.username"
+                ref="usernameDialogInput"
+                helper="Username"
+                label="Username"
+                :label-width="3"
+               />
+              <q-input
+                type="password"
+                v-model="createAccountDialogModel.password"
+                label="Password"
+                :label-width="3"
+                :error-message="passwordERRORMessage"
+                :error="passwordERROR"
+               />
+              <q-input
+                type="password"
+                v-model="createAccountDialogModel.password2"
+                @keyup.enter="okCreateAccountDialog"
+                label="Retype Password"
+                :label-width="3"
+                :error-message="passwordERRORMessage"
+                :error="passwordERROR"
+              />
+              <q-btn
+                @click="okCreateAccountDialog"
+                color="primary"
+                label="Ok"
+                class = "float-right q-ml-xs"
+              />
+              <q-btn
+                @click="cancelCreateAccountDialog"
+                label="Cancel"
+                class = "float-right"
+              />
+            </q-page>
+          </q-page-container>
 
-      </q-layout>
-    </q-dialog>
+        </q-layout>
+      </q-dialog>
 
-    <processLoginResponse ref="processLoginResponseInstance"></processLoginResponse>
+      <processLoginResponse ref="processLoginResponseInstance"></processLoginResponse>
+    </q-layout>
   </div>
 </template>
 
@@ -112,21 +126,10 @@ export default {
       }
     }
   },
-  computed: {
-    tenantInfo () {
-      return this.$store.state.globalDataStore.tenantInfo
-    },
-    authProvInfo () {
-      return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
-    },
-    passwordERROR () {
-      return (this.passwordERRORMessage !== 'Password')
-    },
-    passwordERRORMessage () {
-      return frontendFns.passwordERRORMessage(this.createAccountDialogModel.password, this.createAccountDialogModel.password2)
-    }
-  },
   methods: {
+    goBackToSelectAuthProviderScreen () {
+      this.$router.replace('/' + this.$store.state.globalDataStore.tenantInfo.Name + '/selectAuth')
+    },
     createAccountClick () {
       this.createAccountDialogModel = {
         visible: true,
@@ -210,6 +213,23 @@ export default {
         callback: callback,
         processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
       })
+    }
+  },
+  computed: {
+    tenantInfo () {
+      return this.$store.state.globalDataStore.tenantInfo
+    },
+    authProvInfo () {
+      return this.$store.getters['globalDataStore/getAuthProvFromGUID'](this.$store.state.globalDataStore.selectedAuthProvGUID)
+    },
+    passwordERROR () {
+      return (this.passwordERRORMessage !== 'Password')
+    },
+    passwordERRORMessage () {
+      return frontendFns.passwordERRORMessage(this.createAccountDialogModel.password, this.createAccountDialogModel.password2)
+    },
+    hasMutipleLoginMethods () {
+      return this.$store.state.globalDataStore.tenantInfo.AuthProviders.length !== 0
     }
   },
   mounted: function () {
