@@ -42,7 +42,9 @@ tenantWithNoAuthProviders = {
   "AllowUserCreation": False,
   "AuthProviders": [],
   "JWTCollectionAllowedOriginList": [httpOrigin],
-  "TicketOverrideURL": "TESTOVER"
+  "TicketOverrideURL": "TESTOVER",
+  "TenantBannerHTML": "<div>Test Val HTML</div>",
+  "SelectAuthMessage": "Select A Test Auth woohoo"
 }
 sampleInternalAuthProv001_CREATE = {
   "guid": None,

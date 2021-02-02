@@ -53,7 +53,9 @@ class test_loginapi_norm(test_api):
         "StaticlyLoadedData": {}
       }],
       "ObjectVersion": "2",
-      "TicketOverrideURL": ""
+      "TicketOverrideURL": "",
+      "SelectAuthMessage": constants.masterTenantDefaultSelectAuthMessage,
+      "TenantBannerHTML": constants.masterTenantDefaultTenantBannerHTML
     }
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, expectedResult, [ 'AuthProviders', "JWTCollectionAllowedOriginList" ])
     self.assertEqual(resultJSON["JWTCollectionAllowedOriginList"], expectedResult["JWTCollectionAllowedOriginList"])

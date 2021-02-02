@@ -1,4 +1,4 @@
-from TestHelperSuperClass import testHelperAPIClient, sampleInternalAuthProv001_CREATE, env
+import TestHelperSuperClass
 from appObj import appObj
 import constants
 from tenants import GetTenant
@@ -25,8 +25,21 @@ Issue49_PreviousTenantExample = {
     }
   }
 }
+AddTenantLoginCustomDisplay_PreviousTenantExample = {
+  'Name': randomTenantName,
+  'Description': 'Master Tenadfsfsdfsdnt for User Management System',
+  'AllowUserCreation': False,
+  'AuthProviders': { authProvGUID: {
+    'guid': authProvGUID, 'Type': 'internal', 'AllowUserCreation': False, 'AllowLink': False,
+    'AllowUnlink': False, 'LinkText': 'Link Website Account', 'MenuText': 'Website account login',
+    'IconLink': None,
+    'ConfigJSON': '{"userSufix": "@internalDataStore"}', 'StaticlyLoadedData': {}, 'saltForPasswordHashing': 'JDJiJDEyJGxYdGkzMlhENkxrd1lVbkx3LjF2aC4='}},
+  'JWTCollectionAllowedOriginList': ['http://a.com', 'https://b.com', 'http://c.co.uk'],
+  'TicketOverrideURL': ''
+}
 
-class testDataStructureEvolutionClass(testHelperAPIClient):
+@TestHelperSuperClass.wipd
+class testDataStructureEvolutionClass(TestHelperSuperClass.testHelperAPIClient):
   def test_userAuths_addKnownAs(self):
     #We added a column "known_as" to this object
 
@@ -107,7 +120,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
     self.assertEqual(tenantDict2["AuthProviders"][0]['AllowUnlink'],True, msg="AllowUnlink was changed when it was not provided in update payload")
     self.assertEqual(tenantDict2["AuthProviders"][0]['LinkText'],'nonDefaultLinkText', msg="LinkText was changed when it was not provided in update payload")
 
-    oldAuthProv = copy.deepcopy(sampleInternalAuthProv001_CREATE)
+    oldAuthProv = copy.deepcopy(TestHelperSuperClass.sampleInternalAuthProv001_CREATE)
     del oldAuthProv['AllowLink']
     del oldAuthProv['AllowUnlink']
     del oldAuthProv['LinkText']
@@ -149,7 +162,7 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
       tenantObj = GetTenant(PreviousTenantExample["Name"], storeConnection, appObj=appObj)
       #print(tenantObj.getJSONRepresenation())
 
-      originList = list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
+      originList = list(map(lambda x: x.strip(), TestHelperSuperClass.env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
 
       self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), originList, msg="Did not default master tenant origin list to default env param")
 
@@ -191,7 +204,8 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
       expectedResult["JWTCollectionAllowedOriginList"] = []
       expectedResult["TicketOverrideURL"] = ""
 
-      self.assertJSONStringsEqualWithIgnoredKeys(jsonRep,expectedResult, [], msg="Invalid JSON representation of Object")
+      keysAddedInFutureTenantStructureUpdates = ["TenantBannerHTML", "SelectAuthMessage"]
+      self.assertJSONStringsEqualWithIgnoredKeys(jsonRep,expectedResult, keysAddedInFutureTenantStructureUpdates, msg="Invalid JSON representation of Object")
 
     appObj.objectStore.executeInsideTransaction(dbfn)
 
@@ -225,5 +239,27 @@ class testDataStructureEvolutionClass(testHelperAPIClient):
       self.assertEqual(result.status_code, 200)
 
       resultJSON = json.loads(result.get_data(as_text=True))
+
+    appObj.objectStore.executeInsideTransaction(dbfn)
+
+  def test_AddTenantLoginCustomDisplay(self):
+    def dbfn(storeConnection):
+      storeConnection.saveJSONObject("tenants", AddTenantLoginCustomDisplay_PreviousTenantExample['Name'], copy.deepcopy(AddTenantLoginCustomDisplay_PreviousTenantExample))
+
+      result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
+      self.assertEqual(result.status_code, 200)
+
+      resultJSON = json.loads(result.get_data(as_text=True))
+
+      foundTenant = None
+      for curTenant in resultJSON["result"]:
+        if curTenant["Name"] == AddTenantLoginCustomDisplay_PreviousTenantExample['Name']:
+          foundTenant = curTenant
+
+      if foundTenant is None:
+        raise Exception("Could not find sample tenant")
+
+      self.assertEqual(foundTenant["TenantBannerHTML"], "")
+      self.assertEqual(foundTenant["SelectAuthMessage"], "How do you want to verify who you are?")
 
     appObj.objectStore.executeInsideTransaction(dbfn)

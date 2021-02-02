@@ -27,7 +27,9 @@ def getTenantModel(appObj):
     'AuthProviders': fields.List(fields.Nested(getAuthProviderModel(appObj))),
     'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
     'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
-    'ObjectVersion': fields.String(default='DEFAULT', description='Obect version required to sucessfully preform updates')
+    'TenantBannerHTML': fields.String(default='', description='HTML displayed in select auth and login screens'),
+    'SelectAuthMessage': fields.String(default='', description='Message displayed above buttons in select auth screen'),
+    'ObjectVersion': fields.String(default='DEFAULT', description='Object version required to sucessfully preform updates')
   })
 
 

@@ -40,8 +40,9 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
   print("Creating master tenant")
   _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection,
     JWTCollectionAllowedOriginList=list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(","))),
-    TicketOverrideURL = ""
+    TicketOverrideURL = "", SelectAuthMessage=constants.masterTenantDefaultSelectAuthMessage, TenantBannerHTML=constants.masterTenantDefaultTenantBannerHTML
   )
+
   masterTenantInternalAuthProvider = AddAuthProvider(
     appObj,
     masterTenantName,
@@ -97,16 +98,20 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
 
 #returns tenantObj
 ##allowUserCreation used to default to false, description used to default to ""
-def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList, TicketOverrideURL):
+def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList,
+                 TicketOverrideURL, TenantBannerHTML, SelectAuthMessage):
   if tenantName == masterTenantName:
     raise failedToCreateTenantException
   return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList,
-    TicketOverrideURL=TicketOverrideURL
+    TenantBannerHTML=TenantBannerHTML, SelectAuthMessage=SelectAuthMessage, TicketOverrideURL=TicketOverrideURL
   )
+
 
 def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection,
   JWTCollectionAllowedOriginList,
-  TicketOverrideURL
+  TicketOverrideURL,
+  TenantBannerHTML,
+  SelectAuthMessage
 ):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
@@ -122,7 +127,9 @@ def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDic
     "AllowUserCreation": allowUserCreation,
     "AuthProviders": {},
     "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList,
-    "TicketOverrideURL": TicketOverrideURL
+    "TicketOverrideURL": TicketOverrideURL,
+    "TenantBannerHTML": TenantBannerHTML,
+    "SelectAuthMessage": SelectAuthMessage
   }
   for authProv in authProvDict:
     def getValue(dict, key, defaultValue):
@@ -274,7 +281,9 @@ def AddAuthProvider(appObj, tenantName, menuText, iconLink, Type, AllowUserCreat
 # called locally
 def _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection,
   JWTCollectionAllowedOriginList,
-  TicketOverrideURL
+  TicketOverrideURL,
+  TenantBannerHTML,
+  SelectAuthMessage
 ):
   tenantWithSameName, ver, creationDateTime, lastUpdateDateTime, _ =  storeConnection.getObjectJSON("tenants", tenantName)
   if tenantWithSameName is not None:
@@ -285,7 +294,9 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
     "AllowUserCreation": allowUserCreation,
     "AuthProviders": {},
     "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList,
-    "TicketOverrideURL": TicketOverrideURL
+    "TicketOverrideURL": TicketOverrideURL,
+    "TenantBannerHTML": TenantBannerHTML,
+    "SelectAuthMessage": SelectAuthMessage
   }
   createdTenantVer = storeConnection.saveJSONObject("tenants", tenantName, jsonForTenant)
 

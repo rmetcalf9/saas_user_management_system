@@ -28,6 +28,12 @@ class tenantClass():
     if not "TicketOverrideURL" in self._mainDict:
       self._mainDict["TicketOverrideURL"] = ""
 
+    if not "TenantBannerHTML" in self._mainDict:
+      self._mainDict["TenantBannerHTML"] = ""
+    if not "SelectAuthMessage" in self._mainDict:
+      self._mainDict["SelectAuthMessage"] = "How do you want to verify who you are?"
+
+
     self._objectVersion = objectVersion
 
     if self._mainDict["JWTCollectionAllowedOriginList"] is None:

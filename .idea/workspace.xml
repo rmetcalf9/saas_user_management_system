@@ -3,7 +3,17 @@
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/testContainer/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/autoConfigRunner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/tenantObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenantObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_dataStructureEvolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_dataStructureEvolution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_tenants.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

@@ -52,6 +52,8 @@ def getCreateTenantModel(appObj):
     'AuthProviders': fields.List(fields.Nested(getAuthProviderModel(appObj))),
     'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
     'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
+    'TenantBannerHTML': fields.String(default='', description='HTML displayed in select auth and login screens'),
+    'SelectAuthMessage': fields.String(default='', description='Message displayed above buttons in select auth screen')
   })
 
 def getCreateUserModel(appObj):
@@ -164,7 +166,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],
             connectionContext,
             JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, []),
-            TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, "")
+            TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, ""),
+            TenantBannerHTML=getOrSomethngElse("TenantBannerHTML",content, ""),
+            SelectAuthMessage=getOrSomethngElse("SelectAuthMessage",content, "How do you want to verify who you are?")
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 
@@ -229,7 +233,9 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
             content['AuthProviders'],
             content['ObjectVersion'], connectionContext,
             JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, None),
-            TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, "")
+            TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, ""),
+            TenantBannerHTML=getOrSomethngElse("TenantBannerHTML", content, ""),
+            SelectAuthMessage=getOrSomethngElse("SelectAuthMessage", content, "How do you want to verify who you are?")
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 

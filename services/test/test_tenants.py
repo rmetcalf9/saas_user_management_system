@@ -20,7 +20,11 @@ class test_tenants(testHelperAPIClient):
   def test_cantCreateTenantWithSameNameAsMaster(self):
     def dbfn(storeConnection):
       with self.assertRaises(Exception) as context:
-        tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, JWTCollectionAllowedOriginList=[], TicketOverrideURL="")
+        tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, JWTCollectionAllowedOriginList=[],
+           TicketOverrideURL="",
+           TenantBannerHTML="<h1>DD</h1>",
+           SelectAuthMessage="Hmmmm",
+        )
       self.checkGotRightException(context,failedToCreateTenantException)
 
     appObj.objectStore.executeInsideConnectionContext(dbfn)

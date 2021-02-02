@@ -83,6 +83,8 @@ class test_funcitonal(test_api):
     expectedResult["Description"] = constants.masterTenantDefaultDescription
     expectedResult["JWTCollectionAllowedOriginList"] = list(map(lambda x: x.strip(), env['APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD'].split(',')))
     expectedResult["TicketOverrideURL"] = "" #will always be blank for default tenant
+    expectedResult["TenantBannerHTML"] = constants.masterTenantDefaultTenantBannerHTML
+    expectedResult["SelectAuthMessage"] = constants.masterTenantDefaultSelectAuthMessage
 
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON["result"][0], expectedResult, ['AuthProviders',"ObjectVersion"])
     self.assertEqual(resultJSON["result"][0]["ObjectVersion"],"2")
@@ -131,11 +133,13 @@ class test_funcitonal(test_api):
     )
     self.assertEqual(result.status_code, 400, msg='Shouldn\'t be able to create a two tenants with the same name')
 
-  def test_updateTenantDescription(self):
+  def test_updateTenantDescriptionAndOthers(self):
     tenantJSON = self.createTenantForTesting(tenantWithNoAuthProviders)
 
     tenantWithChangedDescription = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithChangedDescription['Description'] = "Changed Description"
+    tenantWithChangedDescription['TenantBannerHTML'] = "<h1>n</h1>"
+    tenantWithChangedDescription['SelectAuthMessage'] = "Some changed auth message"
     tenantWithChangedDescription['ObjectVersion'] = tenantJSON['ObjectVersion']
 
     result = self.testClient.put(
@@ -150,7 +154,7 @@ class test_funcitonal(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON, tenantWithChangedDescription, ["ObjectVersion"], msg='JSON of updated Tenant is not the same as what it was set to')
     self.assertEqual(resultJSON["ObjectVersion"],"2")
 
-    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithChangedDescription['Name']), tenantWithChangedDescription, ["ObjectVersion"], msg='Tenant wasnt changed in get result')
+    self.assertJSONStringsEqualWithIgnoredKeys(self.getTenantDICT(tenantWithChangedDescription['Name']), tenantWithChangedDescription, ["ObjectVersion"], msg='Tenant was not changed in get result')
     self.assertEqual(resultJSON["ObjectVersion"],"2")
 
   def test_CanNotUpdateTenantName(self):

@@ -6,6 +6,8 @@ masterTenantDefaultAuthProviderMenuText="Website account login"
 masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText="Link Website Account"
 masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
+masterTenantDefaultTenantBannerHTML=""
+masterTenantDefaultSelectAuthMessage="How do you want to verify who you are?"
 DefaultHasAccountRole="hasaccount"
 SecurityEndpointAccessRole="securityTest"
 

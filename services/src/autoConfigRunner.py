@@ -66,12 +66,20 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
   allowUserCreation = None
   JWTCollectionAllowedOriginList = None
   TicketOverrideURL = None
+  TenantBannerHTML = None
+  SelectAuthMessage = None
   def __init__(self, stepDict):
+    if "TenantBannerHTML" not in stepDict:
+      stepDict["TenantBannerHTML"] = ""
+    if "SelectAuthMessage" not in stepDict:
+      stepDict["SelectAuthMessage"] = "How do you want to verify who you are?"
     self.tenantName = stepDict["tenantName"]
     self.description = stepDict["description"]
     self.allowUserCreation = stepDict["allowUserCreation"]
     self.JWTCollectionAllowedOriginList = stepDict["JWTCollectionAllowedOriginList"]
     self.TicketOverrideURL = ""
+    self.TenantBannerHTML = stepDict["TenantBannerHTML"]
+    self.SelectAuthMessage = stepDict["SelectAuthMessage"]
     if "TicketOverrideURL" in stepDict:
       self.TicketOverrideURL = stepDict["TicketOverrideURL"]
   def run(self, appObj, storeConnection):
@@ -82,7 +90,9 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
       allowUserCreation=self.allowUserCreation,
       storeConnection=storeConnection,
       JWTCollectionAllowedOriginList=self.JWTCollectionAllowedOriginList,
-      TicketOverrideURL=self.TicketOverrideURL
+      TicketOverrideURL=self.TicketOverrideURL,
+      TenantBannerHTML = self.TenantBannerHTML,
+      SelectAuthMessage = self.SelectAuthMessage
     )
     print("CreateTenant: " + retVal.getName())
     self.setPassed()
