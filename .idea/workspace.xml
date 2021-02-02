@@ -2,18 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/apiSharedModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiSharedModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/autoConfigRunner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenantObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenantObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_dataStructureEvolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_dataStructureEvolution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_tenants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SelectAuth.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SelectAuth.vue" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -61,13 +50,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1575619803263</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Updating to latest object store abstraction version">
-      <created>1583149144253</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1583149144253</updated>
     </task>
     <task id="LOCAL-00004" summary="Adding Ticketsystem notes">
       <created>1583153209083</created>
@@ -405,7 +387,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587804376580</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="Tenant properties added for custom html">
+      <created>1612286699104</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1612286699104</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -432,7 +421,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Simple ticket use case test created" />
     <MESSAGE value="Ticket use with single role working" />
     <MESSAGE value="Ticket use with two roles working" />
     <MESSAGE value="Register ticket for use with internal auth" />
@@ -457,7 +445,8 @@
     <MESSAGE value="Migrated admin legacy to marshal input so extra fields are removed" />
     <MESSAGE value="Migrated login legacy to marshal input so extra fields are removed" />
     <MESSAGE value="Input filtering for apitickets" />
-    <option name="LAST_COMMIT_MESSAGE" value="Input filtering for apitickets" />
+    <MESSAGE value="Tenant properties added for custom html" />
+    <option name="LAST_COMMIT_MESSAGE" value="Tenant properties added for custom html" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

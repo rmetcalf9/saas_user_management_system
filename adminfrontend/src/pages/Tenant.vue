@@ -53,6 +53,22 @@
         </q-item-label>
       </q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Tennant Banner HTML:</q-item-label>
+        <q-item-label>
+          <div v-html="tenantData.TenantBannerHTML" />
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Select Auth Message:</q-item-label>
+        <q-item-label>
+          {{ tenantData.SelectAuthMessage }}
+        </q-item-label>
+      </q-item-section>
+    </q-item>
   </q-list>
 
   <q-table
@@ -98,6 +114,8 @@
           @new-value="dialogEditJWTCollectionAllowedOriginListCreateValue"
         /> Origins which client apps will be allowed to collect JWT tokens from
         <q-input v-model="editTenantModalDialogData.TicketOverrideURL" ref="TicketOverrideURLInput" label="Tenant spercific ticket endpoint" :label-width="3" clearable />Ticket Override URL
+        <q-input v-model="editTenantModalDialogData.TenantBannerHTML" ref="TenantBannerHTMLInput" label="Tenant banner displayed at login" :label-width="3" clearable />Tenant Banner HTML
+        <q-input v-model="editTenantModalDialogData.SelectAuthMessage" ref="SelectAuthMessageInput" label="Select Auth message to use" :label-width="3" clearable />Select Auth Message
 
         <div>&nbsp;</div>
         <q-btn
@@ -420,8 +438,12 @@ export default {
         if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
           if (this.editTenantModalDialogData.JWTCollectionAllowedOriginList === this.tenantData.JWTCollectionAllowedOriginList) {
             if (this.editTenantModalDialogData.TicketOverrideURL === this.tenantData.TicketOverrideURL) {
-              Notify.create({color: 'positive', message: 'No changes made'})
-              return // no change so do nothing
+              if (this.editTenantModalDialogData.TenantBannerHTML === this.tenantData.TenantBannerHTML) {
+                if (this.editTenantModalDialogData.SelectAuthMessage === this.tenantData.SelectAuthMessage) {
+                  Notify.create({color: 'positive', message: 'No changes made'})
+                  return // no change so do nothing
+                }
+              }
             }
           }
         }
@@ -431,6 +453,8 @@ export default {
       newTenantJSON.AllowUserCreation = this.editTenantModalDialogData.AllowUserCreation
       newTenantJSON.JWTCollectionAllowedOriginList = this.editTenantModalDialogData.JWTCollectionAllowedOriginList
       newTenantJSON.TicketOverrideURL = this.editTenantModalDialogData.TicketOverrideURL
+      newTenantJSON.TenantBannerHTML = this.editTenantModalDialogData.TenantBannerHTML
+      newTenantJSON.SelectAuthMessage = this.editTenantModalDialogData.SelectAuthMessage
 
       var callback = {
         ok: function (response) {
@@ -458,6 +482,8 @@ export default {
       this.editTenantModalDialogData.AllowUserCreation = this.tenantData.AllowUserCreation
       this.editTenantModalDialogData.JWTCollectionAllowedOriginList = this.tenantData.JWTCollectionAllowedOriginList
       this.editTenantModalDialogData.TicketOverrideURL = this.tenantData.TicketOverrideURL
+      this.editTenantModalDialogData.TenantBannerHTML = this.tenantData.TenantBannerHTML
+      this.editTenantModalDialogData.SelectAuthMessage = this.tenantData.SelectAuthMessage
 
       this.editTenantModalDialogVisible = true
       var TTT = this

@@ -3,8 +3,8 @@
     <div>
       <div class="row">
         <div class="col">
-          <div v-html="tenantInfoTenantBanner" />
-          <p>{{ tenantInfoSelectAuthMessage }}</p>
+          <div v-html="tenantInfo.TenantBannerHTML" />
+          <p>{{ tenantInfo.SelectAuthMessage }}</p>
         </div>
       </div>
       <div class="row">
@@ -28,8 +28,6 @@ export default {
   name: 'SelectAuth',
   data () {
     return {
-      tenantInfoTenantBanner: '<div style="text-align: center;"><img src="https://challengeswipe.com/icons/icon-512x512.png" style="width: 200px;"/><br>ChallengeSwipe.com</div>',
-      tenantInfoSelectAuthMessage: 'How do you want to verify who you are?'
     }
   },
   computed: {
