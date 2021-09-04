@@ -193,7 +193,7 @@ class helper(parent_test_api):
     resDICT = json.loads(result.get_data(as_text=True))
     return resDICT
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_loginAPI_APIKeys(helper):
   def test_CreateAPIKeyandQueryBack(self):
     # Create APIKey and query back works

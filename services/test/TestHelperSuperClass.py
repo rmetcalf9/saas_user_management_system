@@ -204,6 +204,23 @@ class testHelperSuperClass(unittest.TestCase):
     print(result.get_data(as_text=True))
     self.assertEqual(result.status_code, expectedResponse, msg)
 
+  def addAuthProvider2(self, currentTenantJSON, authProviderDICT, checkAndParseResponse=True, msg=""):
+    tenantJSON = copy.deepcopy(currentTenantJSON)
+    tenantJSON['AuthProviders'].append(copy.deepcopy(authProviderDICT))
+    tenantJSON['ObjectVersion'] = currentTenantJSON['ObjectVersion']
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'],
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantJSON),
+      content_type='application/json'
+    )
+    if not checkAndParseResponse:
+      return result
+    self.assertEqual(result.status_code, 200, msg=msg + " Failed to add auth(2) - " + result.get_data(as_text=True))
+
+    return json.loads(result.get_data(as_text=True))
+
+
 def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, tenantAuthProvSalt):
   masterSecretKey = (username + ":" + password + ":AG44")
   ret = appObj.bcrypt.hashpw(masterSecretKey, b64decode(tenantAuthProvSalt))

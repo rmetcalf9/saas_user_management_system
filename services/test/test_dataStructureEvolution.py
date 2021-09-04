@@ -38,7 +38,7 @@ AddTenantLoginCustomDisplay_PreviousTenantExample = {
   'TicketOverrideURL': ''
 }
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class testDataStructureEvolutionClass(TestHelperSuperClass.testHelperAPIClient):
   def test_userAuths_addKnownAs(self):
     #We added a column "known_as" to this object

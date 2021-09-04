@@ -8,7 +8,7 @@ baseapp_for_restapi_backend_with_swagger==0.5.22
 object_store_abstraction==0.3.40
 pyjwt==1.7.1
 apscheduler==3.5.3
-werkzeug==0.15.4
+werkzeug==0.15.5
 
 sqlalchemy==1.3.1
 PyMySQL==0.9.3

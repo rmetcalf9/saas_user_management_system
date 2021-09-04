@@ -85,7 +85,10 @@ class authProviderInternal(authProvider):
       raise InvalidAuthCredentialsException
     self.__normalizeCredentialDICT(credentialDICT)
 
+    if obj["AuthProviderJSON"]['salt'].__class__.__name__ != "bytes":
+      raise Exception("ERROR - authproviderJSON Salt retrieved from UserAuth in dynamoDB is not bytes - it is " + obj["AuthProviderJSON"]['salt'].__class__.__name__ )
     hashedPass = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])
+
     if hashedPass != obj["AuthProviderJSON"]['password']:
       #print("DEBUG LING IN AUTHPROVIDERS_INTERNAL TO BE REMOVED")
       #print("Auth failed - hashedpass mismatch -")
