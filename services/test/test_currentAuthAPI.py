@@ -4,8 +4,8 @@ import json
 import copy
 from tenants import CreatePerson, GetTenant, _getAuthProvider
 from appObj import appObj
-from authProviders import authProviderFactory
-from authProviders_base import getAuthRecord
+from AuthProviders import authProviderFactory
+from services.src.AuthProviders.authProviders_base import getAuthRecord
 
 
 

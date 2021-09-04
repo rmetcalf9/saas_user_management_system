@@ -7,7 +7,7 @@ import os
 from tenants import GetTenant, CreateUser
 from persons import CreatePerson
 from users import associateUserWithPerson
-from authProviders_LDAP import encryptPassword, decryptPassword
+from services.src.AuthProviders.authProviders_LDAP import encryptPassword, decryptPassword
 import ldap
 
 from unittest.mock import patch

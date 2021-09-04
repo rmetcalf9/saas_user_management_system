@@ -2,7 +2,8 @@
 from flask import request
 from flask_restx import Resource, fields, marshal
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound, Conflict
-from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, customExceptionClass, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole
+from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole, customExceptionClass
+import AuthProviders
 import constants
 from apiSharedModels import getTenantModel, getUserModel, getPersonModel, getAuthProviderModel
 from urllib.parse import unquote
@@ -222,7 +223,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         del content["ObjectVersion"]
 
       requiredInPayload(content, ['Name','Description','AllowUserCreation','AuthProviders','ObjectVersion'])
-
+      resp = None
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
         def someFn(connectionContext):
@@ -239,16 +240,20 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 
+        resp = tenantObj.getJSONRepresenation()
+
       except customExceptionClass as err:
         if (err.id=='tenantDosentExistException'):
           raise BadRequest(err.text)
         if (err.id=='ShouldNotSupplySaltWhenCreatingAuthProvException'):
           raise BadRequest(err.text)
-        if (err.id=='authProviderNotFoundException'):
-          raise BadRequest(err.text)
         if (err.id=='cantUpdateExistingAuthProvException'):
           raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except AuthProviders.CustomAuthProviderExceptionClass as err:
         if (err.id=='InvalidAuthConfigException'):
+          raise BadRequest(err.text)
+        if (err.id == 'authProviderNotFoundException'):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
       except KeyError as err:
@@ -256,10 +261,12 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         #raise err
       except WrongObjectVersionExceptionClass as err:
         raise Conflict(str(err))
-      except:
+      except Exception as err:
+        print("Un catagoarised exception")
+        print(str(err))
         raise InternalServerError
 
-      return tenantObj.getJSONRepresenation()
+      return resp
 
     @nsAdmin.doc('delete Tenant')
     @nsAdmin.response(200, 'Tenant Deleted')
@@ -724,6 +731,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
           raise BadRequest(err.text)
         if (err.id=='authProviderNotFoundException'):
           raise BadRequest(err.text)
+        raise Exception('InternalServerError')
+      except AuthProviders.CustomAuthProviderExceptionClass as err:
         if (err.id=='InvalidAuthConfigException'):
           raise BadRequest(err.text)
         if (err.id=='MissingAuthCredentialsException'):

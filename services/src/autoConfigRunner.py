@@ -1,7 +1,7 @@
 from tenants import CreateTenant, AddAuthProvider, GetTenant, CreateUser, GetAuthProvider
 import constants
 from persons import CreatePerson
-from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from services.src.AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from users import associateUserWithPerson, AddUserRole
 
 class AutoConfigRunner():

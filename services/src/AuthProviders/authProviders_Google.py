@@ -1,7 +1,8 @@
 #Auth provider that links with google login
-from authProviders_base import authProvider, InvalidAuthConfigException
-import constants
+from .authProviders_base import authProvider, InvalidAuthConfigException
+import services.src.constants
 import json
+from .Exceptions import CustomAuthProviderExceptionClass
 
 ##from google_auth_oauthlib.flow import InstalledAppFlow
 ##from oauth2client.client import flow_from_clientsecrets
@@ -15,7 +16,7 @@ def loadStaticData(fileName):
     with open(fileName, 'r') as f:
       return json.load(f)
   except FileNotFoundError:
-    raise constants.customExceptionClass('Google secret file not found - ' + fileName,'InvalidAuthConfigException')
+    raise CustomAuthProviderExceptionClass('Google secret file not found - ' + fileName, 'InvalidAuthConfigException')
 
 '''
 Eample
@@ -106,12 +107,12 @@ class authProviderGoogle(authProvider):
       }
       self.setStaticData(staticDataValue)
       if self.getStaticData()['secretJSONDownloadedFromGoogle'] is None:
-        raise constants.customExceptionClass('loadStaticData returned None','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('loadStaticData returned None', 'InvalidAuthConfigException')
 
       if "web" not in self.getStaticData()['secretJSONDownloadedFromGoogle']:
-        raise constants.customExceptionClass('Google secret file invliad (missing web)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Google secret file invliad (missing web)', 'InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]:
-        raise constants.customExceptionClass('Google secret file invliad (missing client_id)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Google secret file invliad (missing client_id)', 'InvalidAuthConfigException')
 
     #else:
     #  print('authProviderGoogle static data present NOT loading')
@@ -127,7 +128,7 @@ class authProviderGoogle(authProvider):
       raise InvalidAuthConfigException
     if 'creds' not in credentialDICT:
       raise InvalidAuthConfigException
-    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'google'
+    return credentialDictGet_unique_user_id(credentialDICT) + services.src.constants.uniqueKeyCombinator + 'google'
 
   def __getClientID(self):
     return self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"]
@@ -159,7 +160,7 @@ class authProviderGoogle(authProvider):
       print(err) # for the repr
       print(str(err)) # for just the message
       print(err.args) # the arguments that the exception has been called with.
-      raise constants.authFailedException
+      raise services.src.constants.authFailedException
 
     #print("credentials:", credentials.to_json())
     #raise Exception('Call to google to get code')
@@ -177,7 +178,7 @@ class authProviderGoogle(authProvider):
     #print("Passed checks - will do thingy:")
     try:
       self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection, ticketObj, ticketTypeObj)
-    except constants.customExceptionClass as err:
+    except services.src.constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing
       raise err

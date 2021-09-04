@@ -6,9 +6,9 @@ import constants
 import json
 import copy
 import os
-from authProviders import authProviderFactory
+from AuthProviders import authProviderFactory
 from unittest.mock import patch, mock_open
-from authProviders_base import resetStaticData
+from services.src.AuthProviders.authProviders_base import resetStaticData
 import ticketManagerTestCommon
 import datetime
 import pytz
@@ -82,7 +82,7 @@ class google_auth_test_api_helper_functions(ticketManagerAPICommonUtilsClass):
     if ticketToPass is not None:
       loginJSON["ticket"] = ticketToPass
     result2 = None
-    with patch("authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=googleLoginAccounts[googleLoginAccountNum]) as mock_loadStaticData:
+    with patch("AuthProviders.authProviders_Google.authProviderGoogle._enrichCredentialDictForAuth", return_value=googleLoginAccounts[googleLoginAccountNum]) as mock_loadStaticData:
       result2 = self.testClient.post(
         self.loginAPIPrefix + '/' + tenantName + '/authproviders',
         data=json.dumps(loginJSON),
@@ -198,7 +198,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
 
     #Get Tenant will call auth provider for the first time
     #resetStaticData() #uncommenting this line should cause this test to error since the static data will be loaded from file
-    with patch("authProviders_Google.loadStaticData", return_value={'web':{'client_id':'DummyClientID'}}) as mock_loadStaticData:
+    with patch("AuthProviders.authProviders_Google.loadStaticData", return_value={'web':{'client_id':'DummyClientID'}}) as mock_loadStaticData:
       a = authProviderFactory(googleAuthProv, googleAuthProv['guid'], constants.masterTenantName, None, appObj)
       if a==None:
         self.assertTrue(False, msg="authProviderFactory didn't create object")

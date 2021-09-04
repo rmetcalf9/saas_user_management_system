@@ -1,8 +1,9 @@
 #see https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
-from authProviders_base import authProvider, InvalidAuthConfigException
-import constants
+from .authProviders_base import authProvider, InvalidAuthConfigException
+import services.src.constants
 import json
 import requests
+from .Exceptions import CustomAuthProviderExceptionClass
 
 def credentialDictGet_unique_user_id(credentialDICT):
   #print(credentialDICT)
@@ -11,14 +12,13 @@ def credentialDictGet_unique_access_token(credentialDICT):
   #print(credentialDICT)
   return credentialDICT["creds"]["accessToken"]
 
-
 def loadStaticData(fileName):
   try:
     ##print('authProviderFacebook loadStaticData')
     with open(fileName, 'r') as f:
       return json.load(f)
   except FileNotFoundError:
-    raise constants.customExceptionClass('Facebook secret file not found - ' + fileName,'InvalidAuthConfigException')
+    raise CustomAuthProviderExceptionClass('Facebook secret file not found - ' + fileName, 'InvalidAuthConfigException')
 
 
 class authProviderFacebook(authProvider):
@@ -37,23 +37,23 @@ class authProviderFacebook(authProvider):
       }
       self.setStaticData(staticDataValue)
       if self.getStaticData()['secretJSON'] is None:
-        raise constants.customExceptionClass('loadStaticData returned None','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('loadStaticData returned None', 'InvalidAuthConfigException')
 
       if "web" not in self.getStaticData()['secretJSON']:
-        raise constants.customExceptionClass('Facebook secret file invalid (missing web)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Facebook secret file invalid (missing web)', 'InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invalid (missing client_id)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Facebook secret file invalid (missing client_id)', 'InvalidAuthConfigException')
       if "client_secret" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invliad (missing client_id)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Facebook secret file invliad (missing client_id)', 'InvalidAuthConfigException')
       if "redirect_uri" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invalid (missing redirect_uri)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Facebook secret file invalid (missing redirect_uri)', 'InvalidAuthConfigException')
       if "auth_uri" not in self.getStaticData()['secretJSON']["web"]:
-        raise constants.customExceptionClass('Facebook secret file invalid (missing auth_uri)','InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass('Facebook secret file invalid (missing auth_uri)', 'InvalidAuthConfigException')
 
   def _makeKey(self, credentialDICT):
     if 'creds' not in credentialDICT:
-      raise constants.customExceptionClass('creds not in credentialDICT - this means the credentials have not been enriched','InvalidAuthConfigException')
-    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'facebook'
+      raise services.src.constants.customExceptionClass('creds not in credentialDICT - this means the credentials have not been enriched', 'InvalidAuthConfigException')
+    return credentialDictGet_unique_user_id(credentialDICT) + services.src.constants.uniqueKeyCombinator + 'facebook'
 
   def __getClientID(self):
     return self.getStaticData()['secretJSON']["web"]["client_id"]
@@ -73,7 +73,7 @@ class authProviderFacebook(authProvider):
     try:
       print("Facebook: _AuthActionToTakeWhenThereIsNoRecord")
       self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Facebook/_AuthActionToTakeWhenThereIsNoRecord", storeConnection, ticketObj, ticketTypeObj)
-    except constants.customExceptionClass as err:
+    except services.src.constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing
       raise err
@@ -113,7 +113,7 @@ class authProviderFacebook(authProvider):
         #print("Invalid crecential DICT recieved")
         #print("input credentialDICT:", credentialDICT)
         print("Invalid credentialDICT passed to facebook login")
-        raise constants.authFailedException
+        raise services.src.constants.authFailedException
 
       # URL to make get to call is: https://graph.facebook.com/me?fields=id&access_token=longlongstringoflettersandnumbers
       #print("URL to make get to call is:", urlToGet)
@@ -146,18 +146,18 @@ class authProviderFacebook(authProvider):
         print("Facebook serivce bad response")
         print(" Got result status_code:", result.status_code)
         print(" Got result text:", result.text)
-        raise constants.authFailedException
+        raise services.src.constants.authFailedException
 
       if resultDICT["id"] != credentialDICT["authResponse"]["userID"]:
         print("Facebook verify failed")
-        raise constants.authFailedException
+        raise services.src.constants.authFailedException
 
     except Exception as err:
       print("Facebook ERR)")
       print(err) # for the repr
       print(str(err)) # for just the message
       print(err.args) # the arguments that the exception has been called with.
-      raise constants.authFailedException
+      raise services.src.constants.authFailedException
 
     return {
       "creds": {

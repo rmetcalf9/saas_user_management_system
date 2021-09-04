@@ -1,8 +1,8 @@
 #Provides auth provider functions
-from authProviders_base import authProvider, InvalidAuthConfigException, MissingAuthCredentialsException, InvalidAuthCredentialsException
-from constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
+from .authProviders_base import authProvider, InvalidAuthConfigException, MissingAuthCredentialsException, InvalidAuthCredentialsException
+from services.src.constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
 from base64 import b64decode, b64encode
-from constants import customExceptionClass
+import constants
 
 def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, username, password, tenantAuthProvSalt):
   #print("getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse called with:")
@@ -94,7 +94,7 @@ class authProviderInternal(authProvider):
       #print("Auth failed - hashedpass mismatch -")
       #print("RECANDHASHED=" + str(hashedPass))
       #print("      FROMDB=" + str(obj["AuthProviderJSON"]['password']))
-      raise authFailedException
+      raise constants.authFailedException
 
   def _getTypicalAuthData(self, credentialDICT):
     if 'username' not in credentialDICT:
@@ -115,7 +115,7 @@ class authProviderInternal(authProvider):
 
     newHashedPassword = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, operationDICT["newPassword"], authObj['AuthProviderJSON']['salt'])
     if newHashedPassword == authObj['AuthProviderJSON']['password']:
-      raise customExceptionClass('ERROR - New password matches origional','authopException')
+      raise constants.customExceptionClass('ERROR - New password matches origional','authopException')
 
     authObj['AuthProviderJSON']['password'] = newHashedPassword
     resultValue = {}

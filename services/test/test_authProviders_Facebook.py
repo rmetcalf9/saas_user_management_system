@@ -6,7 +6,7 @@ import copy
 import constants
 import json
 from unittest.mock import patch, mock_open
-from authProviders import authProviderFactory
+from AuthProviders import authProviderFactory
 from appObj import appObj
 
 
@@ -93,7 +93,7 @@ class facebook_auth_test_api_helper_functions(ticketManagerAPICommonUtilsClass):
     if ticketToPass is not None:
       loginJSON["ticket"] = ticketToPass
     result2 = None
-    with patch("authProviders_Facebook.authProviderFacebook._enrichCredentialDictForAuth", return_value=facebookLoginAccounts[facebookLoginAccountNum]) as mock_loadStaticData:
+    with patch("AuthProviders.authProviders_Facebook.authProviderFacebook._enrichCredentialDictForAuth", return_value=facebookLoginAccounts[facebookLoginAccountNum]) as mock_loadStaticData:
       result2 = self.testClient.post(
         self.loginAPIPrefix + '/' + tenantName + '/authproviders',
         data=json.dumps(loginJSON),
@@ -163,7 +163,7 @@ class test_facebook_api(facebook_auth_test_api_helper_functions):
 
     #Get Tenant will call auth provider for the first time
     #resetStaticData() #uncommenting this line should cause this test to error since the static data will be loaded from file
-    with patch("authProviders_Facebook.loadStaticData", return_value={'web':{'client_id':'DummyClientID'}}) as mock_loadStaticData:
+    with patch("AuthProviders.authProviders_Facebook.loadStaticData", return_value={'web':{'client_id':'DummyClientID'}}) as mock_loadStaticData:
       a = authProviderFactory(googleAuthProv, googleAuthProv['guid'], constants.masterTenantName, None, appObj)
       if a==None:
         self.assertTrue(False, msg="authProviderFactory didn't create object")

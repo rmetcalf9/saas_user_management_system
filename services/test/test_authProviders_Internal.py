@@ -2,7 +2,7 @@ import TestHelperSuperClass
 import constants
 import json
 import copy
-from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from services.src.AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from appObj import appObj
 
 InternalAuthProv001_CREATE_configJSON = {

@@ -2,7 +2,7 @@
 import constants
 import json
 import copy
-from authProviders import authProviderFactory
+from AuthProviders import authProviderFactory
 
 #designed as immutable object
 class tenantClass():

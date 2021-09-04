@@ -8,6 +8,7 @@ from persons import CreatePerson
 import json
 from base64 import b64decode
 from users import associateUserWithPerson
+import AuthProviders
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
@@ -102,7 +103,7 @@ class test_tenants(testHelperAPIClient):
       self.checkGotRightException(context,authFailedException)
     appObj.objectStore.executeInsideTransaction(someFn)
 
-  def test_StandardUserInvalidUsername(self):
+  def test_StandardUserInvalidUsername_returnsAuthNotFound(self):
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       self.assertEqual(masterTenant.getNumberOfAuthProviders(),1, msg="No internal Auth Providers found")
@@ -118,7 +119,7 @@ class test_tenants(testHelperAPIClient):
           None, #requestedUserID
           connectionContext,
           'a','b','c')
-      self.checkGotRightException(context,constants.authNotFoundException)
+      self.checkGotRightExceptionType(context,AuthProviders.AuthNotFoundException)
     appObj.objectStore.executeInsideTransaction(someFn)
 
   def test_StandardUserLoginToInvalidIdentity(self):

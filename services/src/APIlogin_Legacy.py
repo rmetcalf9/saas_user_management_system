@@ -7,9 +7,11 @@ import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
 from constants import customExceptionClass
+import services.src.constants
 from apiSharedModels import getTenantModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 import copy
 from userPersonCommon import GetUser
+import AuthProviders
 
 from tenants import GetTenant, Login, RegisterUser
 
@@ -78,8 +80,6 @@ def registerAPI(appObj, nsLogin):
         except customExceptionClass as err:
           if (err.id=='userCreationNotAllowedException'):
             raise Unauthorized(err.text)
-          if (err.id=='InvalidAuthConfigException'):
-            raise BadRequest(err.text)
           if (err.id=='InvalidAuthCredentialsException'):
             raise BadRequest(err.text)
           if (err.id=='tryingToCreateDuplicateAuthException'):
@@ -88,7 +88,10 @@ def registerAPI(appObj, nsLogin):
             raise BadRequest(err.text)
           if (err.id=='ticketNotUsableException'):
             raise BadRequest(err.text)
-
+          raise Exception('InternalServerError')
+        except AuthProviders.CustomAuthProviderExceptionClass as err:
+          if (err.id=='InvalidAuthConfigException'):
+            raise BadRequest(err.text)
           raise Exception('InternalServerError')
         except:
           raise
@@ -168,19 +171,9 @@ def registerAPI(appObj, nsLogin):
         except customExceptionClass as err:
           if (err.id=='authFailedException'):
             raise Unauthorized(err.text)
-          if (err.id=='authNotFoundException'):
-            raise Unauthorized(err.text)
           if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
             raise Unauthorized(err.text)
           if (err.id=='authProviderNotFoundException'):
-            raise BadRequest(err.text)
-          if (err.id=='InvalidAuthConfigException'):
-            #import traceback
-            #traceback.print_exc()
-            raise Unauthorized(err.text)
-          if (err.id=='MissingAuthCredentialsException'):
-            raise BadRequest(err.text)
-          if (err.id=='InvalidAuthCredentialsException'):
             raise BadRequest(err.text)
           if (err.id=='UnknownUserIDException'):
             raise BadRequest(err.text)
@@ -189,7 +182,25 @@ def registerAPI(appObj, nsLogin):
             raise Exception(err.text)
           if (err.id=='ticketNotUsableException'):
             raise BadRequest(err.text)
+          if (err.id=='authNotFoundException'):
+            raise Unauthorized(err.text)
+          if (err.id=='userCreationNotAllowedException'):
+            raise Unauthorized(err.text)
           raise Exception('InternalServerError')
+        except AuthProviders.CustomAuthProviderExceptionClass as err:
+          if (err.id=='InvalidAuthConfigException'):
+            #import traceback
+            #traceback.print_exc()
+            raise Unauthorized(err.text)
+          if (err.id=='authNotFoundException'):
+            raise Unauthorized(err.text)
+          if (err.id=='InvalidAuthCredentialsException'):
+            raise BadRequest(err.text)
+          if (err.id=='MissingAuthCredentialsException'):
+            raise BadRequest(err.text)
+          raise Exception('InternalServerError')
+        except AuthProviders.AuthNotFoundException as err:
+          raise Unauthorized(err.text)
         except:
           raise InternalServerError
 

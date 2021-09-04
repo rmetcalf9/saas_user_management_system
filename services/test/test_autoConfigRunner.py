@@ -4,7 +4,7 @@ import autoConfigRunner as autoConfig
 from appObj import appObj
 from unittest.mock import Mock, patch, call
 from tenants import GetTenant, Login
-from authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from services.src.AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 
 class helpers(TestHelperSuperClass.testHelperAPIClient):
   def assertNextLine(self, mocked_print, cur_line, expected):

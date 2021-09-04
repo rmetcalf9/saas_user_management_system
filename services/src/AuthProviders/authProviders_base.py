@@ -3,16 +3,17 @@
 #  an identity has one user
 import constants
 import uuid
-from persons import associatePersonWithAuthCalledWhenAuthIsCreated
-from authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
+from services.src.persons import associatePersonWithAuthCalledWhenAuthIsCreated
+from services.src.authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
+from .Exceptions import CustomAuthProviderExceptionClass, AuthNotFoundException
 
-InvalidAuthConfigException = constants.customExceptionClass('Invalid Auth Config','InvalidAuthConfigException')
-InvalidAuthCredentialsException = constants.customExceptionClass('Invalid Auth Credentials','InvalidAuthCredentialsException')
-MissingAuthCredentialsException = constants.customExceptionClass('Missing Credentials','MissingAuthCredentialsException')
-tryingToCreateDuplicateAuthException = constants.customExceptionClass('That username is already in use','tryingToCreateDuplicateAuthException')
-InvalidOperationException = constants.customExceptionClass('Invalid Operation','InvalidOperationException')
+InvalidAuthConfigException = CustomAuthProviderExceptionClass('Invalid Auth Config', 'InvalidAuthConfigException')
+InvalidAuthCredentialsException = CustomAuthProviderExceptionClass('Invalid Auth Credentials', 'InvalidAuthCredentialsException')
+MissingAuthCredentialsException = CustomAuthProviderExceptionClass('Missing Credentials', 'MissingAuthCredentialsException')
+tryingToCreateDuplicateAuthException = CustomAuthProviderExceptionClass('That username is already in use', 'tryingToCreateDuplicateAuthException')
+InvalidOperationException = CustomAuthProviderExceptionClass('Invalid Operation', 'InvalidOperationException')
 NotOverriddenException = Exception('Not Overridden')
-ExternalAuthProviderNotReachableException = constants.customExceptionClass('ExternalAuthProviderNotReachable','ExternalAuthProviderNotReachableException')
+ExternalAuthProviderNotReachableException = CustomAuthProviderExceptionClass('ExternalAuthProviderNotReachable', 'ExternalAuthProviderNotReachableException')
 
 #person.py also uses userAuths
 
@@ -57,7 +58,7 @@ class authProvider():
 
     if not typeSupportsUserCreation:
       if dataDict['AllowUserCreation']:
-        raise constants.customExceptionClass("ERROR auth type " +  dataDict['Type'] + " dosen't support user creation",'InvalidAuthConfigException')
+        raise services.src.constants.customExceptionClass("ERROR auth type " + dataDict['Type'] + " dosen't support user creation", 'InvalidAuthConfigException')
 
     ##type check
     #if type(dataDict["saltForPasswordHashing"]) is not str:
@@ -153,7 +154,7 @@ class authProvider():
     return authTPL
 
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
-    raise constants.authNotFoundException
+    raise AuthNotFoundException()
 
   def ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(self, credentialDICT, appObj):
     return self._enrichCredentialDictForAuth(credentialDICT, appObj)
