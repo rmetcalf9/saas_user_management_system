@@ -1,34 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/src/AuthProviders/Exceptions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/src/AuthProviders/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIadmin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/appObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/appObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders_Facebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Facebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Google.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders_Internal.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Internal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders_LDAP.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_LDAP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/authProviders_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/autoConfigRunner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenantObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenantObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Facebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Facebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Internal.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Internal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_LDAP.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_LDAP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_currentAuthAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_currentAuthAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_currentAuthAPI_linkAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_currentAuthAPI_linkAuth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_currentAuthAPI_unlinkAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_currentAuthAPI_unlinkAuth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_tenants.py" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
