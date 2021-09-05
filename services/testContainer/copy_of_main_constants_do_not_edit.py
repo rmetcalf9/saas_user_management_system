@@ -6,6 +6,8 @@ masterTenantDefaultAuthProviderMenuText="Website account login"
 masterTenantDefaultAuthProviderMenuTextInternalAuthLinkText="Link Website Account"
 masterTenantDefaultAuthProviderMenuIconLink=None
 masterTenantDefaultSystemAdminRole="systemadmin"
+masterTenantDefaultTenantBannerHTML=""
+masterTenantDefaultSelectAuthMessage="How do you want to verify who you are?"
 DefaultHasAccountRole="hasaccount"
 SecurityEndpointAccessRole="securityTest"
 
@@ -58,3 +60,7 @@ objectVersionHeaderName="object-version-id"
 #Also try for the cookie the login page sets this allows swagger to work
 ##but no renewal here
 loginCookieName="usersystemUserCredentials"
+
+
+#Object Type NAmes
+objectType_users_associatedPersons = "usersAssociatedPersons"  #was users_associatedPersons but I had to change due to dynamoDB

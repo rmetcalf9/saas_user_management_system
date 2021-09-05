@@ -5,7 +5,7 @@ from tenants import GetTenant
 import copy
 import json
 
-from authsCommon import SaveAuthRecord, getAuthRecord
+from AuthProviders.authsCommon import SaveAuthRecord, getAuthRecord
 
 randomTenantName = "someRandomTenantForTesting"
 authProvGUID =  'd366fdd2-b40d-4c12-9d91-2e11ddf9bbe7'

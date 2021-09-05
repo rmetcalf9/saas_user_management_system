@@ -7,6 +7,7 @@ from .authProviders_Facebook import authProviderFacebook
 from .authProviders_LDAP import authProviderLDAP
 from uuid import uuid4
 from base64 import b64encode
+from .authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
 
 def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
   if dataDict["Type"]=='internal':

@@ -3,7 +3,7 @@ from constants import customExceptionClass, masterTenantName, masterTenantDefaul
 import constants
 import uuid
 from AuthProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
-from services.src.AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from tenantObj import tenantClass
 import jwt
 from persons import CreatePerson
@@ -11,7 +11,7 @@ from jwtTokenGeneration import generateJWTToken
 from object_store_abstraction import WrongObjectVersionException
 from users import CreateUser, AddUserRole, associateUserWithPerson
 from userPersonCommon import getListOfUserIDsForPerson, GetUser, getListOfUserIDsForPersonNoTenantCheck
-from persons import GetPerson
+from persons import GetPerson, associatePersonWithAuthCalledWhenAuthIsCreated
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -87,7 +87,7 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
     masterTenantInternalAuthProvider['guid'],
     storeConnection,
     None
-  ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection)
+  ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated)
 
   #mainUserIdentity with authData
 
@@ -230,7 +230,13 @@ def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, sto
   userData = authProvObj.getTypicalAuthData(credentialDICT)
   CreateUser(appObj, userData, tenantObj.getName(), createdBy, storeConnection)
   person = CreatePerson(appObj, storeConnection, None, 'a','b','c')
-  authData = authProvObj.AddAuth(appObj, credentialDICT, person['guid'], storeConnection)
+  authData = authProvObj.AddAuth(
+    appObj,
+    credentialDICT,
+    person['guid'],
+    storeConnection,
+    associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated
+  )
   associateUserWithPerson(appObj, userData['user_unique_identifier'], person['guid'], storeConnection)
 
   userObj = GetUser(appObj, userData['user_unique_identifier'], storeConnection)
@@ -262,7 +268,7 @@ def AddAuthForUser(appObj, tenantName, authProvGUID, personGUID, credentialDICT,
   if personObj is None:
     raise personDosentExistException
   authProvObj = _getAuthProvider(appObj, tenantObj.getName(), authProvGUID, storeConnection, tenantObj)
-  authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID, storeConnection)
+  authData = authProvObj.AddAuth(appObj, credentialDICT, personGUID, storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated)
 
   return authData
 

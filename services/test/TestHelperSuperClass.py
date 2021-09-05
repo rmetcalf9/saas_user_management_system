@@ -14,7 +14,7 @@ from base64 import b64decode, b64encode
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
 import constants
-from persons import CreatePerson
+from persons import CreatePerson, associatePersonWithAuthCalledWhenAuthIsCreated
 from jwtTokenGeneration import generateJWTToken
 from users import associateUserWithPerson, AddUserRole
 import users
@@ -29,7 +29,13 @@ def wipd(f):
     return attr('wip')(f)
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(
+    appObj,
+    credentialDICT,
+    personGUID,
+    storeConnection,
+    associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated
+  )
   return auth
 
 internalUSerSufix = "@internalDataStore"

@@ -6,8 +6,7 @@ import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized #http://werkzeug.pocoo.org/docs/0.14/exceptions/
-from constants import customExceptionClass
-import services.src.constants
+import constants
 from apiSharedModels import getTenantModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 import copy
 from userPersonCommon import GetUser
@@ -77,7 +76,7 @@ def registerAPI(appObj, nsLogin):
             return RegisterUser(appObj, tenantObj, authProviderGUID, credentialJSON, "loginapi/register", connectionContext, ticketObj, ticketTypeObj)
           userObj = storeConnection.executeInsideTransaction(someFn)
 
-        except customExceptionClass as err:
+        except constants.customExceptionClass as err:
           if (err.id=='userCreationNotAllowedException'):
             raise Unauthorized(err.text)
           if (err.id=='InvalidAuthCredentialsException'):
@@ -168,7 +167,7 @@ def registerAPI(appObj, nsLogin):
             )
           loginResult = storeConnection.executeInsideTransaction(someFn)
 
-        except customExceptionClass as err:
+        except constants.customExceptionClass as err:
           if (err.id=='authFailedException'):
             raise Unauthorized(err.text)
           if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):

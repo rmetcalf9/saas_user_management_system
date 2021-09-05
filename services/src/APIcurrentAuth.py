@@ -5,8 +5,8 @@ import constants
 from apiSharedModels import getPersonModel, getUserModel, getLoginPostDataModel, getLoginResponseModel
 from tenants import ExecuteAuthOperation, GetTenant, GetAuthProvider
 from werkzeug.exceptions import BadRequest
-from persons import deleteAuthAndUnassiciateFromPerson
-from authsCommon import getAuthRecord
+from persons import deleteAuthAndUnassiciateFromPerson, associatePersonWithAuthCalledWhenAuthIsCreated
+from AuthProviders import getAuthRecord
 '''
 The currentAuth API includes functionality availiable for authed users
 
@@ -161,7 +161,7 @@ def registerAPI(appObj):
         if not authProvObj.getAllowLink():
           raise BadRequest('Not allowed to link to this authProvider')
 
-        linkAuthResp = decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection)
+        linkAuthResp = decodedJWTToken.personObj.linkAuth(appObj, authProvObj, credentialJSON, storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated)
 
         return {'result': "OK"}, 200
 

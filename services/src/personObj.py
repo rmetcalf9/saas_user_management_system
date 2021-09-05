@@ -51,10 +51,16 @@ class personClass():
     raise constants.notImplemented("personOBj._linkExistantAuth")
 
 
-  def _linkNonExistantAuth(self, appObj, authProviderObj, credentialJSON, storeConnection):
-    return authProviderObj.AddAuth(appObj, credentialJSON, self.getGUID(), storeConnection)
+  def _linkNonExistantAuth(self, appObj, authProviderObj, credentialJSON, storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated):
+    return authProviderObj.AddAuth(
+      appObj,
+      credentialJSON,
+      self.getGUID(),
+      storeConnection,
+      associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated
+    )
 
-  def linkAuth(self, appObj, authProviderObj, credentialJSON, storeConnection):
+  def linkAuth(self, appObj, authProviderObj, credentialJSON, storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated):
     #Different logic if this is an existing auth vs if it is new
 
     authDict = None
@@ -74,7 +80,7 @@ class personClass():
         raise err
 
     if authDict is None:
-      return self._linkNonExistantAuth(appObj, authProviderObj, enrichedCredentialDICT, storeConnection)
+      return self._linkNonExistantAuth(appObj, authProviderObj, enrichedCredentialDICT, storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated)
     else:
       return self._linkExistantAuth(appObj, authDict, authProviderObj, enrichedCredentialDICT, storeConnection)
 

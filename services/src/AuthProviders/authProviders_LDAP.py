@@ -3,7 +3,7 @@ import constants
 import json
 import ldap
 from ast import literal_eval
-from services.src.encryption import decryptPassword, encryptPassword
+from encryption import decryptPassword, encryptPassword
 from base64 import b64decode, b64encode
 
 #Communication is SSL and that should keep password secure

@@ -1,7 +1,7 @@
 from tenants import CreateTenant, AddAuthProvider, GetTenant, CreateUser, GetAuthProvider
 import constants
-from persons import CreatePerson
-from services.src.AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from persons import CreatePerson, associatePersonWithAuthCalledWhenAuthIsCreated
+from AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from users import associateUserWithPerson, AddUserRole
 
 class AutoConfigRunner():
@@ -181,7 +181,7 @@ class AutoConfigRunStepAddInternalUserAccount(AutoConfigRunStep):
       authProviderGUID=authProvDict['guid'],
       storeConnection=storeConnection,
       tenantObj=tenantObj
-    ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection)
+    ).AddAuth(appObj, credentialJSON, person['guid'], storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated)
 
     associateUserWithPerson(appObj, self.userID, person['guid'], storeConnection)
 

@@ -1,6 +1,5 @@
 #Provides auth provider functions
 from .authProviders_base import authProvider, InvalidAuthConfigException, MissingAuthCredentialsException, InvalidAuthCredentialsException
-from services.src.constants import uniqueKeyCombinator, masterInternalAuthTypePassword, authFailedException
 from base64 import b64decode, b64encode
 import constants
 
@@ -24,7 +23,7 @@ def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, sal
   #print(" - password:", password, ' (', type(password), ')')
   #print(" - salt:", salt, ' (', type(salt), ')')
 
-  masterSecretKey = (masterInternalAuthTypePassword + "f" + APIAPP_MASTERPASSWORDFORPASSHASH)
+  masterSecretKey = (constants.masterInternalAuthTypePassword + "f" + APIAPP_MASTERPASSWORDFORPASSHASH)
   if (type(password)) is not bytes:
     #print(type(password))
     raise Exception('Password passed to hashPassword must be bytes')
@@ -58,7 +57,7 @@ class authProviderInternal(authProvider):
     if 'username' not in credentialDICT:
       raise MissingAuthCredentialsException
     #print(self.getConfig()['userSufix'])
-    return credentialDICT['username'] + self.getConfig()['userSufix'] + uniqueKeyCombinator + self.getType()
+    return credentialDICT['username'] + self.getConfig()['userSufix'] + constants.uniqueKeyCombinator + self.getType()
 
   def _getAuthData(self, appObj, credentialDICT):
     #print("_getAuthData call with:")

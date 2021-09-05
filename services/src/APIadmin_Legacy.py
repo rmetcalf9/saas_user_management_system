@@ -9,7 +9,7 @@ from apiSharedModels import getTenantModel, getUserModel, getPersonModel, getAut
 from urllib.parse import unquote
 import json
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
-from authsCommon import getAuthRecord
+from AuthProviders.authsCommon import getAuthRecord
 from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
 from persons import GetPaginatedPersonData, CreatePerson, GetPerson, UpdatePerson, DeletePerson, CreatePersonObjFromUserDict, deleteAuthAndUnassiciateFromPerson

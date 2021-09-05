@@ -28,7 +28,7 @@ import json
 from refreshTokenGeneration import RefreshTokenManager
 from persons import GetPerson
 from userPersonCommon import GetUser
-from services.src.AuthProviders.authProviders_base import resetStaticData as authProviders_resetStaticData
+from AuthProviders.authProviders_base import resetStaticData as authProviders_resetStaticData
 
 import autoConfigRunner as autoConfig
 

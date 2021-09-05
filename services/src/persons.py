@@ -6,7 +6,7 @@ from personObj import personClass
 from constants import customExceptionClass
 from object_store_abstraction import WrongObjectVersionExceptionClass
 from userPersonCommon import RemoveUserAssociation, getListOfUserIDsForPersonNoTenantCheck, GetUser, personDosentExistException
-from authsCommon import getAuthRecord, DeleteAuthRecord
+from AuthProviders.authsCommon import getAuthRecord, DeleteAuthRecord
 
 # One Person can have many Auths
 #Use store object Persons to store individual person information

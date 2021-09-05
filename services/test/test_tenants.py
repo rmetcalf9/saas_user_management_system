@@ -9,9 +9,16 @@ import json
 from base64 import b64decode
 from users import associateUserWithPerson
 import AuthProviders
+from persons import associatePersonWithAuthCalledWhenAuthIsCreated
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
-  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(appObj, credentialDICT, personGUID, storeConnection)
+  auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(
+    appObj,
+    credentialDICT,
+    personGUID,
+    storeConnection,
+    associatePersonWithAuthCalledWhenAuthIsCreated=associatePersonWithAuthCalledWhenAuthIsCreated
+  )
   return auth
 
 class test_tenants(testHelperAPIClient):

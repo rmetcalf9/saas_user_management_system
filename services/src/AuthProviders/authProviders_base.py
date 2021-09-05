@@ -3,8 +3,7 @@
 #  an identity has one user
 import constants
 import uuid
-from services.src.persons import associatePersonWithAuthCalledWhenAuthIsCreated
-from services.src.authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
+from .authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
 from .Exceptions import CustomAuthProviderExceptionClass, AuthNotFoundException
 
 InvalidAuthConfigException = CustomAuthProviderExceptionClass('Invalid Auth Config', 'InvalidAuthConfigException')
@@ -116,7 +115,7 @@ class authProvider():
   def _getAuthData(self, appObj, credentialDICT):
     raise NotOverriddenException
 
-  def AddAuth(self, appObj, credentialDICT, personGUID, storeConnection):
+  def AddAuth(self, appObj, credentialDICT, personGUID, storeConnection, associatePersonWithAuthCalledWhenAuthIsCreated):
     key = self._makeKey(credentialDICT)
     obj, objVer, creationDateTime, lastUpdateDateTime = getAuthRecord(appObj, key, storeConnection)
     if obj is not None:
