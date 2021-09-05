@@ -151,6 +151,9 @@ export default {
           Loading.hide()
           TTT.createAccountDialogModel.visible = false
           Notify.create({color: 'positive', message: 'Account created'})
+          TTT.usernamePass.username = TTT.createAccountDialogModel.username
+          TTT.usernamePass.password = TTT.createAccountDialogModel.password
+          TTT.usernamePassLogin()
         },
         error: function (response) {
           Loading.hide()
