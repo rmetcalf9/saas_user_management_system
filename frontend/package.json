@@ -13,7 +13,7 @@
   "dependencies": {
     "@quasar/app": "^1.9.6",
     "@quasar/extras": "^1.9.12",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bcryptjs": "^2.4.3",
     "crypto-js": "^3.1.9-1",
     "quasar": "^1.15.0"
