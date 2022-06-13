@@ -3,7 +3,7 @@
 # it it is designed to be launched and linked to the running container to preform the tests
 # source code is not embedded in the image - it is attached
 
-FROM alpine
+FROM alpine:3.4
 MAINTAINER Robert Metcalf
 
 COPY ./requirements.txt /requirements.txt
