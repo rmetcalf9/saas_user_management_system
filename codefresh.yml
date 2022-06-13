@@ -27,7 +27,7 @@ steps:
       - export AUTHED_ACL_WHITELIST="saas_user_management"
       - export AUTHED_ACL_BLACKLIST=""
       - export RJM_BUILDQUASARAPP_IMAGE="metcarob/docker-build-quasar-app:0.0.12"
-      - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.7.17"
+      - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.7.18"
       - export RJM_DOCKER_KONG_API_URL="http://tasks.kong:8001"
       - cf_export RJM_VERSION=${RJM_VERSION}
       - cf_export RJM_VERSION_UNDERSCORE=${RJM_VERSION_UNDERSCORE}
