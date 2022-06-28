@@ -5,7 +5,7 @@ import copy
 from tenants import CreatePerson, GetTenant, _getAuthProvider
 from appObj import appObj
 from AuthProviders import authProviderFactory
-from services.src.AuthProviders.authProviders_base import getAuthRecord
+from AuthProviders.authProviders_base import getAuthRecord
 import urllib
 
 class currentAuthUnlinkSetups(testHelperAPIClient):

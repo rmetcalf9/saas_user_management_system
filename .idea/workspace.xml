@@ -2,10 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/services/pytest.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/codefresh.yml" beforeDir="false" afterPath="$PROJECT_DIR$/codefresh.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/continous_test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/services/continous_test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Internal.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Internal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_currentAuthAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_currentAuthAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_currentAuthAPI_linkAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_currentAuthAPI_linkAuth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_currentAuthAPI_unlinkAuth.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_currentAuthAPI_unlinkAuth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/testContainer/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

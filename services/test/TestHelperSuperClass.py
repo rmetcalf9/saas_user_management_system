@@ -24,9 +24,7 @@ from object_store_abstraction import createObjectStoreInstance
 #from services.src.AuthProviders.authProviders_LDAP import encryptPassword
 
 
-from nose.plugins.attrib import attr
-def wipd(f):
-    return attr('wip')(f)
+# TODO Migrate to using @pytest.mark.webtest
 
 def AddAuth(appObj, tenantName, authProviderGUID, credentialDICT, personGUID, storeConnection):
   auth = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, None).AddAuth(

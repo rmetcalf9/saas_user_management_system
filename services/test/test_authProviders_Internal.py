@@ -2,7 +2,7 @@ import TestHelperSuperClass
 import constants
 import json
 import copy
-from services.src.AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
+from AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
 from appObj import appObj
 
 InternalAuthProv001_CREATE_configJSON = {
@@ -94,7 +94,6 @@ class helpers(TestHelperSuperClass.testHelperAPIClient):
     return json.loads(result2.get_data(as_text=True))
 
 
-@TestHelperSuperClass.wipd
 class test_authProviders_Internal(helpers):
 
   def test_createAndLoginAsUser(self):

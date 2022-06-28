@@ -8,7 +8,7 @@ import copy
 import os
 from AuthProviders import authProviderFactory
 from unittest.mock import patch, mock_open
-from services.src.AuthProviders.authProviders_base import resetStaticData
+from AuthProviders.authProviders_base import resetStaticData
 import ticketManagerTestCommon
 import datetime
 import pytz
