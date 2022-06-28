@@ -4,7 +4,7 @@ from .authProviders_base import InvalidAuthConfigException
 from .authProviders_Internal import authProviderInternal
 from .authProviders_Google import authProviderGoogle
 from .authProviders_Facebook import authProviderFacebook
-from .authProviders_LDAP import authProviderLDAP
+###from .authProviders_LDAP import authProviderLDAP
 from uuid import uuid4
 from base64 import b64encode
 from .authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
@@ -16,8 +16,8 @@ def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
     return authProviderGoogle(dataDict, guid, tenantName, tenantObj, appObj)
   if dataDict["Type"]=='facebook':
     return authProviderFacebook(dataDict, guid, tenantName, tenantObj, appObj)
-  if dataDict["Type"]=='ldap':
-    return authProviderLDAP(dataDict, guid, tenantName, tenantObj, appObj)
+  ###if dataDict["Type"]=='ldap':
+  ###  return authProviderLDAP(dataDict, guid, tenantName, tenantObj, appObj)
   raise InvalidAuthConfigException
 
 def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLink, Type, AllowUserCreation,

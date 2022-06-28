@@ -21,7 +21,7 @@ import users
 
 from object_store_abstraction import createObjectStoreInstance
 
-from services.src.AuthProviders.authProviders_LDAP import encryptPassword
+#from services.src.AuthProviders.authProviders_LDAP import encryptPassword
 
 
 from nose.plugins.attrib import attr
