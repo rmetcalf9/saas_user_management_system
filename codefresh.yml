@@ -43,10 +43,11 @@ steps:
       - cf_export RJM_BUILDQUASARAPP_IMAGE="${RJM_BUILDQUASARAPP_IMAGE}"
       - cf_export RJM_DOCKERWSCALLER_IMAGE="${RJM_DOCKERWSCALLER_IMAGE}"
       - cf_export RJM_DOCKER_KONG_API_URL="${RJM_DOCKER_KONG_API_URL}"
+      - cf_export RJM_PYTHON_TEST_IMAGE="${RJM_PYTHON_TEST_IMAGE}"
 
   unit_test:
     description: Make sure all the unit tests pass
-    image: ${{RJM_DOCKERWSCALLER_IMAGE}}
+    image: ${{RJM_PYTHON_TEST_IMAGE}}
     working_directory: ${{main_clone}}/services
     commands:
       ###- apk add openldap-dev REMOVING LDAP
