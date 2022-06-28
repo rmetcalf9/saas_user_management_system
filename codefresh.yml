@@ -52,7 +52,7 @@ steps:
       - pip3 install --no-cache-dir -r ./src/requirements.txt
       - pip3 install --no-cache-dir -r ./testContainer/requirements.txt
       - export SKIPSQLALCHEMYTESTS=Y
-      - nosetests --rednose ./test
+      - python3 -m pytest ./test
 
   compile_frontend:
     description: Compile the frontend quasar application
