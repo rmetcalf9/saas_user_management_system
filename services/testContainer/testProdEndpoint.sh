@@ -11,4 +11,4 @@ docker run --rm --network main_net \
 -e APIAPP_DEFAULTHOMEADMINPASSWORD=${SAASCODEFRESHTESTUSERPASSWORD} \
 -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) \
 -e RUNNINGVIAKONG="TRUE" \
---mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest nosetests --rednose /ext_volume
+--mount type=bind,source=$(pwd),target=/ext_volume metcarob/saas_user_management_systemtest:latest python3 -m pytest /ext_volume

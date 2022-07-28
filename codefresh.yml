@@ -211,7 +211,7 @@ steps:
     image: ${{build_the_test_image}}
     working_directory: ${{main_clone}}/server
     commands:
-      - nosetests --rednose /ext_volume
+      - python3 -m pytest /ext_volume
     environment:
       - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
       - BASEURL_TO_TEST=https://api.metcarob.com/${{RJM_WS_NAME}}/test/v${{RJM_MAJOR_VERSION}}
