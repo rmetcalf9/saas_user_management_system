@@ -1,4 +1,8 @@
 version: '1.0'
+stages:
+  - prepare
+  - build
+  - deploy
 steps:
 
   #This file describes the deployment process for saas_user_management_system
@@ -6,12 +10,14 @@ steps:
   # x is the major version
 
   main_clone:
+    stage: prepare
     title: Cloning main repository...
     type: git-clone
     repo: '${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}'
     revision: '${{CF_REVISION}}'
 
   setup_variables:
+    stage: prepare
     description: Sets variables for future steps
     image: alpine:latest
     working_directory: ${{main_clone}}
@@ -46,6 +52,7 @@ steps:
       - cf_export RJM_PYTHON_TEST_IMAGE="${RJM_PYTHON_TEST_IMAGE}"
 
   unit_test:
+    stage: build
     description: Make sure all the unit tests pass
     image: ${{RJM_PYTHON_TEST_IMAGE}}
     working_directory: ${{main_clone}}/services
@@ -57,6 +64,7 @@ steps:
       - python3 -m pytest ./test
 
   compile_frontend:
+    stage: build
     description: Compile the frontend quasar application
     image: ${{RJM_BUILDQUASARAPP_IMAGE}}
     working_directory: ${{main_clone}}
@@ -64,6 +72,7 @@ steps:
       - build_quasar_app ./frontend spa ${{RJM_VERSION}}
 
   compile_adminfrontend:
+    stage: build
     description: Compile the adminfrontend quasar application
     image: ${{RJM_BUILDQUASARAPP_IMAGE}}
     working_directory: ${{main_clone}}
@@ -71,12 +80,14 @@ steps:
       - build_quasar_app ./adminfrontend spa ${{RJM_VERSION}}
 
   build_the_image:
+    stage: build
     working_directory: ${{main_clone}}
     type: build
     image_name: metcarob/saas_user_management
     tag: ${{RJM_VERSION}}
 
   build_the_test_image:
+    stage: build
     working_directory: ${{main_clone}}/services/testContainer
     type: build
     image_name: metcarob/saas_user_managementtest
@@ -84,6 +95,7 @@ steps:
     dockerfile: ./Dockerfile
 
   container_level_tests:
+    stage: build
     type: composition
     title: Container level tests
     composition:
@@ -110,6 +122,7 @@ steps:
 
   #Deploy new container to my website swarm
   deploy_to_metcarob_swarm:
+      stage: deploy
       image: codefresh/remote-docker
       working_directory: ${{main_clone}}
       commands:
@@ -147,6 +160,7 @@ steps:
   # Connect test endpoint to new container
   ## This connects directly to the container - no upstreams in use for the test endpoint
   configure_kong_test_PUBLIC_endpoint_to_connect_to_container:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -165,6 +179,7 @@ steps:
       exponentialFactor: 1
 
   configure_kong_test_AUTHED_endpoint_to_connect_to_container:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -184,6 +199,7 @@ steps:
 
   #endpoints are secured the first time they are created. This will add the plugins only if they are not there
   secure_kong_test_AUTHED_endpoint_to_connect_to_container:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -208,6 +224,7 @@ steps:
   ## This is tried a number of times with an increasing delay.
   ## This gives the docker service time to start and become healthy
   run_container_tests_against_test_endpoint:
+    stage: deploy
     image: ${{build_the_test_image}}
     working_directory: ${{main_clone}}/server
     commands:
@@ -228,6 +245,7 @@ steps:
   ## the serivce target is not the container, instead it is the upstream
   ## this won't work until the upstream is in place
   configure_kong_prod_PUBLIC_endpoint:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -246,6 +264,7 @@ steps:
       exponentialFactor: 1
 
   configure_kong_prod_AUTHED_endpoint:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -265,6 +284,7 @@ steps:
 
   #endpoints are secured the first time they are created. This will add the plugins only if they are not there
   secure_kong_prod_AUTHED_endpoint:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -286,6 +306,7 @@ steps:
       exponentialFactor: 1
 
   configure_kong_prod_upstream:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
@@ -305,6 +326,7 @@ steps:
       exponentialFactor: 1
 
   approveCleanUpOldVersion:
+    stage: deploy
     type: pending-approval
     title: Check prod version is working
     description: Check prod version ${{RJM_VERSION}} before continuing pipeline and destorying old versions
@@ -313,6 +335,7 @@ steps:
       finalState: denied
 
   cleanUpOldVersion:
+    stage: deploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
