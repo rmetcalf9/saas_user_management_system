@@ -17,6 +17,6 @@ else
     until ack -f --python  ./src ./test | entr -d python3 -m pytest -a ${1} ./test; do sleep 1; done
   else
     echo "Testing ${1} with verbose option (Single Run)"
-    python3 -m pytest -a ${1} --rednose
+    python3 -m pytest -a ${1}
   fi
 fi

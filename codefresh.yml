@@ -3,6 +3,7 @@ stages:
   - prepare
   - build
   - deploy
+  - postdeploy
 steps:
 
   #This file describes the deployment process for saas_user_management_system
@@ -326,7 +327,7 @@ steps:
       exponentialFactor: 1
 
   approveCleanUpOldVersion:
-    stage: deploy
+    stage: postdeploy
     type: pending-approval
     title: Check prod version is working
     description: Check prod version ${{RJM_VERSION}} before continuing pipeline and destorying old versions
@@ -335,7 +336,7 @@ steps:
       finalState: denied
 
   cleanUpOldVersion:
-    stage: deploy
+    stage: postdeploy
     image: codefresh/remote-docker
     working_directory: ${{main_clone}}
     commands:
