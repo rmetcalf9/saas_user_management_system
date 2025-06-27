@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
+      <change afterPath="$PROJECT_DIR$/services/unitTestMatchingCICD/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/unitTestMatchingCICD/build_test_image.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/unitTestMatchingCICD/run_unit_tests_match_cicd.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/unitTestMatchingCICD/vars.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codefresh.yml" beforeDir="false" afterPath="$PROJECT_DIR$/codefresh.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/continous_test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/services/continous_test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/jwtTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/jwtTokenGeneration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI_securityTestEndpoint.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI_securityTestEndpoint.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI_APIKeys.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +50,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/services/unitTestMatchingCICD" />
       <recent name="$PROJECT_DIR$/services/src/AuthProviders" />
     </key>
   </component>

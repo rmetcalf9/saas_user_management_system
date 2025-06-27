@@ -101,8 +101,8 @@ class test_security_endpoint(parent_test_api):
     securityUser = self.createSecurityUserUsingAdminAPI(authProviderDICT, username, password)
     
     loginResult = self.loginAsUser(masterTenantName, authProviderDICT, username, password)
-    #print("loginResult:",loginResult)
-    
+    #print("loginResult222:",loginResult)
+
     #User setup now access security endpoint
     result = self.testClient.get(
       self.adminAPIPrefix + '/' + masterTenantName + '/securityTestEndpoint', 

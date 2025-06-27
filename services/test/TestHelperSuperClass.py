@@ -266,6 +266,11 @@ class testClassWithTestClient(testHelperSuperClass):
     pass
 
   def decodeToken(self, JWTToken):
+    if isinstance(JWTToken, str):
+      if (JWTToken.startswith("b'")):
+        JWTToken = JWTToken[2:-1]  # remove the b'' wrapper
+        JWTToken = JWTToken.encode('utf-8').decode('utf-8')  # normalize
+
     return jwt.decode(JWTToken, b64decode(appObj.APIAPP_JWTSECRET), algorithms=['HS256'])
     #return jwt.decode(JWTToken, b64decode(json.loads(env['APIAPP_GATEWAYINTERFACECONFIG'])['jwtSecret']), algorithms=['HS256'])
 

@@ -344,7 +344,9 @@ class test_loginAPI_APIKeys(helper):
     self.assertEqual(JWTTokenResponse["possibleUsers"],None)
     self.assertEqual(JWTTokenResponse["known_as"],user["userID"])
 
+    print("DDDTHISTEST", JWTTokenResponse[ 'jwtData' ]['JWTToken'])
     jwtTokenDict = self.decodeToken(JWTTokenResponse[ 'jwtData' ]['JWTToken'])
+    print("token dict", jwtTokenDict)
     self.assertEqual(jwtTokenDict["UserID"],user["userID"])
     self.assertEqual(jwtTokenDict["TenantRoles"],{ constants.masterTenantName: [ constants.DefaultHasAccountRole, extraRoleGrantedToUser ] })
 
