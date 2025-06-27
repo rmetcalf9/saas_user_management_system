@@ -149,11 +149,21 @@ class authProviderGoogle(authProvider):
       ##  ['profile', 'email'],
       ##  credentialDICT['code']
       ##)
+
+      # Default to 'postmessage' for browser-based flows (used by frontend)
+      redirect_uri = 'postmessage'
+      if "redirect_uri" in credentialDICT:
+        if isinstance(credentialDICT["redirect_uri"], str):
+          if len(credentialDICT["redirect_uri"]) < 4096:
+            SAFE_PREFIXES = ('http://localhost', 'https://localhost')
+            if credentialDICT["redirect_uri"].startswith(SAFE_PREFIXES):
+              redirect_uri = credentialDICT["redirect_uri"]
       credentials = client.credentials_from_code(
         client_id = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"],
         client_secret  = self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_secret"],
         scope = ['profile', 'email'],
-        code = credentialDICT['code']
+        code = credentialDICT['code'],
+        redirect_uri=redirect_uri
       )
 
     except Exception as err:
