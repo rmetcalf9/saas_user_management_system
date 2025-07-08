@@ -145,7 +145,7 @@ steps:
             -e APIAPP_APIURL=https://api.metcarob.com/api
             -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/apidocs
             -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/frontend
-            -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api.metcarob.com"
+            -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api.metcarob.com, https://localhost, http://localhost"
             -e APIAPP_OBJECTSTOREDETAILLOGGING="N"
             --constraint \'node.labels.legacy == true\'
             metcarob/saas_user_management:${{RJM_VERSION}}
