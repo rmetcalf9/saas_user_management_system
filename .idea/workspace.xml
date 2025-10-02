@@ -5,7 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/saas_user_management_system.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/saas_user_management_system.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI_auths.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI_auths.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_serverInfoAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_serverInfoAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_tenants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/testContainer/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +41,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/services/unitTestMatchingCICD" />
@@ -51,6 +62,13 @@
       <item itemvalue="Shell Script.Continous Test wip WHICHTESTS" />
       <item itemvalue="Shell Script.continous_test wip" />
     </list>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-41e8cd69c857-64d779b69b7a-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26927.90" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">

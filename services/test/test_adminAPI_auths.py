@@ -163,7 +163,7 @@ class test_adminAPIAuths(parent_test_api):
     getPersonresult = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + createAuthResultJSON['personGUID'], headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(getPersonresult.status_code, 200)
     personResultJSON = json.loads(getPersonresult.get_data(as_text=True))
-    self.assertEquals(len(personResultJSON['personAuths']),2,msg="Wrong number of auths in get Person result, was the auth created?")
+    self.assertEqual(len(personResultJSON['personAuths']),2,msg="Wrong number of auths in get Person result, was the auth created?")
 
     base64EncodedKey = base64.b64encode(createAuthResultJSON['AuthUserKey'].encode('utf-8')).decode("utf-8")
     deleteResult = self.testClient.delete(
@@ -189,7 +189,7 @@ class test_adminAPIAuths(parent_test_api):
     getPersonresult = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/persons/' + createAuthResultJSON['personGUID'], headers={ jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(getPersonresult.status_code, 200)
     personResultJSON = json.loads(getPersonresult.get_data(as_text=True))
-    self.assertEquals(len(personResultJSON['personAuths']),1,msg="Wrong number of auths in get Person result")
+    self.assertEqual(len(personResultJSON['personAuths']),1,msg="Wrong number of auths in get Person result")
     expectedResult = {
       'guid': 'FORCED-CONSTANT-TESTING-PERSON-GUID',
       'associatedUsers': [{ #associatedUSers not checked but placed here for completeness

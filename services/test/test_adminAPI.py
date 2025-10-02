@@ -55,7 +55,7 @@ class test_securityTests(test_api):
     self.assertEqual(result.status_code, 403, msg="expected Forbidden but got something else - " + result.get_data(as_text=True))
 
   def test_jwtWorksAsCookie(self):
-    self.testClient.set_cookie('localhost', jwtCookieName, self.getNormalJWTToken())
+    self.testClient.set_cookie(jwtCookieName, self.getNormalJWTToken(), domain='localhost')
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants')
     self.assertEqual(result.status_code, 200)
 

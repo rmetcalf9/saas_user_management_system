@@ -42,8 +42,8 @@ class test_tenants(testHelperAPIClient):
     def someFn(connectionContext):    
       masterTenant = GetTenant(masterTenantName, connectionContext, appObj=appObj)
       self.assertFalse(masterTenant is None, msg="Master Tenant was not created")
-      self.assertEquals(masterTenant.getJSONRepresenation()['Name'], masterTenantName, msg="Master tenant name is wrong")
-      self.assertEquals(masterTenant.getJSONRepresenation()['Description'], masterTenantDefaultDescription, msg="Master tenant default description wrong")
+      self.assertEqual(masterTenant.getJSONRepresenation()['Name'], masterTenantName, msg="Master tenant name is wrong")
+      self.assertEqual(masterTenant.getJSONRepresenation()['Description'], masterTenantDefaultDescription, msg="Master tenant default description wrong")
       self.assertFalse(masterTenant.getJSONRepresenation()['AllowUserCreation'], msg="Master tenant defaults to allowing user creation")
 
       #Check AuthProvider is correct
