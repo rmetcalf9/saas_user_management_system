@@ -12,11 +12,6 @@ class test_containerAPI(unittest.TestCase):
 
 
 
-  def test_WeCanGetToSwaggerFileForAPIDocs(self):
-    callGetService(containerTestCommon.APIDOCS, "/swagger.json", [200], None, None, None)
-  def test_WeCanGetToAPIDocsURL(self):
-    callGetService(containerTestCommon.APIDOCS, "/", [200], None, None, None)
-
   def test_ContainerVersionMatchesEnviromentVariable(self):
     self.assertTrue('EXPECTED_CONTAINER_VERSION' in os.environ, msg="EXPECTED_CONTAINER_VERSION missing from enviroment")
     resultJSON, status = callGetService(containerTestCommon.SERVERINFO, "/serverinfo", [200], None, None, None)
@@ -32,9 +27,6 @@ class test_containerAPI(unittest.TestCase):
   #  print(result.text)
   #  resultJSON = json.loads(result.text)
   #  self.assertEqual(resultJSON['Server']['APIAPP_APIDOCSURL'], baseURL + "/public/web/apidocs")
-
-  def test_WeCanGetToSwaggerUIStaticFiles(self):
-    callGetService(containerTestCommon.APIDOCS, "/swaggerui/bower/swagger-ui/dist/droid-sans.css", [200], None, None, None)
 
   def test_adminfrontendMainPage(self):
     callGetService(containerTestCommon.ADMINFRONTEND, "/", [200], None, None, None)

@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
-      <change afterPath="$PROJECT_DIR$/Dockerfile_OLDBESEDONNGINX" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_repo_vars.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/install-nginx-debian.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codefresh.yml" beforeDir="false" afterPath="$PROJECT_DIR$/codefresh.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compile_frontend_and_build_container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/compile_frontend_and_build_container.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_localbuild_container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run_localbuild_container.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/testContainer/test_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/test_main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,15 +34,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/services/unitTestMatchingCICD" />
@@ -59,8 +51,8 @@
   </component>
   <component name="RunManager" selected="Shell Script.Continous Test wip WHICHTESTS">
     <list>
-      <item itemvalue="Shell Script.continous_test" />
       <item itemvalue="Shell Script.Continous Test wip WHICHTESTS" />
+      <item itemvalue="Shell Script.continous_test" />
       <item itemvalue="Shell Script.continous_test wip" />
     </list>
   </component>
