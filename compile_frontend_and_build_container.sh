@@ -45,6 +45,7 @@ fi
 
 
 echo "Build docker container (VERSIONNUM=${VERSIONNUM})"
+echo "docker build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild"
 #This file does no version bumping
 cd ${GITROOT}
 eval docker build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild
