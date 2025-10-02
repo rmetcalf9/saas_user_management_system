@@ -1,13 +1,15 @@
 #!/bin/bash
 
 #Not used by codefresh as I am using build container instead
+source ./_repo_vars.sh
+
 
 #working directory is always saas_user_management_system root
 GITROOT=$(pwd)
-DOCKER_USERNAME=metcarob
-DOCKER_IMAGENAME=saas_user_managmenet_system
-VERSIONNUM=$(cat ./VERSION)
+DOCKER_IMAGENAME=${PROJECT_NAME}
+VERSIONNUM=${RJM_VERSION}
 
+echo "compile_fronent_and_build_container.sh - inspecting image"
 docker image inspect ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild > /dev/null
 RES=$?
 if [ ${RES} -eq 0 ]; then
@@ -18,8 +20,6 @@ if [ ${RES} -eq 0 ]; then
     exit 1
   fi
 fi
-
-QUASARBUILDIMAGE="metcarob/docker-build-quasar-app:0.0.12"
 
 docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume ${QUASARBUILDIMAGE} -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
 RES=$?

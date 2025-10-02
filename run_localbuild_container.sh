@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "Script to run a local container which can be accessed via container access descrubed in FRONTEND_NOTES"
+echo "Script to run a local container which can be accessed via container access described in FRONTEND_NOTES"
 
 if [[ ! -f ./VERSION ]]; then
-  echo "VERSION dosen't exist - are you in correct directory?"
+  echo "VERSION doesn't exist - are you in correct directory?"
   exit 1
 fi
 export RJM_VERSION=$(cat ./VERSION)
@@ -27,7 +27,7 @@ fi
 docker service inspect ${RJM_RUNNING_SERVICE_NAME} > /dev/null
 RES=$?
 if [ ${RES} -ne 1 ]; then
-  echo "Container already runing"
+  echo "Container already running"
   echo "use service rm ${RJM_RUNNING_SERVICE_NAME} to stop"
   echo ""
   exit 1

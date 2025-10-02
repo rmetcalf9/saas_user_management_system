@@ -5,15 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/saas_user_management_system.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/saas_user_management_system.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Dockerfile_OLDBESEDONNGINX" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_repo_vars.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install-nginx-debian.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI_auths.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI_auths.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_serverInfoAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_serverInfoAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_tenants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/testContainer/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminfrontend/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminfrontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codefresh.yml" beforeDir="false" afterPath="$PROJECT_DIR$/codefresh.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compile_frontend_and_build_container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/compile_frontend_and_build_container.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_localbuild_container.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run_localbuild_container.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
