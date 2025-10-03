@@ -1,9 +1,11 @@
 #!/bin/bash
 
-PYTHON_CMD=python3
-if [ E${EXTPYTHONCMD} != "E" ]; then
-  PYTHON_CMD=${EXTPYTHONCMD}
-fi
+PYTHON_CMD=python
+#if [ E${EXTPYTHONCMD} != "E" ]; then
+#  PYTHON_CMD=${EXTPYTHONCMD}
+#fi
+
+source ../.venv/bin/activate
 
 PYTHONVERSIONCHECKSCRIPT="import sys\nprint(\"Python version \" + str(sys.version_info))\nif sys.version_info[0] < 3:\n  exit(1)\nif sys.version_info[0] == 3:\n  if sys.version_info[1] < 6:\n    exit(1)\nexit(0)\n"
 printf "${PYTHONVERSIONCHECKSCRIPT}" | ${PYTHON_CMD}
