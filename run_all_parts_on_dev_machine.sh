@@ -5,7 +5,7 @@ echo "Note: Updated to use adminfrontend2"
 
 tmux \
   new-session  "cd ./services ; ./run_app_developer.sh" \; \
-  split-window "cd ./frontend ; quasar dev" \; \
+  split-window "cd ./frontend2 ; quasar dev" \; \
   split-window "cd ./adminfrontend2 ; quasar dev" \; \
   select-layout main-horizontal \; \
   select-pane -t 0 \; \
