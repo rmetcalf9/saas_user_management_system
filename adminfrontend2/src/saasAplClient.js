@@ -131,7 +131,9 @@ export function registerEndpointsWithStore (params) {
             // first we are trying ./run_app_developer.sh which will be on different ports
             // then we are trying running via a container where the frontend and
             // python app are on the same port
+            // usermanagement ADMIN only - also search 8099 as this is the containerised backend
             possibleApiPrefixes: [
+              { prefix: 'http://127.0.0.1:8099', connectingthroughnginx: true, apitype: 'public' },
               { prefix: 'http://localhost:8098', connectingthroughnginx: false, apitype: 'public' },
               { prefix: window.location.protocol + '//' + window.location.host, connectingthroughnginx: true, apitype: 'public' }
             ]

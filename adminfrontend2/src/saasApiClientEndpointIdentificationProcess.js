@@ -4,6 +4,7 @@ File for the endpoint identification process code
 import axios from 'axios'
 
 function startEndpointIdentificationProcess ({ endpointName, callback, rjmStateChange }) {
+  console.log('startEndpointIdentificationProcess for endpoint', endpointName)
   if (typeof (endpointName) !== 'string') {
     console.log('ERROR startEndpointIdentificationProcess wrong type of endpointName supplied', endpointName, typeof (endpointName))
     throw new Error('ERROR startEndpointIdentificationProcess wrong type of endpointName supplied')
@@ -61,6 +62,7 @@ function getUrlToCall (prefixRecord, apiPath, orveridePublicPrivatePart) {
 }
 
 function tryToReadServerInfoFromAllThesePossibleAPIPrefixes ({ possibleApiPrefixes, callback, endpointName }) {
+  console.log('tryToReadServerInfoFromAllThesePossibleAPIPrefixes', JSON.parse(JSON.stringify(possibleApiPrefixes)))
   if (possibleApiPrefixes.length === 0) {
     callback.error('Fail')
     return

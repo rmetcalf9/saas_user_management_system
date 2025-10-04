@@ -5,6 +5,13 @@
         <q-item>
           <q-item-label header>Debug Information and functions</q-item-label>
         </q-item>
+        codebasever
+        <q-item>
+          <q-item-section>
+            <q-item-label>Codebase Version</q-item-label>
+            {{ codebasever }}
+          </q-item-section>
+        </q-item>
         <q-item>
           <q-item-section>
             <q-item-label>Route Params</q-item-label>
@@ -71,6 +78,7 @@
 import { Notify } from 'quasar'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 import saasApiClientCallBackend from '../saasAPiClientCallBackend'
+import rjmversion from '../rjmversion'
 
 export default {
   name: 'DebugInformation',
@@ -80,6 +88,7 @@ export default {
   },
   data () {
     return {
+      codebasever: rjmversion.codebasever,
       possibleTenants: [
         '', 'defaulttenant'
       ]

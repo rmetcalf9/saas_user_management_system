@@ -4,7 +4,7 @@ import { Cookies } from 'quasar'
 import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
 const prodDomain = 'platform.challengeswipe.com'
-const preferredTenantName = 'defaulttenant'
+const preferredTenantName = 'usersystem'
 export const saasServiceName = 'saas_' + preferredTenantName
 const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantName + '/'
 
