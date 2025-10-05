@@ -123,8 +123,7 @@ def UpdateTenantFields(appObj, storeConnection, existingTenantObj, newValDict, f
     if field not in implemented_fields:
       raise failedToUpdateTenantException("update of field '%s' is not implemented" % field)
 
-  jsonForTenant = existingTenantObj.getJSONRepresenation()
-  del jsonForTenant["ObjectVersion"]
+  jsonForTenant = existingTenantObj.getSaveableJSONRepresentation()
 
   if "JWTCollectionAllowedOriginList" in filedsToUpdate:
     val = newValDict["JWTCollectionAllowedOriginList"]

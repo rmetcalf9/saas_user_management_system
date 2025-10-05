@@ -38,8 +38,7 @@ def AutoConfigRunStepFactory(stepDict):
   elif stepDict["type"] == "setTenantJWTCollectionAllowedOriginList":
     return AutoConfigRunStepSetTenantJWTCollectionAllowedOriginList(stepDict["data"])
 
-  raise Exception("Unknown step type")
-
+  raise Exception("Unknown step type - " + stepDict["type"])
 
 class AutoConfigRunStep():
   stepDict = None
@@ -211,18 +210,6 @@ class AutoConfigRunStepSetTenantJWTCollectionAllowedOriginList(AutoConfigRunStep
       existingTenantObj=tenantObj,
       newValDict={"JWTCollectionAllowedOriginList": self.JWTCollectionAllowedOriginList},
       filedsToUpdate=["JWTCollectionAllowedOriginList"])
-
-    # UpdateTenant(
-    #   appObj, content['Name'],
-    #   content['Description'],
-    #   content['AllowUserCreation'],
-    #   content['AuthProviders'],
-    #   content['ObjectVersion'], connectionContext,
-    #   JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList", content, None),
-    #   TicketOverrideURL=getOrSomethngElse("TicketOverrideURL", content, ""),
-    #   TenantBannerHTML=getOrSomethngElse("TenantBannerHTML", content, ""),
-    #   SelectAuthMessage=getOrSomethngElse("SelectAuthMessage", content, "How do you want to verify who you are?")
-    # )
 
     print("SetTenantJWTCollectionAllowedOriginList: " + self.tenantName)
     self.setPassed()

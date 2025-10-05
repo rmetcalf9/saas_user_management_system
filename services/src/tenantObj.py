@@ -59,6 +59,13 @@ class tenantClass():
       self._jsonRepersentation['ObjectVersion'] = self._objectVersion
     return self._jsonRepersentation
 
+  def getSaveableJSONRepresentation(self):
+    # Returns a JSON object that is valid if it is saved back to the datastore
+    # This is different than the normal JSON representation because:
+    #  1. it has no object version
+    #  2. auth providers is a dict with the keys being the guids of the objects
+    return self._mainDict.copy()
+
   def getAuthProvider(self, guid):
     if guid not in self._mainDict["AuthProviders"]:
       raise constants.authProviderNotFoundException
