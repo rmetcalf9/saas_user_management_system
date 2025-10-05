@@ -41,7 +41,7 @@ fi
 APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://127.0.0.1:8082,http://localhost:8082"
 SETUP_JSON_DIR=${INITAL_DIR}
 SETUP_JSON_FILENAME="_start_local_saas_user_management_service_config.json"
-EXPECTED_TENANT="usersystem"
+EXPECTED_TENANT="saas_user_management_detect"
 
 
 start_local_saas_user_management_service \
@@ -65,5 +65,7 @@ fi
 
 echo "Security microservice started"
 echo ""
+
+quasar dev
 
 echo "run_against_container_backend.sh"

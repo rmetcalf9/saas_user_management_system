@@ -1,3 +1,18 @@
 {"steps": [
-  { "type": "echo", "data": { "text": "saas_social Dev Security Config"}}
+  { "type": "echo", "data": { "text": "saas_social Dev Security Config"}},
+  { "type": "createTenant", "data": {
+    "tenantName": "saas_user_management_detect",
+    "description": "Detect if this version is for saas_user_managemnet_testing",
+    "allowUserCreation": true,
+    "JWTCollectionAllowedOriginList": [ ]
+  }},
+  { "type": "addInternalUserAccount", "data": {
+    "tenantName": "usersystem",
+    "userID": "saas-user-management-autocreate-testadmin",
+    "Username": "TestAdmin",
+    "Password": "TestAdmin",
+    "Roles": {
+      "social": [ "hasaccount", "systemadmin" ]
+    }
+  }}
 ]}

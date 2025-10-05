@@ -28,14 +28,23 @@ class helpers(TestHelperSuperClass.testHelperAPIClient):
       return
     self.assertEqual(l, len(mocked_print.mock_calls), msg="Not enough lines in output (next line=" + str(mocked_print.mock_calls[l]) + ")")
 
-  def getCreateTenantStep(self):
+  def getCreateTenantStep(self, tenant="newTenant"):
     testStepData = {
-      "tenantName": "newTenant",
+      "tenantName": tenant,
       "description": "descrition of new tenant",
       "allowUserCreation": True,
       "JWTCollectionAllowedOriginList": [ "a", "b", "https://a.b.c.com" ]
     }
     return { "type": "createTenant", "data": testStepData}
+
+  def getSetTenantJWTCollectionAllowedOriginListStep(self, tenant="newTenant", newVal=[ "a", "b", "https://a.b.c.com" ]):
+    testStepData = {
+      "tenantName": tenant,
+      "JWTCollectionAllowedOriginList": newVal
+    }
+    return { "type": "setTenantJWTCollectionAllowedOriginList", "data": testStepData}
+
+  #
 
   def getAddAuthStep(self):
     testStepData = {
@@ -254,3 +263,47 @@ class test_appObjClass(helpers):
     }
 
     self.assertJSONStringsEqualWithIgnoredKeys(loginResDict, expected, ignoredKeys=["authedPersonGuid", "currentlyUsedAuthProviderGuid", "jwtData", "refresh"])
+
+  def test_SetTenantJWTCollectionAllowedOriginList_settovals_NonExistantTenant(self):
+    testStep = self.getSetTenantJWTCollectionAllowedOriginListStep(tenant="someInvalidTenant")
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        testStep
+      ]}
+    )
+    tenantObj = None
+    def runFn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        autoConfigRunner.run(appObj, storeConnection)
+      self.assertEqual(str(context.exception), "SetTenantJWTCollectionAllowedOriginList: Tenant " + testStep["data"]["tenantName"] + " does not exist")
+    appObj.objectStore.executeInsideTransaction(runFn)
+
+  def test_SetTenantJWTCollectionAllowedOriginList_settovals(self):
+    tenantToUse = "autocongifuteTestTenant"
+    newValToSet = [""]
+    testStep = self.getSetTenantJWTCollectionAllowedOriginListStep(tenant=tenantToUse, newVal=newValToSet)
+    autoConfigRunner = autoConfig.AutoConfigRunner(
+      {"steps": [
+        self.getCreateTenantStep(tenant=tenantToUse),
+        testStep
+      ]}
+    )
+    tenantObj = None
+    with patch('builtins.print') as mocked_print:
+      def runFn(storeConnection):
+        autoConfigRunner.run(appObj, storeConnection)
+      appObj.objectStore.executeInsideTransaction(runFn)
+    l = self.assertHead(mocked_print)
+    l = self.assertNextLine(mocked_print, l, 'CreateTenant: ' + testStep["data"]["tenantName"])
+    l = self.assertNextLine(mocked_print, l, 'SetTenantJWTCollectionAllowedOriginList: ' + testStep["data"]["tenantName"])
+    self.assertTail(mocked_print, l)
+
+    def runFn(storeConnection):
+      return GetTenant(testStep["data"]["tenantName"], storeConnection, appObj=appObj)
+    tenantObj = appObj.objectStore.executeInsideTransaction(runFn)
+
+    self.assertNotEqual(tenantObj, None, msg="Tenant not found")
+
+    self.assertEqual(tenantObj.getName(), testStep["data"]["tenantName"])
+    self.assertEqual(tenantObj.getJWTCollectionAllowedOriginList(), newValToSet)
+

@@ -13,6 +13,9 @@ from users import CreateUser, AddUserRole, associateUserWithPerson
 from userPersonCommon import getListOfUserIDsForPerson, GetUser, getListOfUserIDsForPersonNoTenantCheck
 from persons import GetPerson, associatePersonWithAuthCalledWhenAuthIsCreated
 
+class failedToUpdateTenantException(Exception):
+  pass
+
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
 UserAlreadyAssociatedWithThisIdentityException = Exception('User Already Associated With This Identity')
@@ -106,8 +109,47 @@ def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnec
     TenantBannerHTML=TenantBannerHTML, SelectAuthMessage=SelectAuthMessage, TicketOverrideURL=TicketOverrideURL
   )
 
+def UpdateTenantFields(appObj, storeConnection, existingTenantObj, newValDict, filedsToUpdate):
+  # Can never be used to update tenant name
+  tenantName = existingTenantObj.getName()
+  objectVersion = existingTenantObj.getObjectVersion()
 
-def UpdateTenant(appObj, tenantName, description, allowUserCreation, authProvDict, objectVersion, storeConnection,
+  implemented_fields = ["JWTCollectionAllowedOriginList"]
+  if len(filedsToUpdate) == 0:
+    raise failedToUpdateTenantException("Did not specify any fields to update")
+  for field in filedsToUpdate:
+    if field not in newValDict:
+      raise failedToUpdateTenantException("Did not specify value for field '%s'" % field)
+    if field not in implemented_fields:
+      raise failedToUpdateTenantException("update of field '%s' is not implemented" % field)
+
+  jsonForTenant = existingTenantObj.getJSONRepresenation()
+  del jsonForTenant["ObjectVersion"]
+
+  if "JWTCollectionAllowedOriginList" in filedsToUpdate:
+    val = newValDict["JWTCollectionAllowedOriginList"]
+    if not isinstance(val, list):
+        raise TypeError("JWTCollectionAllowedOriginList must be a list of strings")
+    if not all(isinstance(item, str) for item in val):
+        raise ValueError("JWTCollectionAllowedOriginList must only contain string values")
+    jsonForTenant["JWTCollectionAllowedOriginList"] = val
+
+  def updTenant(tenant, storeConnection):
+    if tenant is None:
+      raise tenantDosentExistException
+    return jsonForTenant
+  storeConnection.updateJSONObject("tenants", tenantName, updTenant, objectVersion)
+  return GetTenant(tenantName, storeConnection, appObj=appObj)
+
+
+def UpdateTenant(
+  appObj,
+  tenantName,
+  description,
+  allowUserCreation,
+  authProvDict,
+  objectVersion,
+  storeConnection,
   JWTCollectionAllowedOriginList,
   TicketOverrideURL,
   TenantBannerHTML,

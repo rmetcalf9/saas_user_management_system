@@ -1,4 +1,4 @@
-from tenants import CreateTenant, AddAuthProvider, GetTenant, CreateUser, GetAuthProvider
+from tenants import CreateTenant, UpdateTenantFields, AddAuthProvider, GetTenant, CreateUser, GetAuthProvider
 import constants
 from persons import CreatePerson, associatePersonWithAuthCalledWhenAuthIsCreated
 from AuthProviders.authProviders_Internal import getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse
@@ -35,6 +35,8 @@ def AutoConfigRunStepFactory(stepDict):
     return AutoConfigRunStepAddAuthProvider(stepDict["data"])
   elif stepDict["type"] == "addInternalUserAccount":
     return AutoConfigRunStepAddInternalUserAccount(stepDict["data"])
+  elif stepDict["type"] == "setTenantJWTCollectionAllowedOriginList":
+    return AutoConfigRunStepSetTenantJWTCollectionAllowedOriginList(stepDict["data"])
 
   raise Exception("Unknown step type")
 
@@ -190,4 +192,37 @@ class AutoConfigRunStepAddInternalUserAccount(AutoConfigRunStep):
         AddUserRole(appObj, self.userID, curTenant, curRole, storeConnection)
 
     print("AddInternalUserAccount: Add " + self.Username + " to tenant " + tenantObj.getName())
+    self.setPassed()
+
+class AutoConfigRunStepSetTenantJWTCollectionAllowedOriginList(AutoConfigRunStep):
+  tenantName = None
+  JWTCollectionAllowedOriginList = None
+  def __init__(self, stepDict):
+    self.tenantName = stepDict["tenantName"]
+    self.JWTCollectionAllowedOriginList = stepDict["JWTCollectionAllowedOriginList"]
+  def run(self, appObj, storeConnection):
+    tenantObj = GetTenant(self.tenantName, storeConnection, appObj=appObj)
+    if tenantObj is None:
+      raise Exception("SetTenantJWTCollectionAllowedOriginList: Tenant " + self.tenantName + " does not exist")
+
+    UpdateTenantFields(
+      appObj,
+      storeConnection,
+      existingTenantObj=tenantObj,
+      newValDict={"JWTCollectionAllowedOriginList": self.JWTCollectionAllowedOriginList},
+      filedsToUpdate=["JWTCollectionAllowedOriginList"])
+
+    # UpdateTenant(
+    #   appObj, content['Name'],
+    #   content['Description'],
+    #   content['AllowUserCreation'],
+    #   content['AuthProviders'],
+    #   content['ObjectVersion'], connectionContext,
+    #   JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList", content, None),
+    #   TicketOverrideURL=getOrSomethngElse("TicketOverrideURL", content, ""),
+    #   TenantBannerHTML=getOrSomethngElse("TenantBannerHTML", content, ""),
+    #   SelectAuthMessage=getOrSomethngElse("SelectAuthMessage", content, "How do you want to verify who you are?")
+    # )
+
+    print("SetTenantJWTCollectionAllowedOriginList: " + self.tenantName)
     self.setPassed()
