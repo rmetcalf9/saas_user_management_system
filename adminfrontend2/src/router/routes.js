@@ -9,20 +9,13 @@ export const saasServiceName = 'saas_' + preferredTenantName
 const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantName + '/'
 
 function allowNotLoggedInForPath (tenantName, path) {
-  // All pages require login accept profile which may be public
-  if (path === '/' + tenantName + '/') {
-    return true
-  }
+  // All pages require login
+  // if (path === '/' + tenantName + '/') {
+  //  return true
+  // }
   if (path === '/' + tenantName + '/debug') {
     return true
   }
-  const pathArr = path.split('/')
-  if (pathArr.length === 4 && path.startsWith('/' + tenantName + '/promo/')) {
-    return true
-  }
-  // if (path.startsWith('/' + tenantName + '/login/')) {
-  //   return true
-  // }
   return false
 }
 

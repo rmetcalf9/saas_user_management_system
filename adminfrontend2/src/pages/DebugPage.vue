@@ -90,7 +90,7 @@ export default {
     return {
       codebasever: rjmversion.codebasever,
       possibleTenants: [
-        '', 'defaulttenant'
+        '', 'usersystem'
       ]
     }
   },
