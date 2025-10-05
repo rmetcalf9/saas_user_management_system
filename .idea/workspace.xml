@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_repo_vars.sh" beforeDir="false" afterPath="$PROJECT_DIR$/_repo_vars.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend2/_start_local_saas_user_management_service_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend2/_start_local_saas_user_management_service_config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/autoConfigRunner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenantObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenantObj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_autoConfigRunner.py" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
