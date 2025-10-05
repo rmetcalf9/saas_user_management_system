@@ -8,7 +8,7 @@
   }},
   { "type": "setTenantJWTCollectionAllowedOriginList", "data": {
     "tenantName": "usersystem",
-    "JWTCollectionAllowedOriginList": [ "http://localhost:8082", "http://127.0.0.1:8082" ]
+    "JWTCollectionAllowedOriginList": [ "http://localhost:8082", "http://127.0.0.1:8082", "http://127.0.0.1:8099", "http://localhost:8099" ]
   }},
   { "type": "addInternalUserAccount", "data": {
     "tenantName": "usersystem",
