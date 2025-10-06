@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          <div @click="clicktoolbartitle">adminfrontend</div>
+          <div @click="clicktoolbartitle">{{ pageTitle }}</div>
         </q-toolbar-title>
 
         <div v-if="serverInfoVersionMatchesCodeBaseVersion">Version {{ serverInfoVersion }}</div>
@@ -95,6 +95,7 @@
 import { defineComponent, ref } from 'vue'
 import { saasServiceName } from '../router/routes.js'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
+import { useGlobalValsStore } from 'stores/globalValsStore'
 import rjmversion from '../rjmversion'
 import saasUsermanagementLoginItem from '../components/saasUsermanagementLoginItem.vue'
 
@@ -107,6 +108,7 @@ export default defineComponent({
 
   setup () {
     const store = useUserManagementClientStoreStore()
+    const globalValsStore = useGlobalValsStore()
     const leftDrawerOpen = ref(false)
 
     return {
@@ -116,7 +118,8 @@ export default defineComponent({
       },
       toolbartitlelastclick: Date.now(),
       toolbartitleclickcount: 0,
-      store
+      store,
+      globalValsStore
     }
   },
   data () {
@@ -177,6 +180,9 @@ export default defineComponent({
     }
   },
   computed: {
+    pageTitle () {
+      return this.globalValsStore.pageTitle
+    },
     host () {
       return window.location.host
     },
