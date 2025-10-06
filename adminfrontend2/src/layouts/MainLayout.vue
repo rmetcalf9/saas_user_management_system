@@ -54,15 +54,20 @@
       >
         {{ host }} Links
       </q-item-label>
-      <q-item clickable :to='"/" + this.$route.params.tenantName + "/"'>
-        <q-item-section avatar>
-          <q-icon color="primary" name="equalizer" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>Home</q-item-label>
-          <q-item-label caption>Index Page</q-item-label>
-        </q-item-section>
-      </q-item>
+      <div v-for="menu_item in menu_items" :key=menu_item.path>
+        <q-item
+          clickable :to='"/" + this.$route.params.tenantName + menu_item.path'
+          :class="{ 'mainlayout-selected': quasarPath === menu_item.path }"
+        >
+          <q-item-section avatar>
+            <q-icon color="primary" :name="menu_item.icon" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ menu_item.label }}</q-item-label>
+            <q-item-label caption>{{ menu_item.caption }}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </div>
       <q-separator />
       <saasUsermanagementLoginItem
         v-model="saasLogin"
@@ -117,7 +122,33 @@ export default defineComponent({
   data () {
     return {
       codebasever: rjmversion.codebasever,
-      saasLogin: undefined
+      saasLogin: undefined,
+      menu_items: [
+        {
+          path: '/tenants',
+          label: 'Tenants',
+          caption: 'Tenant Management',
+          icon: 'business'
+        },
+        {
+          path: '/users',
+          label: 'Users',
+          caption: 'User Management',
+          icon: 'person'
+        },
+        {
+          path: '/persons',
+          label: 'Persons',
+          caption: 'Person Management',
+          icon: 'directions_walk'
+        },
+        {
+          path: '/usersettings',
+          label: 'User Settings',
+          caption: 'Settings',
+          icon: 'settings'
+        }
+      ]
     }
   },
   methods: {
@@ -181,7 +212,19 @@ export default defineComponent({
     },
     tenantName () {
       return this.$route.params.tenantName
+    },
+    quasarPath () {
+      const prefix = `/${this.tenantName}`
+      return this.$route.path.startsWith(prefix)
+        ? this.$route.path.slice(prefix.length) || '/'
+        : this.$route.path
     }
   }
 })
 </script>
+
+<style>
+.mainlayout-selected {
+  background-color: darkgrey;
+}
+</style>

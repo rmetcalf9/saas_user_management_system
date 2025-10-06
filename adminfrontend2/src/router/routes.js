@@ -267,7 +267,11 @@ const routes = [
     beforeEnter: getGlobalBeforeEnterFn('main'),
     children: [
       { path: '', component: () => import('pages/IndexPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Index') },
-      { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('debug') }
+      { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('debug') },
+      { path: 'persons', name: 'Persons', component: () => import('pages/Persons.vue'), beforeEnter: getGlobalBeforeEnterFn('persons') },
+      { path: 'tenants', name: 'Tenants', component: () => import('pages/Tenants.vue'), beforeEnter: getGlobalBeforeEnterFn('tenants') },
+      { path: 'users', name: 'Users', component: () => import('pages/Users.vue'), beforeEnter: getGlobalBeforeEnterFn('users') },
+      { path: 'usersettings', name: 'User Settings', component: () => import('pages/UserSettings.vue'), beforeEnter: getGlobalBeforeEnterFn('usersettings') }
     ]
   },
 
