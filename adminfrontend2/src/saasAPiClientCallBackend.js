@@ -3,7 +3,7 @@ This file contains functions to call the api client backends.
 */
 import { saasServiceName } from './router/routes.js'
 
-// const authedStoreFn = 'callAuthedAPI'
+const authedStoreFn = 'callAuthedAPI'
 const authedOrAnonStoreFn = 'callAuthedOrAnonAPI'
 
 /*
@@ -16,6 +16,12 @@ const apiPrefixes = {
     path: '/info',
     storeFn: authedOrAnonStoreFn, // authedStoreFn or authedOrAnonStoreFn
     orveridePublicPrivatePart: 'public' // public or private
+  },
+  admin: {
+    endpoint: saasServiceName,
+    path: '/admin',
+    storeFn: authedStoreFn,
+    orveridePublicPrivatePart: 'authed'
   }
 }
 

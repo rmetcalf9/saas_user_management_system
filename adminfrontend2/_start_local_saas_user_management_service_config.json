@@ -16,7 +16,7 @@
     "Username": "TestAdmin",
     "Password": "TestAdmin",
     "Roles": {
-      "social": [ "hasaccount", "systemadmin" ]
+      "usersystem": [ "hasaccount", "systemadmin" ]
     }
   }}
 ]}

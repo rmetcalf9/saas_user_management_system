@@ -1,6 +1,10 @@
 <template>
   <q-page>
-    <div>TODO</div>
+    <TenantsTable
+      :defaultDisplayedColumns="['Name', 'Description']"
+      persistantSettingsSlot="tenantsMain"
+      :clickSingleTenantCallback="clickSingleTenant"
+    />
   </q-page>
 </template>
 
@@ -8,12 +12,17 @@
 </style>
 
 <script>
+import TenantsTable from '../components/TenantsTable'
 
 export default {
   name: 'PageTenants',
   components: {
+    TenantsTable
   },
   methods: {
+    clickSingleTenant (props) {
+      this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + props.row.Name)
+    }
   }
 }
 </script>
