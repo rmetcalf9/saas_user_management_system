@@ -191,7 +191,6 @@ export default {
             Description: '',
             AllowUserCreation: false
           }
-          console.log('TODO', callback, postdata)
           saasApiClientCallBackend.callApi({
             prefix: 'admin',
             router: this.$router,
