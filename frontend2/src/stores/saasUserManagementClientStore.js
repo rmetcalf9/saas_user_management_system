@@ -78,9 +78,9 @@ export function refreshJWTToken (callback, curpath, startAllBackendCallQueuesFn)
         })
         rjmStateChangeObj2.executeAction('registerEndOfTokenRefreshSuccess', { responseData: response.data })
         startAllBackendCallQueuesFn({ rjmStateChange: rjmStateChangeObj2, calledAtEndOfRefresh: true })
-        // callback.ok(response) Callback passed is the service callback
-        // response here is the refresh response.
-        // call is still in queue so it will be cakked then
+        if (typeof (callback) !== 'undefined') {
+          callback.ok(response)
+        }
       } else {
         rjmStateChangeObj2.executeAction('registerEndOfTokenRefreshFail')
         // Clear cookie as refresh token will no work any more

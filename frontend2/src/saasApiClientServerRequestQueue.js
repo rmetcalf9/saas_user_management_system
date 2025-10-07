@@ -112,7 +112,8 @@ function processAPICallQueueRecursive ({ endpoint, rjmStateChange, calledAtEndOf
           processAPICallQueueRecursive({ rjmStateChange, endpoint, calledAtEndOfRefresh, curpath, startAllBackendCallQueuesFn })
         } else {
           rjmStateChange.executeAction('endQueueProcessing', { endpoint: endpoint.name })
-          refreshJWTToken(apiCall.callback, curpath, startAllBackendCallQueuesFn)
+          // Passing undefined as callback
+          refreshJWTToken(undefined, curpath, startAllBackendCallQueuesFn)
           // return (Not needed)
         }
       } else {
