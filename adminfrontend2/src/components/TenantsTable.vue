@@ -177,19 +177,31 @@ export default {
         cancel: true,
         color: 'secondary'
       }).onOk(data => {
-        const postdata = {
-          Name: data,
-          Description: '',
-          AllowUserCreation: false
+        if (!data || !data.trim()) {
+          // Show an alert or error, and prevent the dialog from closing
+          this.$q.notify({
+            type: 'negative',
+            message: 'Tenant name cannot be empty!'
+          })
+          // Re-open the dialog
+          this.openCreateTenantModalDialog() // assuming you wrap this in a function
+        } else {
+          const postdata = {
+            Name: data,
+            Description: '',
+            AllowUserCreation: false
+          }
+          console.log('TODO', callback, postdata)
+          saasApiClientCallBackend.callApi({
+            prefix: 'admin',
+            router: this.$router,
+            store: this.userManagementClientStoreStore,
+            path: '/' + TTT.tenantName + '/tenants',
+            method: 'post',
+            postdata,
+            callback
+          })
         }
-        this.$store.dispatch('globalDataStore/callAdminAPI', {
-          path: '/tenants',
-          method: 'post',
-          postdata,
-          callback,
-          curPath: this.$router.history.current.path,
-          headers: undefined
-        })
       })
     },
     refresh () {
@@ -216,7 +228,6 @@ export default {
         return this.tablePersistSettings.visibleColumns
       },
       set (val) {
-        console.log('TODO set', val)
         this.tablePersistSettings.visibleColumns = val
       }
     }
