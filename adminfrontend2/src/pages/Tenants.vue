@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <TenantsTable
-      :defaultDisplayedColumns="['Name', 'Description']"
+      :defaultDisplayedColumns="['Name', 'Description', '...']"
       persistantSettingsSlot="tenantsMain"
       :clickSingleTenantCallback="clickSingleTenant"
     />
@@ -21,7 +21,8 @@ export default {
   },
   methods: {
     clickSingleTenant (props) {
-      this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + props.row.Name)
+      console.log('SSSSS TODO callback', props)
+      // this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + props.row.Name)
     }
   }
 }

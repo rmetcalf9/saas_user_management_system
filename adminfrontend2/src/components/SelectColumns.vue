@@ -1,12 +1,13 @@
 <template>
   <q-select
-    multiple outlined
+    multiple
+    outlined
+    emit-value
     hide-selected
     :options="columnsForEnableDropdown"
     label="Fields:"
     style="width: 300px"
-    v-bind:value="localTableVisibleColumns"
-    v-on:input="updateTableVisibleColumns"
+    v-model="localTableVisibleColumns"
     :display-value="''"
   >
     <template v-slot:selected-item>
@@ -18,7 +19,7 @@
 
 export default {
   props: [
-    'value',
+    'selected_col_names',
     'columns'
   ],
   data () {
@@ -26,13 +27,36 @@ export default {
       localTableVisibleColumns: []
     }
   },
+  watch: {
+    localTableVisibleColumns: {
+      handler (newVal) {
+        const toEmit = this.columns.filter(function (x) {
+          return x.required
+        }).map(function (x) {
+          return x.name
+        }).concat(newVal)
+        this.$emit('update:selected_col_names', toEmit)
+      },
+      deep: true // ensures reactivity inside array
+    }
+  },
   methods: {
     // I think this is what Emit-value does
-    updateTableVisibleColumns (event) {
-      this.localTableVisibleColumns = event
-      this.$emit('input', this.localTableVisibleColumns.map(function (x) {
-        return x.value
-      }))
+    updateselection (event) {
+      // this.localTableVisibleColumns = event
+      let visibleCols = []
+      this.columnsForEnableDropdown.forEach(function (col) {
+        event.forEach(function (evecol) {
+          if (typeof (evecol) !== 'string') {
+            if (evecol.value === col.value) {
+              visibleCols = [...visibleCols, evecol.value]
+              // console.log('evecol', evecol)
+            }
+          }
+        })
+      })
+      console.log('viscols', visibleCols)
+      // this.$emit('update:modelValue', [...visibleCols])
     }
   },
   computed: {
@@ -46,30 +70,15 @@ export default {
       })
     }
   },
-  mounted: function () {
-    var a = this.columnsForEnableDropdown
-    function findCol (name) {
-      return a.filter(function (x) {
-        return x.value === name
-      })
-    }
-    this.localTableVisibleColumns = this.value.map(function (x) {
-      var col = findCol(x)
-      if (col.length === 0) {
-        // columns are not loaded yet
-        return {
-          value: x,
-          label: x,
-          disable: false
-        }
+  mounted () {
+    const TTT = this
+    this.localTableVisibleColumns = []
+    this.selected_col_names.forEach(function (colName) {
+      if (!TTT.columns.filter(function (x) {
+        return x.name === colName
+      })[0].required) {
+        TTT.localTableVisibleColumns.push(colName)
       }
-      return {
-        value: x,
-        label: col[0].label,
-        disable: col[0].required
-      }
-    }).filter(function (x) {
-      return !x.disable
     })
   }
 }

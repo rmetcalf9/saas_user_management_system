@@ -11,16 +11,17 @@
     :filter="tablePersistSettings.filter"
     :pagination="tablePersistSettings.serverPagination"
   >
-      <!--<template slot="top-left" slot-scope="props">
+      <template v-slot:top-left>
         <q-btn
           color="primary"
           push
           @click="openCreateTenantModalDialog"
         >Add Tenant</q-btn>
       </template>
-      <template slot="top-right" slot-scope="props">
+      <template v-slot:top-right>
         <SelectColumns
-          v-model="tablePersistSettings.visibleColumns"
+          :selected_col_names="tablePersistSettings_visiblecols"
+          @update:selected_col_names="(newVal) => tablePersistSettings_visiblecols = newVal"
           :columns="tableColumns"
         />
         &nbsp;
@@ -34,20 +35,26 @@
             <q-icon name="search" />
           </template>
         </q-input>
-
       </template>
-
-      <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
-        <q-btn flat no-caps dense :label="props.value" @click="clickSingleTenantCallbackFN(props)" width="100%"/>
-      </q-td>
-
-      <q-td  slot="body-cell-JWTCollectionAllowedOriginList" slot-scope="props" :props="props">
-        {{ props.value }}
-      </q-td>
-
-      <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleTenantCallbackFN(props)" />
-      </q-td>-->
+      <template v-slot:body="props">
+        <q-tr :props="props" @click="clickSingleTenantCallbackFN(props.row)">
+          <q-td key="Name" :props="props">
+            {{ props.row.Name }}
+          </q-td>
+          <q-td key="Description" :props="props">
+            {{ props.row.Description }}
+          </q-td>
+          <q-td key="AllowUserCreation" :props="props">
+            {{ props.row.AllowUserCreation }}
+          </q-td>
+          <q-td key="JWTCollectionAllowedOriginList" :props="props">
+            {{ props.row.JWTCollectionAllowedOriginList }}
+          </q-td>
+          <q-td key="..." :props="props">
+            <q-btn flat color="primary" icon="keyboard_arrow_right" label="" />
+          </q-td>
+        </q-tr>
+      </template>
   </q-table>
 </div></template>
 
@@ -55,7 +62,7 @@
 import { Notify } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
-// import SelectColumns from '../components/SelectColumns'
+import SelectColumns from '../components/SelectColumns'
 import saasApiClientCallBackend from '../saasAPiClientCallBackend'
 import { useTablePersistSettingsStore } from 'stores/tablePersistSettingsStore'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
@@ -68,7 +75,7 @@ export default {
     'clickSingleTenantCallback'
   ],
   components: {
-    // SelectColumns
+    SelectColumns
   },
   setup () {
     const tablePersistSettingsStore = useTablePersistSettingsStore()
@@ -198,7 +205,19 @@ export default {
     },
     tablePersistSettings: {
       get () {
-        return this.tablePersistSettingsStore.getTableSettings(this.persistantSettingsSlot, this.defaultDisplayedColumns)
+        return this.tablePersistSettingsStore.getTableSettings(
+          this.persistantSettingsSlot,
+          this.defaultDisplayedColumns
+        )
+      }
+    },
+    tablePersistSettings_visiblecols: {
+      get () {
+        return this.tablePersistSettings.visibleColumns
+      },
+      set (val) {
+        console.log('TODO set', val)
+        this.tablePersistSettings.visibleColumns = val
       }
     }
   },
