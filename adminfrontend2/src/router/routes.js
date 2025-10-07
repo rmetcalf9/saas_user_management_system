@@ -273,6 +273,7 @@ const routes = [
       { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Debug') },
       { path: 'persons', name: 'Persons', component: () => import('pages/Persons.vue'), beforeEnter: getGlobalBeforeEnterFn('Persons') },
       { path: 'tenants', name: 'Tenants', component: () => import('pages/Tenants.vue'), beforeEnter: getGlobalBeforeEnterFn('Tenants') },
+      { path: 'tenants/:selTenantNAME', component: () => import('pages/Tenant.vue'), beforeEnter: getGlobalBeforeEnterFn('Tenant') },
       { path: 'users', name: 'Users', component: () => import('pages/Users.vue'), beforeEnter: getGlobalBeforeEnterFn('Users') },
       { path: 'usersettings', name: 'User Settings', component: () => import('pages/UserSettings.vue'), beforeEnter: getGlobalBeforeEnterFn('User Settings') }
     ]

@@ -8,9 +8,6 @@
   </q-page>
 </template>
 
-<style>
-</style>
-
 <script>
 import TenantsTable from '../components/TenantsTable'
 
@@ -21,9 +18,11 @@ export default {
   },
   methods: {
     clickSingleTenant (props) {
-      console.log('SSSSS TODO callback', props)
-      // this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + props.row.Name)
+      this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + props.Name)
     }
   }
 }
 </script>
+
+<style>
+</style>

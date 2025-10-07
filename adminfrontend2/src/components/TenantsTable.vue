@@ -110,7 +110,6 @@ export default {
       TTT.tableLoading = true
       const callback = {
         ok: function (response) {
-          console.log('TenantsTable callback response', response)
           TTT.tableLoading = false
           TTT.tablePersistSettings.serverPagination = pagination
           TTT.tablePersistSettings.serverPagination.rowsNumber = response.data.pagination.total
