@@ -23,8 +23,8 @@
     <q-item>
       <q-item-section >
         <q-item-label>Allow User Creation:</q-item-label>
-        <q-item-label caption v-if="tenantData.AllowUserCreation">New users can sign up</q-item-label>
-        <q-item-label caption v-if="!tenantData.AllowUserCreation">Users must be created by admins</q-item-label>
+        <q-item-label caption v-if="tenantData.AllowUserCreation">✅ New users can sign up</q-item-label>
+        <q-item-label caption v-if="!tenantData.AllowUserCreation">❌ Users must be created by admins</q-item-label>
       </q-item-section>
     </q-item>
     <q-item>
@@ -89,23 +89,35 @@
     label="Add Auth Provider"
     class = "float-left q-ma-xs"
   />
-<!--
-<q-dialog v-model="editTenantModalDialogVisible">
-  <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 450px; width: 700px; max-width: 80vw;">
-    <q-header class="bg-primary">
-      <q-toolbar>
+  <q-dialog v-model="editTenantModalDialogVisible">
+    <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+      <!-- Header -->
+      <q-toolbar class="bg-primary text-white">
         <q-toolbar-title>
           Edit Tenant Information
         </q-toolbar-title>
         <q-btn flat v-close-popup round dense icon="close" />
       </q-toolbar>
-    </q-header>
-    <q-page-container>
-      <q-page padding>
-        <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput" label="Description" :label-width="3"/> Description of Tenant
-        <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
+
+      <!-- Scrollable body -->
+      <q-card-section style="flex: 1; overflow-y: auto;">
+        <q-input
+          v-model="editTenantModalDialogData.Description"
+          @keyup.enter="okEditTenantDialog"
+          ref="descriptionInput"
+          label="Description"
+          :label-width="3"
+        />
+        Description of Tenant
+
+        <q-field
+          helper="Must be on for both Tenant and Auth Provider to be effective"
+          label="Allow User Creation"
+          :label-width="3"
+        >
           <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
-        </q-field> Must be on for both Tenant and Auth Provider to be effective
+        </q-field>
+
         <q-select
           label="JWT Collection Allowed Origin List"
           v-model="editTenantModalDialogData.JWTCollectionAllowedOriginList"
@@ -114,29 +126,59 @@
           multiple
           input-debounce="0"
           @new-value="dialogEditJWTCollectionAllowedOriginListCreateValue"
-        /> Origins which client apps will be allowed to collect JWT tokens from
-        <q-input v-model="editTenantModalDialogData.TicketOverrideURL" ref="TicketOverrideURLInput" label="Tenant spercific ticket endpoint" :label-width="3" clearable />Ticket Override URL
-        <q-input v-model="editTenantModalDialogData.TenantBannerHTML" ref="TenantBannerHTMLInput" label="Tenant banner displayed at login" :label-width="3" clearable />Tenant Banner HTML
-        <q-input v-model="editTenantModalDialogData.SelectAuthMessage" ref="SelectAuthMessageInput" label="Select Auth message to use" :label-width="3" clearable />Select Auth Message
+        />
+        Origins which client apps will be allowed to collect JWT tokens from
 
-        <div>&nbsp;</div>
+        <q-input
+          v-model="editTenantModalDialogData.TicketOverrideURL"
+          ref="TicketOverrideURLInput"
+          label="Tenant specific ticket endpoint"
+          :label-width="3"
+          clearable
+        />
+        Ticket Override URL
+
+        <q-input
+          v-model="editTenantModalDialogData.TenantBannerHTML"
+          ref="TenantBannerHTMLInput"
+          label="Tenant banner displayed at login"
+          :label-width="3"
+          clearable
+        />
+        Tenant Banner HTML
+
+        <q-input
+          v-model="editTenantModalDialogData.SelectAuthMessage"
+          ref="SelectAuthMessageInput"
+          label="Select Auth message to use"
+          :label-width="3"
+          clearable
+        />
+        Select Auth Message
+      </q-card-section>
+
+      <!-- Fixed footer -->
+      <q-separator />
+      <q-card-actions
+        align="right"
+        class="bg-grey-2"
+        style="position: sticky; bottom: 0; z-index: 1;"
+      >
         <q-btn
           @click="okEditTenantDialog"
           color="primary"
           label="Ok"
-          class = "float-right q-ml-xs"
+          class="q-ml-xs"
         />
         <q-btn
-          @click="cancelEditTenantDialog"
+          @click="editTenantModalDialogVisible = false"
           label="Cancel"
-          class = "float-right"
         />
-      </q-page>
-    </q-page-container>
-  </q-layout>
-</q-dialog>
---><!--
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
+<!--
 <q-dialog v-model="editAuthProvModalDialogVisible">
   <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
     <q-header class="bg-primary">
@@ -286,6 +328,13 @@ export default {
     }
   },
   methods: {
+    dialogEditJWTCollectionAllowedOriginListCreateValue (val, done) {
+      if (val.length < 3) {
+        Notify.create({ color: 'negative', message: 'Must have at least 3 characters' })
+        return
+      }
+      done(val, 'add-unique')
+    },
     addAuthProv () {
       console.log('addAuthProv TODO')
     },
@@ -293,7 +342,62 @@ export default {
       console.log('deleteTenant TODO')
     },
     editTenant () {
-      console.log('editTenant TODO')
+      this.editTenantModalDialogData.Description = this.tenantData.Description
+      this.editTenantModalDialogData.AllowUserCreation = this.tenantData.AllowUserCreation
+      this.editTenantModalDialogData.JWTCollectionAllowedOriginList = this.tenantData.JWTCollectionAllowedOriginList
+      this.editTenantModalDialogData.TicketOverrideURL = this.tenantData.TicketOverrideURL
+      this.editTenantModalDialogData.TenantBannerHTML = this.tenantData.TenantBannerHTML
+      this.editTenantModalDialogData.SelectAuthMessage = this.tenantData.SelectAuthMessage
+
+      this.editTenantModalDialogVisible = true
+      const TTT = this
+      setTimeout(function () {
+        TTT.$refs.descriptionInput.focus()
+      }, 5)
+    },
+    okEditTenantDialog () {
+      const TTT = this
+      this.editTenantModalDialogVisible = false
+      if (this.editTenantModalDialogData.Description === this.tenantData.Description) {
+        if (this.editTenantModalDialogData.AllowUserCreation === this.tenantData.AllowUserCreation) {
+          if (this.editTenantModalDialogData.JWTCollectionAllowedOriginList === this.tenantData.JWTCollectionAllowedOriginList) {
+            if (this.editTenantModalDialogData.TicketOverrideURL === this.tenantData.TicketOverrideURL) {
+              if (this.editTenantModalDialogData.TenantBannerHTML === this.tenantData.TenantBannerHTML) {
+                if (this.editTenantModalDialogData.SelectAuthMessage === this.tenantData.SelectAuthMessage) {
+                  Notify.create({ color: 'positive', message: 'No changes made' })
+                  return // no change so do nothing
+                }
+              }
+            }
+          }
+        }
+      }
+      const newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
+      newTenantJSON.Description = this.editTenantModalDialogData.Description
+      newTenantJSON.AllowUserCreation = this.editTenantModalDialogData.AllowUserCreation
+      newTenantJSON.JWTCollectionAllowedOriginList = this.editTenantModalDialogData.JWTCollectionAllowedOriginList
+      newTenantJSON.TicketOverrideURL = this.editTenantModalDialogData.TicketOverrideURL
+      newTenantJSON.TenantBannerHTML = this.editTenantModalDialogData.TenantBannerHTML
+      newTenantJSON.SelectAuthMessage = this.editTenantModalDialogData.SelectAuthMessage
+
+      const callback = {
+        ok: function (response) {
+          Notify.create({ color: 'positive', message: 'Tenant Updated' })
+          TTT.refreshTenantData()
+        },
+        error: function (error) {
+          Notify.create({ color: 'negative', message: 'Update Tenant failed - ' + callbackHelper.getErrorFromResponse(error) })
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/tenants/' + newTenantJSON.Name,
+        method: 'put',
+        postdata: newTenantJSON,
+        callback
+      })
     },
     viewTicketTypes () {
       console.log('viewTicketTypes TODO')
