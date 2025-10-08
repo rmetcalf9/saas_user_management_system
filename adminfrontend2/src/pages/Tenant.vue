@@ -339,7 +339,43 @@ export default {
       console.log('addAuthProv TODO')
     },
     deleteTenant () {
-      console.log('deleteTenant TODO')
+      const TTT = this
+      const nameOfTenantToDelete = TTT.tenantData.Name
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to delete ' + nameOfTenantToDelete,
+        ok: {
+          push: true,
+          label: 'Yes - delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).onOk(() => {
+        const callback = {
+          ok: function (response) {
+            Notify.create({ color: 'positive', message: 'Tenant ' + nameOfTenantToDelete + ' deleted' })
+            TTT.$router.push('/' + TTT.$route.params.tenantName + '/tenants/')
+          },
+          error: function (error) {
+            Notify.create({ color: 'negative', message: 'Delete Tenant failed - ' + callbackHelper.getErrorFromResponse(error) })
+          }
+        }
+        saasApiClientCallBackend.callApi({
+          prefix: 'admin',
+          router: this.$router,
+          store: this.userManagementClientStoreStore,
+          path: '/' + TTT.tenantName + '/tenants/' + nameOfTenantToDelete,
+          method: 'delete',
+          postdata: null,
+          callback,
+          extraHeaders: { 'object-version-id': TTT.tenantData.ObjectVersion }
+        })
+      })
     },
     editTenant () {
       this.editTenantModalDialogData.Description = this.tenantData.Description

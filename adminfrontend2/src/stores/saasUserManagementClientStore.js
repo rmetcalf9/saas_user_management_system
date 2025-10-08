@@ -202,9 +202,9 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
     }
   },
   actions: {
-    callApi ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype }) {
+    callApi ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype, extraHeaders }) {
       // console.log('callAuthedAPI ', path)
-      this.endpointInfo[endpoint].apiCallQueue.push({ path, method, postdata, callback, curpath, authtype, orveridePublicPrivatePart })
+      this.endpointInfo[endpoint].apiCallQueue.push({ path, method, postdata, callback, curpath, authtype, orveridePublicPrivatePart, extraHeaders })
       const rjmStateChange = getRjmStateChangeObj()
       saasApiClientServerRequestQueue.processAPICallQueue({
         rjmStateChange,
@@ -214,7 +214,7 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
         startAllBackendCallQueuesFn: saasApiClientServerRequestQueue.getStartAllBackendCallQueuesFn({ curpath })
       })
     },
-    callAuthedAPI ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart }) {
+    callAuthedAPI ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, extraHeaders }) {
       if (this.loginService.processState === 0) {
         // not logged in
         callbackHelper.callbackWithSimpleError(callback, 'Trying to call authed API but not logged in')
@@ -229,10 +229,10 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
         callbackHelper.callbackWithSimpleError(callback, 'Error callAuthedAPI called with no curpath set')
         return
       }
-      this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'always' })
+      this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'always', extraHeaders })
     },
-    callAuthedOrAnonAPI ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart }) {
-      this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'ifloggedin' })
+    callAuthedOrAnonAPI ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, extraHeaders }) {
+      this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'ifloggedin', extraHeaders })
     },
     takeFirstMessageOffQueue ({ endpoint }) {
       this.endpointInfo[endpoint].apiCallQueue.shift()

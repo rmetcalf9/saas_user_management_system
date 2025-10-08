@@ -32,7 +32,8 @@ function callApi ({
   path, // : queryString,
   method, // : 'get',
   postdata, // : null,
-  callback // : callback,
+  callback, // : callback,
+  extraHeaders
 }) {
   if (typeof (apiPrefixes[prefix]) === 'undefined') {
     console.log('ERROR invalid prefix provided to callAPI - ', prefix, apiPrefixes)
@@ -49,7 +50,8 @@ function callApi ({
     postdata,
     callback,
     curpath: curPath,
-    orveridePublicPrivatePart: apiPrefixes[prefix].orveridePublicPrivatePart
+    orveridePublicPrivatePart: apiPrefixes[prefix].orveridePublicPrivatePart,
+    extraHeaders: extraHeaders ?? {}
   })
 }
 

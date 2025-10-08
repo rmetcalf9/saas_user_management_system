@@ -71,7 +71,7 @@ function processAPICallQueueRecursive ({ endpoint, rjmStateChange, calledAtEndOf
     method: apiCall.method,
     url: urlToCall,
     data: apiCall.postdata,
-    headers: {}
+    headers: { ...{}, ...apiCall.extraHeaders }
   }
   let attachToken = false
   switch (apiCall.authtype) {
