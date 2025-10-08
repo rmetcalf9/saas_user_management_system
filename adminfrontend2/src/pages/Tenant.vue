@@ -1,7 +1,214 @@
 <template>
   <q-page>
-    <div>TENANT TODO {{ tenantData }}</div>
-    <div>xx {{ ticketTypeData }}</div>
+    <q-page-sticky position="bottom-right" :offset="[50, 50]" class="tenantpage-z-max">
+      <q-btn
+        color="negative"
+        class="fixed"
+        round
+        @click="deleteTenant"
+        icon="delete"
+      ></q-btn>
+    </q-page-sticky>
+
+  <q-list >
+    <q-item clickable v-ripple highlight @click="editTenant">
+      <q-item-section >
+        <q-item-label>Tenant Name: {{ tenantData.Name }}</q-item-label>
+        <q-item-label caption>{{ tenantData.Description }}</q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Allow User Creation:</q-item-label>
+        <q-item-label caption v-if="tenantData.AllowUserCreation">New users can sign up</q-item-label>
+        <q-item-label caption v-if="!tenantData.AllowUserCreation">Users must be created by admins</q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Origins which client apps will be allowed to collect JWT tokens from:</q-item-label>
+        <q-item-label caption><q-chip size="10px" v-for="curVal in tenantData.JWTCollectionAllowedOriginList" :key=curVal>{{ curVal }}</q-chip></q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item clickable v-ripple highlight @click="viewTicketTypes">
+      <q-item-section>
+        <q-item-label>Auth Ticket Types</q-item-label>
+        <q-item-label caption>
+          <q-chip size="10px" v-for="curVal in ticketTypeList" :key=curVal.id  @click="viewTicketType(curVal)">{{ curVal.text }}</q-chip>
+        </q-item-label>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon color="primary" name="mode_edit" />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Ticket Override URL:</q-item-label>
+        <q-item-label caption v-if="tenantData.TicketOverrideURL === ''">None Set</q-item-label>
+        <q-item-label caption v-if="tenantData.TicketOverrideURL !== ''">
+          <a :href="tenantData.TicketOverrideURL">{{ tenantData.TicketOverrideURL }}</a>
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Tennant Banner HTML:</q-item-label>
+        <q-item-label>
+          <div v-html="tenantData.TenantBannerHTML" />
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>Select Auth Message:</q-item-label>
+        <q-item-label>
+          {{ tenantData.SelectAuthMessage }}
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+  </q-list>
+
+  <q-table
+    title='Auth Providers'
+    :rows="tenantData.AuthProviders"
+    :columns="tableColumns"
+    row-key="name"
+  >
+    <template v-slot:body-cell-...="props">
+      <q-td :props="props">
+          <q-btn flat color="primary" icon="mode_edit" label="" @click="editAuthProv(props.row)" />
+      </q-td>
+    </template>
+  </q-table>
+  <q-btn
+    @click="addAuthProv"
+    color="primary"
+    label="Add Auth Provider"
+    class = "float-left q-ma-xs"
+  />
+<!--
+<q-dialog v-model="editTenantModalDialogVisible">
+  <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 450px; width: 700px; max-width: 80vw;">
+    <q-header class="bg-primary">
+      <q-toolbar>
+        <q-toolbar-title>
+          Edit Tenant Information
+        </q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
+    </q-header>
+    <q-page-container>
+      <q-page padding>
+        <q-input v-model="editTenantModalDialogData.Description" @keyup.enter="okEditTenantDialog" ref="descriptionInput" label="Description" :label-width="3"/> Description of Tenant
+        <q-field helper="Must be on for both Tenant and Auth Provider to be effective" label="Allow User Creation" :label-width="3">
+          <q-toggle v-model="editTenantModalDialogData.AllowUserCreation" />
+        </q-field> Must be on for both Tenant and Auth Provider to be effective
+        <q-select
+          label="JWT Collection Allowed Origin List"
+          v-model="editTenantModalDialogData.JWTCollectionAllowedOriginList"
+          use-input
+          use-chips
+          multiple
+          input-debounce="0"
+          @new-value="dialogEditJWTCollectionAllowedOriginListCreateValue"
+        /> Origins which client apps will be allowed to collect JWT tokens from
+        <q-input v-model="editTenantModalDialogData.TicketOverrideURL" ref="TicketOverrideURLInput" label="Tenant spercific ticket endpoint" :label-width="3" clearable />Ticket Override URL
+        <q-input v-model="editTenantModalDialogData.TenantBannerHTML" ref="TenantBannerHTMLInput" label="Tenant banner displayed at login" :label-width="3" clearable />Tenant Banner HTML
+        <q-input v-model="editTenantModalDialogData.SelectAuthMessage" ref="SelectAuthMessageInput" label="Select Auth message to use" :label-width="3" clearable />Select Auth Message
+
+        <div>&nbsp;</div>
+        <q-btn
+          @click="okEditTenantDialog"
+          color="primary"
+          label="Ok"
+          class = "float-right q-ml-xs"
+        />
+        <q-btn
+          @click="cancelEditTenantDialog"
+          label="Cancel"
+          class = "float-right"
+        />
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</q-dialog>
+--><!--
+
+<q-dialog v-model="editAuthProvModalDialogVisible">
+  <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
+    <q-header class="bg-primary">
+      <q-toolbar>
+        <q-toolbar-title v-if="editAuthProvModalDialogData.AddMode">
+          Add Auth Provider for {{ tenantData.Name }}
+        </q-toolbar-title>
+        <q-toolbar-title v-if="!editAuthProvModalDialogData.AddMode">
+          Edit {{ editAuthProvModalDialogData.Type }} Auth Provider for {{ tenantData.Name }}
+        </q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
+    </q-header>
+    <q-page-container>
+      <q-page padding>
+        <q-input v-model="editAuthProvModalDialogData.Type" label="Type" :label-width="3"/>
+        <q-toggle v-model="editAuthProvModalDialogData.AllowUserCreation" label="Allow User Creation" :label-width="3"/> Must be on for both Tenant and Auth Provider to be effective
+        <div>&nbsp;</div>
+        <q-toggle v-model="editAuthProvModalDialogData.AllowLink" label="Allow Link" :label-width="3"/> Allow a user to add this auth method
+        <div>&nbsp;</div>
+        <q-toggle v-model="editAuthProvModalDialogData.AllowUnlink" label="Allow Unlink" :label-width="3"/> Allow a user to remove this auth method (As long as they have at least one other active)
+        <div>&nbsp;</div>
+        <q-input
+          v-model="editAuthProvModalDialogData.LinkText"
+          label="Link Text"
+          :label-width="3"
+          error-message="Must be filled in"
+          :error="editAuthProvModalDialogData.LinkText.length === 0"
+        /> Text to show in security settings UI
+        <q-input
+          v-model="editAuthProvModalDialogData.MenuText"
+          label="Menu Text"
+          :label-width="3"
+          error-message="Must be filled in"
+          :error="editAuthProvModalDialogData.MenuText.length === 0"
+        /> Text to display in select auth dialog
+        <q-input
+          v-model="editAuthProvModalDialogData.IconLink"
+          label="Icon Link"
+          :label-width="3"
+        /> Link to icon to be used in select auth dialog
+        <q-input
+          v-model="editAuthProvModalDialogData.ConfigJSON"
+          type="textarea"
+          label="ConfigJSON"
+          :label-width="3"
+          :error="isConfigJSONInvalid"
+        /> Auth Prov Spercific Config
+        <div>&nbsp;</div>
+        <q-btn
+          @click="deleteAuthProvTenantDialog"
+          color="negative"
+          round
+          icon="delete"
+          class = "float-left q-ml-xs"
+        />
+        <q-btn
+          @click="okAuthProvTenantDialog"
+          color="primary"
+          label="Ok"
+          class = "float-right q-ml-xs"
+        />
+        <q-btn
+          @click="cancelAuthProvTenantDialog"
+          label="Cancel"
+          class = "float-right"
+        />
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</q-dialog>
+-->
   </q-page>
 </template>
 
@@ -79,6 +286,21 @@ export default {
     }
   },
   methods: {
+    addAuthProv () {
+      console.log('addAuthProv TODO')
+    },
+    deleteTenant () {
+      console.log('deleteTenant TODO')
+    },
+    editTenant () {
+      console.log('editTenant TODO')
+    },
+    viewTicketTypes () {
+      console.log('viewTicketTypes TODO')
+    },
+    editAuthProv () {
+      console.log('editAuthProv TODO')
+    },
     refreshTenantData () {
       const jobNameToLoad = this.$route.params.selTenantNAME
       const TTT = this
@@ -110,9 +332,9 @@ export default {
       const TTT = this
       const callback = {
         ok: function (response) {
-          TTT.globalValsStore.pageTitle = 'Tenant TODO'
-          Loading.hide()
           TTT.ticketTypeData = response.data
+          TTT.globalValsStore.pageTitle = 'Tenant ' + TTT.tenantData.Name
+          Loading.hide()
         },
         error: function (error) {
           TTT.globalValsStore.pageTitle = 'Tenant ERROR'
@@ -137,6 +359,16 @@ export default {
   computed: {
     tenantName () {
       return this.$route.params.tenantName
+    },
+    ticketTypeList () {
+      const ret = []
+      this.ticketTypeData.result.forEach(function (resItem) {
+        ret.push({ id: resItem.id, text: resItem.ticketTypeName })
+      })
+      if (this.ticketTypeData.pagination.total > this.ticketTypeData.result.length) {
+        ret.push({ id: undefined, text: '...' })
+      }
+      return ret
     }
   },
   mounted () {
@@ -146,4 +378,7 @@ export default {
 </script>
 
 <style>
+.tenantpage-z-max {
+  z-index: 3000; /* higher than q-table's content */
+}
 </style>
