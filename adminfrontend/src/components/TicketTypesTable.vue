@@ -1,4 +1,4 @@
-`<template><div>
+<template><div>
   <q-table
     title='Ticket Types'
     :rows-per-page-options="tableRowsPerPageOptions"
