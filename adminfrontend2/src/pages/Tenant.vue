@@ -177,12 +177,10 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-
-<!--
-<q-dialog v-model="editAuthProvModalDialogVisible">
-  <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
-    <q-header class="bg-primary">
-      <q-toolbar>
+  <q-dialog v-model="editAuthProvModalDialogVisible">
+    <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+      <!-- Header -->
+      <q-toolbar class="bg-primary text-white">
         <q-toolbar-title v-if="editAuthProvModalDialogData.AddMode">
           Add Auth Provider for {{ tenantData.Name }}
         </q-toolbar-title>
@@ -191,66 +189,102 @@
         </q-toolbar-title>
         <q-btn flat v-close-popup round dense icon="close" />
       </q-toolbar>
-    </q-header>
-    <q-page-container>
-      <q-page padding>
-        <q-input v-model="editAuthProvModalDialogData.Type" label="Type" :label-width="3"/>
-        <q-toggle v-model="editAuthProvModalDialogData.AllowUserCreation" label="Allow User Creation" :label-width="3"/> Must be on for both Tenant and Auth Provider to be effective
-        <div>&nbsp;</div>
-        <q-toggle v-model="editAuthProvModalDialogData.AllowLink" label="Allow Link" :label-width="3"/> Allow a user to add this auth method
-        <div>&nbsp;</div>
-        <q-toggle v-model="editAuthProvModalDialogData.AllowUnlink" label="Allow Unlink" :label-width="3"/> Allow a user to remove this auth method (As long as they have at least one other active)
-        <div>&nbsp;</div>
+
+      <!-- Scrollable Body -->
+      <q-card-section style="flex: 1; overflow-y: auto;">
+        <q-input v-model="editAuthProvModalDialogData.Type" label="Type" :label-width="3" />
+
+        <q-toggle
+          v-model="editAuthProvModalDialogData.AllowUserCreation"
+          label="Allow User Creation"
+          :label-width="3"
+        />
+        Must be on for both Tenant and Auth Provider to be effective
+
+        <div class="q-mt-md" />
+
+        <q-toggle
+          v-model="editAuthProvModalDialogData.AllowLink"
+          label="Allow Link"
+          :label-width="3"
+        />
+        Allow a user to add this auth method
+
+        <div class="q-mt-md" />
+
+        <q-toggle
+          v-model="editAuthProvModalDialogData.AllowUnlink"
+          label="Allow Unlink"
+          :label-width="3"
+        />
+        Allow a user to remove this auth method (as long as they have at least one other active)
+
+        <div class="q-mt-md" />
+
         <q-input
           v-model="editAuthProvModalDialogData.LinkText"
           label="Link Text"
           :label-width="3"
           error-message="Must be filled in"
           :error="editAuthProvModalDialogData.LinkText.length === 0"
-        /> Text to show in security settings UI
+        />
+        Text to show in security settings UI
+
         <q-input
           v-model="editAuthProvModalDialogData.MenuText"
           label="Menu Text"
           :label-width="3"
           error-message="Must be filled in"
           :error="editAuthProvModalDialogData.MenuText.length === 0"
-        /> Text to display in select auth dialog
+        />
+        Text to display in select auth dialog
+
         <q-input
           v-model="editAuthProvModalDialogData.IconLink"
           label="Icon Link"
           :label-width="3"
-        /> Link to icon to be used in select auth dialog
+        />
+        Link to icon to be used in select auth dialog
+
         <q-input
           v-model="editAuthProvModalDialogData.ConfigJSON"
           type="textarea"
           label="ConfigJSON"
           :label-width="3"
           :error="isConfigJSONInvalid"
-        /> Auth Prov Spercific Config
-        <div>&nbsp;</div>
+        />
+        Auth Provider Specific Config
+      </q-card-section>
+
+      <!-- Fixed Footer -->
+      <q-separator />
+      <q-card-actions
+        class="bg-grey-2"
+        align="right"
+        style="position: sticky; bottom: 0; z-index: 1;"
+      >
         <q-btn
-          @click="deleteAuthProvTenantDialog"
+          @click="okAuthProvTenantDialog(true)"
+          v-if="!editAuthProvModalDialogData.AddMode"
           color="negative"
           round
           icon="delete"
-          class = "float-left q-ml-xs"
+          class="q-mr-auto"
         />
         <q-btn
-          @click="okAuthProvTenantDialog"
+          @click="okAuthProvTenantDialog(false)"
           color="primary"
           label="Ok"
-          class = "float-right q-ml-xs"
+          class="q-ml-xs"
         />
         <q-btn
-          @click="cancelAuthProvTenantDialog"
+          @click="this.editAuthProvModalDialogVisible = false"
           label="Cancel"
-          class = "float-right"
         />
-      </q-page>
-    </q-page-container>
-  </q-layout>
-</q-dialog>
--->
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
   </q-page>
 </template>
 
@@ -312,7 +346,6 @@ export default {
       editTenantModalDialogVisible: false,
       editAuthProvModalDialogData: {
         AddMode: false,
-        DeleteMode: false,
         Type: 'internal',
         AllowUserCreation: false,
         AllowLink: false,
@@ -336,7 +369,19 @@ export default {
       done(val, 'add-unique')
     },
     addAuthProv () {
-      console.log('addAuthProv TODO')
+      this.editAuthProvModalDialogData.AddMode = true
+      this.editAuthProvModalDialogData.Type = 'internal'
+      this.editAuthProvModalDialogData.AllowUserCreation = false
+      this.editAuthProvModalDialogData.AllowLink = false
+      this.editAuthProvModalDialogData.AllowUnlink = false
+      this.editAuthProvModalDialogData.LinkText = 'Link'
+      this.editAuthProvModalDialogData.MenuText = ''
+      this.editAuthProvModalDialogData.IconLink = ''
+      this.editAuthProvModalDialogData.guid = ''
+      this.editAuthProvModalDialogData.ConfigJSON = ''
+      this.editAuthProvModalDialogData.saltForPasswordHashing = ''
+
+      this.editAuthProvModalDialogVisible = true
     },
     deleteTenant () {
       const TTT = this
@@ -435,11 +480,90 @@ export default {
         callback
       })
     },
+    okAuthProvTenantDialog (isDeleting) {
+      const TTT = this
+
+      // Shared validation
+      if (this.editAuthProvModalDialogData.MenuText === '') {
+        Notify.create({ color: 'negative', message: 'Menu text must be filled in' })
+        return
+      }
+      if (this.editAuthProvModalDialogData.LinkText === '') {
+        Notify.create({ color: 'negative', message: 'LinkText text must be filled in' })
+        return
+      }
+      // Check configJSON string is valid JSON
+      if (this.isConfigJSONInvalid) {
+        Notify.create({ color: 'negative', message: 'ConfigJSON is not valid JSON' })
+        return
+      }
+      const newTenantJSON = JSON.parse(JSON.stringify(this.tenantData))
+      const newAuthProvJSON = {
+        Type: TTT.editAuthProvModalDialogData.Type,
+        AllowUserCreation: TTT.editAuthProvModalDialogData.AllowUserCreation,
+        AllowLink: TTT.editAuthProvModalDialogData.AllowLink,
+        AllowUnlink: TTT.editAuthProvModalDialogData.AllowUnlink,
+        LinkText: TTT.editAuthProvModalDialogData.LinkText,
+        MenuText: TTT.editAuthProvModalDialogData.MenuText,
+        IconLink: TTT.editAuthProvModalDialogData.IconLink,
+        guid: TTT.editAuthProvModalDialogData.guid,
+        ConfigJSON: TTT.editAuthProvModalDialogData.ConfigJSON,
+        saltForPasswordHashing: TTT.editAuthProvModalDialogData.saltForPasswordHashing
+      }
+      if (this.editAuthProvModalDialogData.AddMode) {
+        newTenantJSON.AuthProviders.push(newAuthProvJSON)
+      } else {
+        for (const cur in newTenantJSON.AuthProviders) {
+          if (newTenantJSON.AuthProviders[cur].guid === TTT.editAuthProvModalDialogData.guid) {
+            if (isDeleting) {
+              newTenantJSON.AuthProviders.splice(cur, 1)
+            } else {
+              newTenantJSON.AuthProviders[cur] = newAuthProvJSON
+            }
+          }
+        }
+      }
+      const callback = {
+        ok: function (response) {
+          TTT.editAuthProvModalDialogVisible = false
+          Notify.create({ color: 'positive', message: 'Tenant Updated' })
+          TTT.refreshTenantData()
+        },
+        error: function (error) {
+          let verb = 'Update'
+          if (TTT.editAuthProvModalDialogData.AddMode) {
+            verb = 'Add'
+          }
+          Notify.create({ color: 'negative', message: verb + ' Auth Provider failed - ' + callbackHelper.getErrorFromResponse(error) })
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/tenants/' + newTenantJSON.Name,
+        method: 'put',
+        postdata: newTenantJSON,
+        callback
+      })
+    },
     viewTicketTypes () {
       console.log('viewTicketTypes TODO')
     },
-    editAuthProv () {
-      console.log('editAuthProv TODO')
+    editAuthProv (item) {
+      this.editAuthProvModalDialogData.AddMode = false
+      this.editAuthProvModalDialogData.Type = item.Type
+      this.editAuthProvModalDialogData.AllowUserCreation = item.AllowUserCreation
+      this.editAuthProvModalDialogData.AllowLink = item.AllowLink
+      this.editAuthProvModalDialogData.AllowUnlink = item.AllowUnlink
+      this.editAuthProvModalDialogData.LinkText = item.LinkText
+      this.editAuthProvModalDialogData.MenuText = item.MenuText
+      this.editAuthProvModalDialogData.IconLink = item.IconLink
+      this.editAuthProvModalDialogData.guid = item.guid
+      this.editAuthProvModalDialogData.ConfigJSON = item.ConfigJSON
+      this.editAuthProvModalDialogData.saltForPasswordHashing = item.saltForPasswordHashing
+
+      this.editAuthProvModalDialogVisible = true
     },
     refreshTenantData () {
       const jobNameToLoad = this.$route.params.selTenantNAME
@@ -499,6 +623,14 @@ export default {
   computed: {
     tenantName () {
       return this.$route.params.tenantName
+    },
+    isConfigJSONInvalid () {
+      try {
+        JSON.parse(this.editAuthProvModalDialogData.ConfigJSON)
+      } catch (e) {
+        return true
+      }
+      return false
     },
     ticketTypeList () {
       const ret = []
