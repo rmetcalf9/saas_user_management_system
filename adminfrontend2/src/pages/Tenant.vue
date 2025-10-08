@@ -548,7 +548,7 @@ export default {
       })
     },
     viewTicketTypes () {
-      console.log('viewTicketTypes TODO')
+      this.$router.push('/' + this.$route.params.tenantName + '/tenants/' + this.$route.params.selTenantNAME + '/tickettypes')
     },
     editAuthProv (item) {
       this.editAuthProvModalDialogData.AddMode = false

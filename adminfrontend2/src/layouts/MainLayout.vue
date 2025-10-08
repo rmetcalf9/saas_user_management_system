@@ -10,6 +10,9 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
+        <q-btn v-if="backroute !== ''" class="within-iframe-hide" flat @click="$router.replace(backroute)" style="margin-right: 15px">
+          <q-icon name="keyboard_arrow_left" />
+        </q-btn>
 
         <q-toolbar-title>
           <div @click="clicktoolbartitle">{{ pageTitle }}</div>
@@ -180,6 +183,19 @@ export default defineComponent({
     }
   },
   computed: {
+    backroute () {
+      // console.log(this.$route.path)
+      if (this.$route.path === '/') return ''
+      const x = this.$route.path.split('/')
+      if (x.length < 4) return ''
+      let o = ''
+      for (const y in x) {
+        if (y < (x.length - 1)) o += '/' + x[y]
+      }
+      const newPath = o.substring(1)
+      // console.log('new Path is', newPath)
+      return newPath
+    },
     pageTitle () {
       return this.globalValsStore.pageTitle
     },
