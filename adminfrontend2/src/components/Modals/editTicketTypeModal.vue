@@ -16,7 +16,7 @@
           :label-width="3"
           :error="invalid_ticketTypeName"
           :error-message="invalidlabel_ticketTypeName"
-          @input="registerChange"
+          @update:model-value="registerChange"
         />
 
         <q-input
@@ -25,19 +25,19 @@
           :label-width="3"
           :error="invalid_description"
           :error-message="invalidlabel_description"
-          @input="registerChange"
+          @update:model-value="registerChange"
         />
 
         <q-field helper="Enabled" :label-width="3">
           <q-toggle
             v-model="objData.enabled"
             label="Enabled"
-            @input="registerChange"
+            @update:model-value="registerChange"
           />
           <q-toggle
             v-model="objData.allowUserCreation"
             label="Allow User Creation"
-            @input="registerChange"
+            @update:model-value="registerChange"
           />
         </q-field>
 
@@ -45,7 +45,7 @@
           v-model="objData.issueDuration"
           type="number"
           label="Hours tickets are valid for after creation"
-          @input="registerChange"
+          @update:model-value="registerChange"
         />
 
         <q-card flat bordered class="q-mt-md">
@@ -55,24 +55,24 @@
               v-model="objData.welcomeMessage.title"
               label="Title"
               :label-width="3"
-              @input="registerChange"
+              @update:model-value="registerChange"
             />
             <q-input
               v-model="objData.welcomeMessage.body"
               label="Body"
               :label-width="3"
-              @input="registerChange"
+              @update:model-value="registerChange"
             />
             <q-toggle
               v-model="objData.welcomeMessage.agreementRequired"
               label="Agreement Required"
-              @input="registerChange"
+              @update:model-value="registerChange"
             />
             <q-input
               v-model="objData.welcomeMessage.okButtonText"
               label="Ok button text"
               :label-width="3"
-              @input="registerChange"
+              @update:model-value="registerChange"
             />
           </q-card-section>
         </q-card>
@@ -83,7 +83,7 @@
           :label-width="3"
           :error="invalid_postUseURL"
           :error-message="invalidlabel_postUseURL"
-          @input="registerChange"
+          @update:model-value="registerChange"
         />
 
         <q-input
@@ -92,7 +92,7 @@
           :label-width="3"
           :error="invalid_postInvalidURL"
           :error-message="invalidlabel_postInvalidURL"
-          @input="registerChange"
+          @update:model-value="registerChange"
         />
 
         <q-select
