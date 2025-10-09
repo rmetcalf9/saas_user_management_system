@@ -44,16 +44,15 @@
     </template>
 
     <template v-slot:body-cell-url="props">
-      <a :href="getURLforTicketGUID(props.row.id)">{{ getURLforTicketGUID(props.row.id) }}</a>
-    </template>
-    <!--
-      <q-td  slot="body-cell-creationDateTime" slot-scope="props" :props="props">
-        {{ metadata.creationDateTime }}
-      </q-td>
-      <q-td  slot="body-cell-url" slot-scope="props" :props="props">
+      <q-td key="url" :props="props">
         <a :href="getURLforTicketGUID(props.row.id)">{{ getURLforTicketGUID(props.row.id) }}</a>
       </q-td>
-      -->
+    </template>
+    <template v-slot:body-cell-creationDateTime="props">
+      <q-td key="creationDateTime" :props="props">
+        {{ props.row.metadata.creationDateTime }}
+      </q-td>
+    </template>
   </q-table>
   <ticketCreateBatchStartModal
     ref="ticketCreateBatchStartModal"
