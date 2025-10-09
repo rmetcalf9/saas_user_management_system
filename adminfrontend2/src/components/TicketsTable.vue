@@ -11,13 +11,11 @@
     :filter="tablePersistSettings.filter"
     :pagination="tablePersistSettings.serverPagination"
     selection="multiple"
-    :selected="tableSelected"
+    v-model:selected="tableSelected"
   >
-    <!--
-    <template slot="top-selection" slot-scope="props">
+    <template v-slot:top-selection>
       <q-btn color="negative" @click="disableSelectedTickets">Disable Selected Tickets</q-btn>
     </template>
-    -->
 
     <template v-slot:top-left>
       <q-btn
@@ -145,6 +143,36 @@ export default {
     }
   },
   methods: {
+    disableSelectedTickets () {
+      const TTT = this
+      const callback = {
+        ok: function (response) {
+          Notify.create({ color: 'positive', message: 'Disable Ticket Sucessful' })
+          TTT.refresh()
+        },
+        error: function (error) {
+          Notify.create({ color: 'negative', message: 'Disable Ticket(s) failed - ' + callbackHelper.getErrorFromResponse(error) })
+        }
+      }
+      const arr = this.tableSelected.map(function (ite) {
+        return {
+          ticketGUID: ite.id,
+          objectVersion: ite.metadata.objectVersion
+        }
+      })
+      const postData = {
+        tickets: arr
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/tickets/disablebatch',
+        method: 'post',
+        postdata: postData,
+        callback
+      })
+    },
     getURLforTicketGUID (ticketGUID) {
       return adminfrontendfns.getURLforTicketGUID(this.userManagementClientStoreStore, ticketGUID, this.selectedTenantName, this.ticketTypeData, this.tenantData)
     },
