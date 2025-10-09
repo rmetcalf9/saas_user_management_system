@@ -44,6 +44,10 @@
         </template>
       </q-input>
     </template>
+
+    <template v-slot:body-cell-url="props">
+      <a :href="getURLforTicketGUID(props.row.id)">{{ getURLforTicketGUID(props.row.id) }}</a>
+    </template>
     <!--
       <q-td  slot="body-cell-creationDateTime" slot-scope="props" :props="props">
         {{ metadata.creationDateTime }}
@@ -66,7 +70,7 @@
 import { Notify } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
-// import adminfrontendfns from '../adminfrontendfns.js'
+import adminfrontendfns from '../adminfrontendfns.js'
 import saasApiClientCallBackend from '../saasAPiClientCallBackend'
 
 import SelectColumns from '../components/SelectColumns'
@@ -141,6 +145,9 @@ export default {
     }
   },
   methods: {
+    getURLforTicketGUID (ticketGUID) {
+      return adminfrontendfns.getURLforTicketGUID(this.userManagementClientStoreStore, ticketGUID, this.selectedTenantName, this.ticketTypeData, this.tenantData)
+    },
     createBatchButton () {
       this.$refs.ticketCreateBatchStartModal.launchDialog({
         ticketTypeData: this.ticketTypeData,
