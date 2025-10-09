@@ -36,8 +36,8 @@
         <q-item>
           <q-item-section >
             <q-item-label>Allow User Creation:</q-item-label>
-            <q-item-label caption v-if="ticketTypeData.allowUserCreation">Users without accounts can use this ticket to create an account</q-item-label>
-            <q-item-label caption v-if="!ticketTypeData.allowUserCreation">Only users with an account can use this ticket</q-item-label>
+            <q-item-label caption v-if="ticketTypeData.allowUserCreation">✅ Users without accounts can use this ticket to create an account</q-item-label>
+            <q-item-label caption v-if="!ticketTypeData.allowUserCreation">❌ Only users with an account can use this ticket</q-item-label>
           </q-item-section>
         </q-item>
         <q-item>
@@ -81,7 +81,7 @@
     </q-list>
 
     <TicketsTable
-      :defaultDisplayedColumns="['foreignKey', 'usableState', 'URL']"
+      :defaultDisplayedColumns="['foreignKey', 'usableState', 'url']"
       persistantSettingsSlot="ticketsMain"
       :selectedTenantName="$route.params.selTenantNAME"
       :selectedTicketTypeID="$route.params.selTicketTypeID"

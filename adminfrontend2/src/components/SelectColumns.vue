@@ -74,9 +74,13 @@ export default {
     const TTT = this
     this.localTableVisibleColumns = []
     this.selected_col_names.forEach(function (colName) {
-      if (!TTT.columns.filter(function (x) {
+      const matchingCols = TTT.columns.filter(function (x) {
         return x.name === colName
-      })[0].required) {
+      })
+      if (matchingCols.length !== 1) {
+        console.log('There is not exactly 1 instance of col name ', colName)
+      }
+      if (!matchingCols[0].required) {
         TTT.localTableVisibleColumns.push(colName)
       }
     })
