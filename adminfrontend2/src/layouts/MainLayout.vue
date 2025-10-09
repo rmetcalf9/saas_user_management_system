@@ -139,13 +139,13 @@ export default defineComponent({
         {
           path: '/users',
           label: 'Users',
-          caption: 'User Management',
+          caption: 'User record passed to application. Has the set of roles.',
           icon: 'person'
         },
         {
           path: '/persons',
           label: 'Persons',
-          caption: 'Person Management',
+          caption: 'Person that authenticates to this system via one or more auth providers',
           icon: 'directions_walk'
         },
         {
