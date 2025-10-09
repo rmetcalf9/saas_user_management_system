@@ -275,6 +275,7 @@ const routes = [
       { path: 'tenants', name: 'Tenants', component: () => import('pages/Tenants.vue'), beforeEnter: getGlobalBeforeEnterFn('Tenants') },
       { path: 'tenants/:selTenantNAME', component: () => import('pages/Tenant.vue'), beforeEnter: getGlobalBeforeEnterFn('Tenant') },
       { path: 'tenants/:selTenantNAME/tickettypes', component: () => import('pages/TicketTypes.vue'), beforeEnter: getGlobalBeforeEnterFn('Ticket Types') },
+      { path: 'tenants/:selTenantNAME/tickettypes/:selTicketTypeID', component: () => import('pages/TicketType.vue'), beforeEnter: getGlobalBeforeEnterFn('Ticket Type') },
       { path: 'users', name: 'Users', component: () => import('pages/Users.vue'), beforeEnter: getGlobalBeforeEnterFn('Users') },
       { path: 'usersettings', name: 'User Settings', component: () => import('pages/UserSettings.vue'), beforeEnter: getGlobalBeforeEnterFn('User Settings') }
     ]

@@ -37,7 +37,7 @@
     </q-input>
   </template>
   <template v-slot:body="props">
-    <q-tr :props="props" @click="clickSingleTenantCallbackFN(props.row)">
+    <q-tr :props="props" @click="clickSingleCallbackFN(props.row)">
       <q-td key="Name" :props="props">
         {{ props.row.ticketTypeName }}
       </q-td>
@@ -155,8 +155,8 @@ export default {
     }
   },
   methods: {
-    clickSingleTenantCallbackFN (row) {
-      console.log('TODO clickSingleTenantCallbackFN', row)
+    clickSingleCallbackFN (row) {
+      this.$router.push('/' + this.tenantName + '/tenants/' + this.selectedTenantName + '/tickettypes/' + row.id)
     },
     createNewTicketTypeButton () {
       this.$refs.editTicketTypeModal.launchDialog({
