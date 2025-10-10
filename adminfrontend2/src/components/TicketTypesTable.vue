@@ -1,82 +1,82 @@
 <template><div>
-<q-table
-  title='Ticket Types'
-  :rows-per-page-options="tableRowsPerPageOptions"
-  :loading="tableLoading"
-  :rows="tableData"
-  :columns="tableColumns"
-  @request="request"
-  row-key="Name"
-  :visible-columns="tablePersistSettings.visibleColumns"
-  :filter="tablePersistSettings.filter"
-  :pagination="tablePersistSettings.serverPagination"
->
-  <template v-slot:top-left>
-    <q-btn
-      color="primary"
-      push
-      @click="createNewTicketTypeButton"
-    >Create new Ticket Type</q-btn>
-  </template>
-  <template v-slot:top-right>
-    <SelectColumns
-      :selected_col_names="tablePersistSettings_visiblecols"
-      @update:selected_col_names="(newVal) => tablePersistSettings_visiblecols = newVal"
-      :columns="tableColumns"
-    />
-    &nbsp;
-    <q-input
-      v-model="tablePersistSettings.filter"
-      debounce="500"
-      clearable
-      placeholder="Search" outlined
-    >
-      <template v-slot:append>
-        <q-icon name="search" />
-      </template>
-    </q-input>
-  </template>
-  <template v-slot:body="props">
-    <q-tr :props="props" @click="clickSingleCallbackFN(props.row)">
-      <q-td key="Name" :props="props">
-        {{ props.row.ticketTypeName }}
-      </q-td>
-      <q-td key="Description" :props="props">
-        {{ props.row.description }}
-      </q-td>
-      <q-td key="Enabled" :props="props">
-        {{ props.row.enabled }}
-      </q-td>
-      <q-td key="AllowUserCreation" :props="props">
-        {{ props.row.allowUserCreation }}
-      </q-td>
-      <q-td key="Issue Duration" :props="props">
-        {{ props.row.issueDuration }}
-      </q-td>
-      <q-td key="Post Use URL" :props="props">
-        {{ props.row.postUseURL }}
-      </q-td>
-      <q-td key="Post Use Invalid URL" :props="props">
-        {{ props.row.postInvalidURL }}
-      </q-td>
-      <q-td key="WelcomeAgree" :props="props">
-        {{ props.row.welcomeMessage.agreementRequired }}
-      </q-td>
-      <q-td key="WelcomeTitle" :props="props">
-        {{ props.row.welcomeMessage.title }}
-      </q-td>
-      <q-td key="WelcomeBody" :props="props">
-        {{ props.row.welcomeMessage.body }}
-      </q-td>
-      <q-td key="WelcomeOkText" :props="props">
-        {{ props.row.welcomeMessage.okButtonText }}
-      </q-td>
-      <q-td key="..." :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" />
-      </q-td>
-    </q-tr>
-  </template>
-  </q-table>
+  <q-table
+    title='Ticket Types'
+    :rows-per-page-options="tableRowsPerPageOptions"
+    :loading="tableLoading"
+    :rows="tableData"
+    :columns="tableColumns"
+    @request="request"
+    row-key="Name"
+    :visible-columns="tablePersistSettings.visibleColumns"
+    :filter="tablePersistSettings.filter"
+    :pagination="tablePersistSettings.serverPagination"
+  >
+    <template v-slot:top-left>
+      <q-btn
+        color="primary"
+        push
+        @click="createNewTicketTypeButton"
+      >Create new Ticket Type</q-btn>
+    </template>
+    <template v-slot:top-right>
+      <SelectColumns
+        :selected_col_names="tablePersistSettings_visiblecols"
+        @update:selected_col_names="(newVal) => tablePersistSettings_visiblecols = newVal"
+        :columns="tableColumns"
+      />
+      &nbsp;
+      <q-input
+        v-model="tablePersistSettings.filter"
+        debounce="500"
+        clearable
+        placeholder="Search" outlined
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
+    <template v-slot:body="props">
+      <q-tr :props="props" @click="clickSingleCallbackFN(props.row)">
+        <q-td key="Name" :props="props">
+          {{ props.row.ticketTypeName }}
+        </q-td>
+        <q-td key="Description" :props="props">
+          {{ props.row.description }}
+        </q-td>
+        <q-td key="Enabled" :props="props">
+          {{ props.row.enabled }}
+        </q-td>
+        <q-td key="AllowUserCreation" :props="props">
+          {{ props.row.allowUserCreation }}
+        </q-td>
+        <q-td key="Issue Duration" :props="props">
+          {{ props.row.issueDuration }}
+        </q-td>
+        <q-td key="Post Use URL" :props="props">
+          {{ props.row.postUseURL }}
+        </q-td>
+        <q-td key="Post Use Invalid URL" :props="props">
+          {{ props.row.postInvalidURL }}
+        </q-td>
+        <q-td key="WelcomeAgree" :props="props">
+          {{ props.row.welcomeMessage.agreementRequired }}
+        </q-td>
+        <q-td key="WelcomeTitle" :props="props">
+          {{ props.row.welcomeMessage.title }}
+        </q-td>
+        <q-td key="WelcomeBody" :props="props">
+          {{ props.row.welcomeMessage.body }}
+        </q-td>
+        <q-td key="WelcomeOkText" :props="props">
+          {{ props.row.welcomeMessage.okButtonText }}
+        </q-td>
+        <q-td key="..." :props="props">
+          <q-btn flat color="primary" icon="keyboard_arrow_right" label="" />
+        </q-td>
+      </q-tr>
+    </template>
+    </q-table>
   <editTicketTypeModal
     ref="editTicketTypeModal"
     @ok="clickEditTicketTypeModalModalOK"
