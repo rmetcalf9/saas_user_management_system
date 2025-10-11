@@ -75,7 +75,7 @@
           :label-width="3"
           :error="isConfigJSONInvalid"
         />
-        Auth Provider Specific Config
+        <div class="editAuthProvModal-confignotesdiv" v-html="configNotes" />
       </q-card-section>
 
       <!-- Fixed Footer -->
@@ -153,6 +153,18 @@ export default {
         return true
       }
       return false
+    },
+    configNotes () {
+      if (this.editAuthProvModalDialogData.Type === 'internal') {
+        return '<p>Config type: internal</p><p>Example ConfigJson:</p><pre>{"userSufix": "@internalDataStore"}</pre><p>Notes: Make sure the userSufix is different if using multiple internal auth types. Better still do not use multiple internal auth types</p>'
+      }
+      if (this.editAuthProvModalDialogData.Type === 'google') {
+        return '<p>Config type: google</p><p>Example ConfigJson:</p><pre>{"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_google"}</pre>'
+      }
+      if (this.editAuthProvModalDialogData.Type === 'facebook') {
+        return '<p>Config type: facebook</p><p>Example ConfigJson:</p><pre>{"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}</pre>'
+      }
+      return 'No notes for this config type'
     }
   },
   methods: {
@@ -257,4 +269,7 @@ export default {
 </script>
 
 <style>
+.editAuthProvModal-confignotesdiv {
+  background-color: aqua
+}
 </style>
