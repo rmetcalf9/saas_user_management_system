@@ -92,7 +92,7 @@
             class = "float-right q-ml-xs"
           />
           <q-btn
-            @click="cancelCreatePersonDialog"
+            @click="createPersonModalDialogVisible = false"
             label="Cancel"
             class = "float-right"
           />
@@ -184,7 +184,35 @@ export default {
       console.log('TODO deleteSelectedPersons')
     },
     createPersonButtonClick () {
-      console.log('TODO createPersonButtonClick')
+      this.createPersonModalDialogData.guid = ''
+      this.createPersonModalDialogVisible = true
+    },
+    okCreatePersonDialog () {
+      const TTT = this
+      const jsonToSend = {
+        // 'guid': this.createPersonModalDialogData.guid NO data can be sent
+      }
+      const callback = {
+        ok: function (response) {
+          TTT.createPersonModalDialogVisible = false
+          Notify.create({ color: 'positive', message: 'Person Created' })
+          // Filter for this created person
+          TTT.tablePersistSettings.filter = response.data.guid
+          TTT.refresh()
+        },
+        error: function (error) {
+          Notify.create('Create Person failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/persons',
+        method: 'post',
+        postdata: jsonToSend,
+        callback
+      })
     },
     request ({ pagination, filter }) {
       const TTT = this

@@ -221,6 +221,7 @@ export default {
         ok: function (response) {
           TTT.createUserModalDialogVisible = false
           Notify.create({ color: 'positive', message: 'User Created' })
+          TTT.tablePersistSettings.filter = response.data.UserID
           TTT.refresh()
         },
         error: function (error) {
