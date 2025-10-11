@@ -46,7 +46,7 @@
   </template>
 
   <template v-slot:body="props">
-    <q-tr :props="props" @click="$router.push('/' + $route.params.tenantName + '/persons/' + props.row.guid)">
+    <q-tr :props="props" @click="clickSinglePerson(props.row)">
       <q-td auto-width>
         <q-checkbox
           :model-value="props.selected"
@@ -64,7 +64,7 @@
         {{ props.row.lastUpdateDateTime }}
       </q-td>
       <q-td key="..." :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/' + $route.params.tenantName + '/persons/' + props.row.guid)" />
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSinglePerson(props.row)" />
       </q-td>
     </q-tr>
   </template>
@@ -130,7 +130,7 @@ export default {
   props: [
     'defaultDisplayedColumns',
     'persistantSettingsSlot',
-    'clickSingleUserCallback'
+    'clickSinglePersonCallback'
   ],
   components: {
     SelectColumns
@@ -184,6 +184,11 @@ export default {
     }
   },
   methods: {
+    clickSinglePerson (props) {
+      if (typeof (this.clickSinglePersonCallback) !== 'undefined') {
+        this.clickSinglePersonCallback(props)
+      }
+    },
     toggleRowSelection (row, val) {
       if (val) {
         this.tableSelected.push(row)

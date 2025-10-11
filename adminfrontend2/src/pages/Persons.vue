@@ -18,8 +18,7 @@ export default {
   },
   methods: {
     clickSinglePerson (props) {
-      console.log('TODO check this')
-      this.$router.push('/' + this.$route.params.tenantName + '/persons/' + props.row.PersonID)
+      this.$router.push('/' + this.$route.params.tenantName + '/persons/' + props.guid)
     }
   }
 }

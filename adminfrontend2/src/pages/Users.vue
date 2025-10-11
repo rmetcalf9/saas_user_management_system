@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     clickSingleUser (props) {
-      this.$router.push('/' + this.$route.params.tenantName + '/users/' + props.row.UserID)
+      this.$router.push('/' + this.$route.params.tenantName + '/users/' + props.UserID)
     }
   }
 }

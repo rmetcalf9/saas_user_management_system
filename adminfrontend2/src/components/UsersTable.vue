@@ -45,16 +45,37 @@
 
     </template>
 
-    <template v-slot:body-cell-TenantRoles="props">
-      <q-td :props="props">
-        {{ props.row.TenantRoles }}
-      </q-td>
-    </template>
-
-    <template v-slot:body-cell-...="props">
-      <q-td :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleUser(props)" />
-      </q-td>
+    <template v-slot:body="props">
+      <q-tr :props="props" @click="clickSingleUser(props.row)">
+        <q-td auto-width>
+          <q-checkbox
+            :model-value="props.selected"
+            @update:model-value="val => toggleRowSelection(props.row, val)"
+            @click.stop
+          />
+        </q-td>
+        <q-td key="UserID" :props="props">
+          {{ props.row.UserID }}
+        </q-td>
+        <q-td key="known_as" :props="props">
+          {{ props.row.known_as }}
+        </q-td>
+        <q-td key="TenantRoles" :props="props">
+          {{ props.row.TenantRoles }}
+        </q-td>
+        <q-td key="other_data" :props="props">
+          {{ props.row.other_data }}
+        </q-td>
+        <q-td key="creationDateTime" :props="props">
+          {{ props.row.creationDateTime }}
+        </q-td>
+        <q-td key="lastUpdateDateTime" :props="props">
+          {{ props.row.lastUpdateDateTime }}
+        </q-td>
+        <q-td key="..." :props="props">
+          <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleUser(props.row)" />
+        </q-td>
+      </q-tr>
     </template>
   </q-table>
   <q-dialog v-model="createUserModalDialogVisible">
@@ -194,6 +215,15 @@ export default {
     }
   },
   methods: {
+    toggleRowSelection (row, val) {
+      if (val) {
+        this.tableSelected.push(row)
+        return
+      }
+      this.tableSelected = this.tableSelected.filter(function (x) {
+        return x.guid !== row.guid
+      })
+    },
     clickSingleUser (props) {
       if (typeof (this.clickSingleUserCallback) !== 'undefined') {
         this.clickSingleUserCallback(props)
