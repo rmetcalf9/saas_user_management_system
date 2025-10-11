@@ -24,6 +24,8 @@ export default {
   },
   methods: {
     resetPassword () {
+      console.log('ss', this.authData)
+      console.log('AuthProviderGUID', this.authData.AuthProviderGUID)
       Notify.create({ color: 'positive', message: 'TODO' })
     }
   }
