@@ -57,40 +57,68 @@
       </q-td>
     </template>
   </q-table>
-  <!--
   <q-dialog v-model="createUserModalDialogVisible">
-    <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
-      <q-header class="bg-primary">
-        <q-toolbar>
-          <q-toolbar-title>
-            Create new user
-          </q-toolbar-title>
-          <q-btn flat v-close-popup round dense icon="close" />
-        </q-toolbar>
-      </q-header>
+    <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+      <!-- Header -->
+      <q-toolbar class="bg-primary text-white">
+        <q-toolbar-title>
+          Create new user
+        </q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
 
-      <q-page-container>
-        <q-page padding>
-          <q-input v-model="createUserModalDialogData.UserID" ref="userIDInput" label="User ID" :label-width="3"/> Normally &lt;User ID>@&lt;Auth Prov>
-          <q-input v-model="createUserModalDialogData.known_as" label="Known As" :label-width="3"/> Name displayed to user
-          <q-input v-model="createUserModalDialogData.mainTenant" @keyup.enter="okCreateUserDialog" label="Main Tenant" :label-width="3"/> Optional Tenant to create a hasaccount role
-        <div>&nbsp;</div>
+      <!-- Scrollable Body -->
+      <q-card-section style="flex: 1; overflow-y: auto;">
+        <q-input
+          v-model="createUserModalDialogData.UserID"
+          ref="userIDInput"
+          label="User ID"
+          :label-width="3"
+        />
+        <div class="text-caption text-grey q-mb-md">
+          Normally &lt;User ID&gt;@&lt;Auth Prov&gt;
+        </div>
+
+        <q-input
+          v-model="createUserModalDialogData.known_as"
+          label="Known As"
+          :label-width="3"
+        />
+        <div class="text-caption text-grey q-mb-md">
+          Name displayed to user
+        </div>
+
+        <q-input
+          v-model="createUserModalDialogData.mainTenant"
+          @keyup.enter="okCreateUserDialog"
+          label="Main Tenant"
+          :label-width="3"
+        />
+        <div class="text-caption text-grey">
+          Optional Tenant to create a hasaccount role
+        </div>
+      </q-card-section>
+
+      <!-- Footer -->
+      <q-separator />
+      <q-card-actions
+        align="right"
+        class="bg-grey-2"
+        style="position: sticky; bottom: 0; z-index: 1;"
+      >
         <q-btn
           @click="okCreateUserDialog"
           color="primary"
           label="Ok"
-          class = "float-right q-ml-xs"
+          class="q-ml-xs"
         />
         <q-btn
           label="Cancel"
-          class = "float-right"
           v-close-popup
         />
-        </q-page>
-      </q-page-container>
-    </q-layout>
+      </q-card-actions>
+    </q-card>
   </q-dialog>
--->
 </div></template>
 
 <script>
@@ -170,10 +198,91 @@ export default {
       console.log('TODO clickSingleUser', props)
     },
     createUserButtonClick () {
-      console.log('TODO createUserButtonClick')
+      this.createUserModalDialogData.UserID = ''
+      this.createUserModalDialogData.known_as = ''
+      this.createUserModalDialogData.mainTenant = ''
+      this.createUserModalDialogVisible = true
+      const TTT = this
+      setTimeout(function () {
+        // Highlight default field
+        TTT.$refs.userIDInput.focus()
+      }, 5)
+    },
+    okCreateUserDialog () {
+      const TTT = this
+      const jsonToSend = {
+        UserID: this.createUserModalDialogData.UserID,
+        known_as: this.createUserModalDialogData.known_as,
+        mainTenant: this.createUserModalDialogData.mainTenant
+      }
+      const callback = {
+        ok: function (response) {
+          TTT.createUserModalDialogVisible = false
+          Notify.create({ color: 'positive', message: 'User Created' })
+          TTT.refresh()
+        },
+        error: function (error) {
+          Notify.create({ color: 'negative', message: 'Create User failed - ' + callbackHelper.getErrorFromResponse(error) })
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/users',
+        method: 'post',
+        postdata: jsonToSend,
+        callback
+      })
     },
     deleteSelectedUsers () {
-      console.log('TODO deleteSelectedUsers')
+      const TTT = this
+      const usersToDelete = this.tableSelected.map(function (usr) {
+        return usr
+      })
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to delete ' + usersToDelete.length + ' users?',
+        ok: {
+          push: true,
+          label: 'Yes - delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).onOk(() => {
+        // only clear slection if ok is used
+        TTT.tableSelected = []
+        usersToDelete.forEach(function (usr) {
+          TTT.deleteUserNoConfirm(usr)
+        })
+      })
+    },
+    deleteUserNoConfirm (usr) {
+      const TTT = this
+      const callback = {
+        ok: function (response) {
+          Notify.create({ color: 'positive', message: 'User ' + usr.UserID + ' deleted' })
+          TTT.futureRefresh()
+        },
+        error: function (error) {
+          Notify.create('Delete User failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/users/' + usr.UserID,
+        method: 'delete',
+        postdata: null,
+        callback,
+        extraHeaders: { 'object-version-id': usr.ObjectVersion }
+      })
     },
     refresh () {
       this.request({
@@ -194,10 +303,7 @@ export default {
           TTT.tablePersistSettings.serverPagination.rowsNumber = response.data.pagination.total
           TTT.tablePersistSettings.serverPagination.filter = filter
           TTT.tablePersistSettings.serverPagination.rowsPerPage = response.data.pagination.pagesize
-          // TODO ??? change when we have a store dataTableSettings.commit('JOBS', TTT.tablePersistSettings)
-          // then we update the rows with the fetched ones
           TTT.tableData = response.data.result
-          // console.log('response.data.result:', response.data.result)
         },
         error: function (error) {
           TTT.tableLoading = false
@@ -234,6 +340,17 @@ export default {
         postdata: undefined,
         callback
       })
+    },
+    futureRefresh () {
+      if (this.futureRefreshRequested) {
+        return
+      }
+      this.futureRefreshRequested = true
+      setTimeout(this.futureRefreshDo, 500)
+    },
+    futureRefreshDo () {
+      this.futureRefreshRequested = false
+      this.refresh()
     }
   },
   mounted () {
