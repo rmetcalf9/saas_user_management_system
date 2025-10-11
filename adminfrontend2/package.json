@@ -12,6 +12,7 @@
   "dependencies": {
     "@quasar/extras": "^1.17.0",
     "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
     "core-js": "^3.6.5",
     "pinia": "^2.0.17",
     "quasar": "^2.6.0",
