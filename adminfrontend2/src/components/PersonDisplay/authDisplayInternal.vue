@@ -8,7 +8,10 @@
         Provider Type: Internal
       </div>
       <div>
-        AuthUserKey:{{ authData.AuthUserKey }}
+        Prompt: {{ authProviderPrompt.MenuText }}
+      </div>
+      <div>
+        AuthUserKey: {{ authData.AuthUserKey }}
       </div>
     </div>
     <div class="col flex flex-column justify-end">
@@ -58,6 +61,16 @@ export default {
     tenantName () {
       // This is the LOGGED in tenant name - not the one for the auths we are viewing
       return this.$route.params.tenantName
+    },
+    authProviderPrompt () {
+      const TTT = this
+      const thisAuthProvs = this.tenantData.AuthProviders.filter(function (x) {
+        return x.guid === TTT.authData.AuthProviderGUID
+      })
+      if (thisAuthProvs.length !== 1) {
+        return 'Error'
+      }
+      return thisAuthProvs[0]
     }
   },
   methods: {
