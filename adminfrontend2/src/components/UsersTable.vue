@@ -195,7 +195,9 @@ export default {
   },
   methods: {
     clickSingleUser (props) {
-      console.log('TODO clickSingleUser', props)
+      if (typeof (this.clickSingleUserCallback) !== 'undefined') {
+        this.clickSingleUserCallback(props)
+      }
     },
     createUserButtonClick () {
       this.createUserModalDialogData.UserID = ''
