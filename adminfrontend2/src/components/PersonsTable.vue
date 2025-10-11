@@ -70,37 +70,50 @@
   </template>
 </q-table>
 
-  <q-dialog v-model="createPersonModalDialogVisible">
-    <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 250px; width: 700px; max-width: 80vw;">
-      <q-header class="bg-primary">
-        <q-toolbar>
-          <q-toolbar-title>
-            Create new person
-          </q-toolbar-title>
-          <q-btn flat v-close-popup round dense icon="close" />
-        </q-toolbar>
-      </q-header>
+<q-dialog v-model="createPersonModalDialogVisible">
+  <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+    <!-- Header -->
+    <q-toolbar class="bg-primary text-white">
+      <q-toolbar-title>
+        Create new person
+      </q-toolbar-title>
+      <q-btn flat v-close-popup round dense icon="close" />
+    </q-toolbar>
 
-      <q-page-container>
-        <q-page padding>
-          <q-input v-model="createPersonModalDialogData.guid" ref="personIDInput" label="Unknown" :label-width="3"/> No Editable Person Data
-          <div>&nbsp;</div>
-          <q-btn
-            @click="okCreatePersonDialog"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-          />
-          <q-btn
-            @click="createPersonModalDialogVisible = false"
-            label="Cancel"
-            class = "float-right"
-          />
-        </q-page>
-      </q-page-container>
+    <!-- Scrollable Body -->
+    <q-card-section style="flex: 1; overflow-y: auto;">
+      <q-input
+        v-model="createPersonModalDialogData.guid"
+        ref="personIDInput"
+        label="Unknown"
+        :label-width="3"
+      />
+      <div class="text-caption text-grey q-mt-sm">
+        No Editable Person Data
+      </div>
+    </q-card-section>
 
-    </q-layout>
-  </q-dialog>
+    <!-- Footer -->
+    <q-separator />
+    <q-card-actions
+      align="right"
+      class="bg-grey-2"
+      style="position: sticky; bottom: 0; z-index: 1;"
+    >
+      <q-btn
+        @click="okCreatePersonDialog"
+        color="primary"
+        label="Ok"
+        class="q-ml-xs"
+      />
+      <q-btn
+        @click="createPersonModalDialogVisible = false"
+        label="Cancel"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
 </div></template>
 
 <script>
@@ -181,7 +194,52 @@ export default {
       })
     },
     deleteSelectedPersons () {
-      console.log('TODO deleteSelectedPersons')
+      const TTT = this
+      const personsToDelete = this.tableSelected.map(function (usr) {
+        return usr
+      })
+      TTT.tableSelected = []
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to delete ' + personsToDelete.length + ' Person records?',
+        ok: {
+          push: true,
+          label: 'Yes - delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).onOk(() => {
+        personsToDelete.forEach(function (usr) {
+          TTT.deletePersonNoConfirm(usr)
+        })
+      })
+    },
+    deletePersonNoConfirm (usr) {
+      const TTT = this
+      const callback = {
+        ok: function (response) {
+          Notify.create({ color: 'positive', message: 'Person ' + usr.guid + ' deleted' })
+          TTT.futureRefresh()
+        },
+        error: function (error) {
+          Notify.create('Delete Person failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/persons/' + usr.guid,
+        method: 'delete',
+        postdata: null,
+        callback,
+        extraHeaders: { 'object-version-id': usr.ObjectVersion }
+      })
     },
     createPersonButtonClick () {
       this.createPersonModalDialogData.guid = ''
