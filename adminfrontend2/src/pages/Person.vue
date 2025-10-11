@@ -342,7 +342,42 @@ export default {
       })
     },
     deleteAuth (curAuth) {
-      console.log('deleteAuth', curAuth)
+      const TTT = this
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to remove auth ' + curAuth.AuthUserKey + ' (Tenant ' + curAuth.tenantName + ')',
+        ok: {
+          push: true,
+          label: 'Yes - Delete'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).onOk(() => {
+        const base64encodedkey = btoa(curAuth.AuthUserKey)
+        const callback = {
+          ok: function (response) {
+            Notify.create({ color: 'positive', message: 'Auth Deleted' })
+            TTT.refreshPersonData()
+          },
+          error: function (error) {
+            Notify.create({ color: 'negative', message: 'Delete auth failed ( ' + curAuth.AuthUserKey + ') - ' + callbackHelper.getErrorFromResponse(error) })
+          }
+        }
+        saasApiClientCallBackend.callApi({
+          prefix: 'admin',
+          router: this.$router,
+          store: this.userManagementClientStoreStore,
+          path: '/' + TTT.tenantName + '/auths/' + base64encodedkey,
+          method: 'delete',
+          postdata: null,
+          callback
+        })
+      })
     },
     supportedAuthType (authType) {
       if (authType === 'internal') {
