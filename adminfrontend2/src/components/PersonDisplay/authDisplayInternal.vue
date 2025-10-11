@@ -1,11 +1,22 @@
 <template>
-  <div>
-      Provider: {{ authData.tenantName }} - Internal, Key:{{ authData.AuthUserKey }}
-    <q-btn
-        color="primary"
-        push
-        @click="resetPassword"
-      >Reset Password</q-btn>
+  <div class="row q-gutter-md">
+    <div class="col">
+      <div>
+        Provider: {{ authData.tenantName }} - Internal
+      </div>
+      <div>
+        AuthUserKey:{{ authData.AuthUserKey }}
+      </div>
+    </div>
+    <div class="col flex flex-column justify-end">
+      <div>
+        <q-btn
+            color="primary"
+            push
+            @click="resetPassword"
+          >Reset Password</q-btn>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -24,9 +35,9 @@ export default {
   },
   methods: {
     resetPassword () {
-      console.log('ss', this.authData)
-      console.log('AuthProviderGUID', this.authData.AuthProviderGUID)
-      Notify.create({ color: 'positive', message: 'TODO' })
+      // console.log('ss', this.authData)
+      // console.log('AuthProviderGUID', this.authData.AuthProviderGUID)
+      Notify.create({ color: 'positive', message: 'To reset the password remove this auth and add another one with type internal' })
     }
   }
 }

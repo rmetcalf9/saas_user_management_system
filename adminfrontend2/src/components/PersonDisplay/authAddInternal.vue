@@ -55,31 +55,25 @@ export default {
       const tenant = res.selectedTenantList[0]
       const possibleAuthProviders = tenant.AuthProviders.filter(function (x) { return x.Type === 'internal' })
       if (possibleAuthProviders.length === 0) {
-        Notify.create({ color: 'negative', message: 'Selected tenant dosen\'t have an internal auth provider' })
+        Notify.create({ color: 'negative', message: 'Selected tenant does not have an internal auth provider' })
         return
       }
       if (possibleAuthProviders.length === 1) {
         TTT.tenantAndAuthProvSelected(tenant, possibleAuthProviders[0])
       } else {
-        console.log('possibleAuthProviders', possibleAuthProviders)
         this.$q.dialog({
-          title: 'Options',
-          message: 'Choose your options',
+          title: 'Choose Internal Auth Provider to use',
+          message: 'This tenant has multiple internal auth providers. Choose which prompt the user needs to login with:',
           options: {
             type: 'radio',
             model: 0,
             // inline: true
             items: possibleAuthProviders.map(function (x, idx) {
               return {
-                label: x.MenuText,
+                label: x.MenuText + ' - user keys ending with ' + JSON.parse(x.ConfigJSON).userSufix,
                 value: idx
               }
             })
-            // items: [
-            //  { label: 'Option 1', value: 'opt1', color: 'secondary' },
-            //  { label: 'Option 2', value: 'opt2' },
-            //  { label: 'Option 3', value: 'opt3' }
-            // ]
           },
           cancel: true,
           persistent: true
