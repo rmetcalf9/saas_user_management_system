@@ -56,6 +56,7 @@
                 <AuthDisplayInternal
                   :person="personData"
                   :authData="curAuth"
+                  @refresh="refresh"
                 />
             </q-item-label>
           </div>
@@ -68,7 +69,7 @@
     <q-item-section avatar>
       <AuthAddInternal
         :person="personData"
-        @updateMaster="refreshPersonData"
+        @updateMaster="refresh"
       />
     </q-item-section>
   </q-item>
@@ -254,7 +255,7 @@ export default {
       const callback = {
         ok: function (response) {
           Notify.create({ color: 'positive', message: 'Person Updated' })
-          TTT.refreshPersonData()
+          TTT.refresh()
         },
         error: function (error) {
           Notify.create({ color: 'negative', message: 'Update Person failed - ' + callbackHelper.getErrorFromResponse(error) })
@@ -324,7 +325,7 @@ export default {
           ok: function (response) {
             Notify.create({ color: 'positive', message: 'User Person Link Removed - ' + userData.UserID })
             // TTT.futureRefresh()
-            TTT.refreshPersonData()
+            TTT.refresh()
           },
           error: function (error) {
             Notify.create({ color: 'negative', message: 'Remove Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error) })
@@ -362,7 +363,7 @@ export default {
         const callback = {
           ok: function (response) {
             Notify.create({ color: 'positive', message: 'Auth Deleted' })
-            TTT.refreshPersonData()
+            TTT.refresh()
           },
           error: function (error) {
             Notify.create({ color: 'negative', message: 'Delete auth failed ( ' + curAuth.AuthUserKey + ') - ' + callbackHelper.getErrorFromResponse(error) })
@@ -394,7 +395,7 @@ export default {
     },
     futureRefreshDo () {
       this.futureRefreshRequested = false
-      this.refreshPersonData()
+      this.refresh()
     },
     refreshPersonData () {
       const personIDToLoad = this.$route.params.selPerGUID
@@ -421,10 +422,13 @@ export default {
         postdata: null,
         callback
       })
+    },
+    refresh () {
+      this.refreshPersonData()
     }
   },
   mounted () {
-    this.refreshPersonData()
+    this.refresh()
   }
 }
 </script>
