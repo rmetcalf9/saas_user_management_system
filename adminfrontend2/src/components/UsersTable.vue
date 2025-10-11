@@ -73,7 +73,7 @@
           {{ props.row.lastUpdateDateTime }}
         </q-td>
         <q-td key="..." :props="props">
-          <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleUser(props.row)" />
+          <q-btn flat color="primary" icon="keyboard_arrow_right" label="" />
         </q-td>
       </q-tr>
     </template>

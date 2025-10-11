@@ -126,14 +126,11 @@
     </q-card-actions>
   </q-card>
 </q-dialog>
-
-<!--
   <UserSelectionModal
     ref="UserSelectionModal"
     :title="'Select User to Associate with person ' + personData.guid"
     @ok="associateWithUserBtnClickSelectUserOK"
   />
--->
 </q-page>
 </template>
 
@@ -142,7 +139,7 @@ import { Notify, Loading } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import saasApiClientCallBackend from '../saasAPiClientCallBackend'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
-// import UserSelectionModal from '../components/UserSelectionModal'
+import UserSelectionModal from '../components/UserSelectionModal'
 import AuthDisplayInternal from '../components/PersonDisplay/authDisplayInternal'
 import AuthAddInternal from '../components/PersonDisplay/authAddInternal'
 
@@ -155,7 +152,8 @@ export default {
   name: 'PagePerson',
   components: {
     AuthDisplayInternal,
-    AuthAddInternal
+    AuthAddInternal,
+    UserSelectionModal
   },
   setup () {
     const userManagementClientStoreStore = useUserManagementClientStoreStore()
@@ -273,10 +271,75 @@ export default {
       })
     },
     associateWithUserBtnClick () {
-      console.log('TODO associateWithUserBtnClick')
+      this.$refs.UserSelectionModal.launchDialog()
+    },
+    associateWithUserBtnClickSelectUserOK (response) {
+      const TTT = this
+      for (const x in response.selectedUserList) {
+        TTT._addAuth(response.selectedUserList[x])
+      }
+    },
+    _addAuth (userData) {
+      const TTT = this
+      const callback = {
+        ok: function (response) {
+          Notify.create({ color: 'positive', message: 'Person Auth Added - ' + userData.UserID })
+          TTT.futureRefresh()
+        },
+        error: function (error) {
+          Notify.create({ color: 'negative', message: 'Add Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error) })
+        }
+      }
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/userpersonlinks/' + userData.UserID + '/' + TTT.personData.guid,
+        method: 'post',
+        postdata: {
+          UserID: userData.UserID,
+          personGUID: TTT.personData.guid
+        },
+        callback
+      })
     },
     unassociateWithUserBtnClick (userData) {
-      console.log('TODO unassociateWithUserBtnClick', userData)
+      const TTT = this
+      TTT.$q.dialog({
+        title: 'Confirm',
+        message: 'Are you sure you want to remove user link with ' + userData.UserID,
+        ok: {
+          push: true,
+          label: 'Yes - remove'
+        },
+        cancel: {
+          push: true,
+          label: 'Cancel'
+        }
+        // preventClose: false,
+        // noBackdropDismiss: false,
+        // noEscDismiss: false
+      }).onOk(() => {
+        const callback = {
+          ok: function (response) {
+            Notify.create({ color: 'positive', message: 'User Person Link Removed - ' + userData.UserID })
+            // TTT.futureRefresh()
+            TTT.refreshPersonData()
+          },
+          error: function (error) {
+            Notify.create({ color: 'negative', message: 'Remove Person auth failed ( ' + userData.UserID + ' - ' + callbackHelper.getErrorFromResponse(error) })
+          }
+        }
+        saasApiClientCallBackend.callApi({
+          prefix: 'admin',
+          router: this.$router,
+          store: this.userManagementClientStoreStore,
+          path: '/' + TTT.tenantName + '/userpersonlinks/' + userData.UserID + '/' + TTT.personData.guid,
+          method: 'delete',
+          postdata: null,
+          callback
+        })
+      })
     },
     deleteAuth (curAuth) {
       console.log('deleteAuth', curAuth)
