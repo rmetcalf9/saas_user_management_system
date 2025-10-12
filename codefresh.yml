@@ -80,7 +80,7 @@ steps:
     image: ${{RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND}}
     working_directory: ${{main_clone}}
     commands:
-      - build_quasar_app ./adminfrontend spa ${{RJM_VERSION}}
+      - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 2048
 
   build_the_image:
     stage: build
