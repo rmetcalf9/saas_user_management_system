@@ -1,15 +1,15 @@
 
-function getURLforTicketGUID (stores, ticketGUID, tenantName, ticketTypeData, tenantData) {
-  var urlBase = stores.state.globalDataStore.serverInfo.Server.APIAPP_FRONTENDURL + '/#/' + tenantName + '/Ticket/'
+function getURLforTicketGUID (userManagementClientStoreStore, ticketGUID, tenantName, ticketTypeData, tenantData) {
+  // saas_usersystem origionaly comes from reoutes.js
+  let urlBase = userManagementClientStoreStore.getEndpointInfo('saas_usersystem').serverInfo.Server.APIAPP_FRONTENDURL + '/#/' + tenantName + '/Ticket/'
   if (typeof (tenantData.TicketOverrideURL) !== 'undefined') {
     if (tenantData.TicketOverrideURL !== '') {
       urlBase = tenantData.TicketOverrideURL
     }
   }
-  console.log('tenantData', tenantData)
   return urlBase + ticketGUID
 }
 
 export default {
-  getURLforTicketGUID: getURLforTicketGUID
+  getURLforTicketGUID
 }

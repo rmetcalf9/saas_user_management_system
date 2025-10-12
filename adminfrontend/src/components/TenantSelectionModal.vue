@@ -1,85 +1,54 @@
 <template>
-  <q-dialog v-model="visible">
-    <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
-      <q-header class="bg-primary">
-        <q-toolbar>
-          <q-toolbar-title>
-            {{ title }}
-          </q-toolbar-title>
-          <q-btn flat v-close-popup round dense icon="close" />
-        </q-toolbar>
-      </q-header>
-      <q-page-container>
-          <q-page padding>
-          <TenantsTable
-            :defaultDisplayedColumns="['Name', 'Description']"
-            persistantSettingsSlot="tenantsSel"
-            :clickSingleTenantCallback="clickSingleTenant"
-            ref="tenantTable"
-          />
-          <div>&nbsp;</div>
-          <q-btn
-            v-if="multiselection"
-            @click="ok"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-          />
-          <q-btn
-            @click="cancel"
-            label="Cancel"
-            class = "float-right"
-          />
-        </q-page>
-      </q-page-container>
-    </q-layout>
-  </q-dialog>
-<!--
-  <q-modal v-model="visible" :content-css="{minWidth: '40vw', minHeight: '80vh'}">
-    <q-modal-layout>
-      <q-toolbar slot="header">
-          <q-btn
-          color="primary"
-          flat
-          round
-          dense
-          icon="keyboard_arrow_left"
-          @click="cancel"
-        />
-        <q-toolbar-title>{{ title }}</q-toolbar-title>
-      </q-toolbar>
+<q-dialog v-model="visible">
+  <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+    <!-- Header -->
+    <q-toolbar class="bg-primary text-white">
+      <q-toolbar-title>
+        {{ title }}
+      </q-toolbar-title>
+      <q-btn flat v-close-popup round dense icon="close" />
+    </q-toolbar>
 
-      <div class="layout-padding">
-        <TenantsTable
-          :defaultDisplayedColumns="['Name', 'Description']"
-          persistantSettingsSlot="tenantsSel"
-          :clickSingleTenantCallback="clickSingleTenant"
-          ref="tenantTable"
-        />
-        <div>&nbsp;</div>
-        <q-btn
-          v-if="multiselection"
-          @click="ok"
-          color="primary"
-          label="Ok"
-          class = "float-right q-ml-xs"
-        />
-        <q-btn
-          @click="cancel"
-          label="Cancel"
-          class = "float-right"
-        />
-      </div>
-    </q-modal-layout>
-  </q-modal>-->
+    <!-- Scrollable Body -->
+    <q-card-section style="flex: 1; overflow-y: auto;">
+      <TenantsTable
+        :defaultDisplayedColumns="['Name', 'Description']"
+        :persistantSettingsSlot="tablePersistSettingsSlot"
+        :clickSingleTenantCallback="clickSingleTenant"
+        ref="tenantTable"
+      />
+    </q-card-section>
+
+    <!-- Footer -->
+    <q-separator />
+    <q-card-actions
+      align="right"
+      class="bg-grey-2"
+      style="position: sticky; bottom: 0; z-index: 1;"
+    >
+      <q-btn
+        v-if="multiselection"
+        @click="ok"
+        color="primary"
+        label="Ok"
+        class="q-ml-xs"
+      />
+      <q-btn
+        @click="cancel"
+        label="Cancel"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
 </template>
 
 <script>
 import { Notify } from 'quasar'
 import TenantsTable from '../components/TenantsTable'
+import { useTablePersistSettingsStore } from 'stores/tablePersistSettingsStore'
 
 export default {
-  // name: 'TenantSelectionModal',
+  name: 'TenantSelectionModal',
   components: {
     TenantsTable
   },
@@ -87,26 +56,38 @@ export default {
     'title',
     'multiselection'
   ],
+  setup () {
+    const tablePersistSettingsStore = useTablePersistSettingsStore()
+    return {
+      tablePersistSettingsStore
+    }
+  },
   data () {
     return {
       visible: false,
       filterText: ''
     }
   },
+  computed: {
+    tablePersistSettingsSlot () {
+      return 'tenantsSel'
+    }
+  },
   methods: {
     clickSingleTenant (props) {
       this.visible = false
       this.$emit('ok', {
-        selectedTenantList: [props.row]
+        selectedTenantList: [props]
       })
     },
     ok () {
-      var tmp = this.$refs.tenantTable
+      const tmp = this.$refs.tenantTable
       if (tmp.tableSelected.length === 0) {
         Notify.create('No Tenant selected')
         return
       }
       this.visible = false
+      console.log('AAAA', tmp)
       this.$emit('ok', {
         selectedTenantList: tmp.tableSelected
       })
@@ -115,10 +96,10 @@ export default {
       this.visible = false
     },
     launchDialog () {
-      var TTT = this
+      const TTT = this
       TTT.visible = true
       setTimeout(function () {
-        TTT.$store.commit('tablePersistStore/resetTableSettings', 'tenantsSel')
+        TTT.tablePersistSettingsStore.resetTableSettings(this.tablePersistSettingsSlot)
         TTT.$refs.tenantTable.tableSelected = []
         TTT.$refs.tenantTable.refresh()
       }, 5)

@@ -3,51 +3,56 @@
     title='Tickets'
     :rows-per-page-options="tableRowsPerPageOptions"
     :loading="tableLoading"
-    :data="tableData"
+    :rows="tableData"
     :columns="tableColumns"
     @request="request"
     row-key="id"
     :visible-columns="tablePersistSettings.visibleColumns"
     :filter="tablePersistSettings.filter"
-    :pagination.sync="tablePersistSettings.serverPagination"
+    :pagination="tablePersistSettings.serverPagination"
     selection="multiple"
-    :selected.sync="tableSelected"
+    v-model:selected="tableSelected"
   >
-  <template slot="top-selection" slot-scope="props">
-    <q-btn color="negative" @click="disableSelectedTickets">Disable Selected Tickets</q-btn>
-  </template>
+    <template v-slot:top-selection>
+      <q-btn color="negative" @click="disableSelectedTickets">Disable Selected Tickets</q-btn>
+    </template>
 
-    <template slot="top-left" slot-scope="props">
+    <template v-slot:top-left>
       <q-btn
         color="primary"
         push
         @click="createBatchButton"
       >Create Batch of Tickets</q-btn>
     </template>
+    <template v-slot:top-right>
+      <SelectColumns
+        :selected_col_names="tablePersistSettings_visiblecols"
+        @update:selected_col_names="(newVal) => tablePersistSettings_visiblecols = newVal"
+        :columns="tableColumns"
+      />
+      &nbsp;
+      <q-input
+        v-model="tablePersistSettings.filter"
+        debounce="500"
+        clearable
+        placeholder="Search" outlined
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
 
-      <template slot="top-right" slot-scope="props">
-        <selectColumns
-          v-model="tablePersistSettings.visibleColumns"
-          :columns="tableColumns"
-        />
-        &nbsp;
-        <q-input
-          v-model="tablePersistSettings.filter"
-          debounce="500"
-          clearable
-          placeholder="Search" outlined
-        >
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-      <q-td  slot="body-cell-creationDateTime" slot-scope="props" :props="props">
-        {{ metadata.creationDateTime }}
-      </q-td>
-      <q-td  slot="body-cell-url" slot-scope="props" :props="props">
+    <template v-slot:body-cell-url="props">
+      <q-td key="url" :props="props">
         <a :href="getURLforTicketGUID(props.row.id)">{{ getURLforTicketGUID(props.row.id) }}</a>
       </q-td>
+    </template>
+    <template v-slot:body-cell-creationDateTime="props">
+      <q-td key="creationDateTime" :props="props">
+        {{ props.row.metadata.creationDateTime }}
+      </q-td>
+    </template>
   </q-table>
   <ticketCreateBatchStartModal
     ref="ticketCreateBatchStartModal"
@@ -60,17 +65,19 @@
 
 <script>
 import { Notify } from 'quasar'
-// import { Notify, Loading } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
-import selectColumns from '../components/selectColumns'
+import adminfrontendfns from '../adminfrontendfns.js'
+import saasApiClientCallBackend from '../saasAPiClientCallBackend'
 
+import SelectColumns from '../components/SelectColumns'
+import { useTablePersistSettingsStore } from 'stores/tablePersistSettingsStore'
+import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 import ticketCreateBatchStartModal from './Modals/ticketCreateBatchStartModal.vue'
 import ticketCreateBatchResultsModal from './Modals/ticketCreateBatchResultsModal.vue'
-import adminfrontendfns from '../adminfrontendfns.js'
 
 export default {
-  name: 'TicketTypesTable',
+  name: 'TicketsTable',
   props: [
     'defaultDisplayedColumns',
     'persistantSettingsSlot',
@@ -80,9 +87,17 @@ export default {
     'tenantData'
   ],
   components: {
-    selectColumns,
+    SelectColumns,
     ticketCreateBatchStartModal,
     ticketCreateBatchResultsModal
+  },
+  setup () {
+    const tablePersistSettingsStore = useTablePersistSettingsStore()
+    const userManagementClientStoreStore = useUserManagementClientStoreStore()
+    return {
+      tablePersistSettingsStore,
+      userManagementClientStoreStore
+    }
   },
   data () {
     return {
@@ -105,38 +120,60 @@ export default {
       tableSelected: []
     }
   },
-  methods: {
-    getURLforTicketGUID (ticketGUID) {
-      return adminfrontendfns.getURLforTicketGUID(this.$store, ticketGUID, this.selectedTenantName, this.ticketTypeData, this.tenantData)
+  computed: {
+    tenantName () {
+      return this.$route.params.tenantName
     },
+    tablePersistSettings: {
+      get () {
+        return this.tablePersistSettingsStore.getTableSettings(
+          this.persistantSettingsSlot,
+          this.defaultDisplayedColumns
+        )
+      }
+    },
+    tablePersistSettings_visiblecols: {
+      get () {
+        return this.tablePersistSettings.visibleColumns
+      },
+      set (val) {
+        this.tablePersistSettings.visibleColumns = val
+      }
+    }
+  },
+  methods: {
     disableSelectedTickets () {
-      var TTT = this
-      var callback = {
+      const TTT = this
+      const callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', message: 'Disable Ticket Sucessful'})
+          Notify.create({ color: 'positive', message: 'Disable Ticket Sucessful' })
           TTT.refresh()
         },
         error: function (error) {
-          Notify.create({color: 'negative', message: 'Disable Ticket(s) failed - ' + callbackHelper.getErrorFromResponse(error)})
+          Notify.create({ color: 'negative', message: 'Disable Ticket(s) failed - ' + callbackHelper.getErrorFromResponse(error) })
         }
       }
-      var arr = this.tableSelected.map(function (ite) {
+      const arr = this.tableSelected.map(function (ite) {
         return {
           ticketGUID: ite.id,
           objectVersion: ite.metadata.objectVersion
         }
       })
-      var postData = {
+      const postData = {
         tickets: arr
       }
-      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/tickets/disablebatch',
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/tickets/disablebatch',
         method: 'post',
         postdata: postData,
-        callback: callback,
-        curPath: TTT.$router.history.current.path,
-        headers: {}
+        callback
       })
+    },
+    getURLforTicketGUID (ticketGUID) {
+      return adminfrontendfns.getURLforTicketGUID(this.userManagementClientStoreStore, ticketGUID, this.selectedTenantName, this.ticketTypeData, this.tenantData)
     },
     createBatchButton () {
       this.$refs.ticketCreateBatchStartModal.launchDialog({
@@ -145,8 +182,8 @@ export default {
       })
     },
     clickTicketCreateBatchStartModalOK ({ callerData, keymap, foreignKeyDupAction }) {
-      var TTT = this
-      var callback = {
+      const TTT = this
+      const callback = {
         ok: function (response) {
           TTT.$refs.ticketCreateBatchResultsModal.launchDialog({
             ticketTypeData: TTT.ticketTypeData,
@@ -157,26 +194,27 @@ export default {
           TTT.refresh()
         },
         error: function (error) {
-          Notify.create({color: 'negative', message: 'Delete Ticket Type failed - ' + callbackHelper.getErrorFromResponse(error)})
+          Notify.create({ color: 'negative', message: 'Delete Ticket Type failed - ' + callbackHelper.getErrorFromResponse(error) })
         }
       }
-      var postData = {
-        'foreignKeyDupAction': foreignKeyDupAction,
-        'foreignKeyList': keymap
+      const postData = {
+        foreignKeyDupAction,
+        foreignKeyList: keymap
       }
-      TTT.$store.dispatch('globalDataStore/callAdminAPI', {
-        path: '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/createbatch',
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
+        path: '/' + TTT.tenantName + '/tenants/' + this.selectedTenantName + '/tickettypes/' + this.ticketTypeData.id + '/createbatch',
         method: 'post',
         postdata: postData,
-        callback: callback,
-        curPath: TTT.$router.history.current.path,
-        headers: {}
+        callback
       })
     },
     request ({ pagination, filter }) {
-      var TTT = this
+      const TTT = this
       TTT.tableLoading = true
-      var callback = {
+      const callback = {
         ok: function (response) {
           // console.log(response.data.guid)
           TTT.tableLoading = false
@@ -198,31 +236,32 @@ export default {
       if (pagination.page === 0) {
         pagination.page = 1
       }
-      var queryParams = []
+      const queryParams = []
       if (filter !== null) {
         if (filter !== '') {
-          queryParams['query'] = filter
+          queryParams.query = filter
         }
       }
       if (pagination.rowsPerPage !== 0) {
-        queryParams['pagesize'] = pagination.rowsPerPage.toString()
-        queryParams['offset'] = (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        queryParams.pagesize = pagination.rowsPerPage.toString()
+        queryParams.offset = (pagination.rowsPerPage * (pagination.page - 1)).toString()
       }
       if (pagination.sortBy !== null) {
-        var postfix = ''
+        let postfix = ''
         if (pagination.descending) {
           postfix = ':desc'
         }
-        queryParams['sort'] = pagination.sortBy + postfix
+        queryParams.sort = pagination.sortBy + postfix
       }
-      var queryString = restcallutils.buildQueryString('/tenants/' + TTT.selectedTenantName + '/tickettypes/' + TTT.selectedTicketTypeID + '/tickets', queryParams)
-      this.$store.dispatch('globalDataStore/callAdminAPI', {
+      const queryString = restcallutils.buildQueryString('/' + TTT.tenantName + '/tenants/' + TTT.selectedTenantName + '/tickettypes/' + TTT.selectedTicketTypeID + '/tickets', queryParams)
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
         path: queryString,
         method: 'get',
-        postdata: null,
-        callback: callback,
-        curPath: this.$router.history.current.path,
-        headers: undefined
+        postdata: undefined,
+        callback
       })
     },
     refresh () {
@@ -232,15 +271,7 @@ export default {
       })
     }
   },
-  computed: {
-    tablePersistSettings: {
-      get () {
-        return this.$store.getters['tablePersistStore/tableStttings'](this.persistantSettingsSlot, this.defaultDisplayedColumns)
-      }
-    }
-  },
   mounted () {
-    // once mounted, we need to trigger the initial server data fetch
     this.refresh()
   }
 }

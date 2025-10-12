@@ -12,19 +12,24 @@
 </style>
 
 <script>
+import { useGlobalValsStore } from 'stores/globalValsStore'
 import TicketTypesTable from '../components/TicketTypesTable'
 
 export default {
-  name: 'TicketTypesPage',
+  name: 'PageTicketTypes',
   components: {
     TicketTypesTable
   },
-  data () {
+  setup () {
+    const globalValsStore = useGlobalValsStore()
     return {
+      globalValsStore
     }
   },
+  methods: {
+  },
   mounted () {
-    this.$store.commit('globalDataStore/SET_PAGE_TITLE', 'Ticket types for ' + this.$route.params.selTenantNAME)
+    this.globalValsStore.pageTitle = 'Ticket types for ' + this.$route.params.selTenantNAME
   }
 }
 </script>

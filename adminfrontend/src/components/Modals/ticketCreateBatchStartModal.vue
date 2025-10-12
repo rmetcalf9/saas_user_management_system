@@ -1,56 +1,73 @@
 <template>
   <q-dialog v-model="visible">
-    <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
-      <q-header class="bg-primary">
-        <q-toolbar>
-          <q-toolbar-title>
-            Create batch of tickets for {{ tenantName }} of type {{ ticketTypeName }}
-          </q-toolbar-title>
-          <q-btn flat v-close-popup round dense icon="close" />
-        </q-toolbar>
-      </q-header>
+    <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+      <!-- Header -->
+      <q-toolbar class="bg-primary text-white">
+        <q-toolbar-title>
+          Create batch of tickets for {{ tenantName }} of type {{ ticketTypeName }}
+        </q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
 
-      <q-page-container>
-        <q-page padding>
-          Enter a comma seperated list of foreign keys for the tickets that need to be created.
-          <q-input v-model="text" @keyup.enter="ok" ref="textInput" label="Text" :label-width="3" />
-          (Your list contains {{ numberOfForeignKeys }} keys)<br>
-          <p class="text-negative" v-if="repeatedKeys.length > 0">Repeated keys in input: {{ repeatedKeys }}</p>
-          <q-select
-            outlined v-model="foreignKeyDupAction"
-            :options="foreignKeyDupActionOptions"
-            label="Action to take for existing keys"
-            :display-value="foreignKeyDupAction.label"
-          >
-            <template v-slot:option="scope">
-              <q-item
-                v-bind="scope.itemProps"
-                v-on="scope.itemEvents"
-              >
-                <q-item-section>
-                  <q-item-label v-html="scope.opt.label" />
-                  <q-item-label caption>{{ scope.opt.description }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <div>&nbsp;</div>
-          <q-btn
-            @click="ok"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-            :disabled='okDisabled'
-          />
-          <q-btn
-            @click="cancel"
-            label="Cancel"
-            class = "float-right"
-          />
-        </q-page>
-      </q-page-container>
+      <!-- Scrollable body -->
+      <q-card-section style="flex: 1; overflow-y: auto;">
+        <div class="q-mb-md">
+          Enter a comma separated list of foreign keys for the tickets that need to be created.
+        </div>
 
-    </q-layout>
+        <q-input
+          v-model="text"
+          @keyup.enter="ok"
+          ref="textInput"
+          label="Text"
+          :label-width="3"
+        />
+
+        <div class="q-mt-sm">(Your list contains {{ numberOfForeignKeys }} keys)</div>
+
+        <p class="text-negative q-mt-sm" v-if="repeatedKeys.length > 0">
+          Repeated keys in input: {{ repeatedKeys }}
+        </p>
+
+        <q-select
+          outlined
+          v-model="foreignKeyDupAction"
+          :options="foreignKeyDupActionOptions"
+          label="Action to take for existing keys"
+          :display-value="foreignKeyDupAction.label"
+          class="q-mt-md"
+        >
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section>
+                <q-item-label>{{ scope.opt.label }}</q-item-label>
+                <q-item-label caption>{{ scope.opt.description }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+      </q-card-section>
+
+      <!-- Footer -->
+      <q-separator />
+      <q-card-actions
+        align="right"
+        class="bg-grey-2"
+        style="position: sticky; bottom: 0; z-index: 1;"
+      >
+        <q-btn
+          @click="ok"
+          color="primary"
+          label="Ok"
+          class="q-ml-xs"
+          :disabled="okDisabled"
+        />
+        <q-btn
+          @click="cancel"
+          label="Cancel"
+        />
+      </q-card-actions>
+    </q-card>
   </q-dialog>
 </template>
 
@@ -96,7 +113,7 @@ export default {
       this.visible = false
     },
     launchDialog ({ callerData, ticketTypeData }) {
-      var TTT = this
+      const TTT = this
       this.text = ''
       this.callerData = callerData
       // console.log(ticketTypeData)
@@ -112,9 +129,9 @@ export default {
   },
   computed: {
     keyList () {
-      var list = []
-      this.text.split(',').map(function (text) {
-        var key = text.trim()
+      const list = []
+      this.text.split(',').forEach(function (text) {
+        const key = text.trim()
         if (key !== '') {
           list.push(key)
         }
@@ -125,10 +142,10 @@ export default {
       return this.keyList.length
     },
     repeatedKeys () {
-      var ret = []
-      var items = {}
-      this.text.split(',').map(function (text) {
-        var key = text.trim().toUpperCase()
+      const ret = []
+      const items = {}
+      this.text.split(',').forEach(function (text) {
+        const key = text.trim().toUpperCase()
         if (key !== '') {
           if (typeof (items[key]) !== 'undefined') {
             ret.push(key)

@@ -10,18 +10,19 @@
       <q-item>
         <q-item-section >
           <q-item-label>Roles:</q-item-label>
-          <q-item-label caption v-for="curVal in loggedInUserCookie.ThisTenantRoles" :key=curVal>{{ curVal }}</q-item-label>
+          <div v-for="curRole in loggedInUserCookie.ThisTenantRoles" :key=curRole>
+            <q-item-label caption>{{ curRole }}</q-item-label>
+          </div>
         </q-item-section>
       </q-item>
       <q-item>
         <q-item-section >
           <q-item-label>Other:</q-item-label>
           <q-item-label caption >
-            <q-btn
-              color="primary"
-              @click="securitySettingsClick"
-              label="Security Settings"
+            <saasUsermanagementLoginItem
+              viewstyle="securitysettingsbutton"
             />
+            <div>Note: doesn't work when running locally since relies on cookie and won't read across different domain.</div>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -41,27 +42,35 @@
   </q-page>
 </template>
 
-<style>
-</style>
-
 <script>
 import { Cookies } from 'quasar'
 import rjmversion from '../rjmversion'
+import saasUsermanagementLoginItem from '../components/saasUsermanagementLoginItem.vue'
+
 export default {
-  name: 'PageIndex',
-  methods: {
-    securitySettingsClick () {
-      this.$store.commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', this.$router.currentRoute.path)
-      this.$router.replace('/' + this.$route.params.tenantName + '/SecuritySettings')
-    }
+  name: 'PageUserSettings',
+  components: {
+    saasUsermanagementLoginItem
   },
   computed: {
     loggedInUserCookie () {
-      return Cookies.get('usersystemUserCredentials')
+      // saasUserManagementClientStoreCredentials
+      return Cookies.get('saasUserManagementClientStoreCredentials')
     },
     codebasever () {
       return rjmversion.codebasever
+    },
+    securitySettingsUrl () {
+      return 'AAA'
+    }
+  },
+  methods: {
+    securitySettingsClick () {
+      this.$router.replace('/' + this.$route.params.tenantName + '/SecuritySettings')
     }
   }
 }
 </script>
+
+<style>
+</style>

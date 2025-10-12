@@ -8,21 +8,21 @@
   </q-page>
 </template>
 
-<style>
-</style>
-
 <script>
 import UsersTable from '../components/UsersTable'
 
 export default {
   name: 'PageUsers',
-  methods: {
-    clickSingleUser (props) {
-      this.$router.push('/' + this.$route.params.tenantName + '/users/' + props.row.UserID)
-    }
-  },
   components: {
     UsersTable
+  },
+  methods: {
+    clickSingleUser (props) {
+      this.$router.push('/' + this.$route.params.tenantName + '/users/' + props.UserID)
+    }
   }
 }
 </script>
+
+<style>
+</style>

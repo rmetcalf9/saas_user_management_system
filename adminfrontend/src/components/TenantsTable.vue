@@ -3,24 +3,25 @@
     title='Tenants'
     :rows-per-page-options="tableRowsPerPageOptions"
     :loading="tableLoading"
-    :data="tableData"
+    :rows="tableData"
     :columns="tableColumns"
     @request="request"
     row-key="Name"
     :visible-columns="tablePersistSettings.visibleColumns"
     :filter="tablePersistSettings.filter"
-    :pagination.sync="tablePersistSettings.serverPagination"
+    :pagination="tablePersistSettings.serverPagination"
   >
-      <template slot="top-left" slot-scope="props">
+      <template v-slot:top-left>
         <q-btn
           color="primary"
           push
           @click="openCreateTenantModalDialog"
         >Add Tenant</q-btn>
       </template>
-      <template slot="top-right" slot-scope="props">
-        <selectColumns
-          v-model="tablePersistSettings.visibleColumns"
+      <template v-slot:top-right>
+        <SelectColumns
+          :selected_col_names="tablePersistSettings_visiblecols"
+          @update:selected_col_names="(newVal) => tablePersistSettings_visiblecols = newVal"
           :columns="tableColumns"
         />
         &nbsp;
@@ -34,20 +35,26 @@
             <q-icon name="search" />
           </template>
         </q-input>
-
       </template>
-
-      <q-td  slot="body-cell-Name" slot-scope="props" :props="props">
-        <q-btn flat no-caps dense :label="props.value" @click="clickSingleTenantCallbackFN(props)" width="100%"/>
-      </q-td>
-
-      <q-td  slot="body-cell-JWTCollectionAllowedOriginList" slot-scope="props" :props="props">
-        {{ props.value }}
-      </q-td>
-
-      <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="clickSingleTenantCallbackFN(props)" />
-      </q-td>
+      <template v-slot:body="props">
+        <q-tr :props="props" @click="clickSingleTenantCallbackFN(props.row)">
+          <q-td key="Name" :props="props">
+            {{ props.row.Name }}
+          </q-td>
+          <q-td key="Description" :props="props">
+            {{ props.row.Description }}
+          </q-td>
+          <q-td key="AllowUserCreation" :props="props">
+            {{ props.row.AllowUserCreation }}
+          </q-td>
+          <q-td key="JWTCollectionAllowedOriginList" :props="props">
+            {{ props.row.JWTCollectionAllowedOriginList }}
+          </q-td>
+          <q-td key="..." :props="props">
+            <q-btn flat color="primary" icon="keyboard_arrow_right" label="" />
+          </q-td>
+        </q-tr>
+      </template>
   </q-table>
 </div></template>
 
@@ -55,7 +62,10 @@
 import { Notify } from 'quasar'
 import restcallutils from '../restcallutils'
 import callbackHelper from '../callbackHelper'
-import selectColumns from '../components/selectColumns'
+import SelectColumns from '../components/SelectColumns'
+import saasApiClientCallBackend from '../saasAPiClientCallBackend'
+import { useTablePersistSettingsStore } from 'stores/tablePersistSettingsStore'
+import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 
 export default {
   // name: 'TenantsTable',
@@ -65,7 +75,15 @@ export default {
     'clickSingleTenantCallback'
   ],
   components: {
-    selectColumns
+    SelectColumns
+  },
+  setup () {
+    const tablePersistSettingsStore = useTablePersistSettingsStore()
+    const userManagementClientStoreStore = useUserManagementClientStoreStore()
+    return {
+      tablePersistSettingsStore,
+      userManagementClientStoreStore
+    }
   },
   data () {
     return {
@@ -88,20 +106,15 @@ export default {
       }
     },
     request ({ pagination, filter }) {
-      var TTT = this
+      const TTT = this
       TTT.tableLoading = true
-      var callback = {
+      const callback = {
         ok: function (response) {
-          // console.log(response.data.guid)
           TTT.tableLoading = false
-          // updating pagination to reflect in the UI
           TTT.tablePersistSettings.serverPagination = pagination
-          // we also set (or update) rowsNumber
           TTT.tablePersistSettings.serverPagination.rowsNumber = response.data.pagination.total
           TTT.tablePersistSettings.serverPagination.filter = filter
           TTT.tablePersistSettings.serverPagination.rowsPerPage = response.data.pagination.pagesize
-          // TODO ??? change when we have a store dataTableSettings.commit('JOBS', TTT.tablePersistSettings)
-          // then we update the rows with the fetched ones
           TTT.tableData = response.data.result
         },
         error: function (error) {
@@ -112,38 +125,39 @@ export default {
       if (pagination.page === 0) {
         pagination.page = 1
       }
-      var queryParams = []
+      const queryParams = []
       if (filter !== null) {
         if (filter !== '') {
-          queryParams['query'] = filter
+          queryParams.query = filter
         }
       }
       if (pagination.rowsPerPage !== 0) {
-        queryParams['pagesize'] = pagination.rowsPerPage.toString()
-        queryParams['offset'] = (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        queryParams.pagesize = pagination.rowsPerPage.toString()
+        queryParams.offset = (pagination.rowsPerPage * (pagination.page - 1)).toString()
       }
       if (pagination.sortBy !== null) {
-        var postfix = ''
+        let postfix = ''
         if (pagination.descending) {
           postfix = ':desc'
         }
-        queryParams['sort'] = pagination.sortBy + postfix
+        queryParams.sort = pagination.sortBy + postfix
       }
-      var queryString = restcallutils.buildQueryString('/tenants', queryParams)
-      this.$store.dispatch('globalDataStore/callAdminAPI', {
+      const queryString = restcallutils.buildQueryString('/' + TTT.tenantName + '/tenants', queryParams)
+      saasApiClientCallBackend.callApi({
+        prefix: 'admin',
+        router: this.$router,
+        store: this.userManagementClientStoreStore,
         path: queryString,
         method: 'get',
-        postdata: null,
-        callback: callback,
-        curPath: this.$router.history.current.path,
-        headers: undefined
+        postdata: undefined,
+        callback
       })
     },
     openCreateTenantModalDialog () {
-      var TTT = this
-      var callback = {
+      const TTT = this
+      const callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', message: 'Tenant created'})
+          Notify.create({ color: 'positive', message: 'Tenant created' })
           setTimeout(function () {
             TTT.refresh()
           }, 400)
@@ -162,19 +176,30 @@ export default {
         cancel: true,
         color: 'secondary'
       }).onOk(data => {
-        var postdata = {
-          'Name': data,
-          'Description': '',
-          'AllowUserCreation': false
+        if (!data || !data.trim()) {
+          // Show an alert or error, and prevent the dialog from closing
+          this.$q.notify({
+            type: 'negative',
+            message: 'Tenant name cannot be empty!'
+          })
+          // Re-open the dialog
+          this.openCreateTenantModalDialog() // assuming you wrap this in a function
+        } else {
+          const postdata = {
+            Name: data,
+            Description: '',
+            AllowUserCreation: false
+          }
+          saasApiClientCallBackend.callApi({
+            prefix: 'admin',
+            router: this.$router,
+            store: this.userManagementClientStoreStore,
+            path: '/' + TTT.tenantName + '/tenants',
+            method: 'post',
+            postdata,
+            callback
+          })
         }
-        this.$store.dispatch('globalDataStore/callAdminAPI', {
-          path: '/tenants',
-          method: 'post',
-          postdata: postdata,
-          callback: callback,
-          curPath: this.$router.history.current.path,
-          headers: undefined
-        })
       })
     },
     refresh () {
@@ -185,9 +210,23 @@ export default {
     }
   },
   computed: {
+    tenantName () {
+      return this.$route.params.tenantName
+    },
     tablePersistSettings: {
       get () {
-        return this.$store.getters['tablePersistStore/tableStttings'](this.persistantSettingsSlot, this.defaultDisplayedColumns)
+        return this.tablePersistSettingsStore.getTableSettings(
+          this.persistantSettingsSlot,
+          this.defaultDisplayedColumns
+        )
+      }
+    },
+    tablePersistSettings_visiblecols: {
+      get () {
+        return this.tablePersistSettings.visibleColumns
+      },
+      set (val) {
+        this.tablePersistSettings.visibleColumns = val
       }
     }
   },

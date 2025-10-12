@@ -54,7 +54,7 @@ export default {
       return this.$refs[styleName + 'UI']
     },
     ok () {
-      var TTT = this
+      const TTT = this
       // Validation checks
       if (TTT.text !== TTT.expectedText) {
         Notify.create({ color: 'negative', message: 'You did not type ' + TTT.expectedText })
@@ -68,7 +68,7 @@ export default {
       this.visible = false
     },
     launchDialog (message, title, expectedText, callerData) {
-      var TTT = this
+      const TTT = this
       this.message = message
       this.text = ''
       this.expectedText = expectedText

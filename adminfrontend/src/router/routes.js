@@ -1,103 +1,292 @@
-import stores from '../store/index.js'
+import saasApiClient from '../saasAplClient'
+import { getRjmStateChangeObj } from '../stores/saasUserManagementClientStore'
+import { useGlobalValsStore } from 'stores/globalValsStore'
 import { Cookies } from 'quasar'
-import shared from '../sharedFns.js'
+import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
-function directToFrontend (to, from, next, message = undefined, frontendPath = undefined) {
-  var thisQuasarPath = to.path
-  var logoutClickCurRoute = stores().state.globalDataStore.logoutClickCurRoute
-  if (typeof (logoutClickCurRoute) !== 'undefined') {
-    if (logoutClickCurRoute !== null) {
-      thisQuasarPath = logoutClickCurRoute
-    }
+const prodDomain = 'platform.challengeswipe.com'
+const preferredTenantName = 'usersystem'
+export const saasServiceName = 'saas_' + preferredTenantName
+const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantName + '/'
+
+function allowNotLoggedInForPath (tenantName, path) {
+  // All pages require login
+  // if (path === '/' + tenantName + '/') {
+  //  return true
+  // }
+  if (path === '/' + tenantName + '/debug') {
+    return true
   }
-  stores().commit('globalDataStore/SET_LOGOUT_CLICK_CUR_ROUTE', null)
-
-  shared.moveToFrontendUI(thisQuasarPath, message, frontendPath)
+  return false
 }
 
-function checkLoginNeeded (to, from, next) {
-  stores().commit('globalDataStore/updateTenantName', to.params.tenantName)
+function retrieveLoginFromCookieAndSaveToStateIfFound (rjmStateChange) {
+  if (!Cookies.has('saasUserManagementClientStoreCredentials')) {
+    return // no cookie so do nothing
+  }
+  const cookieData = Cookies.get('saasUserManagementClientStoreCredentials')
+  if (typeof (cookieData) === 'undefined') {
+    return // blanked cookie so do nothing (cookies are blanked when refresh fails)
+  }
+  if (typeof (cookieData.loginTenantName) === 'undefined') {
+    // require cookie to have the loginTenantName
+    return
+  }
+  if (cookieData.loginTenantName !== rjmStateChange.getFromState('loginService').tenantName) {
+    // do not accept a cookie without a loginTenantName that matches this one
+    return
+  }
+  rjmStateChange.executeAction('setLoginFromCookie', { cookieData })
+}
 
-  if (typeof (to.query.jwtretervialtoken) !== 'undefined') {
-    var fakeFirstCookie = {
-      jwtData: {
-        JWTToken: 'INVALID',
-        TokenExpiry: '2019-06-14T13:43:16.140755+00:00'
-      },
-      refresh: {
-        token: to.query.jwtretervialtoken,
-        TokenExpiry: null
-      }
-    }
-    // console.log('fakeFirstCookie:', JSON.stringify(fakeFirstCookie))
-    Cookies.set('usersystemUserCredentials', fakeFirstCookie, {expires: 1, path: '/'})
-    delete to.query.jwtretervialtoken
+function actionsForLoggedInUser ({ to, rjmStateChange }) {
+  // Empty function. Good place for loading logged in users details
+}
+
+function notLoggedInBeforeEnter (to, from, next, rjmStateChange) {
+  redirectionlogger('notLoggedInBeforeEnter')
+
+  const notLoggedInPath = '/' + to.params.tenantName + '/notloggedin'
+  const afterLoginPath = '/' + to.params.tenantName
+
+  const sendUserToNotLoggedInPage = function () {
+    sendUserToPage(to, next, notLoggedInPath, to.path)
+    sendUserToLogin(to, rjmStateChange)
+  }
+  const sendUserToDefaultAfterLoginPage = function () {
+    sendUserToPage(to, next, afterLoginPath)
   }
 
-  // console.log('Checking to see if login is needed')
-  var authCookieSet = Cookies.has('usersystemUserCredentials')
-  if (authCookieSet) {
-    // console.log('Already logged in')
-    // var cookie = Cookies.get('usersystemUserCredentials')
-    // var jwtTokenData = cookie.jwtData
-    // var refreshTokenData = cookie.refresh
-    // console.log('Cookie Val:', cookie)
-    // console.log('JWT Val:', jwtTokenData)
-    // console.log('refresh Val:', refreshTokenData)
+  const callback = {
+    ok: function (response) {
+      // At this point the retervial token and cookie has been read to see if user is logged in
+
+      // console.log('sendUserToNotLoggedInPage callback OK')
+      // Rather than check if user is logged in check they have the role hasaccount
+
+      const hasAccount = rjmStateChange.getFromState('hasRole')('hasaccount')
+      if (hasAccount) {
+        if (to.path === notLoggedInPath) {
+          console.log('about to sendUserToDefaultAfterLoginPage', to.path)
+          sendUserToDefaultAfterLoginPage()
+          return
+        } else {
+          actionsForLoggedInUser({ to, rjmStateChange })
+          next()
+          return
+        }
+      }
+
+      // At this point we know the user has no login credentials
+      if (allowNotLoggedInForPath(to.params.tenantName, to.path)) {
+        redirectionlogger('notLoggedInBeforeEnter - page is allowed for not logged in user')
+        next()
+        return
+      }
+      sendUserToNotLoggedInPage()
+      console.log('sendUserToNotLoggedInPage callback OK END')
+    },
+    error: function (response) {
+      console.log('ERROR router.js fds43 ERR', response)
+      sendUserToNotLoggedInPage()
+    }
+  }
+
+  if (typeof (to.query.jwtretervialtoken) === 'undefined') {
+    // console.log('Checking for logon cookie')
+    if (rjmStateChange.getFromState('loginService').processState !== 0) return
+    retrieveLoginFromCookieAndSaveToStateIfFound(rjmStateChange)
+    callback.ok('')
+  } else {
+    redirectionlogger('Detected return from login')
+    // gtm not deployed yet
+    // gtm.logEvent('login', 'LoginComplete', 'Done', 0)
+    rjmStateChange.executeAction('processRecievedJWTretervialtoken', {
+      jwtretervialtoken: to.query.jwtretervialtoken,
+      callback,
+      curpath: to.path,
+      startAllBackendCallQueuesFn: saasApiClientServerRequestQueue.getStartAllBackendCallQueuesFn({ curpath: to.path })
+    })
+  }
+}
+
+function globalBeforeEnter (to, from, next, callSrc) {
+  redirectionlogger('globalBeforeEnter topath=' + to.path + ' source of globalBeforeEnter=' + callSrc)
+
+  const x = redirectToProperDomain()
+  if (x.wasRedirected) return
+  if (redirectToURLWithExpandedCampaignParams()) return
+
+  const rjmStateChange = getRjmStateChangeObj()
+
+  saasApiClient.registerEndpointsWithStore({
+    saasServiceName,
+    getRjmStateChangeFn: getRjmStateChangeObj,
+    prodDomain,
+    runtype: x.runtype,
+    tenantName: to.params.tenantName,
+    doneFn: function () {
+      saasApiClient.startEndpointIdentificationProcess({
+        endpointName: saasServiceName,
+        getRjmStateChangeFn: getRjmStateChangeObj
+      })
+    }
+  })
+  const rjmStateChange2 = getRjmStateChangeObj()
+  if (rjmStateChange2.getFromState('isLoggedIn')) {
+    actionsForLoggedInUser({ to, rjmStateChange })
+    next()
+  } else {
+    notLoggedInBeforeEnter(to, from, next, rjmStateChange)
+  }
+}
+
+function redirectToURLWithExpandedCampaignParams () {
+  const redirectUTMSource = 'defaulttenant'
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.has('l')) {
+    // Auto tag an internal campaign
+    const newLocation = 'https://' + prodDomain + '/?utm_source=' + redirectUTMSource + '&utm_medium=' + urlParams.get('l') + '&utm_campaign=Internal%20app%20Share'
+    redirectionlogger('redirectToURLWithExpandedCampaignParams->HREF(' + newLocation + ')')
+    window.location.href = newLocation
+    return true
+  }
+  return false
+}
+
+function sendUserToPage (to, next, targetPage, requestedPage) {
+  if (to.path === targetPage) {
+    // console.log('a')
+    redirectionlogger('sendUserToPage->next()')
     next()
     return
   }
-
-  directToFrontend(to, from, next)
+  if (typeof (requestedPage) !== 'undefined') {
+    targetPage = targetPage + '?requestedPage=' + requestedPage
+  }
+  // console.log('AAA:', targetPage)
+  redirectionlogger('sendUserToPage->next(' + targetPage + ')')
+  next({
+    path: targetPage
+  })
 }
 
-function beforeEnterMainIndexChildPage (to, from, next, pageTitle) {
-  // console.log('beforeEnterMainIndexChildPage')
-  stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
-  return checkLoginNeeded(to, from, next)
+function sendUserToLogin (to, rjmStateChange) {
+  const returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + '#' + to.path
+  window.location.href = rjmStateChange.getFromState('getLoginUIURLFn')(undefined, '/', returnAddress)
 }
 
-function logoutPageFn (to, from, next, pageTitle) {
-  stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
-  directToFrontend(to, from, next)
-}
-function SecuritySettingsPageFn (to, from, next, pageTitle) {
-  stores().commit('globalDataStore/SET_PAGE_TITLE', pageTitle)
+function redirectToProperDomain () {
+  // return
+  // {
+  //   wasRedirected: true if redirection is required, false otherwise
+  //   runtype: 'proddomain' - if running in prodDomain, 'prodapi' if running in api.metcarob.com, 'dev' otherwise
+  // }
+  // host api.metcarob.com can never be http - kong will block
+  // host www.thumbsum.co must be moved non-www and https if not already
+  // host thumbsum.co must be moved to https if not
+  // console.log('location.protocol:', location.protocol)
+  // console.log('location.hostname:', location.hostname)
+  const subDomainsToRedirectFrom = ['www']
+  let runtype = 'dev'
+  const arrayLength = subDomainsToRedirectFrom.length
+  for (let i = 0; i < arrayLength; i++) {
+    if (location.hostname === subDomainsToRedirectFrom[i] + '.' + prodDomain) {
+      redirectionlogger('redirectToProperDomain 1->HREF(' + preferredFullLocation + ')')
+      window.location.href = preferredFullLocation
+      return { wasRedirected: true }
+    }
+  }
 
-  directToFrontend(to, from, next, undefined, '/SecuritySettings')
+  if (location.hostname === prodDomain) {
+    if (location.protocol === 'http:') {
+      redirectionlogger('redirectToProperDomain 2->HREF(' + preferredFullLocation + ')')
+      window.location.href = preferredFullLocation
+      return { wasRedirected: true }
+    }
+    runtype = 'proddomain'
+  } else { // not prod domain
+    if (location.hostname === 'api.metcarob.com') {
+      runtype = 'prodapi'
+    } else {
+      if (location.hostname !== 'localhost') {
+        if (location.hostname !== 'localhost:8080') {
+          if (location.hostname !== '127.0.0.1') {
+            if (location.hostname !== '127.0.0.1:8080') {
+              // May be someone else hosting this code
+              redirectionlogger('redirectToProperDomain 3->HREF(' + preferredFullLocation + ')')
+              window.location.href = preferredFullLocation
+              return { wasRedirected: true }
+            }
+          }
+        }
+      }
+    }
+  }
+  return { wasRedirected: false, runtype }
+}
+
+const logger = function (msg, messagetype) {
+  let log = true
+  if (messagetype === 'redirect') {
+    log = true
+  }
+  if (log) {
+    console.log(messagetype, ':', msg)
+  }
+}
+const redirectionlogger = function (msg) {
+  logger(msg, 'redirect')
+}
+
+function redirectToDefaultTenant (to, from, next) {
+  redirectionlogger('redirectToDefaultTenant')
+  const x = redirectToProperDomain()
+  if (x.wasRedirected) return
+  if (redirectToURLWithExpandedCampaignParams()) return
+  // window.location.href = window.location.href + preferredTenantName + '/'
+  redirectionlogger('redirectToDefaultTenant - about to call sendUserToPage')
+  sendUserToPage(to, next, '/' + preferredTenantName + '/')
+}
+
+function getGlobalBeforeEnterFn (callSrc) {
+  return function (to, from, next) {
+    redirectionlogger('S-Start of GlobalBeforeEnterFn:' + callSrc)
+    const globalValStore = useGlobalValsStore()
+    globalValStore.pageTitle = callSrc
+    globalBeforeEnter(to, from, next, callSrc)
+    redirectionlogger('X-End of GlobalBeforeEnterFn:' + callSrc)
+  }
 }
 
 const routes = [
   {
-    path: '/', redirect: '/usersystem/'
+    path: '/',
+    beforeEnter: redirectToDefaultTenant
   },
   {
     path: '/:tenantName/',
-    component: () => import('layouts/MyLayout.vue'),
-    beforeEnter: checkLoginNeeded,
+    component: () => import('layouts/MainLayout.vue'),
+    beforeEnter: getGlobalBeforeEnterFn('main'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') },
-      { path: 'tenants', component: () => import('pages/Tenants.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Tenants') } },
-      { path: 'tenants/:selTenantNAME', component: () => import('pages/Tenant.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Tenant') } },
-      { path: 'tenants/:selTenantNAME/tickettypes', component: () => import('pages/TicketTypes.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Ticket Types') } },
-      { path: 'tenants/:selTenantNAME/tickettypes/:selTicketTypeID', component: () => import('pages/TicketType.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Ticket Type') } },
-      { path: 'users/:selUserID', component: () => import('pages/User.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'User') } },
-      { path: 'users', component: () => import('pages/Users.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Users') } },
-      { path: 'persons', component: () => import('pages/Persons.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Persons') } },
-      { path: 'persons/:selPerGUID', component: () => import('pages/Person.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'Person') } },
-      { path: 'usersettings', component: () => import('pages/UserSettings.vue'), beforeEnter: function fn (to, from, next) { beforeEnterMainIndexChildPage(to, from, next, 'User Settings') } },
-      { path: 'logout', beforeEnter: function fn (to, from, next) { logoutPageFn(to, from, next, 'Logout') } },
-      { path: 'SecuritySettings', beforeEnter: function fn (to, from, next) { SecuritySettingsPageFn(to, from, next, 'Security Settings') } }
+      { path: '', component: () => import('pages/IndexPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Index') },
+      { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Debug') },
+      { path: 'persons', name: 'Persons', component: () => import('pages/Persons.vue'), beforeEnter: getGlobalBeforeEnterFn('Persons') },
+      { path: 'persons/:selPerGUID', component: () => import('pages/Person.vue'), beforeEnter: getGlobalBeforeEnterFn('Person') },
+      { path: 'tenants', name: 'Tenants', component: () => import('pages/Tenants.vue'), beforeEnter: getGlobalBeforeEnterFn('Tenants') },
+      { path: 'tenants/:selTenantNAME', component: () => import('pages/Tenant.vue'), beforeEnter: getGlobalBeforeEnterFn('Tenant') },
+      { path: 'tenants/:selTenantNAME/tickettypes', component: () => import('pages/TicketTypes.vue'), beforeEnter: getGlobalBeforeEnterFn('Ticket Types') },
+      { path: 'tenants/:selTenantNAME/tickettypes/:selTicketTypeID', component: () => import('pages/TicketType.vue'), beforeEnter: getGlobalBeforeEnterFn('Ticket Type') },
+      { path: 'users', name: 'Users', component: () => import('pages/Users.vue'), beforeEnter: getGlobalBeforeEnterFn('Users') },
+      { path: 'users/:selUserID', component: () => import('pages/User.vue'), beforeEnter: getGlobalBeforeEnterFn('User') },
+      { path: 'usersettings', name: 'User Settings', component: () => import('pages/UserSettings.vue'), beforeEnter: getGlobalBeforeEnterFn('User Settings') }
     ]
+  },
+
+  {
+    path: '/:catchAll(.*)*',
+    component: () => import('pages/ErrorNotFound.vue')
   }
 ]
-
-// Always leave this as last one
-if (process.env.MODE !== 'ssr') {
-  routes.push({
-    path: '*',
-    component: () => import('pages/Error404.vue')
-  })
-}
 
 export default routes

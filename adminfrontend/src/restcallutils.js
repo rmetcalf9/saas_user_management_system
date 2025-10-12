@@ -13,12 +13,12 @@ function buildQueryString (prefix, params) {
   if (typeof (params) === 'undefined') {
     return prefix
   }
-  var str = ''
+  let str = ''
   // opted against this method because it allows mutiple values for same key
   // params.map(function (item) {
   //  str = insertString(str, item.name, item.value)
   // })
-  for (var x in params) {
+  for (const x in params) {
     str = insertString(str, x, params[x])
   }
   return prefix + str

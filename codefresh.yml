@@ -33,7 +33,8 @@ steps:
       - export JWT_COOKIE_NAME="jwt-auth-token"
       - export AUTHED_ACL_WHITELIST="saas_user_management"
       - export AUTHED_ACL_BLACKLIST=""
-      - export RJM_BUILDQUASARAPP_IMAGE="metcarob/docker-build-quasar-app:0.0.12"
+      - export RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND="metcarob/docker-build-quasar-app:0.0.33"
+      - export RJM_BUILDQUASARAPP_IMAGE_FRONTEND="metcarob/docker-build-quasar-app:0.0.12"
       - export RJM_DOCKERWSCALLER_IMAGE="metcarob/docker-ws-caller:0.7.19"
       - export RJM_DOCKER_KONG_API_URL="http://tasks.kong:8001"
       - export RJM_PYTHON_TEST_IMAGE="python:3.10"
@@ -47,7 +48,8 @@ steps:
       - cf_export JWT_COOKIE_NAME="${JWT_COOKIE_NAME}"
       - cf_export AUTHED_ACL_WHITELIST="${AUTHED_ACL_WHITELIST}"
       - cf_export AUTHED_ACL_BLACKLIST="${AUTHED_ACL_BLACKLIST}"
-      - cf_export RJM_BUILDQUASARAPP_IMAGE="${RJM_BUILDQUASARAPP_IMAGE}"
+      - cf_export RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND="${RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND}"
+      - cf_export RJM_BUILDQUASARAPP_IMAGE_FRONTEND="${RJM_BUILDQUASARAPP_IMAGE_FRONTEND}"
       - cf_export RJM_DOCKERWSCALLER_IMAGE="${RJM_DOCKERWSCALLER_IMAGE}"
       - cf_export RJM_DOCKER_KONG_API_URL="${RJM_DOCKER_KONG_API_URL}"
       - cf_export RJM_PYTHON_TEST_IMAGE="${RJM_PYTHON_TEST_IMAGE}"
@@ -67,7 +69,7 @@ steps:
   compile_frontend:
     stage: build
     description: Compile the frontend quasar application
-    image: ${{RJM_BUILDQUASARAPP_IMAGE}}
+    image: ${{RJM_BUILDQUASARAPP_IMAGE_FRONTEND}}
     working_directory: ${{main_clone}}
     commands:
       - build_quasar_app ./frontend spa ${{RJM_VERSION}}
@@ -75,7 +77,7 @@ steps:
   compile_adminfrontend:
     stage: build
     description: Compile the adminfrontend quasar application
-    image: ${{RJM_BUILDQUASARAPP_IMAGE}}
+    image: ${{RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND}}
     working_directory: ${{main_clone}}
     commands:
       - build_quasar_app ./adminfrontend spa ${{RJM_VERSION}}

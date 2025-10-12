@@ -1,36 +1,100 @@
 <template>
   <q-dialog v-model="visible">
-    <q-layout view="Lhh lpR fff" container class="bg-white" style="height: 400px; width: 700px; max-width: 80vw;">
-      <q-header class="bg-primary">
-        <q-toolbar>
-          <q-toolbar-title>
-            {{ title }}
-          </q-toolbar-title>
-          <q-btn flat v-close-popup round dense icon="close" />
-        </q-toolbar>
-      </q-header>
+    <q-card style="width: 700px; max-width: 80vw; max-height: 90vh; display: flex; flex-direction: column;">
+      <!-- Header -->
+      <q-toolbar class="bg-primary text-white">
+        <q-toolbar-title>{{ title }}</q-toolbar-title>
+        <q-btn flat v-close-popup round dense icon="close" />
+      </q-toolbar>
 
-      <q-page-container>
-        <q-page padding>
-        <q-input v-model="objData.ticketTypeName" ref="textInput" label="Ticket Type Name" :label-width="3" :error="invalid_ticketTypeName" :error-message="invalidlabel_ticketTypeName"  @input="registerChange" />
-        <q-input v-model="objData.description" label="Description" :label-width="3" :error="invalid_description" :error-message="invalidlabel_description"  @input="registerChange" />
-        <q-field helper="Enabled" :label-width="3">
-          <q-toggle v-model="objData.enabled" label="Enabled"  @input="registerChange" />
-          <q-toggle v-model="objData.allowUserCreation" label="Allow User Creation"  @input="registerChange" />
-        </q-field>
-        <q-input v-model="objData.issueDuration" type="number" label="Hours tickets are valid for after creation" @input="registerChange"
+      <!-- Scrollable Body -->
+      <q-card-section style="flex: 1; overflow-y: auto;">
+        <q-input
+          v-model="objData.ticketTypeName"
+          ref="textInput"
+          label="Ticket Type Name"
+          :label-width="3"
+          :error="invalid_ticketTypeName"
+          :error-message="invalidlabel_ticketTypeName"
+          @update:model-value="registerChange"
         />
-        <q-card>
+
+        <q-input
+          v-model="objData.description"
+          label="Description"
+          :label-width="3"
+          :error="invalid_description"
+          :error-message="invalidlabel_description"
+          @update:model-value="registerChange"
+        />
+
+        <q-field helper="Enabled" :label-width="3">
+          <q-toggle
+            v-model="objData.enabled"
+            label="Enabled"
+            @update:model-value="registerChange"
+          />
+          <q-toggle
+            v-model="objData.allowUserCreation"
+            label="Allow User Creation"
+            @update:model-value="registerChange"
+          />
+        </q-field>
+
+        <q-input
+          v-model="objData.issueDuration"
+          type="number"
+          label="Hours tickets are valid for after creation"
+          @update:model-value="registerChange"
+        />
+
+        <q-card flat bordered class="q-mt-md">
           <q-card-section>
             <div class="text-h6">Welcome Message</div>
-            <q-input v-model="objData.welcomeMessage.title" label="Title" :label-width="3" @input="registerChange" />
-            <q-input v-model="objData.welcomeMessage.body" label="Body" :label-width="3" @input="registerChange" />
-            <q-toggle v-model="objData.welcomeMessage.agreementRequired" label="Agreement Required" @input="registerChange" />
-            <q-input v-model="objData.welcomeMessage.okButtonText" label="Ok button text" :label-width="3" @input="registerChange" />
+            <q-input
+              v-model="objData.welcomeMessage.title"
+              label="Title"
+              :label-width="3"
+              @update:model-value="registerChange"
+            />
+            <q-input
+              v-model="objData.welcomeMessage.body"
+              label="Body"
+              :label-width="3"
+              @update:model-value="registerChange"
+            />
+            <q-toggle
+              v-model="objData.welcomeMessage.agreementRequired"
+              label="Agreement Required"
+              @update:model-value="registerChange"
+            />
+            <q-input
+              v-model="objData.welcomeMessage.okButtonText"
+              label="Ok button text"
+              :label-width="3"
+              @update:model-value="registerChange"
+            />
           </q-card-section>
         </q-card>
-        <q-input v-model="objData.postUseURL" label="post Use URL" :label-width="3" :error="invalid_postUseURL" :error-message="invalidlabel_postUseURL" @input="registerChange" />
-        <q-input v-model="objData.postInvalidURL" label="post Invalid URL" :label-width="3" :error="invalid_postInvalidURL" :error-message="invalidlabel_postInvalidURL"  @input="registerChange"/>
+
+        <q-input
+          v-model="objData.postUseURL"
+          label="Post Use URL"
+          :label-width="3"
+          :error="invalid_postUseURL"
+          :error-message="invalidlabel_postUseURL"
+          @update:model-value="registerChange"
+        />
+
+        <q-input
+          v-model="objData.postInvalidURL"
+          label="Post Invalid URL"
+          :label-width="3"
+          :error="invalid_postInvalidURL"
+          :error-message="invalidlabel_postInvalidURL"
+          @update:model-value="registerChange"
+        />
+
         <q-select
           label="Roles this ticket grants to users"
           v-model="objData.roles"
@@ -40,25 +104,30 @@
           input-debounce="0"
           @new-value="roleNewValue"
           @input="registerChange"
-        /> Roles this ticket grants to users
+        />
+        Roles this ticket grants to users
+      </q-card-section>
 
-          <div>&nbsp;</div>
-          <q-btn
-            @click="ok"
-            color="primary"
-            label="Ok"
-            class = "float-right q-ml-xs"
-            :disabled='okDisabled'
-          />
-          <q-btn
-            @click="cancel"
-            label="Cancel"
-            class = "float-right"
-          />
-        </q-page>
-      </q-page-container>
-
-    </q-layout>
+      <!-- Footer -->
+      <q-separator />
+      <q-card-actions
+        align="right"
+        class="bg-grey-2"
+        style="position: sticky; bottom: 0; z-index: 1;"
+      >
+        <q-btn
+          @click="ok"
+          color="primary"
+          label="Ok"
+          class="q-ml-xs"
+          :disabled="okDisabled"
+        />
+        <q-btn
+          @click="cancel"
+          label="Cancel"
+        />
+      </q-card-actions>
+    </q-card>
   </q-dialog>
 </template>
 
@@ -87,7 +156,7 @@ function getDefaultObjectData () {
 }
 
 export default {
-  // name: 'EditTicketTypeModal',
+  name: 'TicketTypesTable',
   data () {
     return {
       visible: false,
@@ -107,14 +176,14 @@ export default {
     },
     ok () {
       if (!this.changed) {
-        Notify.create({color: 'negative', message: 'No changes made'})
+        Notify.create({ color: 'negative', message: 'No changes made' })
         return
       }
       // var TTT = this
       // Validation checks
-      var x = this.invalidlabel_GLOB
+      const x = this.invalidlabel_GLOB
       if (typeof (x) !== 'undefined') {
-        Notify.create({color: 'negative', message: x})
+        Notify.create({ color: 'negative', message: x })
         return
       }
 
@@ -125,7 +194,7 @@ export default {
       this.visible = false
     },
     launchDialog ({ title, callerData, editingExisting, initialValues }) {
-      var TTT = this
+      const TTT = this
       this.title = title
       this.callerData = callerData
       this.editingExisting = editingExisting
@@ -144,7 +213,7 @@ export default {
         this.objData.allowUserCreation = initialValues.allowUserCreation
         this.objData.issueDuration = initialValues.issueDuration
         this.objData.roles = []
-        initialValues.roles.map(function (x) {
+        initialValues.roles.forEach(function (x) {
           TTT.objData.roles.push(x)
         })
         this.objData.postUseURL = initialValues.postUseURL
@@ -162,7 +231,7 @@ export default {
     },
     roleNewValue (val, done) {
       // if (val.length < 3) {
-      //  Notify.create({color: 'negative', message: 'Must have at least 3 characters'})
+      //  Notify.create({ color: 'negative', message: 'Must have at least 3 characters' })
       //  return
       // }
       done(val, 'add-unique')
@@ -213,8 +282,8 @@ export default {
     }
   }
 }
-
 </script>
 
 <style>
+
 </style>
