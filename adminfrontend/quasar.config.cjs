@@ -88,13 +88,15 @@ module.exports = configure(function (ctx) {
           .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
 
         // Force HTML plugin to use relative paths
-        chain.plugin('html')
-          .tap(args => {
-            if (args[0]) {
-              args[0].publicPath = ''
-            }
-            return args
-          })
+        if (chain.plugins.has('html')) {
+          chain.plugin('html')
+            .tap(args => {
+              if (args[0]) {
+                args[0].publicPath = ''
+              }
+              return args
+            })
+        }
       }
 
     },
