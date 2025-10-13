@@ -57,8 +57,13 @@ module.exports = configure(function (ctx) {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       // transpile: false,
-      publicPath: publicPathValue,
+      publicPath: './',
       // appBase: '',
+
+      extendWebpack(cfg) {
+        // Force webpack to output relative paths without leading slash
+        cfg.output.publicPath = ''
+      },
 
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
@@ -81,6 +86,15 @@ module.exports = configure(function (ctx) {
       chainWebpack (chain) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
+
+        // Force HTML plugin to use relative paths
+        chain.plugin('html')
+          .tap(args => {
+            if (args[0]) {
+              args[0].publicPath = ''
+            }
+            return args
+          })
       }
 
     },
