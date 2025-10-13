@@ -53,6 +53,11 @@ module.exports = configure(function (ctx) {
       // transpile: false,
       publicPath: './',
       appBase: '',
+      extendViteConf(viteConf, { isServer, isClient }) {
+        viteConf.base = ''  // override base
+        // or if you want './', you can try
+        // viteConf.base = './'
+      }      
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
