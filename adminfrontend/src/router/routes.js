@@ -6,7 +6,7 @@ import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
 const prodDomain = 'platform.challengeswipe.com'
 const preferredTenantName = 'usersystem'
-export const saasServiceName = 'saas_' + preferredTenantName
+export const saasServiceName = 'saas_user_management'
 const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantName + '/'
 
 function allowNotLoggedInForPath (tenantName, path) {
