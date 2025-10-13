@@ -79,6 +79,8 @@ steps:
     description: Compile the adminfrontend quasar application
     image: ${{RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND}}
     working_directory: ${{main_clone}}
+    environment:
+      - OVERRIDE_PUBLIC_PATH=saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/adminfrontend/    
     commands:
       - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 2048
 
