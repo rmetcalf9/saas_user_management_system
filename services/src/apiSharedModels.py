@@ -18,6 +18,12 @@ def getAuthProviderModel(appObj):
     'saltForPasswordHashing': fields.String(default=None,description='Salt that can be used for password hashing (Depends on auth method)')
   })
 
+def getTenantModelUserSessionSecurity(appObj):
+  return appObj.flastRestPlusAPIObject.model('TenantModelUserSessionSecurity', {
+    'JwtTokenTimeout': fields.Integer(default='-1', description='Duration a single JWT token will last'),
+    'RefreshTokenTimeout': fields.Integer(default='-1', description='Duration a refresh token will last (must be greater than JwtTokenTimeout)'),
+    'RefreshSessionTimeout': fields.Integer(default='-1', description='Duration before user forced to relogin (must be grater than RefreshTokenTimeout)')
+  })
 
 def getTenantModel(appObj):
   return appObj.flastRestPlusAPIObject.model('TenantInfo', {
@@ -29,6 +35,7 @@ def getTenantModel(appObj):
     'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
     'TenantBannerHTML': fields.String(default='', description='HTML displayed in select auth and login screens'),
     'SelectAuthMessage': fields.String(default='', description='Message displayed above buttons in select auth screen'),
+    'UserSessionSecurity': fields.Nested(getTenantModelUserSessionSecurity(appObj)),
     'ObjectVersion': fields.String(default='DEFAULT', description='Object version required to sucessfully preform updates')
   })
 

@@ -35,6 +35,12 @@ class tenantClass():
     if not "SelectAuthMessage" in self._mainDict:
       self._mainDict["SelectAuthMessage"] = "How do you want to verify who you are?"
 
+    if not "UserSessionSecurity" in self._mainDict:
+      self._mainDict["UserSessionSecurity"] = {
+        "JwtTokenTimeout": appObj.APIAPP_JWT_TOKEN_TIMEOUT,
+        "RefreshTokenTimeout": appObj.APIAPP_REFRESH_TOKEN_TIMEOUT,
+        "RefreshSessionTimeout": appObj.APIAPP_REFRESH_SESSION_TIMEOUT
+      }
 
     self._objectVersion = objectVersion
 

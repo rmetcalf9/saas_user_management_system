@@ -49,7 +49,12 @@ tenantWithNoAuthProviders = {
   "JWTCollectionAllowedOriginList": [httpOrigin],
   "TicketOverrideURL": "TESTOVER",
   "TenantBannerHTML": "<div>Test Val HTML</div>",
-  "SelectAuthMessage": "Select A Test Auth woohoo"
+  "SelectAuthMessage": "Select A Test Auth woohoo",
+  "UserSessionSecurity": {
+    "JwtTokenTimeout": 60,
+    "RefreshSessionTimeout": 2400,
+    "RefreshTokenTimeout": 240
+  }
 }
 sampleInternalAuthProv001_CREATE = {
   "guid": None,

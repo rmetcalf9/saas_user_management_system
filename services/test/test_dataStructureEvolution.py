@@ -23,6 +23,11 @@ Issue49_PreviousTenantExample = {
       'AllowLink': False, 'AllowUnlink': False, 'LinkText': 'Link Website Account',
       'ConfigJSON': {'userSufix': '@internalDataStore'}, 'saltForPasswordHashing': 'JDJiJDEyJGxYdGkzMlhENkxrd1lVbkx3LjF2aC4='
     }
+  },
+  "UserSessionSecurity": {
+    "JwtTokenTimeout": 60,
+    "RefreshSessionTimeout": 2400,
+    "RefreshTokenTimeout": 240
   }
 }
 AddTenantLoginCustomDisplay_PreviousTenantExample = {
