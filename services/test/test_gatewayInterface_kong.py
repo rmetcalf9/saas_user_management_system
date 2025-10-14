@@ -23,7 +23,7 @@ class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
       personGUID,
       'DUMMYcurrentlyUsedAuthProviderGuid',
       'DummyUserAuthKey',
-      MockTenantObj()
+      MockTenantObj(appObj)
     )
     generatedJWTToken = res['JWTToken']
     

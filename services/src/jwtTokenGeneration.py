@@ -15,7 +15,7 @@ def generateJWTToken(
   currentlyUsedAuthKey,
   tenantObj
 ):
-  expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_JWT_TOKEN_TIMEOUT))
+  expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(tenantObj.getJwtTokenTimeout()))
   if secret is None:
     raise Exception("Trying to generate a JWT Token without a secret being set")
   if key is None:

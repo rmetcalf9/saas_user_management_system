@@ -9,7 +9,9 @@ class tenantClass():
   _mainDict = None
   _jsonRepersentation = None
   _objectVersion = None
+  appObj = None
   def __init__(self, JSONRetrievedFromStore, objectVersion, appObj):
+    self.appObj = appObj
     self._mainDict = copy.deepcopy(JSONRetrievedFromStore)
 
     if not 'JWTCollectionAllowedOriginList' in self._mainDict:
@@ -99,3 +101,12 @@ class tenantClass():
 
   def getJWTCollectionAllowedOriginList(self):
     return self._mainDict["JWTCollectionAllowedOriginList"]
+
+  def getJwtTokenTimeout(self):
+    return self.appObj.APIAPP_JWT_TOKEN_TIMEOUT
+
+  def getRefreshTokenTimeout(self):
+    return self.appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
+
+  def getRefreshSessionTimeout(self):
+    return self.appObj.APIAPP_REFRESH_SESSION_TIMEOUT

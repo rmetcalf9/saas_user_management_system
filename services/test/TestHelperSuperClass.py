@@ -363,7 +363,7 @@ class testClassWithTestClient(testHelperSuperClass):
       personGUID,
       'DummyCurrentlyAuthedGUID',
       'DummyAuthKey',
-      MockTenantObj()
+      MockTenantObj(appObj)
     )['JWTToken']
 
   def getTenantDICT(self, tenantName):

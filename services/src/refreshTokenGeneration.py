@@ -37,7 +37,9 @@ class RefreshTokenManager():
     }
     self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, dataToStoreWithRefreshToken)
 
-    expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT))
+    print("DEBUG appObj.APIAPP_REFRESH_TOKEN_TIMEOUT", appObj.APIAPP_REFRESH_TOKEN_TIMEOUT)
+    print("DEBUG tenantObj.getRefreshTokenTimeout()", tenantObj.getRefreshTokenTimeout())
+    expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(tenantObj.getRefreshTokenTimeout()))
 
     return {
       'token': token,
@@ -55,7 +57,7 @@ class RefreshTokenManager():
 
     token = generateRandomRefreshToken(appObj)
     self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, val)
-    expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT))
+    expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(tenantObj.getRefreshTokenTimeout()))
 
 
     userAuthInfo = copy.deepcopy(val['userAuthInformationWithoutJWTorRefreshToken'])
