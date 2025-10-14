@@ -5,12 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
+      <change afterPath="$PROJECT_DIR$/services/test/MockTenantObj.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/apiKeyManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiKeyManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/jwtTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/jwtTokenGeneration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/refreshTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/refreshTokenGeneration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_gatewayInterface_kong.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_gatewayInterface_kong.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_refreshTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_refreshTokenGeneration.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -473,5 +478,15 @@
     <MESSAGE value="Input filtering for apitickets" />
     <MESSAGE value="Tenant properties added for custom html" />
     <option name="LAST_COMMIT_MESSAGE" value="Tenant properties added for custom html" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/services/test/test_gatewayInterface_kong.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

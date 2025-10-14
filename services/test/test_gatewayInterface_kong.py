@@ -4,6 +4,9 @@ from baseapp_for_restapi_backend_with_swagger import decodeJWTToken
 from jwtTokenGeneration import generateJWTToken
 from appObj import appObj
 
+from MockTenantObj import MockTenantObj
+
+
 class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
   def test_genericTests(self):
     
@@ -12,7 +15,16 @@ class test_kongGateway(testHelperAPIClientUsingKongStaticGateway):
     }
 
     personGUID = "FAKE"
-    res = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID, 'DUMMYcurrentlyUsedAuthProviderGuid', 'DummyUserAuthKey')
+    res = generateJWTToken(
+      appObj,
+      userDict,
+      appObj.APIAPP_JWTSECRET,
+      userDict['UserID'],
+      personGUID,
+      'DUMMYcurrentlyUsedAuthProviderGuid',
+      'DummyUserAuthKey',
+      MockTenantObj()
+    )
     generatedJWTToken = res['JWTToken']
     
     jwtSecret = appObj.APIAPP_JWTSECRET

@@ -1,0 +1,4 @@
+
+
+class MockTenantObj():
+    pass

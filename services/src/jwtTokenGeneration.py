@@ -12,7 +12,8 @@ def generateJWTToken(
   key,
   personGUID,
   currentlyUsedAuthProviderGuid,
-  currentlyUsedAuthKey
+  currentlyUsedAuthKey,
+  tenantObj
 ):
   expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_JWT_TOKEN_TIMEOUT))
   if secret is None:

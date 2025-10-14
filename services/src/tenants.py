@@ -493,7 +493,7 @@ def Login(
     authedPersonGuid=authedPersonGuid,
     currentAuthUserKey=currentAuthUserKey,
     authProviderGuid=authProviderGuid,
-    tenantName=tenantName,
+    tenantObj=tenantObj,
     restrictRolesTo=[]
   )
 
@@ -505,9 +505,10 @@ def getLoginResult(
   authedPersonGuid,
   currentAuthUserKey,
   authProviderGuid,
-  tenantName,
+  tenantObj,
   restrictRolesTo
 ):
+  tenantName = tenantObj.getName()
   resDict = {
     'possibleUserIDs': None,
     'possibleUsers': None, #not filled in here but enriched from possibleUserIDs when user selection is required
@@ -567,7 +568,25 @@ def getLoginResult(
 
   #These two sections are rebuilt every refresh
   ##print("CurrentAuthUserKey:", currentAuthUserKey)
-  resDict['jwtData'] = generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], authedPersonGuid, resDict['currentlyUsedAuthProviderGuid'], currentAuthUserKey)
-  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(appObj, tokenWithoutJWTorRefresh, userDict, userDict['UserID'], authedPersonGuid, resDict['currentlyUsedAuthProviderGuid'], currentAuthUserKey)
+  resDict['jwtData'] = generateJWTToken(
+    appObj=appObj,
+    userDict=userDict,
+    secret=appObj.APIAPP_JWTSECRET,
+    key=userDict['UserID'],
+    personGUID=authedPersonGuid,
+    currentlyUsedAuthProviderGuid=resDict['currentlyUsedAuthProviderGuid'],
+    currentlyUsedAuthKey=currentAuthUserKey,
+    tenantObj=tenantObj
+  )
+  resDict['refresh'] = appObj.refreshTokenManager.generateRefreshTokenFirstTime(
+    appObj=appObj,
+    userAuthInformationWithoutJWTorRefreshToken=tokenWithoutJWTorRefresh,
+    userDict=userDict,
+    key=userDict['UserID'],
+    personGUID=authedPersonGuid,
+    currentlyUsedAuthProviderGuid=resDict['currentlyUsedAuthProviderGuid'],
+    currentlyUsedAuthKey=currentAuthUserKey,
+    tenantObj=tenantObj
+  )
 
   return resDict

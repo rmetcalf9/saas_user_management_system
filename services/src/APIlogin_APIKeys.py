@@ -190,7 +190,8 @@ def registerAPI(appObj, nsLogin):
          return appObj.ApiKeyManager.processAPIKeyLogin(
            apiKey=apiKey,
            tenantName=tenant,
-           storeConnection=storeConnection
+           storeConnection=storeConnection,
+           appObj=appObj
          )
        except constants.customExceptionClass as err:
          raise err

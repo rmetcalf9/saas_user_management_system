@@ -10,6 +10,7 @@ import pytz
 from baseapp_for_restapi_backend_with_swagger import from_iso8601
 import jwt
 from base64 import b64decode, b64encode
+from MockTenantObj import MockTenantObj
 
 from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
 from constants import masterTenantName, jwtHeaderName, DefaultHasAccountRole, masterTenantDefaultSystemAdminRole
@@ -354,7 +355,16 @@ class testClassWithTestClient(testHelperSuperClass):
 
   def generateJWTToken(self, userDict):
     personGUID = appObj.testingDefaultPersonGUID
-    return generateJWTToken(appObj, userDict, appObj.APIAPP_JWTSECRET, userDict['UserID'], personGUID, 'DummyCurrentlyAuthedGUID', 'DummyAuthKey')['JWTToken']
+    return generateJWTToken(
+      appObj,
+      userDict,
+      appObj.APIAPP_JWTSECRET,
+      userDict['UserID'],
+      personGUID,
+      'DummyCurrentlyAuthedGUID',
+      'DummyAuthKey',
+      MockTenantObj()
+    )['JWTToken']
 
   def getTenantDICT(self, tenantName):
     result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/tenants', headers={ jwtHeaderName: self.getNormalJWTToken()})

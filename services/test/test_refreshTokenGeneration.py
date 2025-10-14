@@ -3,6 +3,7 @@ import unittest
 import refreshTokenGeneration
 import datetime
 import pytz
+from MockTenantObj import MockTenantObj
 
 class MockGateway():
   def enrichJWTClaims(self, JWTDict):
@@ -53,7 +54,8 @@ class helpers(unittest.TestCase):
       key='x',
       personGUID='x',
       currentlyUsedAuthProviderGuid='',
-      currentlyUsedAuthKey='aaa'
+      currentlyUsedAuthKey='aaa',
+      tenantObj=MockTenantObj()
     )
 
 #@TestHelperSuperClass.wipd
@@ -65,13 +67,15 @@ class testExpiringDictClass(helpers):
 
     nd = self.man.getRefreshedAuthDetails(
       appObj=self.mockAppObj,
-      existingToken=firstTokenJSON["token"]
+      existingToken=firstTokenJSON["token"],
+      tenantObj=MockTenantObj()
     )
     self.assertNotEqual(nd, None)
 
     nd = self.man.getRefreshedAuthDetails(
       appObj=self.mockAppObj,
-      existingToken=firstTokenJSON["token"]
+      existingToken=firstTokenJSON["token"],
+      tenantObj=MockTenantObj()
     )
     self.assertEqual(nd, None, msg="Managed to use same token twice")
 
@@ -87,7 +91,8 @@ class testExpiringDictClass(helpers):
       self.stepTimeForward()
       nextToken = self.man.getRefreshedAuthDetails(
         appObj=self.mockAppObj,
-        existingToken=nextTokenToUse
+        existingToken=nextTokenToUse,
+        tenantObj=MockTenantObj()
       )
       self.assertNotEqual(nextToken, None, msg="Failed to reuse token on attempt " + str(x))
       nextTokenToUse = nextToken["refresh"]["token"]
@@ -96,7 +101,8 @@ class testExpiringDictClass(helpers):
     self.stepTimeForward()
     nextToken = self.man.getRefreshedAuthDetails(
       appObj=self.mockAppObj,
-      existingToken=nextTokenToUse
+      existingToken=nextTokenToUse,
+      tenantObj=MockTenantObj()
     )
     self.assertEqual(nextToken, None, msg="Was still able to use token after " + str(x) + " attempts")
     self.assertTrue(self.mockAppObj.getCurDateTime()>tokenRefreshSessionExpiryTime, msg="Token refresh failed before session expiry")
@@ -118,7 +124,8 @@ class testExpiringDictClass(helpers):
     self.mockAppObj.setTestingDateTime(addSecond(tokenExpiryTime))
     nextToken = self.man.getRefreshedAuthDetails(
       appObj=self.mockAppObj,
-      existingToken=firstTokenJSON["token"]
+      existingToken=firstTokenJSON["token"],
+      tenantObj=MockTenantObj()
     )
     self.assertNotEqual(nextToken, None, msg="Session should have been valid")
 
@@ -139,6 +146,7 @@ class testExpiringDictClass(helpers):
     self.mockAppObj.setTestingDateTime(addSecond(tokenRefreshExpiryTime))
     nextToken = self.man.getRefreshedAuthDetails(
       appObj=self.mockAppObj,
-      existingToken=firstTokenJSON["token"]
+      existingToken=firstTokenJSON["token"],
+      tenantObj=MockTenantObj()
     )
     self.assertEqual(nextToken, None, msg="Session should NOT have been valid")

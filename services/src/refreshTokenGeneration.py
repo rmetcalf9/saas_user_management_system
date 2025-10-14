@@ -22,7 +22,8 @@ class RefreshTokenManager():
     key,
     personGUID,
     currentlyUsedAuthProviderGuid,
-    currentlyUsedAuthKey
+    currentlyUsedAuthKey,
+    tenantObj
   ):
     token = generateRandomRefreshToken(appObj)
     dataToStoreWithRefreshToken = {
@@ -43,7 +44,7 @@ class RefreshTokenManager():
       'TokenExpiry': expiryTime.isoformat()
     }
 
-  def getRefreshedAuthDetails(self, appObj, existingToken):
+  def getRefreshedAuthDetails(self, appObj, existingToken, tenantObj):
     try:
       val = self.refreshTokenDict.popValue(appObj.getCurDateTime(), existingToken)
     except KeyError:
@@ -59,13 +60,14 @@ class RefreshTokenManager():
 
     userAuthInfo = copy.deepcopy(val['userAuthInformationWithoutJWTorRefreshToken'])
     userAuthInfo['jwtData'] = generateJWTToken(
-      appObj,
-      val['userDict'],
-      appObj.APIAPP_JWTSECRET,
-      val['key'],
-      val['personGUID'],
-      val['currentlyUsedAuthProviderGuid'],
-      val['currentlyUsedAuthKey']
+      appObj=appObj,
+      userDict=val['userDict'],
+      secret=appObj.APIAPP_JWTSECRET,
+      key=val['key'],
+      personGUID=val['personGUID'],
+      currentlyUsedAuthProviderGuid=val['currentlyUsedAuthProviderGuid'],
+      currentlyUsedAuthKey=val['currentlyUsedAuthKey'],
+      tenantObj=tenantObj
     )
     userAuthInfo['refresh'] = {
       'token': token,

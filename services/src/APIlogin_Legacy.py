@@ -155,13 +155,13 @@ def registerAPI(appObj, nsLogin):
           #print("APIlogin_Legacy.py login - authProviderGUID:",authProviderGUID)
           def someFn(connectionContext):
             return Login(
-              appObj,
-              tenant,
-              authProviderGUID,
-              content['credentialJSON'],
-              UserID,
-              connectionContext,
-              'a','b','c',
+              appObj=appObj,
+              tenantName=tenant,
+              authProviderGUID=authProviderGUID,
+              credentialJSON=content['credentialJSON'],
+              requestedUserID=UserID,
+              storeConnection=connectionContext,
+              a='a',b='b',c='c',
               ticketObj=ticketObj,
               ticketTypeObj=ticketTypeObj
             )
@@ -229,7 +229,7 @@ def registerAPI(appObj, nsLogin):
         #This is the important call where other app will call
         tenantObj = getValidTenantObj(appObj, tenant, storeConnection, validateOrigin=True)
 
-        refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'])
+        refreshedAuthDetails = appObj.refreshTokenManager.getRefreshedAuthDetails(appObj, request.get_json()['token'], tenantObj)
         if refreshedAuthDetails is None:
           raise Unauthorized('Refresh token not found, token or session may have timedout')
 
