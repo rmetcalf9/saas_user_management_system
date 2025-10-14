@@ -81,9 +81,9 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
     self.refreshTokenTimeout = None
     self.refreshSessionTimeout = None
     if "UserSessionSecurity" in stepDict:
-      self.jwtTokenTimeout = stepDict["jwtTokenTimeout"]
-      self.refreshTokenTimeout = stepDict["refreshTokenTimeout"]
-      self.refreshSessionTimeout = stepDict["refreshSessionTimeout"]
+      self.jwtTokenTimeout = stepDict["JwtTokenTimeout"]
+      self.refreshTokenTimeout = stepDict["RefreshTokenTimeout"]
+      self.refreshSessionTimeout = stepDict["RefreshSessionTimeout"]
 
     self.tenantName = stepDict["tenantName"]
     self.description = stepDict["description"]
