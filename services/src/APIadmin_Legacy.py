@@ -167,9 +167,12 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
       refreshTokenTimeout = appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
       refreshSessionTimeout = appObj.APIAPP_REFRESH_SESSION_TIMEOUT
       if "UserSessionSecurity" in content:
-        jwtTokenTimeout = content["UserSessionSecurity"]["JwtTokenTimeout"]
-        refreshTokenTimeout = content["UserSessionSecurity"]["RefreshTokenTimeout"]
-        refreshSessionTimeout = content["UserSessionSecurity"]["RefreshSessionTimeout"]
+        if content["UserSessionSecurity"]["JwtTokenTimeout"] is not None:
+          jwtTokenTimeout = content["UserSessionSecurity"]["JwtTokenTimeout"]
+        if content["UserSessionSecurity"]["RefreshTokenTimeout"] is not None:
+          refreshTokenTimeout = content["UserSessionSecurity"]["RefreshTokenTimeout"]
+        if content["UserSessionSecurity"]["RefreshSessionTimeout"] is not None:
+          refreshSessionTimeout = content["UserSessionSecurity"]["RefreshSessionTimeout"]
       try:
         def someFn(connectionContext):
           return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],
@@ -238,9 +241,12 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
       refreshTokenTimeout = appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
       refreshSessionTimeout = appObj.APIAPP_REFRESH_SESSION_TIMEOUT
       if "UserSessionSecurity" in content:
-        jwtTokenTimeout = content["UserSessionSecurity"]["JwtTokenTimeout"]
-        refreshTokenTimeout = content["UserSessionSecurity"]["RefreshTokenTimeout"]
-        refreshSessionTimeout = content["UserSessionSecurity"]["RefreshSessionTimeout"]
+        if content["UserSessionSecurity"]["JwtTokenTimeout"] is not None:
+          jwtTokenTimeout = content["UserSessionSecurity"]["JwtTokenTimeout"]
+        if content["UserSessionSecurity"]["RefreshTokenTimeout"] is not None:
+          refreshTokenTimeout = content["UserSessionSecurity"]["RefreshTokenTimeout"]
+        if content["UserSessionSecurity"]["RefreshSessionTimeout"] is not None:
+          refreshSessionTimeout = content["UserSessionSecurity"]["RefreshSessionTimeout"]
 
       resp = None
       try:
