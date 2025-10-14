@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient, env, get_APIAPP_DEFAULTHOMEADMINPASSWORD_bytes
-from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider
+from tenants import GetTenant, CreateTenant, failedToCreateTenantException, Login, UnknownUserIDException, CreateUser, _getAuthProvider, invalidTenantSecurityOptions
 from constants import masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, masterTenantDefaultSystemAdminRole, DefaultHasAccountRole
 import constants
 from appObj import appObj
@@ -28,12 +28,32 @@ class test_tenants(testHelperAPIClient):
   def test_cantCreateTenantWithSameNameAsMaster(self):
     def dbfn(storeConnection):
       with self.assertRaises(Exception) as context:
-        tenant = CreateTenant(appObj, masterTenantName, "", False, storeConnection, JWTCollectionAllowedOriginList=[],
-           TicketOverrideURL="",
-           TenantBannerHTML="<h1>DD</h1>",
-           SelectAuthMessage="Hmmmm",
+        tenant = CreateTenant(
+          appObj, masterTenantName, "", False, storeConnection, JWTCollectionAllowedOriginList=[],
+          TicketOverrideURL="",
+          TenantBannerHTML="<h1>DD</h1>",
+          SelectAuthMessage="Hmmmm",
+          jwtTokenTimeout=123,
+          refreshTokenTimeout=123,
+          refreshSessionTimeout=123
         )
       self.checkGotRightException(context,failedToCreateTenantException)
+
+    appObj.objectStore.executeInsideConnectionContext(dbfn)
+
+  def test_cantCreateTenantWithInvalidSecurityOptions(self):
+    def dbfn(storeConnection):
+      with self.assertRaises(Exception) as context:
+        tenant = CreateTenant(
+          appObj, "DDDTestTenant", "", False, storeConnection, JWTCollectionAllowedOriginList=[],
+          TicketOverrideURL="",
+          TenantBannerHTML="<h1>DD</h1>",
+          SelectAuthMessage="Hmmmm",
+          jwtTokenTimeout=10,
+          refreshTokenTimeout=9,
+          refreshSessionTimeout=8
+        )
+      self.checkGotRightExceptionType(context,invalidTenantSecurityOptions)
 
     appObj.objectStore.executeInsideConnectionContext(dbfn)
 

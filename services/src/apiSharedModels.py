@@ -20,9 +20,9 @@ def getAuthProviderModel(appObj):
 
 def getTenantModelUserSessionSecurity(appObj):
   return appObj.flastRestPlusAPIObject.model('TenantModelUserSessionSecurity', {
-    'JwtTokenTimeout': fields.Integer(default='-1', description='Duration a single JWT token will last'),
-    'RefreshTokenTimeout': fields.Integer(default='-1', description='Duration a refresh token will last (must be greater than JwtTokenTimeout)'),
-    'RefreshSessionTimeout': fields.Integer(default='-1', description='Duration before user forced to relogin (must be grater than RefreshTokenTimeout)')
+    'JwtTokenTimeout': fields.Integer(default=None, description='Duration a single JWT token will last'),
+    'RefreshTokenTimeout': fields.Integer(default=None, description='Duration a refresh token will last (must be greater than JwtTokenTimeout)'),
+    'RefreshSessionTimeout': fields.Integer(default=None, description='Duration before user forced to relogin (must be grater than RefreshTokenTimeout)')
   })
 
 def getTenantModel(appObj):

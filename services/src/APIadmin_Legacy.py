@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequest, InternalServerError, NotFound, Confl
 from constants import masterTenantDefaultSystemAdminRole, masterTenantName, jwtHeaderName, jwtCookieName, loginCookieName, ShouldNotSupplySaltWhenCreatingAuthProvException, objectVersionHeaderName, DefaultHasAccountRole, customExceptionClass
 import AuthProviders
 import constants
-from apiSharedModels import getTenantModel, getUserModel, getPersonModel, getAuthProviderModel
+from apiSharedModels import getTenantModel, getUserModel, getPersonModel, getAuthProviderModel, getTenantModelUserSessionSecurity
 from urllib.parse import unquote
 import json
 from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
@@ -54,7 +54,8 @@ def getCreateTenantModel(appObj):
     'JWTCollectionAllowedOriginList': fields.List(fields.String(default='DEFAULT', description='Allowed origin to retrieve JWT tokens from')),
     'TicketOverrideURL': fields.String(default='', description='Overrider URL for tickets'),
     'TenantBannerHTML': fields.String(default='', description='HTML displayed in select auth and login screens'),
-    'SelectAuthMessage': fields.String(default='', description='Message displayed above buttons in select auth screen')
+    'SelectAuthMessage': fields.String(default='', description='Message displayed above buttons in select auth screen'),
+    'UserSessionSecurity': fields.Nested(getTenantModelUserSessionSecurity(appObj)),
   })
 
 def getCreateUserModel(appObj):
@@ -162,6 +163,13 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         if content["AuthProviders"] is not None:
           if len(content["AuthProviders"]) != 0:
             raise BadRequest("Not possible to create a Tenant with AuthProviders ")
+      jwtTokenTimeout = appObj.APIAPP_JWT_TOKEN_TIMEOUT
+      refreshTokenTimeout = appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
+      refreshSessionTimeout = appObj.APIAPP_REFRESH_SESSION_TIMEOUT
+      if "UserSessionSecurity" in content:
+        jwtTokenTimeout = content["UserSessionSecurity"]["JwtTokenTimeout"]
+        refreshTokenTimeout = content["UserSessionSecurity"]["RefreshTokenTimeout"]
+        refreshSessionTimeout = content["UserSessionSecurity"]["RefreshSessionTimeout"]
       try:
         def someFn(connectionContext):
           return CreateTenant(appObj, content['Name'], content['Description'], content['AllowUserCreation'],
@@ -169,7 +177,10 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
             JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, []),
             TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, ""),
             TenantBannerHTML=getOrSomethngElse("TenantBannerHTML",content, ""),
-            SelectAuthMessage=getOrSomethngElse("SelectAuthMessage",content, "How do you want to verify who you are?")
+            SelectAuthMessage=getOrSomethngElse("SelectAuthMessage",content, "How do you want to verify who you are?"),
+            jwtTokenTimeout = jwtTokenTimeout,
+            refreshTokenTimeout = refreshTokenTimeout,
+            refreshSessionTimeout = refreshSessionTimeout
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 
@@ -223,6 +234,14 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         del content["ObjectVersion"]
 
       requiredInPayload(content, ['Name','Description','AllowUserCreation','AuthProviders','ObjectVersion'])
+      jwtTokenTimeout = appObj.APIAPP_JWT_TOKEN_TIMEOUT
+      refreshTokenTimeout = appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
+      refreshSessionTimeout = appObj.APIAPP_REFRESH_SESSION_TIMEOUT
+      if "UserSessionSecurity" in content:
+        jwtTokenTimeout = content["UserSessionSecurity"]["JwtTokenTimeout"]
+        refreshTokenTimeout = content["UserSessionSecurity"]["RefreshTokenTimeout"]
+        refreshSessionTimeout = content["UserSessionSecurity"]["RefreshSessionTimeout"]
+
       resp = None
       try:
         content = updateContentConvertingInputStringsToDictsWhereRequired(content)
@@ -236,7 +255,10 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
             JWTCollectionAllowedOriginList=getOrSomethngElse("JWTCollectionAllowedOriginList",content, None),
             TicketOverrideURL=getOrSomethngElse("TicketOverrideURL",content, ""),
             TenantBannerHTML=getOrSomethngElse("TenantBannerHTML", content, ""),
-            SelectAuthMessage=getOrSomethngElse("SelectAuthMessage", content, "How do you want to verify who you are?")
+            SelectAuthMessage=getOrSomethngElse("SelectAuthMessage", content, "How do you want to verify who you are?"),
+            jwtTokenTimeout=jwtTokenTimeout,
+            refreshTokenTimeout=refreshTokenTimeout,
+            refreshSessionTimeout=refreshSessionTimeout
           )
         tenantObj = appObj.objectStore.executeInsideTransaction(someFn)
 

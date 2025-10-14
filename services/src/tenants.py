@@ -15,6 +15,8 @@ from persons import GetPerson, associatePersonWithAuthCalledWhenAuthIsCreated
 
 class failedToUpdateTenantException(Exception):
   pass
+class invalidTenantSecurityOptions(Exception):
+  pass
 
 failedToCreateTenantException = Exception('Failed to create Tenant')
 UserIdentityWithThisNameAlreadyExistsException = Exception('User Identity With This Name Already Exists')
@@ -41,9 +43,14 @@ def onAppInit(appObj):
 #only called on intial setup Creates a master tenant with single internal auth provider
 def CreateMasterTenant(appObj, testingMode, storeConnection):
   print("Creating master tenant")
-  _createTenant(appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection,
+  _createTenant(
+    appObj, masterTenantName, masterTenantDefaultDescription, False, storeConnection,
     JWTCollectionAllowedOriginList=list(map(lambda x: x.strip(), appObj.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD.split(","))),
-    TicketOverrideURL = "", SelectAuthMessage=constants.masterTenantDefaultSelectAuthMessage, TenantBannerHTML=constants.masterTenantDefaultTenantBannerHTML
+    TicketOverrideURL = "", SelectAuthMessage=constants.masterTenantDefaultSelectAuthMessage,
+    TenantBannerHTML=constants.masterTenantDefaultTenantBannerHTML,
+    jwtTokenTimeout = appObj.APIAPP_JWT_TOKEN_TIMEOUT,
+    refreshTokenTimeout = appObj.APIAPP_REFRESH_TOKEN_TIMEOUT,
+    refreshSessionTimeout = appObj.APIAPP_REFRESH_SESSION_TIMEOUT
   )
 
   masterTenantInternalAuthProvider = AddAuthProvider(
@@ -101,12 +108,28 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
 
 #returns tenantObj
 ##allowUserCreation used to default to false, description used to default to ""
-def CreateTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList,
-                 TicketOverrideURL, TenantBannerHTML, SelectAuthMessage):
+def CreateTenant(
+    appObj,
+    tenantName,
+    description,
+    allowUserCreation,
+    storeConnection,
+    JWTCollectionAllowedOriginList,
+    TicketOverrideURL,
+    TenantBannerHTML,
+    SelectAuthMessage,
+    jwtTokenTimeout,
+    refreshTokenTimeout,
+    refreshSessionTimeout
+):
   if tenantName == masterTenantName:
     raise failedToCreateTenantException
-  return _createTenant(appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList,
-    TenantBannerHTML=TenantBannerHTML, SelectAuthMessage=SelectAuthMessage, TicketOverrideURL=TicketOverrideURL
+  return _createTenant(
+    appObj, tenantName, description, allowUserCreation, storeConnection, JWTCollectionAllowedOriginList,
+    TenantBannerHTML=TenantBannerHTML, SelectAuthMessage=SelectAuthMessage, TicketOverrideURL=TicketOverrideURL,
+    jwtTokenTimeout=jwtTokenTimeout,
+    refreshTokenTimeout=refreshTokenTimeout,
+    refreshSessionTimeout=refreshSessionTimeout
   )
 
 def UpdateTenantFields(appObj, storeConnection, existingTenantObj, newValDict, filedsToUpdate):
@@ -152,13 +175,20 @@ def UpdateTenant(
   JWTCollectionAllowedOriginList,
   TicketOverrideURL,
   TenantBannerHTML,
-  SelectAuthMessage
+  SelectAuthMessage,
+  jwtTokenTimeout,
+  refreshTokenTimeout,
+  refreshSessionTimeout
 ):
   tenantObj = GetTenant(tenantName, storeConnection, appObj=appObj)
   if tenantObj is None:
     raise tenantDosentExistException
   if str(tenantObj.getObjectVersion()) != str(objectVersion):
     raise WrongObjectVersionException
+  if refreshTokenTimeout < jwtTokenTimeout:
+    raise invalidTenantSecurityOptions("Refresh token timeout must be less than jwt token timeout")
+  if refreshSessionTimeout < refreshTokenTimeout:
+    raise invalidTenantSecurityOptions("Refresh session timeout must be less than refresh session timeout")
 
   if JWTCollectionAllowedOriginList is None:
     JWTCollectionAllowedOriginList = tenantObj.getJWTCollectionAllowedOriginList()
@@ -170,7 +200,12 @@ def UpdateTenant(
     "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList,
     "TicketOverrideURL": TicketOverrideURL,
     "TenantBannerHTML": TenantBannerHTML,
-    "SelectAuthMessage": SelectAuthMessage
+    "SelectAuthMessage": SelectAuthMessage,
+    "UserSessionSecurity": {
+      "JwtTokenTimeout": jwtTokenTimeout,
+      "RefreshTokenTimeout": refreshTokenTimeout,
+      "RefreshSessionTimeout": refreshSessionTimeout
+    }
   }
   for authProv in authProvDict:
     def getValue(dict, key, defaultValue):
@@ -330,11 +365,18 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
   JWTCollectionAllowedOriginList,
   TicketOverrideURL,
   TenantBannerHTML,
-  SelectAuthMessage
+  SelectAuthMessage,
+  jwtTokenTimeout,
+  refreshTokenTimeout,
+  refreshSessionTimeout
 ):
   tenantWithSameName, ver, creationDateTime, lastUpdateDateTime, _ =  storeConnection.getObjectJSON("tenants", tenantName)
   if tenantWithSameName is not None:
     raise tenantAlreadtExistsException
+  if refreshTokenTimeout < jwtTokenTimeout:
+    raise invalidTenantSecurityOptions("Refresh token timeout must be less than jwt token timeout")
+  if refreshSessionTimeout < refreshTokenTimeout:
+    raise invalidTenantSecurityOptions("Refresh session timeout must be less than refresh session timeout")
   jsonForTenant = {
     "Name": tenantName,
     "Description": description,
@@ -343,7 +385,12 @@ def _createTenant(appObj, tenantName, description, allowUserCreation, storeConne
     "JWTCollectionAllowedOriginList": JWTCollectionAllowedOriginList,
     "TicketOverrideURL": TicketOverrideURL,
     "TenantBannerHTML": TenantBannerHTML,
-    "SelectAuthMessage": SelectAuthMessage
+    "SelectAuthMessage": SelectAuthMessage,
+    "UserSessionSecurity": {
+      "JwtTokenTimeout": jwtTokenTimeout,
+      "RefreshTokenTimeout": refreshTokenTimeout,
+      "RefreshSessionTimeout": refreshSessionTimeout
+    }
   }
   createdTenantVer = storeConnection.saveJSONObject("tenants", tenantName, jsonForTenant)
 

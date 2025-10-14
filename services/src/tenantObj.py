@@ -109,10 +109,10 @@ class tenantClass():
     return self._mainDict["JWTCollectionAllowedOriginList"]
 
   def getJwtTokenTimeout(self):
-    return self.appObj.APIAPP_JWT_TOKEN_TIMEOUT
+    return self._mainDict["UserSessionSecurity"]["JwtTokenTimeout"]
 
   def getRefreshTokenTimeout(self):
-    return self.appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
+    return self._mainDict["UserSessionSecurity"]["RefreshTokenTimeout"]
 
   def getRefreshSessionTimeout(self):
-    return self.appObj.APIAPP_REFRESH_SESSION_TIMEOUT
+    return self._mainDict["UserSessionSecurity"]["RefreshSessionTimeout"]

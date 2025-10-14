@@ -69,11 +69,22 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
   TicketOverrideURL = None
   TenantBannerHTML = None
   SelectAuthMessage = None
+  jwtTokenTimeout = None
+  refreshTokenTimeout = None
+  refreshSessionTimeout = None
   def __init__(self, stepDict):
     if "TenantBannerHTML" not in stepDict:
       stepDict["TenantBannerHTML"] = ""
     if "SelectAuthMessage" not in stepDict:
       stepDict["SelectAuthMessage"] = "How do you want to verify who you are?"
+    self.jwtTokenTimeout = None
+    self.refreshTokenTimeout = None
+    self.refreshSessionTimeout = None
+    if "UserSessionSecurity" in stepDict:
+      self.jwtTokenTimeout = stepDict["jwtTokenTimeout"]
+      self.refreshTokenTimeout = stepDict["refreshTokenTimeout"]
+      self.refreshSessionTimeout = stepDict["refreshSessionTimeout"]
+
     self.tenantName = stepDict["tenantName"]
     self.description = stepDict["description"]
     self.allowUserCreation = stepDict["allowUserCreation"]
@@ -84,6 +95,13 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
     if "TicketOverrideURL" in stepDict:
       self.TicketOverrideURL = stepDict["TicketOverrideURL"]
   def run(self, appObj, storeConnection):
+    if self.jwtTokenTimeout is None:
+      self.jwtTokenTimeout = appObj.APIAPP_JWT_TOKEN_TIMEOUT
+    if self.refreshTokenTimeout is None:
+      self.refreshTokenTimeout = appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
+    if self.refreshSessionTimeout is None:
+      self.refreshSessionTimeout = appObj.APIAPP_REFRESH_SESSION_TIMEOUT
+
     retVal = CreateTenant(
       appObj=appObj,
       tenantName=self.tenantName,
@@ -93,7 +111,10 @@ class AutoConfigRunStepCreateTenant(AutoConfigRunStep):
       JWTCollectionAllowedOriginList=self.JWTCollectionAllowedOriginList,
       TicketOverrideURL=self.TicketOverrideURL,
       TenantBannerHTML = self.TenantBannerHTML,
-      SelectAuthMessage = self.SelectAuthMessage
+      SelectAuthMessage = self.SelectAuthMessage,
+      jwtTokenTimeout = self.jwtTokenTimeout,
+      refreshTokenTimeout = self.refreshTokenTimeout,
+      refreshSessionTimeout = self.refreshSessionTimeout
     )
     print("CreateTenant: " + retVal.getName())
     self.setPassed()
