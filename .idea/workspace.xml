@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html" />
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_APIKeys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/apiKeyManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/apiKeyManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/jwtTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/jwtTokenGeneration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/refreshTokenGeneration.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/refreshTokenGeneration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

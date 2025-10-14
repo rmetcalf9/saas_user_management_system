@@ -79,11 +79,11 @@ class apiKeyManagerClass():
     self.repositoryAPIKey.remove(id=apiKeyID, storeConnection=storeConnection, objectVersion=ObjectVersionNumber)
     return {"response": "OK"}, 202
 
-  def processAPIKeyLogin(self, apiKey, tenant, storeConnection):
+  def processAPIKeyLogin(self, apiKey, tenantName, storeConnection):
     apiKeyObj = self.repositoryAPIKey.getAPIKEY(self.getHashedAPIKey(APIKey=apiKey), storeConnection)
     if apiKeyObj is None:
       raise BadRequest("Invalid API Key")
-    if apiKeyObj.getTenant() != tenant:
+    if apiKeyObj.getTenant() != tenantName:
       raise BadRequest("Invalid API Key")
 
     userObj = userPersonCommon.GetUser(self.appObj, apiKeyObj.getDict()["createdByUserID"], storeConnection)
@@ -91,7 +91,7 @@ class apiKeyManagerClass():
       raise BadRequest("Invalid API Key")
 
     #User must have an account in this tenant to work at all
-    if not userObj.hasRole(tenant, constants.DefaultHasAccountRole):
+    if not userObj.hasRole(tenantName, constants.DefaultHasAccountRole):
       raise BadRequest("Invalid API Key")
 
     resDict = tenants.getLoginResult(
@@ -100,7 +100,7 @@ class apiKeyManagerClass():
       authedPersonGuid=None,
       currentAuthUserKey=None,
       authProviderGuid=None,
-      tenantName=tenant,
+      tenantName=tenantName,
       restrictRolesTo=apiKeyObj.getDict()["restrictedRoles"]
     )
     return resDict, 200

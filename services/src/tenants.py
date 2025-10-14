@@ -379,7 +379,17 @@ def _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tena
 # - if an identityGUID is specified and correct then the user and role info
 ### requestedUserID can be None
 #Only Found tickets and tickettype objects are passed here
-def Login(appObj, tenantName, authProviderGUID, credentialJSON, requestedUserID, storeConnection, a,b,c, ticketObj=None, ticketTypeObj=None):
+def Login(
+  appObj,
+  tenantName,
+  authProviderGUID,
+  credentialJSON,
+  requestedUserID,
+  storeConnection,
+  a,b,c,
+  ticketObj=None,
+  ticketTypeObj=None
+):
   def loginTrace(*args):
     pass
     #print("Login Trace - ", args)

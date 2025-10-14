@@ -5,7 +5,15 @@ import jwt
 from base64 import b64decode
 import json
 
-def generateJWTToken(appObj, userDict, secret, key, personGUID, currentlyUsedAuthProviderGuid, currentlyUsedAuthKey):
+def generateJWTToken(
+  appObj,
+  userDict,
+  secret,
+  key,
+  personGUID,
+  currentlyUsedAuthProviderGuid,
+  currentlyUsedAuthKey
+):
   expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_JWT_TOKEN_TIMEOUT))
   if secret is None:
     raise Exception("Trying to generate a JWT Token without a secret being set")

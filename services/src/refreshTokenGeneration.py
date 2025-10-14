@@ -14,7 +14,16 @@ class RefreshTokenManager():
   def __init__(self, appObj):
     self.refreshTokenDict = expiringdictClass(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT, appObj.scheduler, appObj.getCurDateTime)
 
-  def generateRefreshTokenFirstTime(self, appObj, userAuthInformationWithoutJWTorRefreshToken, userDict, key, personGUID, currentlyUsedAuthProviderGuid, currentlyUsedAuthKey):
+  def generateRefreshTokenFirstTime(
+    self,
+    appObj,
+    userAuthInformationWithoutJWTorRefreshToken,
+    userDict,
+    key,
+    personGUID,
+    currentlyUsedAuthProviderGuid,
+    currentlyUsedAuthKey
+  ):
     token = generateRandomRefreshToken(appObj)
     dataToStoreWithRefreshToken = {
       'userAuthInformationWithoutJWTorRefreshToken': copy.deepcopy(userAuthInformationWithoutJWTorRefreshToken),
