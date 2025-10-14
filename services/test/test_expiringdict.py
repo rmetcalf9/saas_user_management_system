@@ -21,23 +21,23 @@ class testExpiringDictClass(unittest.TestCase):
 
   def test_storeAndRetrieve(self):
     durationToKeepItemInSeconds = 20
-    a = expiringdictClass(durationToKeepItemInSeconds)
+    a = expiringdictClass()
     curTime = datetime.now(pytz.timezone("UTC"))
-    a.addOrReplaceKey(curTime,'key','val')
+    a.addOrReplaceKey(curTime,'key','val', durationToKeepItemInSeconds)
     val = a.getValue(curTime,'key')
     self.assertEqual(val, 'val')
 
   def test_retriveMissingValueGivesKeyError(self):
     durationToKeepItemInSeconds = 20
-    a = expiringdictClass(durationToKeepItemInSeconds)
+    a = expiringdictClass()
     curTime = datetime.now(pytz.timezone("UTC"))
     self.ensureKeyDoesntExist(a, curTime,'key')
 
   def test_retriveExpiredValueGivesKeyError(self):
     durationToKeepItemInSeconds = 20
-    a = expiringdictClass(durationToKeepItemInSeconds)
+    a = expiringdictClass()
     curTime = datetime.now(pytz.timezone("UTC"))
-    a.addOrReplaceKey(curTime,'key','val')
+    a.addOrReplaceKey(curTime,'key','val', durationToKeepItemInSeconds)
     endTime = datetime.now(pytz.timezone("UTC")) + timedelta(seconds=int(durationToKeepItemInSeconds)) + timedelta(seconds=int(2))
     foundKeyError = False
     try:
@@ -64,11 +64,11 @@ class testExpiringDictClass(unittest.TestCase):
 
     timeToCheckForExistanceOfBothKeys = timeToCreateKeyWhichShouldNotBeDeleted + timedelta(seconds=int(10))
 
-    objectUnderTest = expiringdictClass(durationToKeepItemInSeconds)
+    objectUnderTest = expiringdictClass()
 
     #Create Keys
-    objectUnderTest.addOrReplaceKey(timeToCreateKeyWhichShouldBeDeleted,keyWhichShouldBeDeleted,'val')
-    objectUnderTest.addOrReplaceKey(timeToCreateKeyWhichShouldNotBeDeleted,keyWhichShouldNotBeDeleted,'val')
+    objectUnderTest.addOrReplaceKey(timeToCreateKeyWhichShouldBeDeleted,keyWhichShouldBeDeleted,'val', durationToKeepItemInSeconds)
+    objectUnderTest.addOrReplaceKey(timeToCreateKeyWhichShouldNotBeDeleted,keyWhichShouldNotBeDeleted,'val', durationToKeepItemInSeconds)
 
     #Make sure both exist (Will rasie an exception if they do not)
     res = objectUnderTest.getValue(timeToCheckForExistanceOfBothKeys,keyWhichShouldBeDeleted)
@@ -86,11 +86,37 @@ class testExpiringDictClass(unittest.TestCase):
 
   def test_popValue(self):
     durationToKeepItemInSeconds = 20
-    a = expiringdictClass(durationToKeepItemInSeconds)
+    a = expiringdictClass()
     curTime = datetime.now(pytz.timezone("UTC"))
-    a.addOrReplaceKey(curTime,'key','val')
+    a.addOrReplaceKey(curTime,'key','val', durationToKeepItemInSeconds)
     val = a.getValue(curTime,'key')
     self.assertEqual(val, 'val')
     val = a.popValue(curTime,'key')
     self.ensureKeyDoesntExist(a, curTime,'key')
-    
+
+  def test_twoObjectsDifferentExpirt(self):
+    expiry1 = 100
+    expiry2 = 200
+    curTime = datetime.now(pytz.timezone("UTC"))
+    oneExpiredTime = curTime + timedelta(seconds=int(expiry1 + 5))
+    bothExpiredTime = curTime + timedelta(seconds=int(expiry2 + 5))
+
+    expiringDict = expiringdictClass()
+    expiringDict.addOrReplaceKey(curTime,'key1','val1', expiry1)
+    expiringDict.addOrReplaceKey(curTime,'key2','val2', expiry2)
+
+    def assertKeyMissing(expiringDict, time, key):
+      foundKeyError = False
+      try:
+        val = expiringDict.getValue(time,key)
+      except KeyError:
+        foundKeyError = True
+      self.assertTrue(foundKeyError, msg="ERROR key error not raised")
+
+
+    self.assertEqual(expiringDict.getValue(curTime, 'key1'),'val1')
+    self.assertEqual(expiringDict.getValue(curTime, 'key2'),'val2')
+    assertKeyMissing(expiringDict, oneExpiredTime, 'key1')
+    self.assertEqual(expiringDict.getValue(oneExpiredTime, 'key2'),'val2')
+    assertKeyMissing(expiringDict, bothExpiredTime, 'key1')
+    assertKeyMissing(expiringDict, bothExpiredTime, 'key2')

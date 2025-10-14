@@ -12,7 +12,8 @@ class RefreshTokenManager():
   refreshTokenDict = None
 
   def __init__(self, appObj):
-    self.refreshTokenDict = expiringdictClass(appObj.APIAPP_REFRESH_TOKEN_TIMEOUT, appObj.scheduler, appObj.getCurDateTime)
+    #appObj.APIAPP_REFRESH_TOKEN_TIMEOUT
+    self.refreshTokenDict = expiringdictClass(appObj.scheduler, appObj.getCurDateTime)
 
   def generateRefreshTokenFirstTime(
     self,
@@ -33,12 +34,15 @@ class RefreshTokenManager():
       'personGUID': personGUID,
       'currentlyUsedAuthProviderGuid': currentlyUsedAuthProviderGuid,
       'currentlyUsedAuthKey': currentlyUsedAuthKey,
-      'refreshSessionExpiry': appObj.getCurDateTime() + timedelta(seconds=int(appObj.APIAPP_REFRESH_SESSION_TIMEOUT))
+      'refreshSessionExpiry': appObj.getCurDateTime() + timedelta(seconds=int(tenantObj.getRefreshSessionTimeout()))
     }
-    self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, dataToStoreWithRefreshToken)
+    self.refreshTokenDict.addOrReplaceKey(
+      curTime=appObj.getCurDateTime(),
+      key=token,
+      val=dataToStoreWithRefreshToken,
+      durationToKeepItemInSeconds=tenantObj.getRefreshTokenTimeout()
+    )
 
-    print("DEBUG appObj.APIAPP_REFRESH_TOKEN_TIMEOUT", appObj.APIAPP_REFRESH_TOKEN_TIMEOUT)
-    print("DEBUG tenantObj.getRefreshTokenTimeout()", tenantObj.getRefreshTokenTimeout())
     expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(tenantObj.getRefreshTokenTimeout()))
 
     return {
@@ -56,7 +60,12 @@ class RefreshTokenManager():
       return None
 
     token = generateRandomRefreshToken(appObj)
-    self.refreshTokenDict.addOrReplaceKey(appObj.getCurDateTime(), token, val)
+    self.refreshTokenDict.addOrReplaceKey(
+      curTime=appObj.getCurDateTime(),
+      key=token,
+      val=val,
+      durationToKeepItemInSeconds=tenantObj.getRefreshTokenTimeout()
+    )
     expiryTime = appObj.getCurDateTime() + timedelta(seconds=int(tenantObj.getRefreshTokenTimeout()))
 
 

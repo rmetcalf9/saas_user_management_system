@@ -4,27 +4,25 @@ from datetime import timedelta
 #  a valid apschedule (in memory) should be passed
 
 class expiringdictClass():
-  durationToKeepItemInSeconds = None
   dataDict = None
   
-  def __init__(self, durationToKeepItemInSeconds, apSchedularInstance=None, curTimeFn=None):
-    self.durationToKeepItemInSeconds = durationToKeepItemInSeconds
+  def __init__(self, apSchedularInstance=None, curTimeFn=None):
     self.dataDict = dict()
     if apSchedularInstance is not None:
       apSchedularInstance.add_job(self._cleanUpProcessWhichMayBeRunInSeperateThread, 'interval', minutes=10, id='my_job_id', args=[curTimeFn])
 
-  def addOrReplaceKey(self, curTime,key,val):
-    expiryTime = curTime + timedelta(seconds=int(self.durationToKeepItemInSeconds))
+  def addOrReplaceKey(self, curTime, key, val, durationToKeepItemInSeconds):
+    expiryTime = curTime + timedelta(seconds=int(durationToKeepItemInSeconds))
     self.dataDict[key] = [val, expiryTime]
     
-  def getValue(self, curTime,key):
+  def getValue(self, curTime, key):
     ite = self.dataDict[key]
     if ite[1] < curTime:
       del self.dataDict[key]
       raise KeyError
     return ite[0]
     
-  def popValue(self, curTime,key):
+  def popValue(self, curTime, key):
     val = self.getValue(curTime,key)
     del self.dataDict[key]
     return val
