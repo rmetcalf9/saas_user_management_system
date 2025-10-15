@@ -11,6 +11,9 @@ from flask_restx import fields
 from flask import request
 import time
 import datetime
+
+from typing_extensions import override
+
 import ticketManager
 import apiKeyManager
 
@@ -224,4 +227,13 @@ class appObjClass(parAppObj):
     decodedJWTToken.userObj = userObj
     return decodedJWTToken
 
+  @override
+  def getDerivedServerInfoData(self):
+    return {
+      "APIAPP_JWT_TOKEN_TIMEOUT": self.APIAPP_JWT_TOKEN_TIMEOUT,
+      "APIAPP_REFRESH_TOKEN_TIMEOUT": self.APIAPP_REFRESH_TOKEN_TIMEOUT,
+      "APIAPP_REFRESH_SESSION_TIMEOUT": self.APIAPP_REFRESH_SESSION_TIMEOUT
+    }
+
 appObj = appObjClass()
+

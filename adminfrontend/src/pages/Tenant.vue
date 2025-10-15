@@ -33,6 +33,12 @@
         <q-item-label caption><q-chip size="10px" v-for="curVal in tenantData.JWTCollectionAllowedOriginList" :key=curVal>{{ curVal }}</q-chip></q-item-label>
       </q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section >
+        <q-item-label>User session security</q-item-label>
+        <q-item-label caption>{{ tenantData.UserSessionSecurity }}</q-item-label>
+      </q-item-section>
+    </q-item>
     <q-item clickable v-ripple highlight @click="viewTicketTypes">
       <q-item-section>
         <q-item-label>Auth Ticket Types</q-item-label>
@@ -129,6 +135,31 @@
         />
         Origins which client apps will be allowed to collect JWT tokens from
 
+        <div class="tenantpage-usersessionsecuritysection">
+          <q-input
+            v-model="editTenantModalDialogData.UserSessionSecurity.JwtTokenTimeout"
+            ref="usersessionsecurityjwttokentimoutInput"
+            label="JWT Token Timeout"
+            :label-width="3"
+          />
+          (Seconds) The time the application can reuse the token until it must use the refresh function to automatically get a new one.
+
+          <q-input
+            v-model="editTenantModalDialogData.UserSessionSecurity.RefreshTokenTimeout"
+            ref="usersessionsecurityrefreshtokentimeoutInput"
+            label="Refresh Token Timeout"
+            :label-width="3"
+          />
+          (Seconds) If the uses is idle for this amount of time they must relogin
+
+          <q-input
+            v-model="editTenantModalDialogData.UserSessionSecurity.RefreshSessionTimeout"
+            ref="usersessionsecurityrefreshsessiontimoutInput"
+            label="Refresh Session Timeout"
+            :label-width="3"
+          />
+          (Seconds) After this amount of time the user must relogin wether they are idle or not
+        </div>
         <q-input
           v-model="editTenantModalDialogData.TicketOverrideURL"
           ref="TicketOverrideURLInput"
@@ -241,7 +272,12 @@ export default {
         Description: '',
         AllowUserCreation: false,
         JWTCollectionAllowedOriginList: [],
-        TicketOverrideURL: ''
+        TicketOverrideURL: '',
+        UserSessionSecurity: {
+          JwtTokenTimeout: -1,
+          RefreshTokenTimeout: -1,
+          RefreshSessionTimeout: -1
+        }
       },
       editTenantModalDialogVisible: false
     }
@@ -303,6 +339,9 @@ export default {
       this.editTenantModalDialogData.TicketOverrideURL = this.tenantData.TicketOverrideURL
       this.editTenantModalDialogData.TenantBannerHTML = this.tenantData.TenantBannerHTML
       this.editTenantModalDialogData.SelectAuthMessage = this.tenantData.SelectAuthMessage
+      this.editTenantModalDialogData.UserSessionSecurity.JwtTokenTimeout = this.tenantData.UserSessionSecurity.JwtTokenTimeout
+      this.editTenantModalDialogData.UserSessionSecurity.RefreshTokenTimeout = this.tenantData.UserSessionSecurity.RefreshTokenTimeout
+      this.editTenantModalDialogData.UserSessionSecurity.RefreshSessionTimeout = this.tenantData.UserSessionSecurity.RefreshSessionTimeout
 
       this.editTenantModalDialogVisible = true
       const TTT = this
@@ -319,8 +358,14 @@ export default {
             if (this.editTenantModalDialogData.TicketOverrideURL === this.tenantData.TicketOverrideURL) {
               if (this.editTenantModalDialogData.TenantBannerHTML === this.tenantData.TenantBannerHTML) {
                 if (this.editTenantModalDialogData.SelectAuthMessage === this.tenantData.SelectAuthMessage) {
-                  Notify.create({ color: 'positive', message: 'No changes made' })
-                  return // no change so do nothing
+                  if (this.editTenantModalDialogData.UserSessionSecurity.JwtTokenTimeout === this.tenantData.UserSessionSecurity.JwtTokenTimeout) {
+                    if (this.editTenantModalDialogData.UserSessionSecurity.RefreshTokenTimeout === this.tenantData.UserSessionSecurity.RefreshTokenTimeout) {
+                      if (this.editTenantModalDialogData.UserSessionSecurity.RefreshSessionTimeout === this.tenantData.UserSessionSecurity.RefreshSessionTimeout) {
+                        Notify.create({ color: 'positive', message: 'No changes made' })
+                        return // no change so do nothing
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -334,6 +379,9 @@ export default {
       newTenantJSON.TicketOverrideURL = this.editTenantModalDialogData.TicketOverrideURL
       newTenantJSON.TenantBannerHTML = this.editTenantModalDialogData.TenantBannerHTML
       newTenantJSON.SelectAuthMessage = this.editTenantModalDialogData.SelectAuthMessage
+      newTenantJSON.UserSessionSecurity.JwtTokenTimeout = this.editTenantModalDialogData.UserSessionSecurity.JwtTokenTimeout
+      newTenantJSON.UserSessionSecurity.RefreshTokenTimeout = this.editTenantModalDialogData.UserSessionSecurity.RefreshTokenTimeout
+      newTenantJSON.UserSessionSecurity.RefreshSessionTimeout = this.editTenantModalDialogData.UserSessionSecurity.RefreshSessionTimeout
 
       const callback = {
         ok: function (response) {
@@ -454,5 +502,8 @@ export default {
 <style>
 .tenantpage-z-max {
   z-index: 3000; /* higher than q-table's content */
+}
+.tenantpage-usersessionsecuritysection {
+  background-color: lightgrey;
 }
 </style>
