@@ -11,7 +11,11 @@ serverInfo = {
       "APIAPP_APIDOCSURL": "_",
       "APIAPP_FRONTENDURL": env["APIAPP_FRONTENDURL"]
     },
-    'Derived': None
+    'Derived': {
+        "APIAPP_JWT_TOKEN_TIMEOUT": 60,
+        "APIAPP_REFRESH_SESSION_TIMEOUT": 2400,
+        "APIAPP_REFRESH_TOKEN_TIMEOUT": 240
+    }
 }
 
 
