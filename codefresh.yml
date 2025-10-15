@@ -2,6 +2,7 @@ version: '1.0'
 stages:
   - prepare
   - build
+  - buildrootver
   - deploy
   - postdeploy
 steps:
@@ -80,7 +81,7 @@ steps:
     image: ${{RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND}}
     working_directory: ${{main_clone}}
     environment:
-      - OVERRIDE_PUBLIC_PATH=saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/adminfrontend/    
+      - OVERRIDE_PUBLIC_PATH=saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/adminfrontend/
     commands:
       - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 2048
 
@@ -124,6 +125,33 @@ steps:
           - EXPECTED_CONTAINER_VERSION=${{RJM_VERSION}}
           - APIAPP_DEFAULTHOMEADMINUSERNAME=admin
           - APIAPP_DEFAULTHOMEADMINPASSWORD=admin
+
+  buildrootver:
+    title: Clean previous adminfrontend build
+    stage: buildrootver
+    image: alpine:3.18
+    working_directory: ${{main_clone}}
+    commands:
+      - echo "Deleting ./adminfrontend/dist/pwa directory..."
+      - rm -rf ./adminfrontend/dist/pwa
+      - echo "Directory deleted successfully."
+
+  compile_adminfrontend_rootver:
+    stage: buildrootver
+    description: Compile the adminfrontend quasar application root version
+    image: ${{RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND}}
+    working_directory: ${{main_clone}}
+    environment:
+      - OVERRIDE_PUBLIC_PATH=
+    commands:
+      - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 2048
+
+  build_the_image_rootver:
+    stage: buildrootver
+    working_directory: ${{main_clone}}
+    type: build
+    image_name: metcarob/saas_user_management_rootver
+    tag: ${{RJM_VERSION}}
 
   #Deploy new container to my website swarm
   deploy_to_metcarob_swarm:
