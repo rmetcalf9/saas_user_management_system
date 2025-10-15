@@ -8,7 +8,7 @@ import constants
 from apiSharedModels import getTenantModel, getUserModel, getPersonModel, getAuthProviderModel, getTenantModelUserSessionSecurity
 from urllib.parse import unquote
 import json
-from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser
+from tenants import CreateTenant, UpdateTenant, DeleteTenant, GetTenant, AddAuthForUser, invalidTenantSecurityOptions
 from AuthProviders.authsCommon import getAuthRecord
 from userPersonCommon import GetUser, CreateUserObjFromUserDict, RemoveUserAssociation
 from users import GetPaginatedUserData, UpdateUser, DeleteUser, CreateUser, associateUserWithPerson
@@ -191,6 +191,8 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         if (err.id=='tenantAlreadtExistsException'):
           raise BadRequest(err.text)
         raise Exception('InternalServerError')
+      except invalidTenantSecurityOptions as err:
+        raise BadRequest(str(err))
       except:
         raise InternalServerError
 
@@ -289,8 +291,10 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
         #raise err
       except WrongObjectVersionExceptionClass as err:
         raise Conflict(str(err))
+      except invalidTenantSecurityOptions as err:
+        raise BadRequest(str(err))
       except Exception as err:
-        print("Un catagoarised exception")
+        print("Un categorised exception")
         print(str(err))
         raise InternalServerError
 
