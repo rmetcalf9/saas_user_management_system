@@ -12,4 +12,4 @@ export QUASARBUILDIMAGE_ADMINFRONTEND="metcarob/docker-build-quasar-app:0.0.33"
 
 export DOCKER_USERNAME=metcarob
 
-export RJM_USERMANAGEMENT_CONTAINER="metcarob/saas_user_management:0.0.223_rootver"
+export RJM_USERMANAGEMENT_CONTAINER="metcarob/saas_user_management:0.0.224_rootver"
