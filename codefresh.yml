@@ -83,7 +83,7 @@ steps:
     environment:
       - OVERRIDE_PUBLIC_PATH=saas_user_management/v${{RJM_MAJOR_VERSION}}/public/web/adminfrontend/
     commands:
-      - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 2048
+      - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 1536
 
   build_the_image:
     stage: build

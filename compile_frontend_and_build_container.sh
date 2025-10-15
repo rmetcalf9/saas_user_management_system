@@ -21,12 +21,20 @@ if [ ${RES} -eq 0 ]; then
   fi
 fi
 
-docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume ${QUASARBUILDIMAGE} -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
-RES=$?
-if [ ${RES} -ne 0 ]; then
-  exit 1
-fi
-docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/adminfrontend,target=/ext_volume ${QUASARBUILDIMAGE} -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
+echo "Skipping frontend as it can not build locally"
+# docker run --rm --name docker_build_quasar_app --mount type=bind,source=${GITROOT}/${APPNAME}/frontend,target=/ext_volume ${QUASARBUILDIMAGE} -c "build_quasar_app /ext_volume spa \"local_build_${VERSIONNUM}\""
+# RES=$?
+# if [ ${RES} -ne 0 ]; then
+#   exit 1
+# fi
+
+# old space was 2048
+# now trying 1536
+docker run --rm --name docker_build_quasar_app \
+  --mount type=bind,source=${GITROOT}/${APPNAME}/adminfrontend,target=/ext_volume \
+  -e OVERRIDE_PUBLIC_PATH= \
+  ${QUASARBUILDIMAGE_ADMINFRONTEND} \
+  -c "build_quasar_app /ext_volume pwa \"local_build_${VERSIONNUM}\"" 1536
 RES=$?
 if [ ${RES} -ne 0 ]; then
   exit 1
@@ -37,12 +45,14 @@ if [ ! -d ${GITROOT}/${APPNAME}/frontend/dist/spa ]; then
   cd ${GITROOT}
   exit 1
 fi
-if [ ! -d ${GITROOT}/${APPNAME}/adminfrontend/dist/spa ]; then
+if [ ! -d ${GITROOT}/${APPNAME}/adminfrontend/dist/pwa ]; then
   echo "ERROR - build command didn't create ${GITROOT}/${APPNAME}/adminfrontend/dist/spa directory"
   cd ${GITROOT}
   exit 1
 fi
 
+echo "Stopping after quasar builds"
+exit 0
 
 echo "Build docker container (VERSIONNUM=${VERSIONNUM})"
 echo "docker build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}_localbuild"
