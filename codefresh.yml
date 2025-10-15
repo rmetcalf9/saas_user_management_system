@@ -144,14 +144,14 @@ steps:
     environment:
       - OVERRIDE_PUBLIC_PATH=
     commands:
-      - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 2048
+      - build_quasar_app ./adminfrontend pwa ${{RJM_VERSION}} 1536
 
   build_the_image_rootver:
     stage: buildrootver
     working_directory: ${{main_clone}}
     type: build
-    image_name: metcarob/saas_user_management_rootver
-    tag: ${{RJM_VERSION}}
+    image_name: metcarob/saas_user_management
+    tag: ${{RJM_VERSION}}_rootver
 
   #Deploy new container to my website swarm
   deploy_to_metcarob_swarm:
