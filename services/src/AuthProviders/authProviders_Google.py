@@ -58,6 +58,8 @@ def credentialDictGet_known_as(credentialDICT):
 def credentialDictGet_unique_user_id(credentialDICT):
   return credentialDICT["creds"]["id_token"]["sub"]
 
+locale_default = "en-GB"
+
 class authProviderGoogle(authProvider):
   def _getTypicalAuthData(self, credentialDICT):
     return {
@@ -70,18 +72,19 @@ class authProviderGoogle(authProvider):
         "picture": credentialDICT["creds"]["id_token"]["picture"],
         "given_name": credentialDICT["creds"]["id_token"]["given_name"],
         "family_name": credentialDICT["creds"]["id_token"]["family_name"],
-        "locale": credentialDICT["creds"]["id_token"]["locale"]
+        "locale": credentialDICT["creds"]["id_token"].get("locale", locale_default)
       } #Other data like name full name that can be provided - will vary between auth providers
     }
   def _getAuthData(self, appObj, credentialDICT):
+    id_token = credentialDICT.get("creds", {}).get("id_token", {})
     return {
-      "email": credentialDICT["creds"]["id_token"]["email"],
-      "email_verified": credentialDICT["creds"]["id_token"]["email_verified"],
-      "name": credentialDICT["creds"]["id_token"]["name"],
-      "picture": credentialDICT["creds"]["id_token"]["picture"],
-      "given_name": credentialDICT["creds"]["id_token"]["given_name"],
-      "family_name": credentialDICT["creds"]["id_token"]["family_name"],
-      "locale": credentialDICT["creds"]["id_token"]["locale"]
+        "email": id_token.get("email"),
+        "email_verified": id_token.get("email_verified", False),
+        "name": id_token.get("name"),
+        "picture": id_token.get("picture"),
+        "given_name": id_token.get("given_name"),
+        "family_name": id_token.get("family_name"),
+        "locale": id_token.get("locale", locale_default),  # default to 'en' if missing
     }
 
   def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):

@@ -66,6 +66,10 @@ googleLoginAccounts[1]['creds']['id_token']['sub'] = "56454656465455"
 googleLoginAccounts[1]['creds']['id_token']['email'] = "rmetcalf92@googlemail.com"
 googleLoginAccounts[1]['creds']['id_token']['name'] = "Robert2 Metcalf2"
 
+googleLoginAccounts.append(copy.deepcopy(googleLoginAccounts[0]))
+del googleLoginAccounts[2]['creds']['id_token']['locale']
+
+
 googleAuthProv001_CREATE_missingClientSecretParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
 googleAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(googleAuthProv001_CREATE)
@@ -422,3 +426,17 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     )
     self.assertEqual(resultJSON3["message"],"Ticket not usable")
 
+  def test_loginAccoutnMissingLocaleWorks(self):
+    setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
+    #Test authentication via google.
+    ## Must use mocks
+
+    googleAuthProvDict = self.getTenantSpercificAuthProvDict(setup['tenantName'], 'google')
+    #print(googleAuthProvDict)
+    result2JSON = self.loginWithGoogle(
+      googleLoginAccountNum=2, #2 has no locale in response
+      tenantName=setup['tenantName'],
+      authProviderDICT=googleAuthProvDict,
+      ticketToPass=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
+      expectedResults=[200]
+    )
