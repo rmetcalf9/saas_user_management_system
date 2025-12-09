@@ -12,7 +12,7 @@ InvalidUserIDException = customExceptionClass('That userID is not valid', 'Inval
 InvalidKnownAsException = customExceptionClass('That knownAs is not valid', 'InvalidKnownAsException')
 
 ##Creation functions
-## All the functions that sets up the user, roles and asociates the user with a person
+## All the functions that sets up the user, roles and associates the user with a person
 
 def CreateUser(appObj, userData, mainTenant, createdBy, storeConnection):
   #mainTenant is validated by adminAPI
