@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/APIlogin_Legacy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Facebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Facebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Google.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Internal.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Internal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_adminAPI_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_adminAPI_users.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI_register.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI_register.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/testContainer/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/unitTestMatchingCICD/container_requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/unitTestMatchingCICD/container_requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/unitTestMatchingCICD/src_requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/services/unitTestMatchingCICD/src_requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
