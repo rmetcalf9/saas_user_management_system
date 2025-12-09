@@ -30,10 +30,21 @@ class customExceptionClass(Exception):
       self.id = iid
     self.text = text
 
+class customUnauthorizedExceptionClass(Exception):
+  id = None
+  text = None
+  def __init__(self, text, iid=None):
+    if iid is None:
+      self.id = text
+    else:
+      self.id = iid
+    self.text = text
+
+#PersonHasNoAccessToAnyIdentitiesException = customUnauthorizedExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
+
 authProviderNotFoundException = customExceptionClass('authProviderNotFoundException','authProviderNotFoundException')
 authFailedException = customExceptionClass('authFailedException')
 authNotFoundException = customExceptionClass('authNotFoundException','authNotFoundException')
-PersonHasNoAccessToAnyIdentitiesException = customExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
 tenantAlreadtExistsException = customExceptionClass('Tenant Already Exists','tenantAlreadtExistsException')
 tenantDosentExistException = customExceptionClass('Tenant Dosen\'t Exist','tenantDosentExistException')
 ShouldNotSupplySaltWhenCreatingAuthProvException = customExceptionClass('Should not supply salt when creating new auth prov', 'ShouldNotSupplySaltWhenCreatingAuthProvException')

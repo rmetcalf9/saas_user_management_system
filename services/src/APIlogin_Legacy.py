@@ -169,10 +169,10 @@ def registerAPI(appObj, nsLogin):
             )
           loginResult = storeConnection.executeInsideTransaction(someFn)
 
+        except constants.customUnauthorizedExceptionClass as err:
+          raise Unauthorized(err.text)
         except constants.customExceptionClass as err:
           if (err.id=='authFailedException'):
-            raise Unauthorized(err.text)
-          if (err.id=='PersonHasNoAccessToAnyIdentitiesException'):
             raise Unauthorized(err.text)
           if (err.id=='authProviderNotFoundException'):
             raise BadRequest(err.text)

@@ -1,5 +1,5 @@
 # Code to handle tenant objects
-from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, PersonHasNoAccessToAnyIdentitiesException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException, personDosentExistException, userCreationNotAllowedException
+from constants import customExceptionClass, masterTenantName, masterTenantDefaultDescription, masterTenantDefaultAuthProviderMenuText, masterTenantDefaultAuthProviderMenuIconLink, uniqueKeyCombinator, masterTenantDefaultSystemAdminRole, authProviderNotFoundException, tenantAlreadtExistsException, tenantDosentExistException, ShouldNotSupplySaltWhenCreatingAuthProvException, cantUpdateExistingAuthProvException, cantDeleteMasterTenantException, personDosentExistException, userCreationNotAllowedException, customUnauthorizedExceptionClass
 import constants
 import uuid
 from AuthProviders import authProviderFactory, getNewAuthProviderJSON, getExistingAuthProviderJSON
@@ -480,11 +480,11 @@ def Login(
   ###print("tenants.py LOGIN possibleUserIDs:",possibleUserIDs, ":", authUserObj['personGUID'])
   if len(possibleUserIDs)==0:
     if not tenantObj.getAllowUserCreation():
-      raise PersonHasNoAccessToAnyIdentitiesException
+      raise customUnauthorizedExceptionClass('Person has no access to any identities and tenant not not allow user creation', 'PersonHasNoAccessToAnyIdentitiesException1')
     if not authProvider.getAllowUserCreation():
-      raise PersonHasNoAccessToAnyIdentitiesException
+      raise customUnauthorizedExceptionClass('Person has no access to any identities and auth provider not allow user creation', 'PersonHasNoAccessToAnyIdentitiesException2')
     if authProvider.requireRegisterCallToAutocreateUser():
-      raise PersonHasNoAccessToAnyIdentitiesException
+      raise customUnauthorizedExceptionClass('Person has no access to any identities and auth provider required register call', 'PersonHasNoAccessToAnyIdentitiesException3')
     #print("No possible identities returned - this means there is no has account role - we should add it")
 
     #Person may have many users, but if we can create accounts for this tenant we can add the account to all users
@@ -497,7 +497,7 @@ def Login(
     possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
     if len(possibleUserIDs)==0:
       #This should never happen as we just added the has account role
-      raise PersonHasNoAccessToAnyIdentitiesException
+      raise customUnauthorizedExceptionClass('Person has no access to any identities even after autocreate','PersonHasNoAccessToAnyIdentitiesException4')
   if requestedUserID is None:
     if len(possibleUserIDs)==1:
       requestedUserID = possibleUserIDs[0]
