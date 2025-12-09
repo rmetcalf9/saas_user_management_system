@@ -68,10 +68,13 @@ def CreateMasterTenant(appObj, testingMode, storeConnection):
   userID = appObj.defaultUserGUID
   InternalAuthUsername = appObj.APIAPP_DEFAULTHOMEADMINUSERNAME
 
-  #User spercific creation
+  #User specific creation
   CreateUser(
     appObj,
-    {"user_unique_identifier": userID, "known_as": InternalAuthUsername},
+    {
+      "user_unique_identifier": userID, #Set to appObj.defaultUserGUID (forced constant)
+      "known_as": InternalAuthUsername
+    },
     masterTenantName,
     'init/CreateMasterTenant',
     storeConnection

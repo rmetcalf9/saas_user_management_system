@@ -185,7 +185,10 @@ class AutoConfigRunStepAddInternalUserAccount(AutoConfigRunStep):
 
     CreateUser(
       appObj,
-      {"user_unique_identifier": self.userID, "known_as": self.Username},
+      {
+        "user_unique_identifier": self.userID, # Passed in from config
+        "known_as": self.Username
+      },
       self.tenantName,
       'autoConfigRunner/AddInternalUserAccount',
       storeConnection

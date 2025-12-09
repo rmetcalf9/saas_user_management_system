@@ -382,7 +382,7 @@ def registerAPI(appObj, APIAdminCommon, nsAdmin):
       content = marshal(content_raw, getCreateUserModel(appObj))
       requiredInPayload(content, ['UserID','known_as'])
       userData = {
-        "user_unique_identifier": content["UserID"],
+        "user_unique_identifier": content["UserID"], #Entered by user in UI TODO Add warning this may become public
         "known_as": content["known_as"]
       }
       def dbfn(storeConnection):

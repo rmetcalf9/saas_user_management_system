@@ -90,14 +90,23 @@
 
       <!-- Scrollable Body -->
       <q-card-section style="flex: 1; overflow-y: auto;">
-        <q-input
-          v-model="createUserModalDialogData.UserID"
-          ref="userIDInput"
-          label="User ID"
-          :label-width="3"
-        />
+        <div class="flex">
+          <div class="col-grow">
+            <q-input
+              v-model="createUserModalDialogData.UserID"
+              ref="userIDInput"
+              label="User ID"
+              :label-width="3"
+            />
+          </div>
+          <q-btn
+            color="secondary"
+            label="Generate GUID"
+            @click="btnCreateUserGenGuid"
+          />
+        </div>
         <div class="text-caption text-grey q-mb-md">
-          Normally &lt;User ID&gt;@&lt;Auth Prov&gt;
+          Warning: For some systems this can be exposed to other users - recommend not using email or username. GUID is best
         </div>
 
         <q-input
@@ -150,6 +159,7 @@ import SelectColumns from '../components/SelectColumns'
 import saasApiClientCallBackend from '../saasAPiClientCallBackend'
 import { useTablePersistSettingsStore } from 'stores/tablePersistSettingsStore'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
+import utils from '../utils'
 
 export default {
   name: 'UsersTable',
@@ -215,6 +225,9 @@ export default {
     }
   },
   methods: {
+    btnCreateUserGenGuid () {
+      this.createUserModalDialogData.UserID = utils.uuidv4()
+    },
     toggleRowSelection (row, val) {
       if (val) {
         this.tableSelected.push(row)
