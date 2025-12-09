@@ -15,7 +15,29 @@ import constants
 invalidTenantName="invalidtenantname"
 
 class test_api(testHelperAPIClient):
-  pass
+  def deleteUserPersonLink(self, userId, personGuid, checkAndParseResponse=True):
+    # must be called on masterTenant
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/userpersonlinks/' + userId + '/' + personGuid,
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()}
+    )
+    if (not checkAndParseResponse):
+      return result
+    self.assertEqual(result.status_code, 200, msg="Unexpected return - " + result.get_data(as_text=True))
+    return json.loads(result.get_data(as_text=True))
+
+    # TODO Delete user from person
+    # saasApiClientCallBackend.callApi({
+    #   prefix: 'admin',
+    #   router: this.$router,
+    # store: this.userManagementClientStoreStore,
+    # path: '/' + TTT.tenantName + '/userpersonlinks/' + userData.UserID + '/' + TTT.personData.guid,
+    # method: 'delete',
+    # postdata: null,
+    # callback
+    # })
+
+
 
 class test_loginapi_norm(test_api):
   def test_loginInvalidTenantFails(self):
@@ -67,8 +89,6 @@ class test_loginapi_norm(test_api):
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON[ 'AuthProviders' ][0], expectedResult[ 'AuthProviders' ][0], [ 'guid', 'saltForPasswordHashing' ], msg="Master tenant auth provider wrong")
 
   def test_sucessfulLoginAsDefaultUser(self):
-    result2JSON = self.loginAsDefaultUser()
-
     result = self.testClient.get(
       self.loginAPIPrefix + '/' + masterTenantName + '/authproviders',
       headers={"Origin": httpOrigin}
@@ -415,7 +435,7 @@ class test_loginapi_norm(test_api):
     self.assertEqual(result2.status_code, 400, 'Login failed - ' + result2.get_data(as_text=True))
 
   def test_attemptToLoginTenantWherePersonHasInternalAuthOnAnotherTenant(self):
-    #accounts are not autocreated for internal auth so it is not nessecary to set allow user creation to false
+    #accounts are not autocreated for internal auth so it is not necessary to set allow user creation to false
     tenantWhereUserHasAccountDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
     tenantWithNoAuthProviders2 = copy.deepcopy(tenantWithNoAuthProviders)
     tenantWithNoAuthProviders2['Name'] = 'secondTestTenant'
@@ -450,3 +470,64 @@ class test_loginapi_norm(test_api):
     )
 
     #self.assertTrue(False)
+
+  def test_logingSuccessfulWherePersonHasNoUserREcords(self):
+    tenantDict = self.createTenantWithAuthProvider(
+      tenantWithNoAuthProviders,
+      True,
+      sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+    )
+    createdAuthProvGUID = tenantDict['AuthProviders'][0]['guid']
+    createdAuthSalt = tenantDict['AuthProviders'][0]['saltForPasswordHashing']
+
+    userName = "testSetUserName"
+    password = "pass"
+
+    registerJSON = {
+      "authProviderGUID": createdAuthProvGUID,
+      "credentialJSON": {
+        "username": userName,
+        "password": self.getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(
+          createdAuthSalt,
+          username=userName,
+          password=password
+        )
+       }
+    }
+
+    registerResult = self.testClient.put(
+      self.loginAPIPrefix + '/' + tenantDict['Name'] + '/register',
+      data=json.dumps(registerJSON),
+      content_type='application/json',
+      headers={"Origin": httpOrigin}
+    )
+    self.assertEqual(registerResult.status_code, 201, msg="Registration failed")
+
+    # Login with newly registered user
+    self.loginAsUser(
+      tenantDict['Name'],
+      self.getTenantInternalAuthProvDict(tenantDict['Name']),
+      userName,
+      password,
+      [200]
+    )
+
+    registerResultJson = json.loads(registerResult.get_data(as_text=True))
+
+    userId = registerResultJson["UserID"]
+    personGuid = registerResultJson["associatedPersonGUIDs"][0]
+    print("userId", userId, " personGuid", personGuid)
+
+    deleteLinkResponse = self.deleteUserPersonLink(
+      userId=userId,
+      personGuid=personGuid
+    )
+
+    # login should still work
+    self.loginAsUser(
+      tenantDict['Name'],
+      self.getTenantInternalAuthProvDict(tenantDict['Name']),
+      userName,
+      password,
+      [200]
+    )

@@ -487,6 +487,8 @@ def Login(
       raise customUnauthorizedExceptionClass('Person has no access to any identities and auth provider required register call', 'PersonHasNoAccessToAnyIdentitiesException3')
     #print("No possible identities returned - this means there is no has account role - we should add it")
 
+    # User might exist but not have an accountRole for this tenant. The followin section adds it:
+
     #Person may have many users, but if we can create accounts for this tenant we can add the account to all users
     # and give the person logging in a choice
     #We don't do a tenant check because all it's doing is restricting the returned users to users who already have a hasaccount role
@@ -496,8 +498,11 @@ def Login(
 
     possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
     if len(possibleUserIDs)==0:
-      #This should never happen as we just added the has account role
-      raise customUnauthorizedExceptionClass('Person has no access to any identities even after autocreate','PersonHasNoAccessToAnyIdentitiesException4')
+      #Still no users with an hasaccout role for this tenant. We must create the user
+      #TODO Create user with hasaccount role for this tenant
+      possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
+      if len(possibleUserIDs) == 0:
+        raise customUnauthorizedExceptionClass('No possible userIds to use and create attempt failed','PersonHasNoAccessToAnyIdentitiesException4')
   if requestedUserID is None:
     if len(possibleUserIDs)==1:
       requestedUserID = possibleUserIDs[0]

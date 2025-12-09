@@ -338,8 +338,8 @@ class testClassWithTestClient(testHelperSuperClass):
       'person': person
     }
 
-  def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt):
-    return getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantAuthProvSalt)
+  def getDefaultHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(self, tenantAuthProvSalt, username=env['APIAPP_DEFAULTHOMEADMINUSERNAME'], password=env['APIAPP_DEFAULTHOMEADMINPASSWORD']):
+    return getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, tenantAuthProvSalt)
 
   #Returns a token with the admin user logged in
   def getNormalJWTToken(self):
