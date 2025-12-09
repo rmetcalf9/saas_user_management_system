@@ -4,6 +4,7 @@ import constants
 import json
 import requests
 from .Exceptions import CustomAuthProviderExceptionClass
+import uuid
 
 def credentialDictGet_unique_user_id(credentialDICT):
   #print(credentialDICT)
@@ -168,7 +169,7 @@ class authProviderFacebook(authProvider):
 
   def _getTypicalAuthData(self, credentialDICT):
     return {
-      "user_unique_identifier": credentialDictGet_unique_user_id(credentialDICT) + '@' + self.guid, #used for username - needs to be unique across all auth provs
+      "user_unique_identifier": str(uuid.uuid4()),
       "known_as": credentialDictGet_unique_user_id(credentialDICT), #used to display in UI for the user name
       "other_data": {}
     }

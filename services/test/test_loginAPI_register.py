@@ -27,7 +27,7 @@ class test_loginapi_register(parent_test_api):
 
 
     expectedUserDICT = {
-      "UserID": userName + internalUSerSufix,
+      "UserID": userName + internalUSerSufix, #Now returns GUID
       "known_as": userName,
       "ObjectVersion": "2",
       "TenantRoles": [{
@@ -40,7 +40,7 @@ class test_loginapi_register(parent_test_api):
 
     self.assertFalse('other_data' in registerResultJSON, msg="Found other_data in user registerResultJSON")
 
-    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersonGUIDs'], msg='Incorrect response from registration')
+    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ["UserID", 'associatedPersonGUIDs'], msg='Incorrect response from registration')
     self.assertEqual(len(registerResultJSON['associatedPersonGUIDs']),1)
 
     loginResultJSON = self.loginAsUser(
@@ -53,7 +53,10 @@ class test_loginapi_register(parent_test_api):
     self.assertFalse('other_data' in loginResultJSON)
 
     #Test other_data is filled in. This is only returned in the admin API get function so can't use login api to view
-    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + userName + internalUSerSufix, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    result = self.testClient.get(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + registerResultJSON["UserID"],
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
     self.assertEqual(result.status_code, 200)
 
     userGetResultDICT = json.loads(result.get_data(as_text=True))
@@ -74,7 +77,7 @@ class test_loginapi_register(parent_test_api):
       "lastUpdateDateTime": testDateTime.isoformat(),
       "associatedPersonGUIDs": registerResultJSON['associatedPersonGUIDs']
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, [], msg='Admin API User data wrong')
+    self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, ["UserID"], msg='Admin API User data wrong')
 
 
   def test_registerNewUserTenantFail(self):
@@ -322,6 +325,8 @@ class test_loginapi_register(parent_test_api):
       headers={"Origin": httpOrigin}
     )
     self.assertEqual(registerResult.status_code, 400, msg="Registration of second user with same name did not fail")
+    resultJSON = json.loads(registerResult.get_data(as_text=True))
+    self.assertEqual(resultJSON["message"], "That username is already in use")
 
   def test_registerNewUserFailsWithDuplicateUsernameDifferByCase(self):
     tenantDict = self.createTenantWithAuthProvider(tenantWithNoAuthProviders, True, sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
@@ -391,7 +396,7 @@ class test_loginapi_register(parent_test_api):
 
     self.assertFalse('other_data' in registerResultJSON, msg="Found other_data in user registerResultJSON")
 
-    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ['associatedPersonGUIDs'], msg='Incorrect response from registration')
+    self.assertJSONStringsEqualWithIgnoredKeys(registerResultJSON, expectedUserDICT, ["UserID", 'associatedPersonGUIDs'], msg='Incorrect response from registration')
     self.assertEqual(len(registerResultJSON['associatedPersonGUIDs']),1)
 
     loginResultJSON = self.loginAsUser(
@@ -404,7 +409,10 @@ class test_loginapi_register(parent_test_api):
     self.assertFalse('other_data' in loginResultJSON)
 
     #Test other_data is filled in. This is only returned in the admin API get function so can't use login api to view
-    result = self.testClient.get(self.adminAPIPrefix + '/' + masterTenantName + '/users/' + userName + internalUSerSufix, headers={ jwtHeaderName: self.getNormalJWTToken()})
+    result = self.testClient.get(
+      self.adminAPIPrefix + '/' + masterTenantName + '/users/' + registerResultJSON["UserID"],
+      headers={ jwtHeaderName: self.getNormalJWTToken()}
+    )
     self.assertEqual(result.status_code, 200)
 
     userGetResultDICT = json.loads(result.get_data(as_text=True))
@@ -425,4 +433,4 @@ class test_loginapi_register(parent_test_api):
       "lastUpdateDateTime": testDateTime.isoformat(),
       "associatedPersonGUIDs": registerResultJSON['associatedPersonGUIDs']
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, [], msg='Admin API User data wrong')
+    self.assertJSONStringsEqualWithIgnoredKeys(userGetResultDICT, expectedResult, ["UserID"], msg='Admin API User data wrong')

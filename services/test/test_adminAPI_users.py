@@ -74,7 +74,7 @@ class test_adminAPIUsers(parent_test_api):
       },
       'ObjectVersion': "2"
     }
-    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["TenantRoles", "creationDateTime", "lastUpdateDateTime", 'associatedPersonGUIDs'], msg="User data mismatch")
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON['result'][1],expectedResult, ["UserID", "TenantRoles", "creationDateTime", "lastUpdateDateTime", 'associatedPersonGUIDs'], msg="User data mismatch")
     self.assertEqual(len(resultJSON['result'][1]["TenantRoles"]),1,msg="Didn't return single tenant")
     expectedTenantRolesResult = [{
       "TenantName": tenantDict["Name"],

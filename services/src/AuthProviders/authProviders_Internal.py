@@ -2,6 +2,7 @@
 from .authProviders_base import authProvider, InvalidAuthConfigException, MissingAuthCredentialsException, InvalidAuthCredentialsException
 from base64 import b64decode, b64encode
 import constants
+import uuid
 
 def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, username, password, tenantAuthProvSalt):
   #print("getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse called with:")
@@ -99,7 +100,7 @@ class authProviderInternal(authProvider):
     if 'username' not in credentialDICT:
       raise InvalidAuthConfigException
     return {
-      "user_unique_identifier": credentialDICT['username'] + self.getConfig()['userSufix'], #used for username - needs to be unique across all auth provs
+      "user_unique_identifier": str(uuid.uuid4()),
       "known_as": self.getDefaultKnownAs(credentialDICT), #used to display in UI for the user name
       "other_data": {} #Other data like name full name that can be provided - will vary between auth providers
     }
