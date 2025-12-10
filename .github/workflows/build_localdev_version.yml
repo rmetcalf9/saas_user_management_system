@@ -1,4 +1,4 @@
-name: build_root_var
+name: build_localdev_version
 
 on:
   workflow_dispatch:
