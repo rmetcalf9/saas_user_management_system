@@ -87,10 +87,15 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment docker_username=username docker_password=password
+            kv/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment docker_username=username docker_password=password
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ env.docker_username }}
           password: ${{ env.docker_password }}
+
+      - name: Push rootver image
+        run: |
+          source ./_repo_vars.sh && \
+          docker push metcarob/saas_user_management:${RJM_VERSION}_rootver
