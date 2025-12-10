@@ -44,6 +44,7 @@ jobs:
       - name: Unit tests
         run: |
           source ./_repo_vars.sh && \
+          echo "Running uint tests for ${PROJECT_NAME}" && \
           docker run --rm -v "$PWD/services:/opt/services" -w /opt/services \
             $RJM_PYTHON_TEST_IMAGE \
             sh -c "pip3 install --no-cache-dir -r ./src/requirements.txt && \
