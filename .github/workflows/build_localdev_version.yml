@@ -41,7 +41,7 @@ jobs:
 
       - name: Build main image
         run: |
-          source ./_repo_vars.sh && \          
+          source ./_repo_vars.sh && \
           docker build -t metcarob/saas_user_management:${RJM_VERSION} .
 
       - name: Build test image
