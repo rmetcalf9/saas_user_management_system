@@ -54,14 +54,14 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
             $RJM_BUILDQUASARAPP_IMAGE_FRONTEND \
-            build_quasar_app ./frontend spa $RJM_VERSION
+            sh -c "build_quasar_app ./frontend spa $RJM_VERSION"
 
       - name: Build adminfrontend
         run: |
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
             -e OVERRIDE_PUBLIC_PATH="saas_user_management/v${RJM_MAJOR_VERSION}/public/web/adminfrontend/" \
             $RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND \
-            build_quasar_app ./adminfrontend pwa $RJM_VERSION 1536
+            sh -c "build_quasar_app ./adminfrontend pwa $RJM_VERSION 1536"
 
       - name: Build main image
         run: |
