@@ -14,7 +14,6 @@ jobs:
       RJM_BUILDQUASARAPP_IMAGE_FRONTEND: metcarob/docker-build-quasar-app:0.0.12
       RJM_DOCKERWSCALLER_IMAGE: metcarob/docker-ws-caller:0.7.19
       RJM_DOCKER_KONG_API_URL: http://tasks.kong:8001
-      RJM_PYTHON_TEST_IMAGE: python:3.10
 
     steps:
       # === prepare stage ===
@@ -44,6 +43,7 @@ jobs:
 
       - name: Unit tests
         run: |
+          source ./_repo_vars.sh && \
           docker run --rm -v "$PWD/services:/opt/services" -w /opt/services \
             $RJM_PYTHON_TEST_IMAGE \
             sh -c "pip3 install --no-cache-dir -r ./src/requirements.txt && \
@@ -93,7 +93,7 @@ jobs:
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
             -e OVERRIDE_PUBLIC_PATH="" \
             $RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND \
-            build_quasar_app ./adminfrontend pwa $RJM_VERSION 1536
+            -c "build_quasar_app ./adminfrontend pwa $RJM_VERSION 1536"
 
       - name: Build rootver docker image
         run: |

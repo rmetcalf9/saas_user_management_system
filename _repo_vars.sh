@@ -10,6 +10,8 @@ export RJM_DOCKER_SERVICE_NAME=${PROJECT_NAME}_${RJM_VERSION_UNDERSCORE}
 export QUASARBUILDIMAGE="metcarob/docker-build-quasar-app:0.0.12"
 export QUASARBUILDIMAGE_ADMINFRONTEND="metcarob/docker-build-quasar-app:0.0.33"
 
+export RJM_PYTHON_TEST_IMAGE=python:3.10
+
 export DOCKER_USERNAME=metcarob
 
 export RJM_USERMANAGEMENT_CONTAINER="metcarob/saas_user_management:0.0.224_rootver"
