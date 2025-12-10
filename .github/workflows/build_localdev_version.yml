@@ -20,6 +20,7 @@ jobs:
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           exportEnv: true
+          mountPoint: kv
           secrets: |
             kv/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment username=DOCKER_USERNAME password=DOCKER_PASSWORD
 
