@@ -78,10 +78,15 @@ jobs:
 
       # === buildrootver stage ===
 
-      - name: Clean previous adminfrontend rootversion
+      - name: Clean previous adminfrontend build
         run: |
           echo "Deleting ./adminfrontend/dist/pwa..."
-          rm -rf ./adminfrontend/dist/pwa
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            $RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND \
+            -c "rm -rf ./adminfrontend/dist/pwa"
+          echo "Directory deleted successfully."
 
       - name: Build adminfrontend root version
         run: |
