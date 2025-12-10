@@ -184,7 +184,7 @@ class authProvider():
       authTPL=authTPL, authTPLQueried=authTPLQueried,
       ticketObj=ticketObj, ticketTypeObj=ticketTypeObj
     )
-    return obj
+    return (obj, enrichedCredentialDICT)
 
   # Normally overridden
   def _getTypicalAuthData(self, credentialDICT):

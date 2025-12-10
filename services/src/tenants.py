@@ -465,7 +465,7 @@ def Login(
 
   authProvider = _getAuthProvider(appObj, tenantName, authProviderGUID, storeConnection, tenantObj)
   loginTrace("Login trace authProvider FOUND")
-  authUserObj = authProvider.Auth(
+  (authUserObj, enrichedCredentialDICT) = authProvider.Auth(
     appObj=appObj,
     credentialDICT=credentialJSON,
     storeConnection=storeConnection,
@@ -502,10 +502,6 @@ def Login(
     possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
     if len(possibleUserIDs)==0:
       #Still no users with an hasaccount role for this tenant. We must create the user
-      enrichedCredentialDICT = authProvider.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(
-        credentialJSON,
-        appObj=appObj
-      )
       userData = authProvider.getTypicalAuthData(enrichedCredentialDICT)
       CreateUser(
         appObj=appObj,

@@ -174,7 +174,7 @@ class authProviderGoogle(authProvider):
       print(err) # for the repr
       print(str(err)) # for just the message
       print(err.args) # the arguments that the exception has been called with.
-      raise services.src.constants.authFailedException
+      raise constants.authFailedException
 
     #print("credentials:", credentials.to_json())
     #raise Exception('Call to google to get code')
