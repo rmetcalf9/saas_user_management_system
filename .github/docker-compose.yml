@@ -1,0 +1,20 @@
+version: "2"
+services:
+  saas_user_management_system:
+    image: metcarob/saas_user_management:${RJM_VERSION}
+    environment:
+      APIAPP_APIURL: http://saas_user_management_system:80/api
+      APIAPP_APIDOCSURL: http://saas_user_management_system:80/apidocs
+      APIAPP_FRONTENDURL: http://saas_user_management_system:80/frontend
+      APIAPP_MASTERPASSWORDFORPASSHASH: ABCCC
+      APIAPP_DEFAULTHOMEADMINUSERNAME: admin
+      APIAPP_DEFAULTHOMEADMINPASSWORD: admin
+      APIAPP_JWTSECRET: someDummy3245SecretForTesting
+
+  saas_user_management_systemtest:
+    image: metcarob/saas_user_managementtest:develop
+    command: /ext_volume/run_tests_with_wait.sh
+    environment:
+      EXPECTED_CONTAINER_VERSION: ${RJM_VERSION}
+      APIAPP_DEFAULTHOMEADMINUSERNAME: admin
+      APIAPP_DEFAULTHOMEADMINPASSWORD: admin

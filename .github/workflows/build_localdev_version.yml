@@ -1,0 +1,95 @@
+name: build_root_var
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_root_var:
+    runs-on: ubuntu-latest
+
+    env:
+      # These are environment variables that Codefresh exported.
+      # They must be available at runtime the same way CF had them.
+      RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND: metcarob/docker-build-quasar-app:0.0.33
+      RJM_BUILDQUASARAPP_IMAGE_FRONTEND: metcarob/docker-build-quasar-app:0.0.12
+      RJM_DOCKERWSCALLER_IMAGE: metcarob/docker-ws-caller:0.7.19
+      RJM_DOCKER_KONG_API_URL: http://tasks.kong:8001
+      RJM_PYTHON_TEST_IMAGE: python:3.10
+
+    steps:
+      # === prepare stage ===
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup variables / environment
+        id: vars
+        run: |
+          RJM_VERSION=$(cat VERSION)
+          RJM_VERSION_UNDERSCORE=$(echo "$RJM_VERSION" | tr '.' '_')
+          RJM_MAJOR_VERSION=${RJM_VERSION%%.*}
+          RJM_WS_NAME="saas_user_management"
+          RJM_DOCKER_SERVICE_NAME="${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}"
+          RJM_DOCKER_SERVICE_URL="tasks.${RJM_WS_NAME}_${RJM_VERSION_UNDERSCORE}"
+          RJM_KONG_UPSTREAM_NAME="${RJM_WS_NAME}_${RJM_MAJOR_VERSION}"
+
+          echo "RJM_VERSION=$RJM_VERSION" >> $GITHUB_ENV
+          echo "RJM_VERSION_UNDERSCORE=$RJM_VERSION_UNDERSCORE" >> $GITHUB_ENV
+          echo "RJM_MAJOR_VERSION=$RJM_MAJOR_VERSION" >> $GITHUB_ENV
+          echo "RJM_WS_NAME=$RJM_WS_NAME" >> $GITHUB_ENV
+          echo "RJM_DOCKER_SERVICE_NAME=$RJM_DOCKER_SERVICE_NAME" >> $GITHUB_ENV
+          echo "RJM_DOCKER_SERVICE_URL=$RJM_DOCKER_SERVICE_URL" >> $GITHUB_ENV
+          echo "RJM_KONG_UPSTREAM_NAME=$RJM_KONG_UPSTREAM_NAME" >> $GITHUB_ENV
+
+      # === build stage ===
+
+      - name: Unit tests
+        run: |
+          docker run --rm -v "$PWD/services:/opt/services" -w /opt/services \
+            $RJM_PYTHON_TEST_IMAGE \
+            sh -c "pip3 install --no-cache-dir -r ./src/requirements.txt && \
+                   pip3 install --no-cache-dir -r ./testContainer/requirements.txt && \
+                   SKIPSQLALCHEMYTESTS=Y python3 -m pytest ./test"
+
+      - name: Build frontend
+        run: |
+          docker run --rm -v "$PWD:/opt/work" -w /opt/work \
+            $RJM_BUILDQUASARAPP_IMAGE_FRONTEND \
+            build_quasar_app ./frontend spa $RJM_VERSION
+
+      - name: Build adminfrontend
+        run: |
+          docker run --rm -v "$PWD:/opt/work" -w /opt/work \
+            -e OVERRIDE_PUBLIC_PATH="saas_user_management/v${RJM_MAJOR_VERSION}/public/web/adminfrontend/" \
+            $RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND \
+            build_quasar_app ./adminfrontend pwa $RJM_VERSION 1536
+
+      - name: Build main image
+        run: |
+          docker build -t metcarob/saas_user_management:$RJM_VERSION .
+
+      - name: Build test image
+        run: |
+          docker build -t metcarob/saas_user_managementtest:develop \
+            -f services/testContainer/Dockerfile services/testContainer
+
+      - name: Container level tests
+        run: |
+          docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from saas_user_management_systemtest
+
+      # === buildrootver stage ===
+
+      - name: Clean previous adminfrontend rootversion
+        run: |
+          echo "Deleting ./adminfrontend/dist/pwa..."
+          rm -rf ./adminfrontend/dist/pwa
+
+      - name: Build adminfrontend root version
+        run: |
+          docker run --rm -v "$PWD:/opt/work" -w /opt/work \
+            -e OVERRIDE_PUBLIC_PATH="" \
+            $RJM_BUILDQUASARAPP_IMAGE_ADMINFRONTEND \
+            build_quasar_app ./adminfrontend pwa $RJM_VERSION 1536
+
+      - name: Build rootver docker image
+        run: |
+          docker build -t metcarob/saas_user_management:${RJM_VERSION}_rootver .
