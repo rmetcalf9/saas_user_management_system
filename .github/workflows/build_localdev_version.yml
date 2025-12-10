@@ -17,7 +17,9 @@ jobs:
         uses: hashicorp/vault-action@v3
         with:
           url: ${{ secrets.VAULT_ADDR }}
-          token: ${{ secrets.VAULT_TOKEN }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          exportEnv: true
           secrets: |
             kv/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment username=DOCKER_USERNAME password=DOCKER_PASSWORD
 
