@@ -52,6 +52,7 @@ jobs:
 
       - name: Container level tests
         run: |
+          source ./_repo_vars.sh && \
           docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from saas_user_management_systemtest
 
       # === buildrootver stage ===
