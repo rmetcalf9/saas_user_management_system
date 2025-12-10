@@ -12,6 +12,7 @@ from AuthProviders.authProviders_base import resetStaticData
 import ticketManagerTestCommon
 import datetime
 import pytz
+import jwt
 
 client_cliental_json_filename = 'googleauth_client_public.json'
 #client_cliental_json_filename = 'googleauth_client_secret.json'
@@ -426,7 +427,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     )
     self.assertEqual(resultJSON3["message"],"Ticket not usable")
 
-  def test_loginAccoutnMissingLocaleWorks(self):
+  def test_loginAccountMissingLocaleWorks(self):
     setup = self.setupTenantWithTwoTicketTypesAndTickets(googleAuthProv001_CREATE)
     #Test authentication via google.
     ## Must use mocks
@@ -439,4 +440,45 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
       authProviderDICT=googleAuthProvDict,
       ticketToPass=setup["ticketTypeWithAllowUserCreation"]["tickets"][0]["ticketGUID"],
       expectedResults=[200]
+    )
+
+
+  def test_logingSuccessfulWherePersonHasNoUserRecords(self):
+    tenantDict = self.createTenantWithAuthProvider(
+      TestHelperSuperClass.tenantWithNoAuthProviders,
+      True,
+      TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+    )
+
+    resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
+    googleAuthProvider = resultJSON2["AuthProviders"][1]
+
+    successLoginResult = self.loginWithGoogle(
+      0,
+      tenantDict['Name'],
+      googleAuthProvider,
+      [200]
+    )
+    options = {
+      "verify_signature": False
+    }
+    decodedToken = jwt.decode(
+      successLoginResult["jwtData"]["JWTToken"],
+      options=options,
+      algorithms=['HS256']
+    )
+
+    userId = decodedToken["UserID"]
+    personGuid = decodedToken["authedPersonGuid"]
+
+    deleteLinkResponse = self.deleteUserPersonLink(
+      userId=userId,
+      personGuid=personGuid
+    )
+
+    secondSuccessLoginResult = self.loginWithGoogle(
+      0,
+      tenantDict['Name'],
+      googleAuthProvider,
+      [200]
     )

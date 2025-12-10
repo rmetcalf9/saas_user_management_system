@@ -15,29 +15,7 @@ import constants
 invalidTenantName="invalidtenantname"
 
 class test_api(testHelperAPIClient):
-  def deleteUserPersonLink(self, userId, personGuid, checkAndParseResponse=True):
-    # must be called on masterTenant
-    result = self.testClient.delete(
-      self.adminAPIPrefix + '/' + constants.masterTenantName + '/userpersonlinks/' + userId + '/' + personGuid,
-      headers={ constants.jwtHeaderName: self.getNormalJWTToken()}
-    )
-    if (not checkAndParseResponse):
-      return result
-    self.assertEqual(result.status_code, 200, msg="Unexpected return - " + result.get_data(as_text=True))
-    return json.loads(result.get_data(as_text=True))
-
-    # TODO Delete user from person
-    # saasApiClientCallBackend.callApi({
-    #   prefix: 'admin',
-    #   router: this.$router,
-    # store: this.userManagementClientStoreStore,
-    # path: '/' + TTT.tenantName + '/userpersonlinks/' + userData.UserID + '/' + TTT.personData.guid,
-    # method: 'delete',
-    # postdata: null,
-    # callback
-    # })
-
-
+  pass
 
 class test_loginapi_norm(test_api):
   def test_loginInvalidTenantFails(self):
@@ -471,7 +449,7 @@ class test_loginapi_norm(test_api):
 
     #self.assertTrue(False)
 
-  def test_logingSuccessfulWherePersonHasNoUserREcords(self):
+  def test_logingFailsWherePersonHasNoUserRecords_andAuthProviderNeedsRegister(self):
     tenantDict = self.createTenantWithAuthProvider(
       tenantWithNoAuthProviders,
       True,
@@ -516,18 +494,20 @@ class test_loginapi_norm(test_api):
 
     userId = registerResultJson["UserID"]
     personGuid = registerResultJson["associatedPersonGUIDs"][0]
-    print("userId", userId, " personGuid", personGuid)
 
     deleteLinkResponse = self.deleteUserPersonLink(
       userId=userId,
       personGuid=personGuid
     )
 
-    # login should still work
-    self.loginAsUser(
+    # login should fail because internal auth requires user creation call
+    respRaw = self.loginAsUser(
       tenantDict['Name'],
       self.getTenantInternalAuthProvDict(tenantDict['Name']),
       userName,
       password,
-      [200]
+      [401]
     )
+    self.assertEqual(respRaw["message"],"Person has no access to any identities and auth provider required register call")
+    # Note Test for login where register call not required is in the test_authProviders_Google
+

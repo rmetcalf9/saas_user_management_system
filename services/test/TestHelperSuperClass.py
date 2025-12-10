@@ -551,6 +551,18 @@ class testClassWithTestClient(testHelperSuperClass):
       users.UpdateUserObjUsingFunction(userObj, storeConnection, updateFn)
     return appObj.objectStore.executeInsideTransaction(fn)
 
+  def deleteUserPersonLink(self, userId, personGuid, checkAndParseResponse=True):
+    # must be called on masterTenant
+    result = self.testClient.delete(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/userpersonlinks/' + userId + '/' + personGuid,
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()}
+    )
+    if (not checkAndParseResponse):
+      return result
+    self.assertEqual(result.status_code, 200, msg="Unexpected return - " + result.get_data(as_text=True))
+    return json.loads(result.get_data(as_text=True))
+
+
 #helper class with setup for an APIClient
 class testHelperAPIClient(testClassWithTestClient):
   def _getEnvironment(self):

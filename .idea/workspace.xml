@@ -8,6 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/src/tenants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/tenants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/TestHelperSuperClass.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/test/test_loginAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_loginAPI.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

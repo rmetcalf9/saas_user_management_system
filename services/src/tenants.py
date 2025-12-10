@@ -289,7 +289,10 @@ def DeleteTenant(appObj, tenantName, objectVersion, storeConnection):
 
   return tenantObj
 
-def RegisterUser(appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection, ticketObj, ticketTypeObj):
+def RegisterUser(
+    appObj, tenantObj, authProvGUID, credentialDICT, createdBy, storeConnection,
+    ticketObj, ticketTypeObj
+):
   ticketAllowsUsToCreateAUser = False
   if ticketObj is not None:
     #If the ticket was for a different tenant then the ticket type would have
@@ -498,8 +501,25 @@ def Login(
 
     possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
     if len(possibleUserIDs)==0:
-      #Still no users with an hasaccout role for this tenant. We must create the user
-      #TODO Create user with hasaccount role for this tenant
+      #Still no users with an hasaccount role for this tenant. We must create the user
+      enrichedCredentialDICT = authProvider.ValaditeExternalCredentialsAndEnrichCredentialDictForAuth(
+        credentialJSON,
+        appObj=appObj
+      )
+      userData = authProvider.getTypicalAuthData(enrichedCredentialDICT)
+      CreateUser(
+        appObj=appObj,
+        userData=userData,
+        mainTenant=tenantName,
+        createdBy="tenants/loginautocreate",
+        storeConnection=storeConnection
+      )
+      associateUserWithPerson(
+        appObj=appObj,
+        UserID=userData['user_unique_identifier'],
+        personGUID=authUserObj['personGUID'],
+        storeConnection=storeConnection
+      )
       possibleUserIDs = getListOfUserIDsForPerson(appObj, authUserObj['personGUID'], tenantName, GetUser, storeConnection)
       if len(possibleUserIDs) == 0:
         raise customUnauthorizedExceptionClass('No possible userIds to use and create attempt failed','PersonHasNoAccessToAnyIdentitiesException4')
