@@ -73,7 +73,7 @@ jobs:
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
             -e OVERRIDE_PUBLIC_PATH="" \
-            QUASARBUILDIMAGE_ADMINFRONTEND \
+            ${QUASARBUILDIMAGE_ADMINFRONTEND} \
             -c "build_quasar_app ./adminfrontend pwa ${RJM_VERSION} 1536"
 
       - name: Build rootver docker image
