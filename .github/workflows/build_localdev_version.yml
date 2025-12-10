@@ -80,3 +80,17 @@ jobs:
         run: |
           source ./_repo_vars.sh && \
           docker build -t metcarob/saas_user_management:${RJM_VERSION}_rootver .
+
+      - name: Read Docker credentials from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment docker_username=username docker_password=password
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.docker_username }}
+          password: ${{ env.docker_password }}
