@@ -153,10 +153,6 @@ jobs:
           EOF
 
       - name: Configure Kong test container endpoint
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -172,10 +168,6 @@ jobs:
           EOF
 
       - name: Configure Kong test authed container endpoint
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -192,10 +184,6 @@ jobs:
 
       #endpoints are secured the first time they are created. This will add the plugins only if they are not there
       - name: Add security plugins for test
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -214,10 +202,6 @@ jobs:
           EOF
 
       - name: Test the newly deployed container using test endpoint
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           docker run --rm \
@@ -231,10 +215,6 @@ jobs:
             python3 -m pytest /ext_volume
 
       - name: Configure Kong prod container endpoint
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -250,10 +230,6 @@ jobs:
           EOF
 
       - name: Configure Kong prod authed container endpoint
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -270,10 +246,6 @@ jobs:
 
       #endpoints are secured the first time they are created. This will add the plugins only if they are not there
       - name: Add security plugins
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -292,10 +264,6 @@ jobs:
           EOF
 
       - name: Configure Kong prod upstream
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -314,10 +282,6 @@ jobs:
       # no longer approve cleanup old version - just go straight ahead and cleanup
 
       - name: Clean up old versions
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 3
-          retry_on: error
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
