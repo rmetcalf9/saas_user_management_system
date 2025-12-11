@@ -20,7 +20,7 @@ jobs:
           method: approle
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
-          exportEnv: false
+          exportEnv: true
           secrets: |
             kv/data/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment username | DOCKER_USERNAME ;
             kv/data/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment password | DOCKER_PASSWORD ;
