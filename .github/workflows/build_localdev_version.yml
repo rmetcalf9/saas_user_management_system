@@ -124,7 +124,7 @@ jobs:
           ssh -p "${SSH_PORT}" \
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
-            bash -s << 'EOF'
+            bash -s << EOF
   
           docker service create --name "${RJM_DOCKER_SERVICE_NAME}" \
             --network main_net \
