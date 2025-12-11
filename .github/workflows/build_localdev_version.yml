@@ -22,8 +22,8 @@ jobs:
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           exportEnv: true
           secrets: |
-            kv/data/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment username | DOCKER_USERNAME ;
-            kv/data/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_system_deployment password | DOCKER_PASSWORD ;
+            kv/data/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_deployment username | DOCKER_USERNAME ;
+            kv/data/robert_accounts/dockerhub/personal_access_tokens/saas_user_management_deployment password | DOCKER_PASSWORD ;
             kv/data/memset/deployment/ssh SSH_KEY | SSH_KEY ;
             kv/data/memset/deployment/ssh SPLIT_CHAR | SPLIT_CHAR ;
             kv/data/memset/deployment/ssh SSH_PORT | SSH_PORT ;
