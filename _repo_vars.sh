@@ -1,7 +1,8 @@
 #!/bin/bash
 
-export PROJECT_NAME=${PWD##*/}          # to assign to a variable
-export PROJECT_NAME=${PROJECT_NAME:-/}
+#export PROJECT_NAME=${PWD##*/}          # to assign to a variable
+#export PROJECT_NAME=${PROJECT_NAME:-/}
+export PROJECT_NAME="saas_user_management"
 
 export RJM_VERSION=$(cat ./VERSION)
 export RJM_VERSION_UNDERSCORE=$(cat ./VERSION | tr '.' '_')
