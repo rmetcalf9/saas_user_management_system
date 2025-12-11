@@ -159,10 +159,10 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_TEST_PUBLIC http ${RJM_DOCKER_SERVICE_URL} 80 /public/
+              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_TEST_PUBLIC http ${RJM_DOCKER_SERVICE_URL} 80 /public/ \
               https api.metcarob.com /${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION}/public null null null true
 
           EOF
@@ -174,10 +174,10 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_TEST_AUTHED http ${RJM_DOCKER_SERVICE_URL} 80 /authed/
+              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_TEST_AUTHED http ${RJM_DOCKER_SERVICE_URL} 80 /authed/ \
               https api.metcarob.com /${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION}/authed null null null true
 
           EOF
@@ -190,13 +190,13 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_TEST_AUTHED
-              \"${JWT_COOKIE_NAME}\"
-              \"${AUTHED_ACL_WHITELIST}\"
-              \"${AUTHED_ACL_BLACKLIST}\"
+              docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_TEST_AUTHED \
+              \"${JWT_COOKIE_NAME}\" \
+              \"${AUTHED_ACL_WHITELIST}\" \
+              \"${AUTHED_ACL_BLACKLIST}\" \
               \"kong_iss\"          
 
           EOF
@@ -205,12 +205,12 @@ jobs:
         run: |
           source ./_repo_vars.sh && \
           docker run --rm \
-            -e EXPECTED_CONTAINER_VERSION=${RJM_VERSION}
-            -e BASEURL_TO_TEST=https://api.metcarob.com/${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION}
-            -e HTTPORIGIN_TO_TEST=https://api.metcarob.com
-            -e RUNNINGVIAKONG="TRUE"
-            -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user
-            -e APIAPP_DEFAULTHOMEADMINPASSWORD=CODEFRESH_TEST_USER_PASSWORD
+            -e EXPECTED_CONTAINER_VERSION=${RJM_VERSION} \
+            -e BASEURL_TO_TEST=https://api.metcarob.com/${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION} \
+            -e HTTPORIGIN_TO_TEST=https://api.metcarob.com \
+            -e RUNNINGVIAKONG="TRUE" \
+            -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user \
+            -e APIAPP_DEFAULTHOMEADMINPASSWORD=CODEFRESH_TEST_USER_PASSWORD \
             metcarob/saas_user_managementtest:develop \
             python3 -m pytest /ext_volume
 
@@ -221,10 +221,10 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_PUBLIC http ${RJM_DOCKER_SERVICE_URL} 80 /public/
+              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_PUBLIC http ${RJM_DOCKER_SERVICE_URL} 80 /public/ \
               https api.metcarob.com /${PROJECT_NAME}/v${RJM_MAJOR_VERSION}/public null null null true
 
           EOF
@@ -236,10 +236,10 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_AUTHED http ${RJM_DOCKER_SERVICE_URL} 80 /authed/
+              docker run --rm -it --network main_net --entrypoint kong_install_service_and_route \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_AUTHED http ${RJM_DOCKER_SERVICE_URL} 80 /authed/ \
               https api.metcarob.com /${PROJECT_NAME}/v${RJM_MAJOR_VERSION}/authed null null null true
 
           EOF
@@ -252,14 +252,14 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_AUTHED
-              \"${JWT_COOKIE_NAME}\"
-              \"${AUTHED_ACL_WHITELIST}\"
-              \"${AUTHED_ACL_BLACKLIST}\"
-              \"kong_iss\"          
+              docker run --rm -it --network main_net --entrypoint kong_add_jwt_and_acl_plugins \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_AUTHED \
+              \"${JWT_COOKIE_NAME}\" \
+              \"${AUTHED_ACL_WHITELIST}\" \
+              \"${AUTHED_ACL_BLACKLIST}\" \
+              \"kong_iss\"
 
           EOF
 
@@ -270,12 +270,12 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-            docker run --rm -it --network main_net --entrypoint kong_add_upstream
-              ${RJM_DOCKERWSCALLER_IMAGE}
-              ${RJM_DOCKER_KONG_API_URL}
-              ${RJM_KONG_UPSTREAM_NAME}
-              ${RJM_DOCKER_SERVICE_URL}:80
-              remove_other_targets          
+            docker run --rm -it --network main_net --entrypoint kong_add_upstream \
+              ${RJM_DOCKERWSCALLER_IMAGE} \
+              ${RJM_DOCKER_KONG_API_URL} \
+              ${RJM_KONG_UPSTREAM_NAME} \
+              ${RJM_DOCKER_SERVICE_URL}:80 \
+              remove_other_targets
 
           EOF
 
@@ -288,10 +288,10 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-              docker run --rm -it --network main_net --volume=/var/run:/var/run --entrypoint docker_service_remove_non_live
-                ${RJM_DOCKERWSCALLER_IMAGE}
-                ${PROJECT_NAME}
-                ${RJM_VERSION}
+              docker run --rm -it --network main_net --volume=/var/run:/var/run --entrypoint docker_service_remove_non_live \
+                ${RJM_DOCKERWSCALLER_IMAGE} \
+                ${PROJECT_NAME} \
+                ${RJM_VERSION} \
                 metcarob/
 
           EOF
