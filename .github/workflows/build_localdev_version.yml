@@ -1,10 +1,12 @@
-name: build_localdev_version
+name: build_test_and_deploy
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 jobs:
-  build_root_var:
+  build_test_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
