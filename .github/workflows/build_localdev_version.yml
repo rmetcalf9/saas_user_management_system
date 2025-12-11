@@ -27,7 +27,8 @@ jobs:
             kv/data/memset/deployment/ssh SSH_KEY | SSH_KEY ;
             kv/data/memset/deployment/ssh SPLIT_CHAR | SPLIT_CHAR ;
             kv/data/memset/deployment/ssh SSH_PORT | SSH_PORT ;
-            kv/data/memset/deployment/ssh RDOCKER_HOST | RDOCKER_HOST
+            kv/data/memset/deployment/ssh SSH_HOST | SSH_HOST ;
+            kv/data/memset/deployment/ssh SSH_USER | SSH_USER
 
       - name: Unit tests
         run: |
@@ -114,7 +115,7 @@ jobs:
           echo "${SSH_KEY}" | sed "s/${SPLIT_CHAR}/\n/g" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           # Add host to known_hosts
-          ssh-keyscan -p "${SSH_PORT}" "${RDOCKER_HOST}" >> ~/.ssh/known_hosts          
+          ssh-keyscan -p "${SSH_PORT}" "${SSH_HOST}" >> ~/.ssh/known_hosts          
 
       # Artifacts created now deploy to server
       - name: Deploy Docker Service to Swarm
@@ -122,7 +123,7 @@ jobs:
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
             -i ~/.ssh/id_rsa \
-            "${RDOCKER_HOST}" \
+            "${SSH_USER}@${SSH_HOST}" \
             bash -s << 'EOF'
   
           docker service create --name "${RJM_DOCKER_SERVICE_NAME}" \
