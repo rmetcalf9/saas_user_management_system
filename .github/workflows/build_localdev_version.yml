@@ -28,7 +28,8 @@ jobs:
             kv/data/memset/deployment/ssh SPLIT_CHAR | SPLIT_CHAR ;
             kv/data/memset/deployment/ssh SSH_PORT | SSH_PORT ;
             kv/data/memset/deployment/ssh SSH_HOST | SSH_HOST ;
-            kv/data/memset/deployment/ssh SSH_USER | SSH_USER
+            kv/data/memset/deployment/ssh SSH_USER | SSH_USER ;
+            kv/data/memset/saas_user_management SAASCODEFRESHTESTUSERPASSWORD | SAASCODEFRESHTESTUSERPASSWORD
 
       - name: Unit tests
         run: |
@@ -210,7 +211,7 @@ jobs:
             -e HTTPORIGIN_TO_TEST=https://api.metcarob.com \
             -e RUNNINGVIAKONG="TRUE" \
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user \
-            -e APIAPP_DEFAULTHOMEADMINPASSWORD=CODEFRESH_TEST_USER_PASSWORD \
+            -e APIAPP_DEFAULTHOMEADMINPASSWORD=${SAASCODEFRESHTESTUSERPASSWORD} \
             metcarob/saas_user_managementtest:develop \
             python3 -m pytest /ext_volume
 
