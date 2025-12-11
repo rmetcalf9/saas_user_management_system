@@ -17,3 +17,4 @@ export DOCKER_USERNAME=metcarob
 export RJM_USERMANAGEMENT_CONTAINER="metcarob/saas_user_management:0.0.224_rootver"
 
 export VAULT_DEPLOYMENT_APPROLE_SECRET_LOCATION=/deploymentapproles/${PROJECT_NAME}
+
