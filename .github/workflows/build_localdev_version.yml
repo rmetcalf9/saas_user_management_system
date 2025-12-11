@@ -215,7 +215,7 @@ jobs:
             metcarob/saas_user_managementtest:develop \
             python3 -m pytest /ext_volume
 
-      - name: Configure Kong prod container endpoint
+      - name: Configure Kong prod public container endpoint
         run: |
           source ./_repo_vars.sh && \
           ssh -p "${SSH_PORT}" \
@@ -225,7 +225,7 @@ jobs:
               docker run --rm -i --network main_net --entrypoint kong_install_service_and_route \
               ${RJM_DOCKERWSCALLER_IMAGE} \
               ${RJM_DOCKER_KONG_API_URL} \
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_PUBLIC http ${RJM_DOCKER_SERVICE_URL} 80 /public/ \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_PUBLIC http ${RJM_KONG_UPSTREAM_NAME} 80 /public/ \
               https api.metcarob.com /${PROJECT_NAME}/v${RJM_MAJOR_VERSION}/public null null null true
 
           EOF
@@ -240,7 +240,7 @@ jobs:
               docker run --rm -i --network main_net --entrypoint kong_install_service_and_route \
               ${RJM_DOCKERWSCALLER_IMAGE} \
               ${RJM_DOCKER_KONG_API_URL} \
-              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_AUTHED http ${RJM_DOCKER_SERVICE_URL} 80 /authed/ \
+              ${PROJECT_NAME}_v${RJM_MAJOR_VERSION}_AUTHED http ${RJM_KONG_UPSTREAM_NAME} 80 /authed/ \
               https api.metcarob.com /${PROJECT_NAME}/v${RJM_MAJOR_VERSION}/authed null null null true
 
           EOF
