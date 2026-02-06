@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build_localdev_version.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build_localdev_version.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

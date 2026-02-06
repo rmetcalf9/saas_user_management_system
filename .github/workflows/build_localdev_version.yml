@@ -119,7 +119,7 @@ jobs:
           echo "${SSH_KEY}" | sed "s/${SPLIT_CHAR}/\n/g" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           # Add host to known_hosts
-          ssh-keyscan -p "${SSH_PORT}" "${SSH_HOST}" >> ~/.ssh/known_hosts          
+          ssh-keyscan -p "${SSH_PORT}" "${SSH_HOST}" >> ~/.ssh/known_hosts
 
       # Artifacts created now deploy to server
       - name: Deploy Docker Service to Swarm
@@ -129,7 +129,7 @@ jobs:
             -i ~/.ssh/id_rsa \
             "${SSH_USER}@${SSH_HOST}" \
             bash -s << EOF
-  
+
           docker service create --name "${RJM_DOCKER_SERVICE_NAME}" \
             --network main_net \
             --secret saas_user_management_system_objectstore_config_dynamodb \
@@ -139,6 +139,7 @@ jobs:
             --secret saas_jwtsecret \
             --secret saas_user_management_system_authprov_google \
             --secret saas_user_management_system_authprov_facebook \
+            --secret saas_user_management_system_authprov_saassocial_google \
             -e APIAPP_JWTSECRETFILE=/run/secrets/saas_jwtsecret \
             -e APIAPP_GATEWAYINTERFACECONFIGFILE=/run/secrets/saas_user_management_system_gateway_config \
             -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config_dynamodb \
@@ -152,7 +153,7 @@ jobs:
             -e APIAPP_OBJECTSTOREDETAILLOGGING="N" \
             --constraint 'node.labels.legacy == true' \
             "metcarob/saas_user_management:${RJM_VERSION}"
-  
+
           EOF
 
       - name: Configure Kong test container endpoint
@@ -200,7 +201,7 @@ jobs:
               \"${JWT_COOKIE_NAME}\" \
               \"${AUTHED_ACL_WHITELIST}\" \
               \"${AUTHED_ACL_BLACKLIST}\" \
-              \"kong_iss\"          
+              \"kong_iss\"
 
           EOF
 
