@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Script creates or recreates approles"
-echo " if recrate will reset password but NOT change the policy"
-
 CURDIR=$(pwd)
 cd ../../
 source ./_repo_vars.sh
+
+echo "Script creates or recreates approles"
+echo " if recrate will reset password but NOT change the policy"
+echo " AFTER running this you must change password in github or"
+echo " deployments will break"
+echo "  (it is stored in ${VAULT_DEPLOYMENT_APPROLE_SECRET_LOCATION})"
+
+read -r -p "Press Y to continue: " answer
+if [[ "$answer" != "Y" ]]; then
+  echo "Aborted."
+  exit 1
+fi
 
 POLICY_NAME=approle_deployment_${PROJECT_NAME}
 APPROLE_NAME=deploy_${PROJECT_NAME}
