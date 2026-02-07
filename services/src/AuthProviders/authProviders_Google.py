@@ -132,7 +132,10 @@ class authProviderGoogle(authProvider):
       raise InvalidAuthConfigException
     if 'creds' not in credentialDICT:
       raise InvalidAuthConfigException
-    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'google'
+    extra = ""
+    if 'userSufix' in self.getConfig():
+      extra += self.getConfig()['userSufix']
+    return credentialDictGet_unique_user_id(credentialDICT) + extra + constants.uniqueKeyCombinator + 'google'
 
   def __getClientID(self):
     return self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]["client_id"]

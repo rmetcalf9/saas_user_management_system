@@ -54,7 +54,10 @@ class authProviderFacebook(authProvider):
   def _makeKey(self, credentialDICT):
     if 'creds' not in credentialDICT:
       raise constants.customExceptionClass('creds not in credentialDICT - this means the credentials have not been enriched', 'InvalidAuthConfigException')
-    return credentialDictGet_unique_user_id(credentialDICT) + constants.uniqueKeyCombinator + 'facebook'
+    extra = ""
+    if 'userSufix' in self.getConfig():
+      extra += self.getConfig()['userSufix']
+    return credentialDictGet_unique_user_id(credentialDICT) + extra + constants.uniqueKeyCombinator + 'facebook'
 
   def __getClientID(self):
     return self.getStaticData()['secretJSON']["web"]["client_id"]
