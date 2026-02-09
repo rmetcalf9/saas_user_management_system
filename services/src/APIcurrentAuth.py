@@ -131,6 +131,8 @@ def registerAPI(appObj):
           raise BadRequest(excep.text)
         if (excep.id=='authopException'):
           raise BadRequest(excep.text)
+        if (excep.id=='authFailedException'):
+          raise BadRequest("Authorization Failed")
         raise excep
 
   @nsCurAuth.route('/<string:tenant>/loggedInUserAuths/link')

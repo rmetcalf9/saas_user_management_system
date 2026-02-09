@@ -43,7 +43,7 @@ class customUnauthorizedExceptionClass(Exception):
 #PersonHasNoAccessToAnyIdentitiesException = customUnauthorizedExceptionClass('PersonHasNoAccessToAnyIdentitiesException')
 
 authProviderNotFoundException = customExceptionClass('authProviderNotFoundException','authProviderNotFoundException')
-authFailedException = customExceptionClass('authFailedException')
+authFailedException = customExceptionClass('authFailedException', 'authFailedException')
 authNotFoundException = customExceptionClass('authNotFoundException','authNotFoundException')
 tenantAlreadtExistsException = customExceptionClass('Tenant Already Exists','tenantAlreadtExistsException')
 tenantDosentExistException = customExceptionClass('Tenant Dosen\'t Exist','tenantDosentExistException')
