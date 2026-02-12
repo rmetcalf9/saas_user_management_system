@@ -127,7 +127,7 @@ class appObjClass(parAppObj):
 
     self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
 
-    # add to the baseapp default so allowed origns are in this list and extra vals
+    # add to the baseapp default so allowed origins are in this list and extra vals
     self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD + ", " + self.accessControlAllowOriginObj.toString())
 
     # print('uniqueCommaSeperatedListClass:', self.accessControlAllowOriginObj.toString())
@@ -220,9 +220,9 @@ class appObjClass(parAppObj):
       return GetPerson(appObj, decodedJWTToken.getPersonID(), connectionContext), GetUser(appObj, decodedJWTToken.getUserID(), connectionContext)
     personObj, userObj = appObj.objectStore.executeInsideTransaction(someFn)
     if (personObj is None):
-      raise constants.invalidPersonInToken('Invlaid person in token')
+      raise constants.invalidPersonInToken('Invalid person in token')
     if (userObj is None):
-      raise constants.invalidUserInToken('Invlaid user in token')
+      raise constants.invalidUserInToken('Invalid user in token')
     decodedJWTToken.personObj = personObj
     decodedJWTToken.userObj = userObj
     return decodedJWTToken

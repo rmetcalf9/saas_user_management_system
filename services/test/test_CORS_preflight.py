@@ -98,3 +98,8 @@ class test_corsPreflightHasMasterTenantHosts(corsPreflight_helpers):
     a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
     self.assertEqual(a.get("Access-Control-Allow-Origin"),None)
 
+  # All these tests seem to not work. They check for None.
+  # def test_vary_header(self):
+  #   a = self.findCORSReturnVals(constants.masterTenantName, "http://randomOrigin")
+  #   print("Headers:", a)
+  #   self.assertEqual(a.get("Vary"),"Origin")
