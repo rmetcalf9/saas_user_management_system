@@ -3,8 +3,8 @@ import { getRjmStateChangeObj } from '../stores/saasUserManagementClientStore'
 import { Cookies } from 'quasar'
 import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
-const prodDomain = 'platform.challengeswipe.com'
-const preferredTenantName = 'defaulttenant'
+const prodDomain = 'api.metcarob.com'
+const preferredTenantName = 'user_management'
 export const saasServiceName = 'saas_' + preferredTenantName
 const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantName + '/'
 

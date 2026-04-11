@@ -18,8 +18,8 @@
         <div v-if="serverInfoVersionMatchesCodeBaseVersion">Version {{ serverInfoVersion }}</div>
         <div v-if="!serverInfoVersionMatchesCodeBaseVersion">Version {{ serverInfoVersion }}
           <q-tooltip>
-            <table><tr><td>Services: {{serverInfoVersion}}</td></tr>
-            <tr><td>Code: {{ codebasever }}</td></tr></table>
+            <table><tbody><tr><td>Services: {{serverInfoVersion}}</td></tr>
+            <tr><td>Code: {{ codebasever }}</td></tr></tbody></table>
           </q-tooltip>
         </div>
       </q-toolbar>

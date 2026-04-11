@@ -42,7 +42,7 @@ APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://127.0.0.1:8082,http://localhost:8
 SETUP_JSON_DIR=${INITAL_DIR}
 SETUP_JSON_FILENAME="_start_local_saas_user_management_service_config.json"
 EXPECTED_TENANT="saas_user_management_detect"
-
+EXTERNAL_VOLUME=""
 
 start_local_saas_user_management_service \
  ${RJM_USERMANAGEMENT_CONTAINER} \
@@ -54,7 +54,8 @@ start_local_saas_user_management_service \
  ${APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN} \
  ${SETUP_JSON_DIR} \
  ${SETUP_JSON_FILENAME} \
- ${EXPECTED_TENANT}
+ ${EXPECTED_TENANT} \
+ "${EXTERNAL_VOLUME}"
 
 RES=$?
 if [ ${RES} -ne 0 ]; then
