@@ -37,6 +37,10 @@ function loginUIBaseURLInt () {
   if (baseUrl === 0) {
     console.log('ERROR 0 loginservice baseurl found in loginUIBaseURLInt')
   }
+  const loginFrontendIsDev = rjmStateChangeObj.getFromState('loginService').loginFrontendIsDev
+  if (loginFrontendIsDev) {
+    return baseUrl + '#/' + tenantName
+  }
   return baseUrl + 'public/web/frontend/#/' + tenantName
 }
 
@@ -112,7 +116,8 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
       1 = REFRESH_IN_PROGRESS
       2 = LOGGEDIN
       */
-      processState: 0
+      processState: 0,
+      loginFrontendIsDev: false
     },
     endpointInfo: {},
     /*
@@ -263,7 +268,13 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
     registerEndOfTokenRefreshFail () {
       this.loginService.processState = 0
     },
-    registerLoginEndpoint ({ baseUrl, tenantName }) {
+    registerLoginEndpoint (args) {
+      const baseUrl = args.baseUrl
+      const tenantName = args.tenantName
+      this.loginService.loginFrontendIsDev = false
+      if (typeof (args.loginFrontendIsDev) !== 'undefined') {
+        this.loginService.loginFrontendIsDev = args.loginFrontendIsDev
+      }
       this.loginService.baseUrl = baseUrl
       this.loginService.tenantName = tenantName
       this.loginService.processState = 0 // Always start with not logged in

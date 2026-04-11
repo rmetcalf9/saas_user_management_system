@@ -5,7 +5,12 @@
 import rjmversion from './rjmversion.js'
 import saasApiClientEndpointIdentificationProcess from './saasApiClientEndpointIdentificationProcess'
 
-// Change this variable to use different major bersions of login service
+// If the login service is dev then it is launched on dev machine via quasar dev
+//  otherwise it is expected to be in a container
+//  this setting only effects running this app in non-prod
+const loginFrontendIsDev = true
+
+// Change this variable to use different major versions of login service
 const prodLoginServiceBaseURL = 'https://api.metcarob.com/saas_user_management/v0/'
 
 function finishEndPointIdentificationHook (rjmStateChange, { serverInfo, apiPrefix }) {
@@ -119,10 +124,18 @@ export function registerEndpointsWithStore (params) {
       })
     } else { // Not prod ver
       console.log('NON PROD no api version needed using same basepath', params.runtype)
-      rjmStateChange.executeAction('registerLoginEndpoint', {
-        baseUrl: 'http://127.0.0.1:8099/',
-        tenantName: params.tenantName
-      })
+      if (loginFrontendIsDev) {
+        rjmStateChange.executeAction('registerLoginEndpoint', {
+          baseUrl: 'http://127.0.0.1:8081/',
+          tenantName: params.tenantName,
+          loginFrontendIsDev: true
+        })
+      } else {
+        rjmStateChange.executeAction('registerLoginEndpoint', {
+          baseUrl: 'http://127.0.0.1:8099/',
+          tenantName: params.tenantName
+        })
+      }
       if (!rjmStateChange.getFromState('getIsParticularEndpointsRegistered')(params.saasServiceName)) {
         const newEndpoint = {
           endpointName: params.saasServiceName,

@@ -11,5 +11,9 @@ See run dev local for instructions on running - it's the same.
 
 ## Run against container
 
-Go into the admin frontend directory.
+To run against container you must change this line in saasApilClient.js
+  - const loginFrontendIsDev = true
+and make it false
+
+then go into the admin frontend directory.
 use ./run_against_container_backend
