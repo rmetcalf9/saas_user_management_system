@@ -41,4 +41,3 @@ tmux \
   split-window "cd ./adminfrontend ; quasar dev" \; \
   select-layout main-horizontal \; \
   select-pane -t 0 \; \
-  ##split-window "cd ./services ; ./insert_test_data.sh 4"

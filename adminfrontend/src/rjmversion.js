@@ -1,2 +1,2 @@
 /* eslint-disable */
-export default { codebasever: 'run_all_parts_on_dev_machine_0.1.8' }
+export default { codebasever: 'runing_against_container_0.1.8' }

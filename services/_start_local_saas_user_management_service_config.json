@@ -8,7 +8,7 @@
   }},
   { "type": "setTenantJWTCollectionAllowedOriginList", "data": {
     "tenantName": "usersystem",
-    "JWTCollectionAllowedOriginList": [ "http://localhost:8082", "http://127.0.0.1:8082", "http://127.0.0.1:8099", "http://localhost:8099" ]
+    "JWTCollectionAllowedOriginList": [ "http://localhost:8082", "http://127.0.0.1:8082", "http://localhost:8081", "http://127.0.0.1:8081", "http://127.0.0.1:8099", "http://localhost:8099" ]
   }},
   { "type": "addInternalUserAccount", "data": {
     "tenantName": "usersystem",
@@ -18,5 +18,36 @@
     "Roles": {
       "usersystem": [ "hasaccount", "systemadmin" ]
     }
+  }},
+  { "type": "addInternalUserAccount", "data": {
+    "tenantName": "usersystem",
+    "userID": "saas-user-management-autocreate-testuser",
+    "Username": "TestUser",
+    "Password": "TestUser",
+    "Roles": {
+      "usersystem": [ "hasaccount" ]
+    }
+  }},
+  { "type": "addAuthProvider", "data": {
+    "tenantName": "usersystem",
+    "menuText": "Second Internal Auth",
+    "iconLink": "",
+    "Type": "internal",
+    "AllowUserCreation": true,
+    "configJSON": {"userSufix": "@internalDataStore2"},
+    "AllowLink": true,
+    "AllowUnlink": true,
+    "LinkText": "Second Internal Auth"
+  }},
+  { "type": "addAuthProvider", "data": {
+    "tenantName": "usersystem",
+    "menuText": "Google Auth",
+    "iconLink": "",
+    "Type": "google",
+    "AllowUserCreation": true,
+    "configJSON": {"clientSecretJSONFile": "./secrets/saas_user_management_system_authprov_saassocial_google.json", "userSufix": "@saassocial"},
+    "AllowLink": true,
+    "AllowUnlink": true,
+    "LinkText": "Google Auth"
   }}
 ]}
