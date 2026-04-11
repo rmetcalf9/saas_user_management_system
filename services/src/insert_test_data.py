@@ -9,6 +9,7 @@ import copy
 import time
 
 httpOrigin="http://localhost"
+tenantName = "test_tenant" # masterTenantName also created
 
 creationStats = {
   'empty_tenants': 15,
@@ -111,321 +112,322 @@ def errorInProcess(errMessage):
   exit(1)
 
 print("Start of script to insert test data")
+try:
+    AuthProvidersDICT,res = callGetService(LOGIN, "/" + masterTenantName + "/authproviders", [200])
+    MainAuthProvider = AuthProvidersDICT['AuthProviders'][0]
 
-AuthProvidersDICT,res = callGetService(LOGIN, "/" + masterTenantName + "/authproviders", [200])
-MainAuthProvider = AuthProvidersDICT['AuthProviders'][0]
+    loginCallDICT = {
+      "authProviderGUID": MainAuthProvider['guid'],
+      "credentialJSON": {
+        "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
+        "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
+       }
+    }
+    loginDICT,res = callPostService(LOGIN, "/" + masterTenantName + "/authproviders",loginCallDICT,[200])
 
-loginCallDICT = {
-  "authProviderGUID": MainAuthProvider['guid'],
-  "credentialJSON": {
-    "username": env['APIAPP_DEFAULTHOMEADMINUSERNAME'],
-    "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
-   }
-}
-loginDICT,res = callPostService(LOGIN, "/" + masterTenantName + "/authproviders",loginCallDICT,[200])
+    tenantCreationDICT = {
+      "Name": tenantName,
+      "Description": "Created by insert_test_data.py",
+      "AllowUserCreation": True,
+      "AuthProviders": [],
+      "JWTCollectionAllowedOriginList": [httpOrigin]
+    }
 
-tenantCreationDICT = {
-  "Name": "testData_Tenant",
-  "Description": "Created by insert_test_data.py",
-  "AllowUserCreation": True,
-  "AuthProviders": [],
-  "JWTCollectionAllowedOriginList": [httpOrigin]
-}
+    authProvCreationDICT = {
+        "guid": None,
+        "Type": "internal",
+        "AllowUserCreation": True,
+        "AllowLink": True,
+        "AllowUnlink": True,
+        "LinkText": 'Link Website Account',
+        "MenuText": "Login with Website Account",
+        "IconLink": "string",
+        "ConfigJSON": "{\"userSufix\": \"@testUserSufix\"}",
+        "saltForPasswordHashing": None
+    }
 
-authProvCreationDICT = {
-    "guid": None,
-    "Type": "internal",
-    "AllowUserCreation": True,
-    "AllowLink": True,
-    "AllowUnlink": True,
-    "LinkText": 'Link Website Account',
-    "MenuText": "Login with Website Account",
-    "IconLink": "string",
-    "ConfigJSON": "{\"userSufix\": \"@testUserSufix\"}",
-    "saltForPasswordHashing": None
-}
+    authProvGoogleCreationDICT = {
+        "guid": None,
+        "Type": "google",
+        "AllowUserCreation": True,
+        "AllowLink": True,
+        "AllowUnlink": True,
+        "LinkText": 'Link Google Account',
+        "MenuText": "Login with Google",
+        "IconLink": "string",
+        "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../googleauth_client_secret.json\"}",
+        "saltForPasswordHashing": None
+    }
 
-authProvGoogleCreationDICT = {
-    "guid": None,
-    "Type": "google",
-    "AllowUserCreation": True,
-    "AllowLink": True,
-    "AllowUnlink": True,
-    "LinkText": 'Link Google Account',
-    "MenuText": "Login with Google",
-    "IconLink": "string",
-    "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../googleauth_client_secret.json\"}",
-    "saltForPasswordHashing": None
-}
+    authProvFacebookCreationDICT = {
+        "guid": None,
+        "Type": "facebook",
+        "AllowUserCreation": True,
+        "AllowLink": True,
+        "AllowUnlink": True,
+        "LinkText": 'Link Facebook Account',
+        "MenuText": "Login with Facebook",
+        "IconLink": "string",
+        "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../facebookauth_client_secret.json\"}",
+        "saltForPasswordHashing": None
+    }
 
-authProvFacebookCreationDICT = {
-    "guid": None,
-    "Type": "facebook",
-    "AllowUserCreation": True,
-    "AllowLink": True,
-    "AllowUnlink": True,
-    "LinkText": 'Link Facebook Account',
-    "MenuText": "Login with Facebook",
-    "IconLink": "string",
-    "ConfigJSON": "{\"clientSecretJSONFile\":\"" + os.path.dirname(os.path.realpath(__file__)) + "/../facebookauth_client_secret.json\"}",
-    "saltForPasswordHashing": None
-}
+    authProvLDAPCreationDICT_ConfigJSON = {
+      "Timeout": 60,
+      "Host": "unixldap.cc.ic.ac.uk",
+      "Port": "636",
+      "UserBaseDN": "ou=People,ou=everyone,dc=ic,dc=ac,dc=uk",
+      "UserAttribute": "uid",
+      "GroupBaseDN": "ou=Group,ou=everyone,dc=ic,dc=ac,dc=uk",
+      "GroupAttribute": "cn",
+      "GroupMemberField": "memberUid",
+      "userSufix": "@OrgNameLDAP",
+      "MandatoryGroupList": "soa_tech_monitoring",
+      "AnyGroupList": ""
+    }
 
-authProvLDAPCreationDICT_ConfigJSON = {
-  "Timeout": 60,
-  "Host": "unixldap.cc.ic.ac.uk",
-  "Port": "636",
-  "UserBaseDN": "ou=People,ou=everyone,dc=ic,dc=ac,dc=uk",
-  "UserAttribute": "uid",
-  "GroupBaseDN": "ou=Group,ou=everyone,dc=ic,dc=ac,dc=uk",
-  "GroupAttribute": "cn",
-  "GroupMemberField": "memberUid",
-  "userSufix": "@OrgNameLDAP",
-  "MandatoryGroupList": "soa_tech_monitoring",
-  "AnyGroupList": ""
-}
+    authProvLDAPCreationDICT = {
+        "guid": None,
+        "Type": "ldap",
+        "AllowUserCreation": True,
+        "AllowLink": True,
+        "AllowUnlink": True,
+        "LinkText": 'Link LDAP Account',
+        "MenuText": "Login with LDAP",
+        "IconLink": "string",
+        "ConfigJSON": json.dumps(authProvLDAPCreationDICT_ConfigJSON),
+        "saltForPasswordHashing": None
+    }
 
-authProvLDAPCreationDICT = {
-    "guid": None,
-    "Type": "ldap",
-    "AllowUserCreation": True,
-    "AllowLink": True,
-    "AllowUnlink": True,
-    "LinkText": 'Link LDAP Account',
-    "MenuText": "Login with LDAP",
-    "IconLink": "string",
-    "ConfigJSON": json.dumps(authProvLDAPCreationDICT_ConfigJSON),
-    "saltForPasswordHashing": None
-}
+    #print(authProvGoogleCreationDICT)
+    #errorInProcess("DD")
 
-#print(authProvGoogleCreationDICT)
-#errorInProcess("DD")
+    registeruserDICT = {
+      "authProviderGUID": "TODO",
+      "credentialJSON": {
+        "username": "testUser_",
+        "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
+       }
+    }
 
-registeruserDICT = {
-  "authProviderGUID": "TODO",
-  "credentialJSON": {
-    "username": "testUser_",
-    "password": getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], MainAuthProvider['saltForPasswordHashing'])
-   }
-}
+    def createUserUsingAdminAPI(UserID, known_as, mainTenant):
+      print(" - creating user " + UserID + " on " + mainTenant + ' ', end='')
+      postDict = {"UserID":UserID,"known_as":known_as,"mainTenant":mainTenant}
+      resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/users", postDict,[201, 400])
+      if (res==400):
+        if (resDICT['message'] == 'That username is already in use'):
+          print('Skipping as it already exists', end='')
+        else:
+          print("")
+          print("ERROR ERROR ERROR")
+          print(res)
+          print(resDICT)
+          raise Exception()
+      print(".")
 
-def createUserUsingAdminAPI(UserID, known_as, mainTenant):
-  print(" - creating user " + UserID + " on " + mainTenant + ' ', end='')
-  postDict = {"UserID":UserID,"known_as":known_as,"mainTenant":mainTenant}
-  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/users", postDict,[201, 400])
-  if (res==400):
-    if (resDICT['message'] == 'That username is already in use'):
-      print('Skipping as it already exists', end='')
-    else:
-      print("")
-      print("ERROR ERROR ERROR")
-      print(res)
-      print(resDICT)
-      raise Exception()
-  print(".")
+    def getTenantRoleDictFromTenantRoles(tenantRoles, tenantName):
+      for x in tenantRoles:
+        if x["TenantName"] == tenantName:
+          return x
+      a = {
+        "TenantName": tenantName,
+        "ThisTenantRoles": []
+      }
+      tenantRoles.append(a)
+      return a
 
-def getTenantRoleDictFromTenantRoles(tenantRoles, tenantName):
-  for x in tenantRoles:
-    if x["TenantName"] == tenantName:
-      return x
-  a = {
-    "TenantName": tenantName,
-    "ThisTenantRoles": []
-  }
-  tenantRoles.append(a)
-  return a
+    def addUserRole(UserID, TenantName, role):
+      print(" - adding " + role + " role to " + UserID + " on " + TenantName + " ", end='')
+      AuthProvidersDICT,res = callGetService(ADMIN, "/" + masterTenantName + "/users/" + UserID, [200])
+      #only works with existing tenant. When we need to add tenant will expand code
+      tenantRoleDict = getTenantRoleDictFromTenantRoles(AuthProvidersDICT["TenantRoles"], TenantName)
+      tenantRoleDict["ThisTenantRoles"].append(role)
+      #print("\ninsert data addUserRole Got:******************************")
+      #print(AuthProvidersDICT)
+      tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/users/" + UserID, AuthProvidersDICT, [200])
+      print(".")
 
-def addUserRole(UserID, TenantName, role):
-  print(" - adding " + role + " role to " + UserID + " on " + TenantName + " ", end='')
-  AuthProvidersDICT,res = callGetService(ADMIN, "/" + masterTenantName + "/users/" + UserID, [200])
-  #only works with existing tenant. When we need to add tenant will expand code
-  tenantRoleDict = getTenantRoleDictFromTenantRoles(AuthProvidersDICT["TenantRoles"], TenantName)
-  tenantRoleDict["ThisTenantRoles"].append(role)
-  #print("\ninsert data addUserRole Got:******************************")
-  #print(AuthProvidersDICT)
-  tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/users/" + UserID, AuthProvidersDICT, [200])
-  print(".")
+    def createPersonUsingAdminAPI():
+      print(" - creating person ", end='')
+      postDict = {}
+      resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/persons", postDict,[201])
+      print(' - new person GUID=' + resDICT['guid'])
+      return resDICT
 
-def createPersonUsingAdminAPI():
-  print(" - creating person ", end='')
-  postDict = {}
-  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/persons", postDict,[201])
-  print(' - new person GUID=' + resDICT['guid'])
-  return resDICT
+    def linkUserAndPerson(UserID, personGUID):
+      print(" - creating person link between " + UserID + " and " + personGUID + ' ', end='')
+      postDict = {"UserID":UserID,"personGUID":personGUID}
+      resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/userpersonlinks/" + UserID + "/" + personGUID, postDict,[201])
+      print(".")
 
-def linkUserAndPerson(UserID, personGUID):
-  print(" - creating person link between " + UserID + " and " + personGUID + ' ', end='')
-  postDict = {"UserID":UserID,"personGUID":personGUID}
-  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/userpersonlinks/" + UserID + "/" + personGUID, postDict,[201])
-  print(".")
+    def addInternalAuth(personGUID, tenantName, authProvider, username, password):
+      hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, authProvider['saltForPasswordHashing'])
+      print(" - adding admin2 internal auth for " + personGUID + " ", end='')
+      postDict = {"personGUID":personGUID,"tenantName":tenantName,"authProviderGUID":authProvider['guid'],"credentialJSON":{"username":username,"password":hashedPassword}}
+      resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/auths", postDict,[201, 400])
+      if (res==400):
+        if (resDICT['message'] == 'That username is already in use'):
+          print('Skipping as it already exists', end='')
+        else:
+          print("")
+          print("ERROR ERROR ERROR")
+          print(res)
+          print(resDICT)
+          raise Exception()
+      print('.')
 
-def addInternalAuth(personGUID, tenantName, authProvider, username, password):
-  hashedPassword = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(username, password, authProvider['saltForPasswordHashing'])
-  print(" - adding admin2 internal auth for " + personGUID + " ", end='')
-  postDict = {"personGUID":personGUID,"tenantName":tenantName,"authProviderGUID":authProvider['guid'],"credentialJSON":{"username":username,"password":hashedPassword}}
-  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/auths", postDict,[201, 400])
-  if (res==400):
-    if (resDICT['message'] == 'That username is already in use'):
-      print('Skipping as it already exists', end='')
-    else:
-      print("")
-      print("ERROR ERROR ERROR")
-      print(res)
-      print(resDICT)
-      raise Exception()
-  print('.')
+    def addAuthProvider(tenantName, authDict):
+      tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantName, [200])
+      tenantDICT["AuthProviders"].append(authDict)
+      tenantDICT2, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantDICT['Name'], tenantDICT, [200])
+      if (res==400):
+        if (resDICT['message'] == 'Auth PRov exists'):
+          print('Skipping add auth prov to tenant ' + tenantName)
+        else:
+          print(resDICT)
+          errorInProcess("Error")
+      return tenantDICT2
 
-def addAuthProvider(tenantName, authDict):
-  tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantName, [200])
-  tenantDICT["AuthProviders"].append(authDict)
-  tenantDICT2, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantDICT['Name'], tenantDICT, [200])
-  if (res==400):
-    if (resDICT['message'] == 'Auth PRov exists'):
-      print('Skipping add auth prov to tenant ' + tenantName)
-    else:
-      print(resDICT)
-      errorInProcess("Error")
-  return tenantDICT2
+    print("Setting up admin2 auth connected to two users - adminTest and normalTest")
+    createUserUsingAdminAPI("adminTest", "adminTest", masterTenantName)
+    createUserUsingAdminAPI("normalTest", "normalTest", masterTenantName)
+    addUserRole("adminTest", masterTenantName, masterTenantDefaultSystemAdminRole)
+    personDICT = createPersonUsingAdminAPI()
+    linkUserAndPerson("adminTest", personDICT['guid'])
+    linkUserAndPerson("normalTest", personDICT['guid'])
+    addInternalAuth(personDICT['guid'], masterTenantName, MainAuthProvider, 'admin2', 'admin2')
 
-print("Setting up admin2 auth connected to two users - adminTest and normalTest")
-createUserUsingAdminAPI("adminTest", "adminTest", masterTenantName)
-createUserUsingAdminAPI("normalTest", "normalTest", masterTenantName)
-addUserRole("adminTest", masterTenantName, masterTenantDefaultSystemAdminRole)
-personDICT = createPersonUsingAdminAPI()
-linkUserAndPerson("adminTest", personDICT['guid'])
-linkUserAndPerson("normalTest", personDICT['guid'])
-addInternalAuth(personDICT['guid'], masterTenantName, MainAuthProvider, 'admin2', 'admin2')
+    print("Adding google auth to master tenant")
+    addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
 
-print("Adding google auth to master tenant")
-addAuthProvider(masterTenantName, authProvGoogleCreationDICT)
+    print("Adding facebook auth to master tenant")
+    addAuthProvider(masterTenantName, authProvFacebookCreationDICT)
 
-print("Adding facebook auth to master tenant")
-addAuthProvider(masterTenantName, authProvFacebookCreationDICT)
-
-print("Adding ldap auth to master tenant")
-addAuthProvider(masterTenantName, authProvLDAPCreationDICT)
+    print("Adding ldap auth to master tenant")
+    addAuthProvider(masterTenantName, authProvLDAPCreationDICT)
 
 
-print("Enabling Link and accounts with Master Tenant")
-tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + masterTenantName, [200])
-for x in tenantDICT["AuthProviders"]:
-  if x['Type'] == 'internal':
-    x["AllowUserCreation"] = True
-    x["AllowLink"] = True
-    x["AllowUnlink"] = True
-tenantDICT2, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantDICT['Name'], tenantDICT, [200])
+    print("Enabling Link and accounts with Master Tenant")
+    tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + masterTenantName, [200])
+    for x in tenantDICT["AuthProviders"]:
+      if x['Type'] == 'internal':
+        x["AllowUserCreation"] = True
+        x["AllowLink"] = True
+        x["AllowUnlink"] = True
+    tenantDICT2, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + tenantDICT['Name'], tenantDICT, [200])
 
-print("Creating allowUserCreation tenants with users created with register method")
-for cur in range(creationStats['allowUserCreation_tenants']['num']):
-  print("Allow User Tenant ", cur)
-  creationDICT = copy.deepcopy(tenantCreationDICT)
-  creationDICT['Name'] = creationDICT['Name'] + str(cur)
-  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
-  if (res==400):
-    if (resDICT['message'] == 'Tenant Already Exists'):
-      print('Skipping tenant create as it already exists')
-    else:
-      errorInProcess("Error")
+    print("Creating allowUserCreation tenants with users created with register method")
+    for cur in range(creationStats['allowUserCreation_tenants']['num']):
+      print("Allow User Tenant ", cur)
+      creationDICT = copy.deepcopy(tenantCreationDICT)
+      creationDICT['Name'] = creationDICT['Name'] + str(cur)
+      resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
+      if (res==400):
+        if (resDICT['message'] == 'Tenant Already Exists'):
+          print('Skipping tenant create as it already exists')
+        else:
+          errorInProcess("Error")
 
-  tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], [200])
-  if len(tenantDICT["AuthProviders"]) == 0:
-    addAuthProvDICT = copy.deepcopy(tenantDICT)
-    addAuthProvDICT["AuthProviders"].append(authProvCreationDICT)
-    tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], addAuthProvDICT, [200])
+      tenantDICT, res = callGetService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], [200])
+      if len(tenantDICT["AuthProviders"]) == 0:
+        addAuthProvDICT = copy.deepcopy(tenantDICT)
+        addAuthProvDICT["AuthProviders"].append(authProvCreationDICT)
+        tenantDICT, res = callPutService(ADMIN, "/" + masterTenantName + "/tenants/" + creationDICT['Name'], addAuthProvDICT, [200])
 
-  for curUser in range(creationStats['allowUserCreation_tenants']['num_users']):
-    print(" - user ", curUser)
-    creationDICT = copy.deepcopy(registeruserDICT)
-    creationDICT['authProviderGUID'] = tenantDICT["AuthProviders"][0]['guid']
-    creationDICT['credentialJSON']['username'] = creationDICT['credentialJSON']['username'] + "T" + str(cur) + "_" + str(curUser)
-    creationDICT['credentialJSON']['password'] = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantDICT["AuthProviders"][0]['saltForPasswordHashing'])
-    resDICT, res = callPutService(LOGIN, "/" + tenantDICT['Name'] + "/register", creationDICT,[201,400])
+      for curUser in range(creationStats['allowUserCreation_tenants']['num_users']):
+        print(" - user ", curUser)
+        creationDICT = copy.deepcopy(registeruserDICT)
+        creationDICT['authProviderGUID'] = tenantDICT["AuthProviders"][0]['guid']
+        creationDICT['credentialJSON']['username'] = creationDICT['credentialJSON']['username'] + "T" + str(cur) + "_" + str(curUser)
+        creationDICT['credentialJSON']['password'] = getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(env['APIAPP_DEFAULTHOMEADMINUSERNAME'], env['APIAPP_DEFAULTHOMEADMINPASSWORD'], tenantDICT["AuthProviders"][0]['saltForPasswordHashing'])
+        resDICT, res = callPutService(LOGIN, "/" + tenantDICT['Name'] + "/register", creationDICT,[201,400])
+        if (res==400):
+          if (resDICT['message'] == 'That username is already in use'):
+            print('Ignoring user create error as it already exists')
+          else:
+            errorInProcess("Error")
+
+
+    print("Creating more tenants without any users or auths")
+    for cur in range(creationStats['empty_tenants']):
+      print("Allow User Tenant ", cur)
+      creationDICT = copy.deepcopy(tenantCreationDICT)
+      creationDICT['Name'] = creationDICT['Name'] + "_nouser_" + str(cur)
+      resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
+      if (res==400):
+        if (resDICT['message'] == 'Tenant Already Exists'):
+          print('Skipping tenant create as it already exists')
+        else:
+          errorInProcess("Error")
+
+    print("Creating teat tenant with internal, facebook and google auth")
+    creationDICT = copy.deepcopy(tenantCreationDICT)
+    creationDICT['Name'] = creationDICT['Name'] + "_googleAuthWithInternal"
+    resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
     if (res==400):
-      if (resDICT['message'] == 'That username is already in use'):
-        print('Ignoring user create error as it already exists')
+      if (resDICT['message'] == 'Tenant Already Exists'):
+        print('Skipping tenant create as it already exists')
       else:
+        print(resDICT)
         errorInProcess("Error")
-
-
-print("Creating more tenants without any users or auths")
-for cur in range(creationStats['empty_tenants']):
-  print("Allow User Tenant ", cur)
-  creationDICT = copy.deepcopy(tenantCreationDICT)
-  creationDICT['Name'] = creationDICT['Name'] + "_nouser_" + str(cur)
-  resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
-  if (res==400):
-    if (resDICT['message'] == 'Tenant Already Exists'):
-      print('Skipping tenant create as it already exists')
     else:
-      errorInProcess("Error")
+      addAuthProvider(creationDICT['Name'], authProvCreationDICT)
+      addAuthProvider(creationDICT['Name'], authProvGoogleCreationDICT)
+      addAuthProvider(creationDICT['Name'], authProvFacebookCreationDICT)
 
-print("Creating teat tenant with internal, facebook and google auth")
-creationDICT = copy.deepcopy(tenantCreationDICT)
-creationDICT['Name'] = creationDICT['Name'] + "_googleAuthWithInternal"
-resDICT, res = callPostService(ADMIN, "/" + masterTenantName + "/tenants", creationDICT,[201, 400])
-if (res==400):
-  if (resDICT['message'] == 'Tenant Already Exists'):
-    print('Skipping tenant create as it already exists')
-  else:
-    print(resDICT)
-    errorInProcess("Error")
-else:
-  addAuthProvider(creationDICT['Name'], authProvCreationDICT)
-  addAuthProvider(creationDICT['Name'], authProvGoogleCreationDICT)
-  addAuthProvider(creationDICT['Name'], authProvFacebookCreationDICT)
+    validTicketTypeDict = {
+      "tenantName": masterTenantName,
+      "ticketTypeName": "TestTicketType001",
+      "description": "Created by insert_test_data.py",
+      "enabled": True,
+      "welcomeMessage": {
+        "agreementRequired": False,
+        "title": "Test Ticket Type Welcome Message Title",
+        "body": "Test Ticket Type Welcome Message Body",
+        "okButtonText": "ok button text"
+      },
+      "allowUserCreation": True,
+      "issueDuration": 123,
+      "roles": [ "role1" ],
+      "postUseURL": "http://localhost:8082/#/usersystem/tenants/" + tenantName + "_googleAuthWithInternal",
+      "postInvalidURL": "http://localhost:8082/#/usersystem/tenants/" + tenantName + "_googleAuthWithInternal"
+    }
 
-validTicketTypeDict = {
-  "tenantName": masterTenantName,
-  "ticketTypeName": "TestTicketType001",
-  "description": "Created by insert_test_data.py",
-  "enabled": True,
-  "welcomeMessage": {
-    "agreementRequired": False,
-    "title": "Test Ticket Type Welcome Message Title",
-    "body": "Test Ticket Type Welcome Message Body",
-    "okButtonText": "ok button text"
-  },
-  "allowUserCreation": True,
-  "issueDuration": 123,
-  "roles": [ "role1" ],
-  "postUseURL": "http://localhost:8082/#/usersystem/tenants/testData_Tenant_googleAuthWithInternal",
-  "postInvalidURL": "http://localhost:8082/#/usersystem/tenants/testData_Tenant_googleAuthWithInternal"
-}
+    def createTicketType(tenantTypesTenant, name="TestTicketType001", allowUserCreation=True, expiryDuration=123):
+      jsonData = copy.deepcopy(validTicketTypeDict)
+      jsonData["ticketTypeName"] = name
+      jsonData["tenantName"] = tenantTypesTenant
+      jsonData["allowUserCreation"] = allowUserCreation
+      jsonData["issueDuration"] = expiryDuration
+      jsonData["roles"] = [ "COMMONROLE", "ROLEFROM" + name ]
+      print("Creating ticket type " + name)
+      createTicketTypeResultDict, res = callPostService(
+        ADMIN,
+        "/" + masterTenantName + "/tenants/" + tenantTypesTenant + '/tickettypes',
+        jsonData,
+        [201]
+      )
 
-def createTicketType(tenantTypesTenant, name="TestTicketType001", allowUserCreation=True, expiryDuration=123):
-  jsonData = copy.deepcopy(validTicketTypeDict)
-  jsonData["ticketTypeName"] = name
-  jsonData["tenantName"] = tenantTypesTenant
-  jsonData["allowUserCreation"] = allowUserCreation
-  jsonData["issueDuration"] = expiryDuration
-  jsonData["roles"] = [ "COMMONROLE", "ROLEFROM" + name ]
-  print("Creating ticket type " + name)
-  createTicketTypeResultDict, res = callPostService(
-    ADMIN,
-    "/" + masterTenantName + "/tenants/" + tenantTypesTenant + '/tickettypes',
-    jsonData,
-    [201]
-  )
+      jsonData = {
+        "foreignKeyDupAction": "Skip",
+        "foreignKeyList": [ "Tick001", "Tick002", "Tick003", "Tick004", "Tick005", "Tick006" ]
+      }
+      print(" - Creating 6 tickets " + str(jsonData["foreignKeyList"]))
+      resDICT, res = callPostService(
+        ADMIN,
+        "/" + masterTenantName + "/tenants/" + tenantTypesTenant + '/tickettypes/' + createTicketTypeResultDict["id"] + '/createbatch',
+        jsonData,
+        [200]
+      )
 
-  jsonData = {
-    "foreignKeyDupAction": "Skip",
-    "foreignKeyList": [ "Tick001", "Tick002", "Tick003", "Tick004", "Tick005", "Tick006" ]
-  }
-  print(" - Creating 6 tickets " + str(jsonData["foreignKeyList"]))
-  resDICT, res = callPostService(
-    ADMIN,
-    "/" + masterTenantName + "/tenants/" + tenantTypesTenant + '/tickettypes/' + createTicketTypeResultDict["id"] + '/createbatch',
-    jsonData,
-    [200]
-  )
+      return
 
-  return
-
-print("Adding ticket types to " + creationDICT['Name'])
-createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeWithAllowUserCreation", allowUserCreation=True)
-createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeNOUserCreation", allowUserCreation=False)
-createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeWithAllowUserCreationNegativeExpiry", allowUserCreation=True, expiryDuration=-1)
-
+    print("Adding ticket types to " + creationDICT['Name'])
+    createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeWithAllowUserCreation", allowUserCreation=True)
+    createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeNOUserCreation", allowUserCreation=False)
+    createTicketType(tenantTypesTenant=creationDICT['Name'], name="TestTicketTypeWithAllowUserCreationNegativeExpiry", allowUserCreation=True, expiryDuration=-1)
+except Exception as e:
+    errorInProcess(str(e))
 
 print("End")
 

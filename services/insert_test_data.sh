@@ -1,9 +1,11 @@
 #!/bin/bash
 
-PYTHON_CMD=python3
-if [ E${EXTPYTHONCMD} != "E" ]; then
-  PYTHON_CMD=${EXTPYTHONCMD}
-fi
+PYTHON_CMD=python
+#if [ E${EXTPYTHONCMD} != "E" ]; then
+#  PYTHON_CMD=${EXTPYTHONCMD}
+#fi
+
+source ../.venv/bin/activate
 
 
 echo "Insert Test Data"
@@ -25,5 +27,10 @@ export APIAPP_DEFAULTHOMEADMINUSERNAME=admin
 export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 
 ${PYTHON_CMD} ./src/insert_test_data.py
+RES=$?
+if [[ ${RES} -ne 0 ]]; then
+  echo "Insert test data failed"
+  exit ${RES}
+fi
 
 exit 0

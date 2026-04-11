@@ -100,7 +100,7 @@ export default {
         // console.log(items)
         TTT.$q.dialog({
           title: 'Select User',
-          message: 'You have access to mutiple user accounts on this site',
+          message: 'You have access to multiple user accounts on this site',
           options: {
             type: 'radio',
             model: items[0].value,
