@@ -45,7 +45,7 @@ fi
 #  ${SAAS_APIAPP_MASTERPASSWORDFORPASSHASH}
 
 APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://127.0.0.1:8082,http://localhost:8082"
-SETUP_JSON_DIR=${INITAL_DIR}
+SETUP_JSON_DIR="${INITAL_DIR}/../services"
 SETUP_JSON_FILENAME="_start_local_saas_user_management_service_config.json"
 EXPECTED_TENANT="saas_user_management_detect"
 EXTERNAL_VOLUME=""

@@ -3,7 +3,7 @@
 This runs all the parts locally on the machine.
 
 
-Make sure setting in saasApilClient.js is correct
+Make sure setting in saasApilClient.js in adminfrontend is correct
   - const loginFrontendIsDev = true
 it should be true
 
