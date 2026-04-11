@@ -7,6 +7,12 @@
         </q-item>
         <q-item>
           <q-item-section>
+            <q-item-label>Codebase Version</q-item-label>
+            {{ codebasever }}
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
             <q-item-label>Route Params</q-item-label>
             {{ $route.params }}
           </q-item-section>
@@ -71,6 +77,7 @@
 import { Notify } from 'quasar'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 import saasApiClientCallBackend from '../saasAPiClientCallBackend'
+import rjmversion from '../rjmversion'
 
 export default {
   name: 'DebugInformation',
@@ -80,6 +87,7 @@ export default {
   },
   data () {
     return {
+      codebasever: rjmversion.codebasever,
       possibleTenants: [
         '', 'defaulttenant'
       ]

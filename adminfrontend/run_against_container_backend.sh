@@ -10,6 +10,12 @@ cd ..
 source ./_repo_vars.sh
 cd ${INITAL_DIR}
 
+echo "Overwiting hard coded codebaseversion file ():"
+#must overwrite file not append so only single >
+echo "/* eslint-disable */" > ./src/rjmversion.js
+echo "export default { codebasever: 'runing_against_container_${RJM_VERSION}' }" >> ./src/rjmversion.js
+
+
 echo " using container version ${RJM_USERMANAGEMENT_CONTAINER}"
 
 export APIAPP_JWTSECRET="gldskajld435sFFkfjlkfdsj"

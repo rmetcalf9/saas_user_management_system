@@ -5,7 +5,6 @@
         <q-item>
           <q-item-label header>Debug Information and functions</q-item-label>
         </q-item>
-        codebasever
         <q-item>
           <q-item-section>
             <q-item-label>Codebase Version</q-item-label>

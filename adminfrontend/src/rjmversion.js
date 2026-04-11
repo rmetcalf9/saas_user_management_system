@@ -1,2 +1,2 @@
 /* eslint-disable */
-export default { codebasever: 'local_build_0.0.221' }
+export default { codebasever: 'run_all_parts_on_dev_machine_0.1.8' }

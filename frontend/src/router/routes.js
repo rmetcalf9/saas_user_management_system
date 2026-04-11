@@ -1,111 +1,287 @@
-import stores from '../store/index.js'
+import saasApiClient from '../saasAplClient'
+import { getRjmStateChangeObj } from '../stores/saasUserManagementClientStore'
+import { Cookies } from 'quasar'
+import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
-function isValueHeld (a) {
-  if (typeof (a) === 'undefined') return null
-  if (a === null) return false
-  return true
+const prodDomain = 'api.metcarob.com'
+const preferredTenantName = 'user_management'
+export const saasServiceName = 'saas_' + preferredTenantName
+const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantName + '/'
+
+function allowNotLoggedInForPath (tenantName, path) {
+  // All pages require login accept profile which may be public
+  if (path === '/' + tenantName + '/') {
+    return true
+  }
+  if (path === '/' + tenantName + '/debug') {
+    return true
+  }
+  const pathArr = path.split('/')
+  if (pathArr.length === 4 && path.startsWith('/' + tenantName + '/promo/')) {
+    return true
+  }
+  // if (path.startsWith('/' + tenantName + '/login/')) {
+  //   return true
+  // }
+  return false
 }
 
-function _getDecodedValueFromQuery (to, from, valueName) {
-  if (isValueHeld(from.query[valueName])) {
-    return decodeURIComponent(from.query[valueName])
-  } else if (isValueHeld(to.query[valueName])) {
-    return decodeURIComponent(to.query[valueName])
+function retrieveLoginFromCookieAndSaveToStateIfFound (rjmStateChange) {
+  if (!Cookies.has('saasUserManagementClientStoreCredentials')) {
+    return // no cookie so do nothing
   }
-  return undefined
+  const cookieData = Cookies.get('saasUserManagementClientStoreCredentials')
+  if (typeof (cookieData) === 'undefined') {
+    return // blanked cookie so do nothing (cookies are blanked when refresh fails)
+  }
+  if (typeof (cookieData.loginTenantName) === 'undefined') {
+    // require cookie to have the loginTenantName
+    return
+  }
+  if (cookieData.loginTenantName !== rjmStateChange.getFromState('loginService').tenantName) {
+    // do not accept a cookie without a loginTenantName that matches this one
+    return
+  }
+  rjmStateChange.executeAction('setLoginFromCookie', { cookieData })
 }
 
-function _ensurePassedTenenatIsLoaded (to, from, next, successCallback) {
-  // console.log('_ensurePassedTenenatIsLoaded FROM', from)
-  // console.log('_ensurePassedTenenatIsLoaded TO', to)
-  // console.log('_ensurePassedTenenatIsLoaded internal ra:', stores().state.globalDataStore.usersystemReturnaddressInternal)
-  var a = _getDecodedValueFromQuery(to, from, 'usersystem_returnaddress')
-  if (typeof (a) !== 'undefined') {
-    stores().commit('globalDataStore/updateUsersystemReturnaddress', a)
+function actionsForLoggedInUser ({ to, rjmStateChange }) {
+  // Empty function. Good place for loading logged in users details
+}
+
+function notLoggedInBeforeEnter (to, from, next, rjmStateChange) {
+  redirectionlogger('notLoggedInBeforeEnter')
+
+  const notLoggedInPath = '/' + to.params.tenantName + '/notloggedin'
+  const afterLoginPath = '/' + to.params.tenantName
+
+  const sendUserToNotLoggedInPage = function () {
+    sendUserToPage(to, next, notLoggedInPath, to.path)
+    sendUserToLogin(to, rjmStateChange)
   }
-  var b = _getDecodedValueFromQuery(to, from, 'usersystem_message')
-  if (typeof (b) !== 'undefined') {
-    stores().commit('globalDataStore/setMessageToDisplay', b)
+  const sendUserToDefaultAfterLoginPage = function () {
+    sendUserToPage(to, next, afterLoginPath)
   }
-  if (stores().state.globalDataStore.tenantInfo !== null) {
-    if (stores().state.globalDataStore.tenantInfo.Name === to.params.tenantName) {
-      successCallback(to, from, next)
-      return
+
+  const callback = {
+    ok: function (response) {
+      // At this point the retervial token and cookie has been read to see if user is logged in
+
+      // console.log('sendUserToNotLoggedInPage callback OK')
+      // Rather than check if user is logged in check they have the role hasaccount
+
+      const hasAccount = rjmStateChange.getFromState('hasRole')('hasaccount')
+      if (hasAccount) {
+        if (to.path === notLoggedInPath) {
+          console.log('about to sendUserToDefaultAfterLoginPage', to.path)
+          sendUserToDefaultAfterLoginPage()
+          return
+        } else {
+          actionsForLoggedInUser({ to, rjmStateChange })
+          next()
+          return
+        }
+      }
+
+      // At this point we know the user has no login credentials
+      if (allowNotLoggedInForPath(to.params.tenantName, to.path)) {
+        redirectionlogger('notLoggedInBeforeEnter - page is allowed for not logged in user')
+        next()
+        return
+      }
+      sendUserToNotLoggedInPage()
+      console.log('sendUserToNotLoggedInPage callback OK END')
+    },
+    error: function (response) {
+      console.log('ERROR router.js fds43 ERR', response)
+      sendUserToNotLoggedInPage()
     }
   }
-  console.log('Loaded store differs from param, redirecting')
-  next({
-    path: '/' + to.params.tenantName,
-    query: {
-      usersystem_redirect: to.fullPath
-    }
-  })
+
+  if (typeof (to.query.jwtretervialtoken) === 'undefined') {
+    // console.log('Checking for logon cookie')
+    if (rjmStateChange.getFromState('loginService').processState !== 0) return
+    retrieveLoginFromCookieAndSaveToStateIfFound(rjmStateChange)
+    callback.ok('')
+  } else {
+    redirectionlogger('Detected return from login')
+    // gtm not deployed yet
+    // gtm.logEvent('login', 'LoginComplete', 'Done', 0)
+    rjmStateChange.executeAction('processRecievedJWTretervialtoken', {
+      jwtretervialtoken: to.query.jwtretervialtoken,
+      callback,
+      curpath: to.path,
+      startAllBackendCallQueuesFn: saasApiClientServerRequestQueue.getStartAllBackendCallQueuesFn({ curpath: to.path })
+    })
+  }
 }
 
-function ensurePassedTenantIsLoaded (to, from, next) {
-  _ensurePassedTenenatIsLoaded(to, from, next, function (to, from, next) { next() })
-}
+function globalBeforeEnter (to, from, next, callSrc) {
+  redirectionlogger('globalBeforeEnter topath=' + to.path + ' source of globalBeforeEnter=' + callSrc)
 
-function selectAuthBeforeEnter (to, from, next) {
-  _ensurePassedTenenatIsLoaded(to, from, next, function (to, from, next) {
-    if (stores().state.globalDataStore.tenantInfo.AuthProviders.length === 1) {
-      stores().commit('globalDataStore/updateSelectedAuthProvGUID', stores().state.globalDataStore.tenantInfo.AuthProviders[0].guid)
-      next({
-        path: '/' + to.params.tenantName + '/AuthProvider/' + stores().state.globalDataStore.tenantInfo.AuthProviders[0].Type
+  const x = redirectToProperDomain()
+  if (x.wasRedirected) return
+  if (redirectToURLWithExpandedCampaignParams()) return
+
+  const rjmStateChange = getRjmStateChangeObj()
+
+  saasApiClient.registerEndpointsWithStore({
+    saasServiceName,
+    getRjmStateChangeFn: getRjmStateChangeObj,
+    prodDomain,
+    runtype: x.runtype,
+    tenantName: to.params.tenantName,
+    doneFn: function () {
+      saasApiClient.startEndpointIdentificationProcess({
+        endpointName: saasServiceName,
+        getRjmStateChangeFn: getRjmStateChangeObj
       })
     }
-    next()
   })
+  const rjmStateChange2 = getRjmStateChangeObj()
+  if (rjmStateChange2.getFromState('isLoggedIn')) {
+    actionsForLoggedInUser({ to, rjmStateChange })
+    next()
+  } else {
+    notLoggedInBeforeEnter(to, from, next, rjmStateChange)
+  }
+}
+
+function redirectToURLWithExpandedCampaignParams () {
+  const redirectUTMSource = 'defaulttenant'
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.has('l')) {
+    // Auto tag an internal campaign
+    const newLocation = 'https://' + prodDomain + '/?utm_source=' + redirectUTMSource + '&utm_medium=' + urlParams.get('l') + '&utm_campaign=Internal%20app%20Share'
+    redirectionlogger('redirectToURLWithExpandedCampaignParams->HREF(' + newLocation + ')')
+    window.location.href = newLocation
+    return true
+  }
+  return false
+}
+
+function sendUserToPage (to, next, targetPage, requestedPage) {
+  if (to.path === targetPage) {
+    // console.log('a')
+    redirectionlogger('sendUserToPage->next()')
+    next()
+    return
+  }
+  if (typeof (requestedPage) !== 'undefined') {
+    targetPage = targetPage + '?requestedPage=' + requestedPage
+  }
+  // console.log('AAA:', targetPage)
+  redirectionlogger('sendUserToPage->next(' + targetPage + ')')
+  next({
+    path: targetPage
+  })
+}
+
+function sendUserToLogin (to, rjmStateChange) {
+  const returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + '#' + to.path
+  window.location.href = rjmStateChange.getFromState('getLoginUIURLFn')(undefined, '/', returnAddress)
+}
+
+function redirectToProperDomain () {
+  // return
+  // {
+  //   wasRedirected: true if redirection is required, false otherwise
+  //   runtype: 'proddomain' - if running in prodDomain, 'prodapi' if running in api.metcarob.com, 'dev' otherwise
+  // }
+  // host api.metcarob.com can never be http - kong will block
+  // host www.thumbsum.co must be moved non-www and https if not already
+  // host thumbsum.co must be moved to https if not
+  // console.log('location.protocol:', location.protocol)
+  // console.log('location.hostname:', location.hostname)
+  const subDomainsToRedirectFrom = ['www']
+  let runtype = 'dev'
+  const arrayLength = subDomainsToRedirectFrom.length
+  for (let i = 0; i < arrayLength; i++) {
+    if (location.hostname === subDomainsToRedirectFrom[i] + '.' + prodDomain) {
+      redirectionlogger('redirectToProperDomain 1->HREF(' + preferredFullLocation + ')')
+      window.location.href = preferredFullLocation
+      return { wasRedirected: true }
+    }
+  }
+
+  if (location.hostname === prodDomain) {
+    if (location.protocol === 'http:') {
+      redirectionlogger('redirectToProperDomain 2->HREF(' + preferredFullLocation + ')')
+      window.location.href = preferredFullLocation
+      return { wasRedirected: true }
+    }
+    runtype = 'proddomain'
+  } else { // not prod domain
+    if (location.hostname === 'api.metcarob.com') {
+      runtype = 'prodapi'
+    } else {
+      if (location.hostname !== 'localhost') {
+        if (location.hostname !== 'localhost:8080') {
+          if (location.hostname !== '127.0.0.1') {
+            if (location.hostname !== '127.0.0.1:8080') {
+              // May be someone else hosting this code
+              redirectionlogger('redirectToProperDomain 3->HREF(' + preferredFullLocation + ')')
+              window.location.href = preferredFullLocation
+              return { wasRedirected: true }
+            }
+          }
+        }
+      }
+    }
+  }
+  return { wasRedirected: false, runtype }
+}
+
+const logger = function (msg, messagetype) {
+  let log = true
+  if (messagetype === 'redirect') {
+    log = true
+  }
+  if (log) {
+    console.log(messagetype, ':', msg)
+  }
+}
+const redirectionlogger = function (msg) {
+  logger(msg, 'redirect')
+}
+
+function redirectToDefaultTenant (to, from, next) {
+  redirectionlogger('redirectToDefaultTenant')
+  const x = redirectToProperDomain()
+  if (x.wasRedirected) return
+  if (redirectToURLWithExpandedCampaignParams()) return
+  // window.location.href = window.location.href + preferredTenantName + '/'
+  redirectionlogger('redirectToDefaultTenant - about to call sendUserToPage')
+  sendUserToPage(to, next, '/' + preferredTenantName + '/')
+}
+
+function getGlobalBeforeEnterFn (callSrc) {
+  return function (to, from, next) {
+    redirectionlogger('S-Start of GlobalBeforeEnterFn:' + callSrc)
+    globalBeforeEnter(to, from, next, callSrc)
+    redirectionlogger('X-End of GlobalBeforeEnterFn:' + callSrc)
+  }
 }
 
 const routes = [
   {
-    path: '/:tenantName',
-    component: () => import('pages/CheckTenant.vue')
+    path: '/',
+    beforeEnter: redirectToDefaultTenant
   },
   {
-    path: '/:tenantName/selectAuth',
-    component: () => import('pages/SelectAuth.vue'),
-    beforeEnter: selectAuthBeforeEnter
+    path: '/:tenantName/',
+    component: () => import('layouts/MainLayout.vue'),
+    beforeEnter: getGlobalBeforeEnterFn('main'),
+    children: [
+      { path: '', component: () => import('pages/IndexPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Index') },
+      { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('debug') }
+    ]
   },
+
   {
-    path: '/:tenantName/AuthProvider/internal',
-    component: () => import('pages/AuthProvider_internal.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
-  },
-  {
-    path: '/:tenantName/AuthProvider/google',
-    component: () => import('pages/AuthProvider_google.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
-  },
-  {
-    path: '/:tenantName/AuthProvider/facebook',
-    component: () => import('pages/AuthProvider_facebook.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
-  },
-  {
-    path: '/:tenantName/AuthProvider/ldap',
-    component: () => import('pages/AuthProvider_ldap.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
-  },
-  {
-    path: '/:tenantName/SecuritySettings',
-    component: () => import('pages/SecuritySettings.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
-  },
-  {
-    path: '/:tenantName/Ticket/:ticketGUID',
-    component: () => import('pages/Ticket.vue'),
-    beforeEnter: ensurePassedTenantIsLoaded
+    path: '/:catchAll(.*)*',
+    component: () => import('pages/ErrorNotFound.vue')
   }
 ]
-
-// Always leave this as last one
-if (process.env.MODE !== 'ssr') {
-  routes.push({
-    path: '*',
-    component: () => import('pages/Error404.vue')
-  })
-}
 
 export default routes
