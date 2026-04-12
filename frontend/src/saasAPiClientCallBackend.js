@@ -6,6 +6,8 @@ import { saasServiceName } from './router/routes.js'
 // const authedStoreFn = 'callAuthedAPI'
 const authedOrAnonStoreFn = 'callAuthedOrAnonAPI'
 
+import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
+
 /*
 One entry here for ecery prefix ins the python backend app
  matches prefixes foudn in /services/src/APIs/__init__.py
@@ -16,13 +18,18 @@ const apiPrefixes = {
     path: '/info',
     storeFn: authedOrAnonStoreFn, // authedStoreFn or authedOrAnonStoreFn
     orveridePublicPrivatePart: 'public' // public or private
+  },
+  login: { // baseapp provided endpoint
+    endpoint: saasServiceName,
+    path: '/login',
+    storeFn: authedOrAnonStoreFn, // authedStoreFn or authedOrAnonStoreFn
+    orveridePublicPrivatePart: 'public' // public or private
   }
 }
 
 function callApi ({
   prefix, // must match prefix from apiPRefixes array
   router,
-  store,
   path, // : queryString,
   method, // : 'get',
   postdata, // : null,
@@ -36,7 +43,9 @@ function callApi ({
   if (typeof (router) !== 'undefined') {
     curPath = router.currentRoute.value.fullPath
   }
-  store[apiPrefixes[prefix].storeFn]({
+  const userManagementClientStore = useUserManagementClientStoreStore()
+
+  userManagementClientStore[apiPrefixes[prefix].storeFn]({
     endpoint: apiPrefixes[prefix].endpoint,
     path: apiPrefixes[prefix].path + path,
     method,
