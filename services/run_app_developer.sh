@@ -45,7 +45,7 @@ export APIAPP_DEFAULTHOMEADMINPASSWORD=admin
 export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"Memory\"}"
 ##export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SQLAlchemy\", \"connectionString\":\"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man_rad\"}"
 ##export APIAPP_GATEWAYINTERFACECONFIG "{\"Type\": \"none\", \"jwtSecret\":\"some_secretxx\", "kongISS": "kong_iss"}"
-export APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="http://localhost, http://somefunnyhostname.com:5081, http://somefunnyhostname.com:5082, http://localhost:8081, http://localhost:8082"
+export APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="http://localhost, http://somefunnyhostname.com:5081, http://somefunnyhostname.com:5082, http://localhost:8081, http://localhost:8082, http://127.0.0.1:8081, http://127.0.0.1:8082"
 #export APIAPP_AUTOCONFIG="{ \"steps\": [{ \"type\": \"echo\", \"data\": { \"text\": \"Hello World\"}}]}"
 
 export APIAPP_AUTOCONFIGFILE=./_start_local_saas_user_management_service_config.json
