@@ -1,5 +1,6 @@
 import saasApiClient from '../saasAplClient'
 import { getRjmStateChangeObj } from '../stores/saasUserManagementClientStore'
+import { useInputParamsStore } from 'stores/inputParams'
 import { Cookies } from 'quasar'
 import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
@@ -11,6 +12,9 @@ const preferredFullLocation = 'https://' + prodDomain + '/#/' + preferredTenantN
 function allowNotLoggedInForPath (tenantName, path) {
   // All pages require login accept profile which may be public
   if (path === '/' + tenantName + '/') {
+    return true
+  }
+  if (path === '/' + tenantName + '/auth/internal') {
     return true
   }
   if (path === '/' + tenantName + '/debug') {
@@ -118,6 +122,26 @@ function notLoggedInBeforeEnter (to, from, next, rjmStateChange) {
 
 function globalBeforeEnter (to, from, next, callSrc) {
   redirectionlogger('globalBeforeEnter topath=' + to.path + ' source of globalBeforeEnter=' + callSrc)
+
+  let eitherset = false
+  let usersystemReturnaddress = ''
+  let usersystemMessage = ''
+  if (typeof (to.query.usersystem_returnaddress) !== 'undefined') {
+    usersystemReturnaddress = to.query.usersystem_returnaddress
+    eitherset = true
+  }
+  if (typeof (to.query.usersystem_message) !== 'undefined') {
+    usersystemMessage = to.query.usersystem_message
+    eitherset = true
+  }
+  if (eitherset) {
+    const inputParamsStore = useInputParamsStore()
+    inputParamsStore.setParams({ usersystemReturnaddress, usersystemMessage })
+    next({
+      path: to.path
+    })
+    return
+  }
 
   const x = redirectToProperDomain()
   if (x.wasRedirected) return
@@ -274,6 +298,7 @@ const routes = [
     beforeEnter: getGlobalBeforeEnterFn('main'),
     children: [
       { path: '', component: () => import('pages/IndexPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Index') },
+      { path: 'auth/internal', component: () => import('pages/AuthProvider_internal.vue'), beforeEnter: getGlobalBeforeEnterFn('AuthProvider_internal') },
       { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('debug') }
     ]
   },

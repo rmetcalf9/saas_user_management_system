@@ -173,7 +173,7 @@ function sendUserToPage (to, next, targetPage, requestedPage) {
 
 function sendUserToLogin (to, rjmStateChange) {
   const returnAddress = window.location.protocol + '//' + window.location.host + window.location.pathname + '#' + to.path
-  window.location.href = rjmStateChange.getFromState('getLoginUIURLFn')(undefined, '/', returnAddress)
+  window.location.href = rjmStateChange.getFromState('getLoginUIURLFn')('TEST MSG IN ADMIN FRONTEND', '/', returnAddress)
 }
 
 function redirectToProperDomain () {
