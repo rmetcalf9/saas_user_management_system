@@ -2,17 +2,8 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
         <q-toolbar-title>
-          <div @click="clicktoolbartitle">frontend</div>
+          <div @click="clicktoolbartitle">Login</div>
         </q-toolbar-title>
 
         <div v-if="serverInfoVersionMatchesCodeBaseVersion">Version {{ serverInfoVersion }}</div>
@@ -25,61 +16,6 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-    <q-list>
-      <div v-if="isAdminUser">
-        <q-item-label
-          header
-          class="text-grey-8"
-        >
-          Admin
-        </q-item-label>
-        <q-item clickable :to='"/" + this.$route.params.tenantName + "/admin/locationscanner"'>
-          <q-item-section avatar>
-            <q-icon color="primary" name="add_location" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>TODO ADMIN MENU ITEM</q-item-label>
-            <q-item-label caption>TODO ADMIN MENU ITEM</q-item-label>
-          </q-item-section>
-        </q-item>
-      </div>
-      <q-item-label
-        header
-        class="text-grey-8"
-      >
-        {{ host }} Links
-      </q-item-label>
-      <q-item clickable :to='"/" + this.$route.params.tenantName + "/"'>
-        <q-item-section avatar>
-          <q-icon color="primary" name="equalizer" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>Home</q-item-label>
-          <q-item-label caption>Index Page</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <saasUsermanagementLoginItem
-        v-model="saasLogin"
-        @userloggedout="userloggedout"
-      />
-      <div v-if="tenantName !== 'defaulttenant'">
-        <q-separator />
-        <q-item>
-          <q-item-section>
-            <q-item-label>non-prod Tenant</q-item-label>
-            <q-item-label caption>{{ tenantName }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </div>
-    </q-list>
-    </q-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -87,28 +23,21 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent } from 'vue'
 import { saasServiceName } from '../router/routes.js'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 import rjmversion from '../rjmversion'
-import saasUsermanagementLoginItem from '../components/saasUsermanagementLoginItem.vue'
 
 export default defineComponent({
   name: 'MainLayout',
 
   components: {
-    saasUsermanagementLoginItem
   },
 
   setup () {
     const store = useUserManagementClientStoreStore()
-    const leftDrawerOpen = ref(false)
 
     return {
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      },
       toolbartitlelastclick: Date.now(),
       toolbartitleclickcount: 0,
       store
