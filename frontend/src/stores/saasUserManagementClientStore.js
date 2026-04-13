@@ -231,6 +231,9 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
       }
       this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'always' })
     },
+    callAnonAPI ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart }) {
+      this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'none' })
+    },
     callAuthedOrAnonAPI ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart }) {
       this.callApi({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype: 'ifloggedin' })
     },

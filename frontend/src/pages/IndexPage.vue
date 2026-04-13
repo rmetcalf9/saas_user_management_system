@@ -107,7 +107,8 @@ export default defineComponent({
         return
       }
       this.tenantInfoStore.selectAuthProvider({
-        selectedAuthProvider: authProvider
+        selectedAuthProvider: authProvider,
+        tenantName: this.$route.params.tenantName
       })
       this.$router.push('/' + this.$route.params.tenantName + targets[authProvider.Type])
     }

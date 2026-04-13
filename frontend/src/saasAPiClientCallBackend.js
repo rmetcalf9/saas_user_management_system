@@ -5,6 +5,7 @@ import { saasServiceName } from './router/routes.js'
 
 // const authedStoreFn = 'callAuthedAPI'
 const authedOrAnonStoreFn = 'callAuthedOrAnonAPI'
+const anonStoreFn = 'callAnonAPI'
 
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 
@@ -22,7 +23,7 @@ const apiPrefixes = {
   login: { // baseapp provided endpoint
     endpoint: saasServiceName,
     path: '/login',
-    storeFn: authedOrAnonStoreFn, // authedStoreFn or authedOrAnonStoreFn
+    storeFn: anonStoreFn, // authedStoreFn or authedOrAnonStoreFn
     orveridePublicPrivatePart: 'public' // public or private
   }
 }

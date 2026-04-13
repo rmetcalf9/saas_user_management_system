@@ -5,16 +5,19 @@ import saasAPiClientCallBackend from '../saasAPiClientCallBackend.js'
 export const useTenantInfoStore = defineStore('tenantInfoStore', {
   state: () => ({
     tenants: {},
-    selectedAuth: {}
+    selectedAuth: {},
+    selectedAuthTenantName: ''
   }),
   getters: {
   },
   actions: {
-    selectAuthProvider ({ selectedAuthProvider }) {
+    selectAuthProvider ({ selectedAuthProvider, tenantName }) {
       this.selectedAuth = selectedAuthProvider
+      this.selectedAuthTenantName = tenantName
     },
     clearAuthProvider () {
       this.selectedAuth = {}
+      this.selectedAuthTenantName = ''
     },
     isAuthProviderSelected () {
       return Object.keys(this.selectedAuth).length > 0

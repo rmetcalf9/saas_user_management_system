@@ -53,6 +53,7 @@ import DisplayInputMessage from '../components/displayInputMessage.vue'
 import { useTenantInfoStore } from 'stores/tenantInfo'
 import bcrypt from 'bcryptjs'
 import ProcessLoginResponse from '../components/processLoginResponse'
+import frontendFns from '../frontendFns.js'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -107,23 +108,23 @@ export default defineComponent({
         username: this.usernamePass.username,
         password: passwordhash
       }
-      console.log('todo', credentialJson)
-      // const callback = {
-      //  ok: function (response) {
-      //    Loading.hide()
-      //  },
-      //  error: function (response) {
-      //    Loading.hide()
-      //    Notify.create({ color: 'negative', message: 'Login Failed' })
-      //  }
-      // }
+      const callback = {
+        ok: function (response) {
+          Loading.hide()
+        },
+        error: function (response) {
+          Loading.hide()
+          Notify.create({ color: 'negative', message: 'Login Failed' })
+        }
+      }
       Loading.show()
-      // frontendFns.callLoginAPI({
-      //  store: this.$store,
-      //  credentialJSON: credentialJson,
-      //  callback: callback,
-      //  processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
-      // })
+      frontendFns.callLoginAPI({
+        credentialJSON: credentialJson,
+        callback,
+        processLoginResponseInstance: TTT.$refs.processLoginResponseInstance,
+        registering: false,
+        router: this.$router
+      })
     }
   }
 })

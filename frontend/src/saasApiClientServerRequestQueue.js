@@ -76,7 +76,7 @@ function processAPICallQueueRecursive ({ endpoint, rjmStateChange, calledAtEndOf
   let attachToken = false
   switch (apiCall.authtype) {
     case 'none':
-      attachToken = true
+      attachToken = false
       break
     case 'always':
       attachToken = true
@@ -111,10 +111,17 @@ function processAPICallQueueRecursive ({ endpoint, rjmStateChange, calledAtEndOf
           rjmStateChange.executeAction('takeFirstMessageOffQueue', { endpoint: endpoint.name })
           processAPICallQueueRecursive({ rjmStateChange, endpoint, calledAtEndOfRefresh, curpath, startAllBackendCallQueuesFn })
         } else {
-          rjmStateChange.executeAction('endQueueProcessing', { endpoint: endpoint.name })
-          // Passing undefined as callback
-          refreshJWTToken(undefined, curpath, startAllBackendCallQueuesFn)
-          // return (Not needed)
+          if (apiCall.authtype === 'none') {
+            // There was never auth with this call so we don't need to refresh a JWT token
+            callbackHelper.webserviceError(apiCall.callback, response)
+            rjmStateChange.executeAction('takeFirstMessageOffQueue', { endpoint: endpoint.name })
+            processAPICallQueueRecursive({ rjmStateChange, endpoint, calledAtEndOfRefresh, curpath, startAllBackendCallQueuesFn })
+          } else {
+            rjmStateChange.executeAction('endQueueProcessing', { endpoint: endpoint.name })
+            // Passing undefined as callback
+            refreshJWTToken(undefined, curpath, startAllBackendCallQueuesFn)
+            // return (Not needed)
+          }
         }
       } else {
         callbackHelper.webserviceError(apiCall.callback, response)

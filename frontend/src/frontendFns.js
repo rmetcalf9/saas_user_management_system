@@ -1,18 +1,24 @@
+import saasAPiClientCallBackend from './saasAPiClientCallBackend.js'
+// import callbackHelper from './callbackHelper'2
+import { useTenantInfoStore } from 'stores/tenantInfo'
 
 // callback dosent have to do anything as proceeLoginResponse is called from here
-function callLoginAPI ({ store, credentialJSON, callback, processLoginResponseInstance, registering }) {
-  var loginRequestPostData = {
-    credentialJSON: credentialJSON,
-    authProviderGUID: store.state.globalDataStore.selectedAuthProvGUID
+function callLoginAPI ({ credentialJSON, callback, processLoginResponseInstance, registering, router }) {
+  const tenantInfoStore = useTenantInfoStore()
+  const loginRequestPostData = {
+    credentialJSON,
+    authProviderGUID: tenantInfoStore.selectedAuth.guid
   }
-  if (typeof (store.state.globalDataStore.ticketInUse) !== 'undefined') {
-    if (store.state.globalDataStore.ticketInUse !== null) {
-      if (store.state.globalDataStore.ticketInUse !== 'null') {
-        loginRequestPostData['ticket'] = store.state.globalDataStore.ticketInUse
-      }
-    }
-  }
-  var localCallback = {
+  // TODO ReIntroduce ticket functinoality
+  // if (typeof (store.state.globalDataStore.ticketInUse) !== 'undefined') {
+  //   if (store.state.globalDataStore.ticketInUse !== null) {
+  //     if (store.state.globalDataStore.ticketInUse !== 'null') {
+  //       loginRequestPostData['ticket'] = store.state.globalDataStore.ticketInUse
+  //     }
+  //   }
+  // }
+
+  const localCallback = {
     ok: function (response) {
       callback.ok(response)
       if (typeof (processLoginResponseInstance) !== 'undefined') {
@@ -23,19 +29,21 @@ function callLoginAPI ({ store, credentialJSON, callback, processLoginResponseIn
       callback.error(response)
     }
   }
-  var method = 'POST'
-  var path = '/authproviders'
+  let method = 'POST'
+  let path = '/authproviders'
   if (typeof (registering) !== 'undefined') {
     if (registering) {
       method = 'PUT'
       path = '/register'
     }
   }
-  store.dispatch('globalDataStore/callLoginAPI', {
-    method: method,
-    path: path,
-    callback: localCallback,
-    postdata: loginRequestPostData
+  saasAPiClientCallBackend.callApi({
+    prefix: 'login',
+    router,
+    path: '/' + tenantInfoStore.selectedAuthTenantName + path,
+    method,
+    postdata: loginRequestPostData,
+    callback: localCallback
   })
 }
 
@@ -72,7 +80,7 @@ function isSet (value) {
 }
 
 export default {
-  passwordERRORMessage: passwordERRORMessage,
-  isSet: isSet,
-  callLoginAPI: callLoginAPI
+  passwordERRORMessage,
+  isSet,
+  callLoginAPI
 }
