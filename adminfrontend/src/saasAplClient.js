@@ -90,6 +90,7 @@ export function registerEndpointsWithStore (params) {
   }
 
   if (params.runtype === 'proddomain') {
+    // Running in prod from proddomain
     const majorCodeVersion = rjmversion.codebasever.split('.')[0]
     console.log('PROD taking api version from code', params.runtype, majorCodeVersion)
     rjmStateChange.executeAction('registerLoginEndpoint', {
@@ -109,6 +110,7 @@ export function registerEndpointsWithStore (params) {
   } else {
     const prodVer = getProdVer(window.location.href, params.saasServiceName)
     if (prodVer.prod) {
+      // Running in prod but from api.metcarob.com
       console.log('PROD taking api version from url ', params.runtype)
       rjmStateChange.executeAction('registerLoginEndpoint', {
         baseUrl: prodLoginServiceBaseURL,
@@ -123,6 +125,7 @@ export function registerEndpointsWithStore (params) {
         finishEndPointIdentificationHook: finishEndPointIdentificationHookFN
       })
     } else { // Not prod ver
+      // Running on local dev machine
       console.log('NON PROD no api version needed using same basepath', params.runtype)
       if (loginFrontendIsDev) {
         rjmStateChange.executeAction('registerLoginEndpoint', {

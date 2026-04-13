@@ -60,10 +60,12 @@ export function refreshJWTToken (callback, curpath, startAllBackendCallQueuesFn)
     callbackHelper.callbackWithSimpleError(callback, 'refreshJWTToken with no pendingRefreshToken')
     return
   }
-  const loginServicePublicURL = rjmStateChangeObj.getFromState('loginService').baseUrl + 'public/'
+  // const loginServicePublicURL = rjmStateChangeObj.getFromState('loginService').baseUrl + 'public/'
+  // rjmStateChangeObj.executeAction('registerStartOfTokenRefresh')
+  // const url = loginServicePublicURL + 'api/login/' + rjmStateChangeObj.getFromState('loginService').tenantName + '/refresh'
   rjmStateChangeObj.executeAction('registerStartOfTokenRefresh')
-  const url = loginServicePublicURL + 'api/login/' + rjmStateChangeObj.getFromState('loginService').tenantName + '/refresh'
-  console.log('REFRESH url', url)
+  const url = rjmStateChangeObj.getFromState('loginService').backendRefreshUrl
+  console.log('REFRESH url to get jwt token from backend:', url)
   const config = {
     method: 'POST',
     url,
@@ -108,7 +110,9 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
   state: () => ({
     isEndpointsRegistered: false,
     loginService: {
+      // baseurl is the FRONTEND base URL
       baseUrl: undefined,
+      backendRefreshUrl: undefined,
       tenantName: undefined,
       /*
       -1 = login process not registered
@@ -269,6 +273,7 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
       this.loginService.processState = 0
     },
     registerLoginEndpoint (args) {
+      // Note .baseURL is the FRONTEND BASE URL
       const baseUrl = args.baseUrl
       const tenantName = args.tenantName
       this.loginService.loginFrontendIsDev = false
@@ -278,6 +283,14 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
       this.loginService.baseUrl = baseUrl
       this.loginService.tenantName = tenantName
       this.loginService.processState = 0 // Always start with not logged in
+      if (this.loginService.loginFrontendIsDev) {
+        // If the frontend is running locally on dev machine
+        //  then the loginbackend must also be running locally
+        //  in this situation we always use this base url
+        this.loginService.backendRefreshUrl = 'http://127.0.0.1:8098/api/public/login/' + tenantName + '/refresh'
+      } else {
+        this.loginService.backendRefreshUrl = baseUrl + 'public/api/login/' + tenantName + '/refresh'
+      }
     },
     setLoginFromCookie ({ cookieData }) {
       this.loginService.processState = 2
