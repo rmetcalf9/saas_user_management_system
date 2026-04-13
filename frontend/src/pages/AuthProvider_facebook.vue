@@ -64,7 +64,7 @@ export default defineComponent({
       this.tenantInfoStore.clearAuthProvider()
       this.$router.push('/' + this.$route.params.tenantName + '/')
     },
-    signInCallback (responseFromGoogle) {
+    signInCallback (responseFromFacebook) {
       const TTT = this
       const callback = {
         ok: function (response) {
@@ -74,48 +74,44 @@ export default defineComponent({
           Loading.hide()
           Notify.create({
             color: 'negative',
-            message: 'Google Auth failed - ' + callbackHelper.getErrorFromResponse(response)
+            message: 'Failed - ' + callbackHelper.getErrorFromResponse(response)
           })
           TTT.$router.replace('/' + TTT.$route.params.tenantName + '/')
         }
       }
       Loading.show()
       frontendFns.callLoginAPI({
-        credentialJSON: responseFromGoogle,
+        credentialJSON: responseFromFacebook,
         callback,
         processLoginResponseInstance: TTT.$refs.processLoginResponseInstance,
         registering: false,
         router: TTT.$router
       })
     },
-    signInError (err) {
+    displayErrorToUserAndMoveToLoginSelectionScreen (message) {
       Loading.hide()
-      Notify.create({
-        color: 'negative',
-        message: 'Google signin error - ' + callbackHelper.getErrorFromResponse(err)
-      })
-      console.log(err)
+      Notify.create({ color: 'negative', message })
       this.$router.replace('/' + this.$route.params.tenantName + '/')
     }
   },
   mounted () {
     const TTT = this
-    const client = window.google.accounts.oauth2.initCodeClient({
-      client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
-      scope: 'openid email profile',
-      ux_mode: 'popup', // important
-      callback: (response) => {
-        if (response.code) {
-          TTT.signInCallback({
-            code: response.code
-          })
-        } else {
-          TTT.signInError(response)
-        }
-      }
+    Loading.show()
+
+    window.FB.init({
+      appId: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
+      autoLogAppEvents: true,
+      xfbml: true,
+      version: 'v3.3'
     })
 
-    client.requestCode()
+    window.FB.login(function (response) {
+      if (response.authResponse) {
+        TTT.signInCallback(response)
+      } else {
+        TTT.displayErrorToUserAndMoveToLoginSelectionScreen('User cancelled login or did not fully authorize.')
+      }
+    })
   }
 })
 </script>
