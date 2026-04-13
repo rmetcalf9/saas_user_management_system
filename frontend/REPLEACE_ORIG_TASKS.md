@@ -4,6 +4,7 @@
 ## Initial Migration
 AuthProvider_internal
 createAccountClick for internal
+identity selection screen
 AuthProvider_google
 AuthProvider_facebook
 
