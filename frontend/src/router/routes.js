@@ -17,6 +17,9 @@ function allowNotLoggedInForPath (tenantName, path) {
   if (path === '/' + tenantName + '/auth/internal') {
     return true
   }
+  if (path === '/' + tenantName + '/auth/google') {
+    return true
+  }
   if (path === '/' + tenantName + '/debug') {
     return true
   }
@@ -299,6 +302,7 @@ const routes = [
     children: [
       { path: '', component: () => import('pages/IndexPage.vue'), beforeEnter: getGlobalBeforeEnterFn('Index') },
       { path: 'auth/internal', component: () => import('pages/AuthProvider_internal.vue'), beforeEnter: getGlobalBeforeEnterFn('AuthProvider_internal') },
+      { path: 'auth/google', component: () => import('pages/AuthProvider_google.vue'), beforeEnter: getGlobalBeforeEnterFn('AuthProvider_google') },
       { path: 'debug', name: 'Debug', component: () => import('pages/DebugPage.vue'), beforeEnter: getGlobalBeforeEnterFn('debug') }
     ]
   },

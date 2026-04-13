@@ -96,7 +96,8 @@ export default defineComponent({
   methods: {
     clickAuth (authProvider) {
       const targets = {
-        internal: '/auth/internal'
+        internal: '/auth/internal',
+        google: '/auth/google'
       }
       if (!Object.keys(targets).includes(authProvider.Type)) {
         console.log('Uknown type', authProvider)

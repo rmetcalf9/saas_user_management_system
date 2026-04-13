@@ -4,15 +4,14 @@
 ## Initial Migration
 DONE AuthProvider_internal
 DONE identity selection screen
-createAccountClick for internal
+DONE createAccountClick for internal
 AuthProvider_google
 AuthProvider_facebook
 
-Ticket Page
-
-Test multiple user setup
 
 ## Not yet planned
+Ticket Page
+
 Security Settings internal
 Security Settings google
 Security Settings facebook
