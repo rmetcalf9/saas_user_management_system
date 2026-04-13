@@ -42,19 +42,22 @@
         </div>
       </div>
     </div>
+    <ProcessLoginResponse ref="processLoginResponseInstance" />
   </q-page>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-// import { Notify } from 'quasar'
+import { Notify, Loading } from 'quasar'
 import DisplayInputMessage from '../components/displayInputMessage.vue'
 import { useTenantInfoStore } from 'stores/tenantInfo'
+import bcrypt from 'bcryptjs'
+import ProcessLoginResponse from '../components/processLoginResponse'
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
-    DisplayInputMessage
+    DisplayInputMessage, ProcessLoginResponse
   },
   setup () {
     const tenantInfoStore = useTenantInfoStore()
@@ -94,7 +97,33 @@ export default defineComponent({
       }
     },
     usernamePassLogin () {
-      console.log('TODO process login')
+      const TTT = this
+      if (!this.tenantInfoStore.isAuthProviderSelected) {
+        Notify.create({ color: 'negative', message: 'No AuthProvGUID selected - you shouldn\'t navigate here directly' })
+        return
+      }
+      const passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.selectedAuthProvider.saltForPasswordHashing))
+      const credentialJson = {
+        username: this.usernamePass.username,
+        password: passwordhash
+      }
+      console.log('todo', credentialJson)
+      // const callback = {
+      //  ok: function (response) {
+      //    Loading.hide()
+      //  },
+      //  error: function (response) {
+      //    Loading.hide()
+      //    Notify.create({ color: 'negative', message: 'Login Failed' })
+      //  }
+      // }
+      Loading.show()
+      // frontendFns.callLoginAPI({
+      //  store: this.$store,
+      //  credentialJSON: credentialJson,
+      //  callback: callback,
+      //  processLoginResponseInstance: TTT.$refs.processLoginResponseInstance
+      // })
     }
   }
 })

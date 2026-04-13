@@ -16,6 +16,9 @@ export const useTenantInfoStore = defineStore('tenantInfoStore', {
     clearAuthProvider () {
       this.selectedAuth = {}
     },
+    isAuthProviderSelected () {
+      return Object.keys(this.selectedAuth).length > 0
+    },
     getInfo ({ router, tenantName, skipcache }) {
       if (!skipcache) {
         if (typeof (this.tenants[tenantName]) !== 'undefined') {
