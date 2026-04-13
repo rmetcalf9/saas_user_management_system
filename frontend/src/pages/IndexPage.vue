@@ -122,4 +122,7 @@ export default defineComponent({
 .indexpage-main {
   padding: 10px;
 }
+.indexpage-main button {
+  margin: 5px;
+}
 </style>
