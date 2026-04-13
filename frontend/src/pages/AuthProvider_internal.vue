@@ -40,7 +40,7 @@ export default defineComponent({
       })
     },
     hasMutipleLoginMethods () {
-      return this.tenantInfo.res.AuthProviders.length !== 0
+      return this.tenantInfo.res.AuthProviders.length !== 1
     }
   },
   methods: {

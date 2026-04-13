@@ -69,6 +69,28 @@ export default defineComponent({
         tenantName: this.$route.params.tenantName,
         skipcache: false
       })
+    },
+    hasMutipleLoginMethods () {
+      if (this.usersystemReturnaddress === '') {
+        // Stay on this page and show error
+        return true
+      }
+      if (this.tenantInfo.loading) {
+        // Stay on this page and show error
+        return true
+      }
+      if (this.tenantInfo.errored) {
+        // Stay on this page and show error
+        return true
+      }
+      return this.tenantInfo.res.AuthProviders.length !== 1
+    }
+  },
+  watch: {
+    hasMutipleLoginMethods (newVal) {
+      if (newVal === false) {
+        this.clickAuth(this.tenantInfo.res.AuthProviders[0])
+      }
     }
   },
   methods: {
