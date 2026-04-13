@@ -104,7 +104,8 @@ module.exports = configure(function (ctx) {
       plugins: [
         'Notify',
         'Loading',
-        'Cookies'
+        'Cookies',
+        'Dialog'
       ]
     },
 

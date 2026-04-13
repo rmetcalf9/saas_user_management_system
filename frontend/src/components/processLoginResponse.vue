@@ -4,8 +4,10 @@
 
 <script>
 import { defineComponent } from 'vue'
-import { Cookies } from 'quasar'
+import { Cookies, Loading, Notify } from 'quasar'
 import { useInputParamsStore } from 'stores/inputParams'
+import { useTenantInfoStore } from 'stores/tenantInfo'
+import saasAPiClientCallBackend from '../saasAPiClientCallBackend.js'
 
 function removeParamsFromUrlPath (params, path) {
   const a = path.split('?')
@@ -34,7 +36,8 @@ export default defineComponent({
   name: 'ProcessLoginResponseComponent',
   setup () {
     const inputParamsStore = useInputParamsStore()
-    return { inputParamsStore }
+    const tenantInfoStore = useTenantInfoStore()
+    return { tenantInfoStore, inputParamsStore }
   },
   methods: {
     processLoginOKResponse (response, loginRequestPostData) {
@@ -70,8 +73,51 @@ export default defineComponent({
         console.log('Redirecting back to main site:', returnAddressToUse)
         window.location.href = returnAddressToUse
       } else {
-        console.log('TODO Multiple users (Need to recopy this code)')
+        this.processOkResponseDuplicateUserAccounts(response, loginRequestPostData)
       }
+    },
+    processOkResponseDuplicateUserAccounts (response, loginRequestPostData) {
+      // console.log('response:', response.data.possibleUsers)
+      const TTT = this
+      const items = []
+      for (const x in response.data.possibleUsers) {
+        // console.log(response.data.possibleUsers[x])
+        items.push({ label: response.data.possibleUsers[x].known_as + ' (' + response.data.possibleUsers[x].UserID + ')', value: response.data.possibleUsers[x].UserID })
+      }
+      // console.log(items)
+      TTT.$q.dialog({
+        title: 'Select User',
+        message: 'You have access to multiple user accounts on this site',
+        options: {
+          type: 'radio',
+          model: items[0].value,
+          items
+        },
+        cancel: true,
+        preventClose: true,
+        color: 'secondary'
+      }).onOk(data => {
+        const postUserSelectionCallback = {
+          ok: function (response) {
+            Loading.hide()
+            TTT.processLoginOKResponse(response, loginRequestPostData)
+          },
+          error: function (response) {
+            Loading.hide()
+            Notify.create('Login Failed')
+          }
+        }
+        Loading.show()
+        loginRequestPostData.UserID = data
+        saasAPiClientCallBackend.callApi({
+          prefix: 'login',
+          router: this.$router,
+          path: '/' + this.tenantInfoStore.selectedAuthTenantName + '/authproviders',
+          method: 'POST',
+          postdata: loginRequestPostData,
+          callback: postUserSelectionCallback
+        })
+      })
     }
   }
 })
