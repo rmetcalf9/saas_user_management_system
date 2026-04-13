@@ -101,17 +101,23 @@ export default defineComponent({
       console.log(err)
     }
   },
-  mounted: function () {
-    const TTT = this
-    Loading.show()
-    this.$gapi.load('auth2', function () {
-      const auth2 = TTT.$gapi.auth2.init({
-        client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id
-        // Scopes to request in addition to 'profile' and 'email'
-        // scope: 'additional_scope'
-      }, TTT.signInError, TTT.signInError)
-      auth2.grantOfflineAccess().then(TTT.signInCallback, TTT.signInError)
+  mounted () {
+    const client = window.google.accounts.oauth2.initCodeClient({
+      client_id: this.selectedAuthProvider.StaticlyLoadedData.client_id,
+      scope: 'openid email profile',
+      ux_mode: 'popup', // important
+      callback: (response) => {
+        if (response.code) {
+          this.signInCallback({
+            code: response.code
+          })
+        } else {
+          this.signInError(response)
+        }
+      }
     })
+
+    client.requestCode()
   }
 })
 </script>
