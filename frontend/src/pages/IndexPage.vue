@@ -32,7 +32,7 @@
 
 <script>
 import { defineComponent } from 'vue'
-// import { Notify } from 'quasar'
+import { Notify } from 'quasar'
 import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClientStore'
 import { useTenantInfoStore } from 'stores/tenantInfo'
 import { useInputParamsStore } from 'stores/inputParams'
@@ -73,9 +73,21 @@ export default defineComponent({
   },
   methods: {
     clickAuth (authProvider) {
-      console.log('TODO', authProvider)
-      console.log('tmp pushing', '/' + this.$route.params.tenantName + '/auth/internal')
-      this.$router.push('/' + this.$route.params.tenantName + '/auth/internal')
+      const targets = {
+        internal: '/auth/internal'
+      }
+      if (!Object.keys(targets).includes(authProvider.Type)) {
+        console.log('Uknown type', authProvider)
+        Notify.create({
+          color: 'negative',
+          message: 'ERROR - unknown auth type ' + authProvider.Type
+        })
+        return
+      }
+      this.tenantInfoStore.selectAuthProvider({
+        selectedAuthProvider: authProvider
+      })
+      this.$router.push('/' + this.$route.params.tenantName + targets[authProvider.Type])
     }
   },
   mounted () {

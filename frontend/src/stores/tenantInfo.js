@@ -4,10 +4,17 @@ import saasAPiClientCallBackend from '../saasAPiClientCallBackend.js'
 
 export const useTenantInfoStore = defineStore('tenantInfoStore', {
   state: () => ({
-    tenants: {}
+    tenants: {},
+    selectedAuth: {}
   }),
   getters: {},
   actions: {
+    selectAuthProvider ({ selectedAuthProvider }) {
+      this.selectedAuth = selectedAuthProvider
+    },
+    clearAuthProvider () {
+      this.selectedAuth = {}
+    },
     getInfo ({ router, tenantName, skipcache }) {
       if (!skipcache) {
         if (typeof (this.tenants[tenantName]) !== 'undefined') {

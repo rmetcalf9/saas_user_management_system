@@ -18,7 +18,7 @@ export default defineComponent({
       return
     }
     Notify.create({
-      color: 'positive',
+      color: 'negative',
       message: this.inputParamsStore.usersystemMessage
     })
     this.inputParamsStore.clearUsersystemMessage()
