@@ -23,7 +23,7 @@
           placeholder="Password"
           @keyup="textBoxKeyUp"
         />
-        <div class="text-center group authprovider_internal_loginbuttons">
+        <div class="text-center group authprovider_internal_loginbuttons row">
           <q-btn
             color="primary"
             push
@@ -31,14 +31,10 @@
           >
             Login
           </q-btn>
-          <q-btn
+          <CreateAccountButton
             v-if='selectedAuthProvider.AllowUserCreation && tenantInfo.res.AllowUserCreation'
-            color="secondary"
-            push
-            @click="createAccountClick"
-          >
-            Create Account
-          </q-btn>
+            @postCreateLogin="postCreateLogin"
+          />
         </div>
       </div>
     </div>
@@ -53,12 +49,13 @@ import DisplayInputMessage from '../components/displayInputMessage.vue'
 import { useTenantInfoStore } from 'stores/tenantInfo'
 import bcrypt from 'bcryptjs'
 import ProcessLoginResponse from '../components/processLoginResponse'
+import CreateAccountButton from '../components/internal/createAccountButton'
 import frontendFns from '../frontendFns.js'
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
-    DisplayInputMessage, ProcessLoginResponse
+    DisplayInputMessage, ProcessLoginResponse, CreateAccountButton
   },
   setup () {
     const tenantInfoStore = useTenantInfoStore()
@@ -97,15 +94,21 @@ export default defineComponent({
         this.usernamePassLogin()
       }
     },
+    postCreateLogin (eventData) {
+      this.processLogin(eventData.username, eventData.password)
+    },
     usernamePassLogin () {
+      this.processLogin(this.usernamePass.username, this.usernamePass.password)
+    },
+    processLogin (username, password) {
       const TTT = this
       if (!this.tenantInfoStore.isAuthProviderSelected) {
         Notify.create({ color: 'negative', message: 'No AuthProvGUID selected - you shouldn\'t navigate here directly' })
         return
       }
-      const passwordhash = bcrypt.hashSync(this.usernamePass.username + ':' + this.usernamePass.password + ':AG44', atob(TTT.selectedAuthProvider.saltForPasswordHashing))
+      const passwordhash = bcrypt.hashSync(username + ':' + password + ':AG44', atob(TTT.selectedAuthProvider.saltForPasswordHashing))
       const credentialJson = {
-        username: this.usernamePass.username,
+        username,
         password: passwordhash
       }
       const callback = {
