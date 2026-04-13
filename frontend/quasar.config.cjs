@@ -13,6 +13,12 @@ const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers')
 
 module.exports = configure(function (ctx) {
+  const overridePublicPath = process.env.OVERRIDE_PUBLIC_PATH
+  const publicPathValue = overridePublicPath && overridePublicPath.trim() !== ''
+    ? overridePublicPath
+    : ''
+  console.log('Using publicPath =', publicPathValue)
+
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: false,
@@ -52,7 +58,8 @@ module.exports = configure(function (ctx) {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       // transpile: false,
-      // publicPath: '/',
+      publicPath: publicPathValue,
+      // appBase: '',
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
