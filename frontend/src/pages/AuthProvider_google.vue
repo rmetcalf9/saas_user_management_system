@@ -11,7 +11,7 @@
     <div>
       <div rows>
         <div v-html="tenantInfo.TenantBannerHTML" />
-        <div>TODO SOMETHING HERE</div>
+        <div>Log in with Google</div>
       </div>
     </div>
     <ProcessLoginResponse ref="processLoginResponseInstance" />
@@ -20,9 +20,12 @@
 
 <script>
 import { defineComponent } from 'vue'
+import { Notify, Loading } from 'quasar'
 import DisplayInputMessage from '../components/displayInputMessage.vue'
 import { useTenantInfoStore } from 'stores/tenantInfo'
 import ProcessLoginResponse from '../components/processLoginResponse'
+import callbackHelper from '../callbackHelper'
+import frontendFns from '../frontendFns.js'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -66,9 +69,49 @@ export default defineComponent({
         this.usernamePassLogin()
       }
     },
-    executeLogin () {
-      this.processLogin(this.usernamePass.username, this.usernamePass.password)
+    signInCallback (responseFromGoogle) {
+      const TTT = this
+      const callback = {
+        ok: function (response) {
+          Loading.hide()
+        },
+        error: function (response) {
+          Loading.hide()
+          Notify.create({
+            color: 'negative',
+            message: 'Create Account failed - ' + callbackHelper.getErrorFromResponse(response)
+          })
+        }
+      }
+      Loading.show()
+      frontendFns.callLoginAPI({
+        credentialJSON: responseFromGoogle,
+        callback,
+        processLoginResponseInstance: TTT.$refs.processLoginResponseInstance,
+        registering: false,
+        router: this.$router
+      })
+    },
+    signInError (err) {
+      Loading.hide()
+      Notify.create({
+        color: 'negative',
+        message: 'Google signin error - ' + callbackHelper.getErrorFromResponse(err)
+      })
+      console.log(err)
     }
+  },
+  mounted: function () {
+    const TTT = this
+    Loading.show()
+    this.$gapi.load('auth2', function () {
+      const auth2 = TTT.$gapi.auth2.init({
+        client_id: TTT.authProvInfo.StaticlyLoadedData.client_id
+        // Scopes to request in addition to 'profile' and 'email'
+        // scope: 'additional_scope'
+      }, TTT.signInError, TTT.signInError)
+      auth2.grantOfflineAccess().then(TTT.signInCallback, TTT.signInError)
+    })
   }
 })
 </script>
