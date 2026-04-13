@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/quasar.config.cjs" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/quasar.config.cjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_google.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AuthProvider_google.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/_start_local_saas_user_management_service_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/services/_start_local_saas_user_management_service_config.json" afterDir="false" />
-    </list>
+    <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

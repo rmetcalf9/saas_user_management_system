@@ -5,7 +5,7 @@
 DONE AuthProvider_internal
 DONE identity selection screen
 DONE createAccountClick for internal
-AuthProvider_google
+DONE AuthProvider_google
 AuthProvider_facebook
 
 
