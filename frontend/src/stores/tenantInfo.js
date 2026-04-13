@@ -7,7 +7,8 @@ export const useTenantInfoStore = defineStore('tenantInfoStore', {
     tenants: {},
     selectedAuth: {}
   }),
-  getters: {},
+  getters: {
+  },
   actions: {
     selectAuthProvider ({ selectedAuthProvider }) {
       this.selectedAuth = selectedAuthProvider

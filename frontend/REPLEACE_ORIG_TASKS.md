@@ -3,6 +3,7 @@
 
 ## Initial Migration
 AuthProvider_internal
+createAccountClick for internal
 AuthProvider_google
 AuthProvider_facebook
 
