@@ -106,7 +106,7 @@ export default defineComponent({
     Loading.show()
     this.$gapi.load('auth2', function () {
       const auth2 = TTT.$gapi.auth2.init({
-        client_id: TTT.authProvInfo.StaticlyLoadedData.client_id
+        client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id
         // Scopes to request in addition to 'profile' and 'email'
         // scope: 'additional_scope'
       }, TTT.signInError, TTT.signInError)

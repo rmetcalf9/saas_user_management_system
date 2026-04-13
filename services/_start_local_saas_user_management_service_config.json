@@ -45,7 +45,7 @@
     "iconLink": "",
     "Type": "google",
     "AllowUserCreation": true,
-    "configJSON": {"clientSecretJSONFile": "./secrets/saas_user_management_system_authprov_saassocial_google.json", "userSufix": "@saassocial"},
+    "configJSON": {"clientSecretJSONFile": "./secrets/client_secret_2_116474023880-kpst7vgcaav6136kpud9m23b8tic9ga2.apps.googleusercontent.com.json", "userSufix": "@saassocial"},
     "AllowLink": true,
     "AllowUnlink": true,
     "LinkText": "Google Auth"
