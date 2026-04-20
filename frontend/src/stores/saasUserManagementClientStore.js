@@ -86,7 +86,7 @@ export function refreshJWTToken (callback, curpath, startAllBackendCallQueuesFn)
         // Clear cookie as refresh token will no work any more
         Cookies.remove('saasUserManagementClientStoreCredentials')
         console.log('FAIL Refresh result A:', response)
-        rjmStateChangeObj2.executeAction('requestUserReloginFn', { message: 'Logged in user has no account', curpath })
+        rjmStateChangeObj2.executeAction('requestUserReloginFn', { message: 'User Management: Logged in user has no account', curpath })
       }
     },
     (response) => {
@@ -95,7 +95,7 @@ export function refreshJWTToken (callback, curpath, startAllBackendCallQueuesFn)
       // Clear cookie as refresh token will no work any more
       Cookies.remove('saasUserManagementClientStoreCredentials')
       console.log('FAIL Refresh result B:', response)
-      rjmStateChangeObj3.executeAction('requestUserReloginFn', { message: 'User needs to log in again', curpath })
+      rjmStateChangeObj3.executeAction('requestUserReloginFn', { message: 'User Management: User needs to log in again', curpath })
     }
   )
 }
