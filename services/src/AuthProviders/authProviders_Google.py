@@ -67,12 +67,12 @@ class authProviderGoogle(authProvider):
       "user_unique_identifier": str(uuid.uuid4()),
       "known_as": credentialDictGet_known_as(credentialDICT), #used to display in UI for the user name
       "other_data": {
-        "email": credentialDICT["creds"]["id_token"]["email"],
-        "email_verified": credentialDICT["creds"]["id_token"]["email_verified"],
-        "name": credentialDICT["creds"]["id_token"]["name"],
-        "picture": credentialDICT["creds"]["id_token"]["picture"],
-        "given_name": credentialDICT["creds"]["id_token"]["given_name"],
-        "family_name": credentialDICT["creds"]["id_token"]["family_name"],
+        "email": credentialDICT["creds"]["id_token"].get("email",""),
+        "email_verified": credentialDICT["creds"]["id_token"].get("email_verified", False),
+        "name": credentialDICT["creds"]["id_token"].get("name", ""),
+        "picture": credentialDICT["creds"]["id_token"].get("picture", ""),
+        "given_name": credentialDICT["creds"]["id_token"].get("given_name", ""),
+        "family_name": credentialDICT["creds"]["id_token"].get("family_name", ""),
         "locale": credentialDICT["creds"]["id_token"].get("locale", locale_default)
       } #Other data like name full name that can be provided - will vary between auth providers
     }

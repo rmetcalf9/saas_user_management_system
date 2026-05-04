@@ -70,6 +70,9 @@ googleLoginAccounts[1]['creds']['id_token']['name'] = "Robert2 Metcalf2"
 googleLoginAccounts.append(copy.deepcopy(googleLoginAccounts[0]))
 del googleLoginAccounts[2]['creds']['id_token']['locale']
 
+googleLoginAccounts.append(copy.deepcopy(googleLoginAccounts[0]))
+del googleLoginAccounts[3]['creds']['id_token']['family_name']
+
 
 googleAuthProv001_CREATE_missingClientSecretParam = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
@@ -482,3 +485,21 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
       googleAuthProvider,
       [200]
     )
+
+  def test_authWithUserCreation_missingfaimlyname(self):
+    #Test authentication via google.
+    ## Must use mocks
+    tenantDict = self.createTenantWithAuthProvider(TestHelperSuperClass.tenantWithNoAuthProviders, True, TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+
+    resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
+    googleAuthProvider = resultJSON2["AuthProviders"][1]
+
+    result2JSON = self.loginWithGoogle(3, tenantDict['Name'], googleAuthProvider, [200])
+
+    #Turn off auto user creation
+    tenantDict2 = self.getTenantDICT(tenantDict['Name'])
+    tenantDict2['AllowUserCreation'] = False
+    tenantDict3 = self.updateTenant(tenantDict2, [200])
+
+    #Try and login - should not need to create so will succeed
+    result3JSON = self.loginWithGoogle(3, tenantDict['Name'], googleAuthProvider, [200])
