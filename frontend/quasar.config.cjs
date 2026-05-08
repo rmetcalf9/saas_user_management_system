@@ -58,13 +58,21 @@ module.exports = configure(function (ctx) {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       // transpile: false,
+      transpile: true,
+
       publicPath: publicPathValue,
       // appBase: '',
+
+      target: {
+        browser: ['es2017']
+      },
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
       // Applies only if "transpile" is set to true.
-      // transpileDependencies: [],
+      transpileDependencies: [
+        'bcryptjs'
+      ],
 
       // rtl: true, // https://quasar.dev/options/rtl-support
       // preloadChunks: true,
@@ -81,6 +89,11 @@ module.exports = configure(function (ctx) {
       chainWebpack (chain) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
+
+        // Target ES2017 browsers
+        chain.merge({
+          target: ['web', 'es2017']
+        })
       }
 
     },
