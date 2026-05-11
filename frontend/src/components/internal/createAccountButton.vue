@@ -23,24 +23,46 @@
             helper="Username"
             label="Username"
             :label-width="3"
+            name="username"
+            autocomplete="username"
            />
           <q-input
-            type="password"
+            :type="isPwd ? 'password' : 'text'"
             v-model="createAccountDialogModel.password"
             label="Password"
             :label-width="3"
             :error-message="passwordERRORMessage"
             :error="passwordERROR"
-           />
+            name="new-password"
+            autocomplete="new-password"
+           >
+             <template v-slot:append>
+               <q-icon
+                 :name="isPwd ? 'visibility_off' : 'visibility'"
+                 class="cursor-pointer"
+                 @click="isPwd = !isPwd"
+               />
+             </template>
+           </q-input>
           <q-input
-            type="password"
+            :type="isPwd ? 'password' : 'text'"
             v-model="createAccountDialogModel.password2"
             @keyup="textBoxKeyUp"
             label="Retype Password"
             :label-width="3"
             :error-message="passwordERRORMessage"
             :error="passwordERROR"
-          />
+            name="confirm-password"
+            autocomplete="new-password"
+          >
+            <template v-slot:append>
+              <q-icon
+                :name="isPwd ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer"
+                @click="isPwd = !isPwd"
+              />
+            </template>
+          </q-input>
         </q-card-section>
 
         <!-- Footer -->
@@ -85,6 +107,7 @@ export default defineComponent({
   },
   data () {
     return {
+      isPwd: true,
       createAccountDialogModel: {
         visible: false,
         username: '',

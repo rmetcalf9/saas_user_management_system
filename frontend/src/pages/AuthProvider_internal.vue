@@ -14,15 +14,27 @@
         <q-input
           v-model="usernamePass.username"
           placeholder="Username"
+          autocomplete="username"
+          name="username"
           ref="userNameInput"
           @keyup="textBoxKeyUp"
         />
         <q-input
-          type="password"
           v-model="usernamePass.password"
           placeholder="Password"
+          autocomplete="current-password"
+          name="password"
+          :type="isPwd ? 'password' : 'text'"
           @keyup="textBoxKeyUp"
-        />
+        >
+          <template v-slot:append>
+            <q-icon
+              :name="isPwd ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              @click="isPwd = !isPwd"
+            />
+          </template>
+        </q-input>
         <div class="text-center group authprovider_internal_loginbuttons row">
           <q-btn
             color="primary"
@@ -63,6 +75,7 @@ export default defineComponent({
   },
   data () {
     return {
+      isPwd: true,
       usernamePass: {
         username: '',
         password: ''
