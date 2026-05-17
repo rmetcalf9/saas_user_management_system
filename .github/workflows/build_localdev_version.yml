@@ -75,7 +75,7 @@ jobs:
           source ./_repo_vars.sh && \
           docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from saas_user_management_systemtest
 
-      # === buildrootver stage ===
+      # === buildnonkongver stage ===
 
       - name: Clean previous frontend build
         run: |
@@ -99,28 +99,26 @@ jobs:
             -c "rm -rf ./adminfrontend/dist/pwa"
           echo "Directory deleted successfully."
 
-      # TODO OVERRIDE_PUBLIC_PATH should be /public/web/frontend/
       - name: Build frontend root version
         run: |
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
-            -e OVERRIDE_PUBLIC_PATH="" \
+            -e OVERRIDE_PUBLIC_PATH="public/web/frontend/" \
             ${QUASARBUILDIMAGE} \
             -c "build_quasar_app ./frontend spa ${RJM_VERSION} 1536"
 
-      # TODO OVERRIDE_PUBLIC_PATH should be /public/web/adminfrontend/
       - name: Build adminfrontend root version
         run: |
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
-            -e OVERRIDE_PUBLIC_PATH="" \
+            -e OVERRIDE_PUBLIC_PATH="public/web/adminfrontend/" \
             ${QUASARBUILDIMAGE_ADMINFRONTEND} \
             -c "build_quasar_app ./adminfrontend pwa ${RJM_VERSION} 1536"
 
-      - name: Build rootver docker image
+      - name: Build nonkongver docker image
         run: |
           source ./_repo_vars.sh && \
-          docker build -t metcarob/saas_user_management:${RJM_VERSION}_rootver .
+          docker build -t metcarob/saas_user_management:${RJM_VERSION}_nonkongver .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
