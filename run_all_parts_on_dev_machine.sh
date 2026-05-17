@@ -37,7 +37,7 @@ echo "export default { codebasever: 'run_all_parts_on_dev_machine_${VER}' }" >> 
 
 tmux \
   new-session  "cd ./services ; ./run_app_developer.sh" \; \
-  split-window "cd ./frontend ; quasar dev" \; \
-  split-window "cd ./adminfrontend ; quasar dev" \; \
+  split-window "cd ./frontend ; quasar dev --quasarport 8081" \; \
+  split-window "cd ./adminfrontend ; quasar dev --quasarport 8082" \; \
   select-layout main-horizontal \; \
   select-pane -t 0 \; \
