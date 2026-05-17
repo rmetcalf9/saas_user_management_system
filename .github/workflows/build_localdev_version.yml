@@ -77,6 +77,17 @@ jobs:
 
       # === buildrootver stage ===
 
+      - name: Clean previous frontend build
+        run: |
+          source ./_repo_vars.sh && \
+          echo "Deleting ./frontend/dist/spa..."
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            ${QUASARBUILDIMAGE_ADMINFRONTEND} \
+            -c "rm -rf ./adminfrontend/dist/spa"
+          echo "Directory deleted successfully."
+
       - name: Clean previous adminfrontend build
         run: |
           source ./_repo_vars.sh && \
@@ -88,6 +99,7 @@ jobs:
             -c "rm -rf ./adminfrontend/dist/pwa"
           echo "Directory deleted successfully."
 
+      # TODO OVERRIDE_PUBLIC_PATH should be /public/web/frontend/
       - name: Build frontend root version
         run: |
           source ./_repo_vars.sh && \
@@ -96,6 +108,7 @@ jobs:
             ${QUASARBUILDIMAGE} \
             -c "build_quasar_app ./frontend spa ${RJM_VERSION} 1536"
 
+      # TODO OVERRIDE_PUBLIC_PATH should be /public/web/adminfrontend/
       - name: Build adminfrontend root version
         run: |
           source ./_repo_vars.sh && \
