@@ -99,7 +99,7 @@ jobs:
             -c "rm -rf ./adminfrontend/dist/pwa"
           echo "Directory deleted successfully."
 
-      - name: Build frontend root version
+      - name: Build frontend nonkong version
         run: |
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
@@ -107,7 +107,7 @@ jobs:
             ${QUASARBUILDIMAGE} \
             -c "build_quasar_app ./frontend spa ${RJM_VERSION} 1536"
 
-      - name: Build adminfrontend root version
+      - name: Build adminfrontend nonkong version
         run: |
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
