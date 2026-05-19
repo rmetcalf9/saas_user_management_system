@@ -126,10 +126,10 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Push images to dockehub
+      - name: Push images to dockerhub
         run: |
           source ./_repo_vars.sh && \
-          docker push metcarob/saas_user_management:${RJM_VERSION}_rootver
+          docker push metcarob/saas_user_management:${RJM_VERSION}_nonkongver
           docker push metcarob/saas_user_management:${RJM_VERSION}
 
       - name: Configure SSH
