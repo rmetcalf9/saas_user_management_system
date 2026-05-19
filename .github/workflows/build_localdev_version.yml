@@ -84,7 +84,7 @@ jobs:
           docker run --rm \
             -v "$PWD:/work" \
             -w /work \
-            ${QUASARBUILDIMAGE_ADMINFRONTEND} \
+            ${QUASARBUILDIMAGE} \
             -c "rm -rf ./adminfrontend/dist/spa"
           echo "Directory deleted successfully."
 
