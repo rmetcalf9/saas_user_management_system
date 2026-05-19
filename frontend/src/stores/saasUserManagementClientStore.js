@@ -41,6 +41,10 @@ function loginUIBaseURLInt () {
 }
 
 export function refreshJWTToken (callback, curpath, startAllBackendCallQueuesFn) {
+  if (curpath === '') {
+    console.log('WARNING refreshJWTToken with empty string as curpath. This might be because')
+    console.log('  it is immideatadly called in the endpoint identification process')
+  }
   const rjmStateChangeObj = getRjmStateChangeObj()
   const processState = rjmStateChangeObj.getFromState('loginService').processState
   if (processState === -1) {
@@ -77,7 +81,9 @@ export function refreshJWTToken (callback, curpath, startAllBackendCallQueuesFn)
           expires: 90 // expire in 90 days
         })
         rjmStateChangeObj2.executeAction('registerEndOfTokenRefreshSuccess', { responseData: response.data })
-        startAllBackendCallQueuesFn({ rjmStateChange: rjmStateChangeObj2, calledAtEndOfRefresh: true })
+        if (typeof (startAllBackendCallQueuesFn) !== 'undefined') {
+          startAllBackendCallQueuesFn({ rjmStateChange: rjmStateChangeObj2, calledAtEndOfRefresh: true })
+        }
         if (typeof (callback) !== 'undefined') {
           callback.ok(response)
         }
@@ -203,7 +209,6 @@ export const useUserManagementClientStoreStore = defineStore('userManagementClie
   },
   actions: {
     callApi ({ endpoint, path, method, postdata, callback, curpath, orveridePublicPrivatePart, authtype }) {
-      // console.log('callAuthedAPI ', path)
       this.endpointInfo[endpoint].apiCallQueue.push({ path, method, postdata, callback, curpath, authtype, orveridePublicPrivatePart })
       const rjmStateChange = getRjmStateChangeObj()
       saasApiClientServerRequestQueue.processAPICallQueue({

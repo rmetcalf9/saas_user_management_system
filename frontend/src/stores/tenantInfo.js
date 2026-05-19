@@ -31,20 +31,16 @@ export const useTenantInfoStore = defineStore('tenantInfoStore', {
       const TTT = this
       const callback = {
         ok: function (response) {
-          TTT.tenants[tenantName] = {
-            loading: false,
-            errored: false,
-            error: {},
-            res: response.data
-          }
+          TTT.tenants[tenantName].loading = false
+          TTT.tenants[tenantName].errored = false
+          TTT.tenants[tenantName].error = {}
+          TTT.tenants[tenantName].res = response.data
         },
         error: function (response) {
-          TTT.tenants[tenantName] = {
-            loading: false,
-            errored: true,
-            error: response,
-            res: {}
-          }
+          TTT.tenants[tenantName].loading = false
+          TTT.tenants[tenantName].errored = true
+          TTT.tenants[tenantName].error = response
+          TTT.tenants[tenantName].res = {}
           console.log('ERROR - failed to get tenant info')
         }
       }
@@ -56,6 +52,7 @@ export const useTenantInfoStore = defineStore('tenantInfoStore', {
           res: {}
         }
       }
+      console.log('TENANTINFO CALL TO GET AUTH PROVIDERS')
       saasAPiClientCallBackend.callApi({
         prefix: 'login',
         router,

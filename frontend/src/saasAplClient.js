@@ -4,6 +4,7 @@
 */
 import rjmversion from './rjmversion.js'
 import saasApiClientEndpointIdentificationProcess from './saasApiClientEndpointIdentificationProcess'
+import saasApiClientServerRequestQueue from './saasApiClientServerRequestQueue'
 
 // Change this variable to use different major bersions of login service
 const prodLoginServiceBaseURL = 'https://api.metcarob.com/saas_user_management/v0/'
@@ -131,7 +132,11 @@ export function registerEndpointsWithStore (params) {
             // first we are trying ./run_app_developer.sh which will be on different ports
             // then we are trying running via a container where the frontend and
             // python app are on the same port
+            //
+            // Note RJM Adding the alwaysfail test endpoint to recrated an issue I see when running in container
+            //    where there is a rece condition with the fail method
             possibleApiPrefixes: [
+              { prefix: 'http://alwaysfail:8098', connectingthroughnginx: false, apitype: 'public' },
               { prefix: 'http://localhost:8098', connectingthroughnginx: false, apitype: 'public' },
               { prefix: window.location.protocol + '//' + window.location.host, connectingthroughnginx: true, apitype: 'public' }
             ]
@@ -158,6 +163,14 @@ function startEndpointIdentificationProcess ({ getRjmStateChangeFn, endpointName
   const rjmStateChange = getRjmStateChangeFn()
   const callback = {
     ok: function ({ serverinfoResponse, endpoint, sucessfulapiprefix }) {
+      // Start processing queue - in case any api calls were made in between times
+      saasApiClientServerRequestQueue.processAPICallQueue({
+        rjmStateChange,
+        endpoint: rjmStateChange.getFromState('getEndpointInfo')(endpointName),
+        calledAtEndOfRefresh: false,
+        curpath: '',
+        startAllBackendCallQueuesFn: undefined
+      })
     },
     error: function (response) {
     }

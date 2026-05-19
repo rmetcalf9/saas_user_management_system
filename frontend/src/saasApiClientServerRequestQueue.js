@@ -21,6 +21,7 @@ function getStartAllBackendCallQueuesFn ({ curpath }) {
 }
 
 function startEndpointIdentificationprocessThenStartToProcessQueue ({ rjmStateChange, endpoint, curpath, startAllBackendCallQueuesFn }) {
+  console.log('DEBUG startEndpointIdentificationprocessThenStartToProcessQueue')
   const callback = {
     // TODO WRONG CALLBACK of startEndpointIdentificationProcess GIVES ENDPOINT NAME
     ok: function ({ serverinfoResponse, endpointName, sucessfulapiprefix }) {
