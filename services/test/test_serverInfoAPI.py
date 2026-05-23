@@ -7,6 +7,7 @@ import datetime
 
 serverInfo = {
     'Server': {
+      'APIAPP_PROJECT_NAME': 'saas_user_management',
       'Version': env['APIAPP_VERSION'],
       "APIAPP_APIDOCSURL": "_",
       "APIAPP_FRONTENDURL": env["APIAPP_FRONTENDURL"]

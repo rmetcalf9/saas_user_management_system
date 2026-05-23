@@ -5,6 +5,17 @@ PYTHON_CMD=python
 #  PYTHON_CMD=${EXTPYTHONCMD}
 #fi
 
+INITAL_DIR=$(pwd)
+
+cd ..
+if [[ ! -f ./_repo_vars.sh ]]; then
+  echo "_repo_vars.sh dosen't exist - are you in correct directory?"
+  cd ${INITAL_DIR}
+  exit 1
+fi
+source ./_repo_vars.sh
+cd ${INITAL_DIR}
+
 source ../.venv/bin/activate
 
 PYTHONVERSIONCHECKSCRIPT="import sys\nprint(\"Python version \" + str(sys.version_info))\nif sys.version_info[0] < 3:\n  exit(1)\nif sys.version_info[0] == 3:\n  if sys.version_info[1] < 6:\n    exit(1)\nexit(0)\n"
@@ -29,6 +40,7 @@ fi
 
 APP_DIR=.
 
+export APIAPP_PROJECT_NAME="${PROJECT_NAME}"
 export APIAPP_MODE=DEVELOPER
 export APIAPP_JWTSECRET="gldskajld435sFFkfjlkfdsj"
 export APIAPP_FRONTEND=_

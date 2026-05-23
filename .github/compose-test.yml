@@ -3,6 +3,7 @@ services:
   saas_user_management_system:
     image: metcarob/saas_user_management:${RJM_VERSION}
     environment:
+      APIAPP_PROJECT_NAME: testservice
       APIAPP_APIURL: http://saas_user_management_system:80/api
       APIAPP_APIDOCSURL: http://saas_user_management_system:80/apidocs
       APIAPP_FRONTENDURL: http://saas_user_management_system:80/frontend
