@@ -2,6 +2,9 @@ FROM python:3.11-bookworm
 
 MAINTAINER Robert Metcalf
 
+ARG PROJECT_NAME
+ENV APIAPP_PROJECT_NAME=${PROJECT_NAME}
+
 ENV APP_DIR /app
 ##web dirs arealso configured in nginx conf
 ENV APIAPP_FRONTEND /frontend
