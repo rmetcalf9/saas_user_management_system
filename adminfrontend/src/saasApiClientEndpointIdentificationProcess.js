@@ -5,7 +5,6 @@ import axios from 'axios'
 import { projectName } from './router/routes.js'
 
 function isCorrectServerInfoForThisProject (serverinfo) {
-  console.log('TODO isCorrectServerInfoForThisProject', serverinfo)
   if (typeof (serverinfo.Server) === 'undefined') {
     return false
   }
@@ -99,6 +98,7 @@ function tryToReadServerInfoFromAllThesePossibleAPIPrefixes ({ possibleApiPrefix
     (response) => {
       if (!isCorrectServerInfoForThisProject(response.data)) {
         console.log('FAILED - reached api at ' + config.url + ' - but this server info is not for this project')
+        console.log(' possibleApiPrefixes remaining', possibleApiPrefixes)
         tryToReadServerInfoFromAllThesePossibleAPIPrefixes({ possibleApiPrefixes, callback, endpointName })
         return
       }
@@ -111,6 +111,7 @@ function tryToReadServerInfoFromAllThesePossibleAPIPrefixes ({ possibleApiPrefix
     },
     (response) => {
       console.log('FAILED')
+      console.log(' possibleApiPrefixes remaining', possibleApiPrefixes)
       tryToReadServerInfoFromAllThesePossibleAPIPrefixes({ possibleApiPrefixes, callback, endpointName })
     }
   )
