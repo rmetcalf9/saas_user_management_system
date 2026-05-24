@@ -109,7 +109,7 @@ function tryToReadServerInfoFromAllThesePossibleAPIPrefixes ({ possibleApiPrefix
     },
     (response) => {
       console.log('FAILED')
-      console.log(' possibleApiPrefixes remaining', possibleApiPrefixes)      
+      console.log(' possibleApiPrefixes remaining', possibleApiPrefixes)
       tryToReadServerInfoFromAllThesePossibleAPIPrefixes({ possibleApiPrefixes, callback, endpointName })
     }
   )
