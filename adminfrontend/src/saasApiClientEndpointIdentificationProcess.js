@@ -2,6 +2,21 @@
 File for the endpoint identification process code
 */
 import axios from 'axios'
+import { projectName } from './router/routes.js'
+
+function isCorrectServerInfoForThisProject (serverinfo) {
+  console.log('TODO isCorrectServerInfoForThisProject', serverinfo)
+  if (typeof (serverinfo.Server) === 'undefined') {
+    return false
+  }
+  if (typeof (serverinfo.Server.APIAPP_PROJECT_NAME) === 'undefined') {
+    return false
+  }
+  if (serverinfo.Server.APIAPP_PROJECT_NAME !== projectName) {
+    return false
+  }
+  return true
+}
 
 function startEndpointIdentificationProcess ({ endpointName, callback, rjmStateChange }) {
   console.log('startEndpointIdentificationProcess for endpoint', endpointName)
@@ -20,6 +35,12 @@ function startEndpointIdentificationProcess ({ endpointName, callback, rjmStateC
     ok: function ({ serverinfoResponse, endpointName, sucessfulapiprefix }) {
       // // console.log('Success API response recieved')
       // // console.log('startEndpointIdentificationprocess Success', serverinfoResponse, sucessfulapiprefix)
+      if (!isCorrectServerInfoForThisProject(serverinfoResponse.data)) {
+        console.log('EndpointIdentificationprocess FAILED for', endpointName, ' this is not the server info for this project')
+        rjmStateChange.executeAction('setEndpointIdentificationProcessState', { endpointName, newState: 0 })
+        callback.error(serverinfoResponse)
+        return
+      }
       rjmStateChange.executeAction('finishedEndpointIdentificationProcess', {
         endpointName,
         sucessfulapiprefix,
