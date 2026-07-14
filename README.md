@@ -94,3 +94,16 @@ All components are designed to be deployed in a single container and a codefresh
  | APIAPP_REFRESH_TOKEN_TIMEOUT | Number of seconds the refresh tokens are valid for, must be greater than APIAPP_JWT_TOKEN_TIMEOUT. If a user is idle for this amount of time they will have to login again. | 2 hours |
  | APIAPP_REFRESH_SESSION_TIMEOUT | Amount of time until the refresh session expires. Even if the user is active in the app for this amount of time they will need to re-login after this period. Must be greater than  APIAPP_REFRESH_TOKEN_TIMEOUT. | 12 hours. |
  | APIAPP_EBOAPIDOCSURL | | |
+
+## Testing mysql database setup
+The local tests use a testing mysql setup.
+This is run with dev machine utilities
+Its a local only database password does not need to be secure.
+envUsingDevDatabase['APIAPP_OBJECTSTORECONFIG']='{"Type":"SQLAlchemy","connectionString":"mysql+pymysql://saas_user_man_user:saas_user_man_testing_password@127.0.0.1:10103/saas_user_man"}'
+
+drop database saas_user_man;
+create database saas_user_man CHARACTER SET utf8 COLLATE utf8_general_ci;
+grant ALL on saas_user_man.* TO saas_user_man_user@'%' IDENTIFIED BY 'saas_user_man_testing_password';
+FLUSH PRIVILEGES;
+
+
