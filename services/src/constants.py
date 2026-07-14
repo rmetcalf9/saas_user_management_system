@@ -75,3 +75,18 @@ loginCookieName="usersystemUserCredentials"
 
 #Object Type NAmes
 objectType_users_associatedPersons = "usersAssociatedPersons"  #was users_associatedPersons but I had to change due to dynamoDB
+
+#Apple sign in constants
+apple_signon_public_key_url = "https://appleid.apple.com/auth/keys"
+apple_iss = "https://appleid.apple.com"
+
+#This key is ONLY used when the app is in testing mode
+testmodersakeyforjwtsigning = {
+    "alg": "RS256",
+    "e": "AQAB",
+    "kid": "TESTINGKID",
+    "kty": "RSA",
+    "n": "lSJXgvDhHLXlMPqFiOnU6umReqefLHKLFh4kgdhP71BlDxEa_yNtYbrszflO1Od-VkGkV615LxQGuOT6Un9S58xuPmrIuHF48AIUCh4FBsrI-GBFML_6pi1tGLGZq7q59k5N2QWVRx7M-d714Uu0wO2O1JjdcvE6-s2myRlFLYK0Z4635AU6lgCWHNJzJlYp7xyISbOkY10ayJ9C8LIU0tCgXsREEE-aNIP_Vo0o7GS-kqqb4s6mwf9SEFSFqqK5GN0cJVXjUl3VLUDzJp3WXvkSWKu5eK1eraeIwWA9jTjcsUGO0XnqQvlN8AkQbaXoCz8dK8VKsPqiovIpruE7TQ",
+    "use": "sig"
+}
+#note: for a valid token aud = service id. (app.socialclubhub.login)

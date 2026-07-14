@@ -20,7 +20,7 @@ def loadStaticData(fileName):
     raise CustomAuthProviderExceptionClass('Google secret file not found - ' + fileName, 'InvalidAuthConfigException')
 
 '''
-Eample
+Example
 {
 "code": "AAA",
 "creds": {
@@ -114,9 +114,9 @@ class authProviderGoogle(authProvider):
         raise constants.customExceptionClass('loadStaticData returned None', 'InvalidAuthConfigException')
 
       if "web" not in self.getStaticData()['secretJSONDownloadedFromGoogle']:
-        raise constants.customExceptionClass('Google secret file invliad (missing web)', 'InvalidAuthConfigException')
+        raise constants.customExceptionClass('Google secret file invalid (missing web)', 'InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]:
-        raise constants.customExceptionClass('Google secret file invliad (missing client_id)', 'InvalidAuthConfigException')
+        raise constants.customExceptionClass('Google secret file invalid (missing client_id)', 'InvalidAuthConfigException')
 
     #else:
     #  print('authProviderGoogle static data present NOT loading')

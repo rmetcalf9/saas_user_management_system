@@ -2,6 +2,7 @@
 from .Exceptions import CustomAuthProviderExceptionClass, AuthNotFoundException
 from .authProviders_base import InvalidAuthConfigException
 from .authProviders_Internal import authProviderInternal
+from .authProviders_Apple import authProviderApple
 from .authProviders_Google import authProviderGoogle
 from .authProviders_Facebook import authProviderFacebook
 ###from .authProviders_LDAP import authProviderLDAP
@@ -16,6 +17,8 @@ def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
     return authProviderGoogle(dataDict, guid, tenantName, tenantObj, appObj)
   if dataDict["Type"]=='facebook':
     return authProviderFacebook(dataDict, guid, tenantName, tenantObj, appObj)
+  if dataDict["Type"]=='apple':
+    return authProviderApple(dataDict, guid, tenantName, tenantObj, appObj)
   ###if dataDict["Type"]=='ldap':
   ###  return authProviderLDAP(dataDict, guid, tenantName, tenantObj, appObj)
   raise InvalidAuthConfigException
@@ -34,7 +37,7 @@ def _getAuthProviderJSON(appObj, guid, saltForPasswordHashing, menuText, iconLin
     "AllowLink": AllowLink,
     "AllowUnlink": AllowUnlink,
     "LinkText": LinkText,
-    "ConfigJSON": configJSON,  #Type spercific config
+    "ConfigJSON": configJSON,  #Type specific config
     "saltForPasswordHashing": saltForPasswordHashing,
     "AllowLink": AllowLink,
     "AllowUnlink": AllowUnlink,

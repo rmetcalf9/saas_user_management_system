@@ -64,6 +64,7 @@ class appObjClass(parAppObj):
   RegisterUserFn = RegisterUser #First argument to registerUser is appObj
   TicketManager = None
   ApiKeyManager = None
+  isAppRunningInTestingMode = None
 
   def setupLogging(self):
     root = logging.getLogger()
@@ -84,7 +85,9 @@ class appObjClass(parAppObj):
     authProviders_resetStaticData()
     self.scheduler = BackgroundScheduler(timezone="UTC")
     self.defaultUserGUID = str(uuid.uuid4())
+    self.isAppRunningInTestingMode = False
     if testingMode:
+      self.isAppRunningInTestingMode = True
       self.defaultUserGUID = conDefaultUserGUID
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
 

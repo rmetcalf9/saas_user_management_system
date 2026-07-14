@@ -240,7 +240,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     tenantDict2['AllowUserCreation'] = False
     tenantDict3 = self.updateTenant(tenantDict2, [200])
 
-    #Try and login - should not need to create so will suceed
+    #Try and login - should not need to create so will succeed
     result3JSON = self.loginWithGoogle(0, tenantDict['Name'], googleAuthProvider, [200])
 
 

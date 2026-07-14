@@ -5,11 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
+      <change afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Apple.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/test/test_authProviders_Apple.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/saas_user_management_system.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/saas_user_management_system.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminfrontend/src/rjmversion.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminfrontend/src/rjmversion.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/rjmversion.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/rjmversion.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/AuthProviders/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/AuthProviders/authProviders_Google.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/appObj.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/appObj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/src/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/src/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/test/test_authProviders_Google.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +59,8 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/services/test" />
+      <recent name="$PROJECT_DIR$/services/test/authproviders" />
       <recent name="$PROJECT_DIR$/services/unitTestMatchingCICD" />
       <recent name="$PROJECT_DIR$/services/src/AuthProviders" />
     </key>
@@ -489,11 +495,6 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/services/test/test_gatewayInterface_kong.py</url>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/services/src/AuthProviders/authProviders_Google.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
