@@ -50,10 +50,6 @@ Example
 },
 }
 '''
-def credentialDictGet_email(credentialDICT):
-  return credentialDICT["creds"]["id_token"]["email"]
-def credentialDictGet_emailVerfied(credentialDICT):
-  return credentialDICT["creds"]["id_token"]["email_verified"]
 def credentialDictGet_known_as(credentialDICT):
   return credentialDICT["creds"]["id_token"]["given_name"]
 def credentialDictGet_unique_user_id(credentialDICT):
@@ -187,21 +183,13 @@ class authProviderGoogle(authProvider):
     }
 
   def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
-    #if not self.getAllowUserCreation():
-    #  return
-    #if not self.tenantObj.getAllowUserCreation():
-    #  return
-    #Allow user creation checks preformed in RegisterUser call
-    #print("Passed checks - will do thingy:")
     try:
+      # RegisterUser checks for allowusercreation
       self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT, "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection, ticketObj, ticketTypeObj)
     except constants.customExceptionClass as err:
       if err.id == 'userCreationNotAllowedException':
         return #Do nothing
       raise err
-    #print("Email:", credentialDictGet_email(credentialDICT))
-    #print("Email Veffied:", credentialDictGet_emailVerfied(credentialDICT))
-    #print("known_as:", credentialDictGet_known_as(credentialDICT))
 
   #check the auth and if it is not valid raise authFailedException
   def _auth(self, appObj, obj, credentialDICT):

@@ -523,7 +523,7 @@ def Login(
     if len(possibleUserIDs)==1:
       requestedUserID = possibleUserIDs[0]
     else:
-      #mutiple userids supplied
+      #multiple userids supplied
       return {
         'possibleUserIDs': possibleUserIDs,
         'possibleUsers': None,

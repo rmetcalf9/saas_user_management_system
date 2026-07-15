@@ -15,6 +15,12 @@ Example credentialDICT:
 '''
 def credentialDictGet_unique_user_id(credentialDICT):
   return credentialDICT["enriched"]["decodedjwt"]["sub"]
+def credentialDictGet_email(credentialDICT):
+  return credentialDICT["enriched"]["decodedjwt"].get("email", "")
+def credentialDictGet_email_verified(credentialDICT):
+  return credentialDICT["enriched"]["decodedjwt"].get("email_verified", False)
+def credentialDictGet_is_private_email(credentialDICT):
+  return credentialDICT["enriched"]["decodedjwt"].get("is_private_email", "")
 
 def decodeAppleJwtToken(identityToken, clientId, isAppRunningInTestingMode):
     keys = requests.get(constants.apple_signon_public_key_url).json()
@@ -49,40 +55,38 @@ def decodeAppleJwtToken(identityToken, clientId, isAppRunningInTestingMode):
     return decoded
 
 class authProviderApple(authProvider):
-    pass
-    # def _getTypicalAuthData(self, credentialDICT):
-    #     return {
-    #         "user_unique_identifier": str(uuid.uuid4()),
-    #         "known_as": credentialDictGet_known_as(credentialDICT),  # used to display in UI for the user name
-    #         "other_data": {
-    #             "email": credentialDICT["creds"]["id_token"].get("email", ""),
-    #             "email_verified": credentialDICT["creds"]["id_token"].get("email_verified", False),
-    #             "name": credentialDICT["creds"]["id_token"].get("name", ""),
-    #             "picture": credentialDICT["creds"]["id_token"].get("picture", ""),
-    #             "given_name": credentialDICT["creds"]["id_token"].get("given_name", ""),
-    #             "family_name": credentialDICT["creds"]["id_token"].get("family_name", ""),
-    #             "locale": credentialDICT["creds"]["id_token"].get("locale", locale_default)
-    #         }  # Other data like name full name that can be provided - will vary between auth providers
-    #     }
-    #
-    # def _getAuthData(self, appObj, credentialDICT):
-    #     id_token = credentialDICT.get("creds", {}).get("id_token", {})
-    #     return {
-    #         "email": id_token.get("email"),
-    #         "email_verified": id_token.get("email_verified", False),
-    #         "name": id_token.get("name"),
-    #         "picture": id_token.get("picture"),
-    #         "given_name": id_token.get("given_name"),
-    #         "family_name": id_token.get("family_name"),
-    #         "locale": id_token.get("locale", locale_default),  # default to 'en' if missing
-    #     }
+    def _getTypicalAuthData(self, credentialDICT):
+        retVal = {
+            "user_unique_identifier": str(uuid.uuid4()),
+            "known_as": credentialDictGet_email(credentialDICT),  # used to display in UI for the user name
+            "other_data": {
+                "email": credentialDictGet_email(credentialDICT),
+                "email_verified": credentialDictGet_email_verified(credentialDICT),
+                "is_private_email": credentialDictGet_is_private_email(credentialDICT)
+            }  # Other data like name full name that can be provided - will vary between auth providers
+        }
+        if "user" in credentialDICT:
+            retVal["other_data"]["user"] = credentialDICT["user"]
+        return retVal
+
+    def _getAuthData(self, appObj, credentialDICT):
+        retVal = {
+            "email": credentialDictGet_email(credentialDICT),
+            "email_verified": credentialDictGet_email_verified(credentialDICT),
+            "is_private_email": credentialDictGet_is_private_email(credentialDICT)
+        }
+        if "user" in credentialDICT:
+            retVal["user"] = credentialDICT["user"]
+        return retVal
 
     def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
         super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
         if 'service_id' not in dataDict['ConfigJSON']:
+            print("Missing service ID")
             raise InvalidAuthConfigException
 
         if not isinstance(dataDict['ConfigJSON']['service_id'], str):
+            print("Service ID not string")
             raise InvalidAuthConfigException
 
         # Only load the static data once
@@ -94,8 +98,7 @@ class authProviderApple(authProvider):
 
     def _makeKey(self, credentialDICT):
         if 'identityToken' not in credentialDICT:
-            raise InvalidAuthConfigException
-        if 'creds' not in credentialDICT:
+            print("Missing identity token")
             raise InvalidAuthConfigException
         extra = ""
         if 'userSufix' in self.getConfig():
@@ -127,29 +130,21 @@ class authProviderApple(authProvider):
             # print(err.args)  # the arguments that the exception has been called with.
             raise constants.authFailedException
 
-    # def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
-    #     # if not self.getAllowUserCreation():
-    #     #  return
-    #     # if not self.tenantObj.getAllowUserCreation():
-    #     #  return
-    #     # Allow user creation checks preformed in RegisterUser call
-    #     # print("Passed checks - will do thingy:")
-    #     try:
-    #         self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT,
-    #                                    "authProviders_Google/_AuthActionToTakeWhenThereIsNoRecord", storeConnection,
-    #                                    ticketObj, ticketTypeObj)
-    #     except constants.customExceptionClass as err:
-    #         if err.id == 'userCreationNotAllowedException':
-    #             return  # Do nothing
-    #         raise err
-    #     # print("Email:", credentialDictGet_email(credentialDICT))
-    #     # print("Email Veffied:", credentialDictGet_emailVerfied(credentialDICT))
-    #     # print("known_as:", credentialDictGet_known_as(credentialDICT))
-    #
-    # # check the auth and if it is not valid raise authFailedException
-    # def _auth(self, appObj, obj, credentialDICT):
-    #     # not required as auths are checked at the enrichment stage
-    #     pass
+    def _AuthActionToTakeWhenThereIsNoRecord(self, credentialDICT, storeConnection, ticketObj, ticketTypeObj):
+        try:
+            # RegisterUser checks for allowusercreation
+            self.appObj.RegisterUserFn(self.tenantObj, self.guid, credentialDICT,
+                                       "authProviders_Apple/_AuthActionToTakeWhenThereIsNoRecord", storeConnection,
+                                       ticketObj, ticketTypeObj)
+        except constants.customExceptionClass as err:
+            if err.id == 'userCreationNotAllowedException':
+                return  # Do nothing
+            raise err
+
+    # check the auth and if it is not valid raise authFailedException
+    def _auth(self, appObj, obj, credentialDICT):
+        # not required as auths are checked at the enrichment stage
+        pass
 
     def canMakeKeyWithoutEnrichment(self):
         return False

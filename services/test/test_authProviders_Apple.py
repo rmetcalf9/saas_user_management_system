@@ -41,6 +41,16 @@ appleLoginAccounts = []
 appleLoginAccounts.append({
   "identityToken": "AAA"
 })
+appleLoginAccounts.append({
+  "identityToken": "FirstTime",
+  "user": {
+    "email": "bob@example.com",
+    "name": {
+        "firstName": "Robert",
+        "lastName": "Metcalf"
+    }
+  }
+})
 
 def generateIdentityToken(apple_subject="Default_apple_subject"):
     headers = {
@@ -50,7 +60,10 @@ def generateIdentityToken(apple_subject="Default_apple_subject"):
     JWTDict = {
         "iss": constants.apple_iss,
         "aud": apple_test_service_id,
-        "sub": apple_subject
+        "sub": apple_subject,
+        "email": "user@example.com",
+        "email_verified": "true",
+        "is_private_email": "false",
     }
     privateKey = {
         "alg": "RS256",
@@ -108,11 +121,11 @@ class helpers(ticketManagerAPICommonUtilsClass):
         return None
 
     def loginWithApple(self, appleLoginAccountNum, tenantName, authProviderDICT, expectedResults, ticketToPass=None):
+        creds = copy.deepcopy(appleLoginAccounts[appleLoginAccountNum])
+        creds["identityToken"] = generateIdentityToken()
         loginJSON = {
-          "credentialJSON":{
-            "identityToken": generateIdentityToken()
-          },
-          "authProviderGUID":authProviderDICT['guid']
+          "credentialJSON": creds,
+          "authProviderGUID": authProviderDICT['guid']
         }
         if ticketToPass is not None:
           loginJSON["ticket"] = ticketToPass
@@ -176,14 +189,16 @@ class test_authproviders_apple(helpers):
   def test_authWithUserCreation(self):
     #Test authentication via apple.
     ## Must use mocks
-    tenantDict = self.createTenantWithAuthProvider(TestHelperSuperClass.tenantWithNoAuthProviders, True, TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation)
+    tenantDict = self.createTenantWithAuthProvider(
+        TestHelperSuperClass.tenantWithNoAuthProviders,
+        True,
+        TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+    )
 
     resultJSON2 = self.setupAppleAuthOnMainTenantForTests(appleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
     appleAuthProvider = resultJSON2["AuthProviders"][1]
 
     result2JSON = self.loginWithApple(0, tenantDict['Name'], appleAuthProvider, [200])
-
-    raise Exception("TEST NI")
 
     #Turn off auto user creation
     tenantDict2 = self.getTenantDICT(tenantDict['Name'])
@@ -192,4 +207,42 @@ class test_authproviders_apple(helpers):
 
     #Try and login - should not need to create so will succeed
     result3JSON = self.loginWithApple(0, tenantDict['Name'], appleAuthProvider, [200])
+
+  def test_nousercreation_fails(self):
+    #Test authentication via apple.
+    ## Must use mocks
+    tenantDict = self.createTenantWithAuthProvider(
+        TestHelperSuperClass.tenantWithNoAuthProviders,
+        True,
+        TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+    )
+
+    resultJSON2 = self.setupAppleAuthOnMainTenantForTests(appleAuthProv001_CREATE, tenantDict['Name'])
+    appleAuthProvider = resultJSON2["AuthProviders"][1]
+
+    result2JSON = self.loginWithApple(0, tenantDict['Name'], appleAuthProvider, [401])
+    self.assertEqual(result2JSON["message"], "authNotFoundException")
+
+  def test_authWithUserCreationAndFrontendSendingUserObject(self):
+    #Test authentication via apple.
+    ## This does not verify that the user object is saved
+    tenantDict = self.createTenantWithAuthProvider(
+        TestHelperSuperClass.tenantWithNoAuthProviders,
+        True,
+        TestHelperSuperClass.sampleInternalAuthProv001_CREATE_WithAllowUserCreation
+    )
+
+    resultJSON2 = self.setupAppleAuthOnMainTenantForTests(appleAuthProv001_CREATE_withAllowCreate, tenantDict['Name'])
+    appleAuthProvider = resultJSON2["AuthProviders"][1]
+
+    result2JSON = self.loginWithApple(1, tenantDict['Name'], appleAuthProvider, [200])
+
+    #Turn off auto user creation
+    tenantDict2 = self.getTenantDICT(tenantDict['Name'])
+    tenantDict2['AllowUserCreation'] = False
+    tenantDict3 = self.updateTenant(tenantDict2, [200])
+
+    #Try and login - should not need to create so will succeed
+    result3JSON = self.loginWithApple(0, tenantDict['Name'], appleAuthProvider, [200])
+
 
