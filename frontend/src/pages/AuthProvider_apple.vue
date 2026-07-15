@@ -80,7 +80,6 @@ export default defineComponent({
       //    }
       //  }
       // }
-      console.log('DEBUG - responseFromApple', responseFromApple)
       const TTT = this
       const callback = {
         ok: function (response) {
