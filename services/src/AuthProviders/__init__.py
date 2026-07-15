@@ -3,6 +3,7 @@ from .Exceptions import CustomAuthProviderExceptionClass, AuthNotFoundException
 from .authProviders_base import InvalidAuthConfigException
 from .authProviders_Internal import authProviderInternal
 from .authProviders_Apple import authProviderApple
+from .authProviders_AppleJwtPubKeyCache import AuthProviders_AppleJwtPubKeyCache
 from .authProviders_Google import authProviderGoogle
 from .authProviders_Facebook import authProviderFacebook
 ###from .authProviders_LDAP import authProviderLDAP

@@ -18,27 +18,19 @@ def credentialDictGet_unique_user_id(credentialDICT):
 def credentialDictGet_email(credentialDICT):
   return credentialDICT["enriched"]["decodedjwt"].get("email", "")
 def credentialDictGet_email_verified(credentialDICT):
-  return credentialDICT["enriched"]["decodedjwt"].get("email_verified", False)
+    value = credentialDICT["enriched"]["decodedjwt"].get("email_verified", False)
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return bool(value)
 def credentialDictGet_is_private_email(credentialDICT):
   return credentialDICT["enriched"]["decodedjwt"].get("is_private_email", "")
 
-def decodeAppleJwtToken(identityToken, clientId, isAppRunningInTestingMode):
-    keys = requests.get(constants.apple_signon_public_key_url).json()
-
+def decodeAppleJwtToken(identityToken, clientId, authProviders_AppleJwtPubKeyCache):
     header = jwt.get_unverified_header(identityToken)
     if "kid" not in header:
         raise Exception("KID not found in JWT token")
 
-    appleKey = None
-    for key in keys["keys"]:
-        if key["kid"] == header["kid"]:
-            appleKey = key
-            break
-
-    if isAppRunningInTestingMode:
-        if appleKey is None:
-            if header["kid"] == constants.testmodersakeyforjwtsigning["kid"]:
-                appleKey = constants.testmodersakeyforjwtsigning
+    appleKey = authProviders_AppleJwtPubKeyCache.getKey(header["kid"])
 
     if appleKey is None:
         raise Exception("Apple signing key not found")
@@ -56,9 +48,16 @@ def decodeAppleJwtToken(identityToken, clientId, isAppRunningInTestingMode):
 
 class authProviderApple(authProvider):
     def _getTypicalAuthData(self, credentialDICT):
+        known_as = credentialDictGet_email(credentialDICT)
+        if "user" in credentialDICT:
+            try:
+                known_as = credentialDICT["user"]["name"]["firstName"]
+            except KeyError:
+                pass
+
         retVal = {
             "user_unique_identifier": str(uuid.uuid4()),
-            "known_as": credentialDictGet_email(credentialDICT),  # used to display in UI for the user name
+            "known_as": known_as,  # used to display in UI for the user name
             "other_data": {
                 "email": credentialDictGet_email(credentialDICT),
                 "email_verified": credentialDictGet_email_verified(credentialDICT),
@@ -83,6 +82,9 @@ class authProviderApple(authProvider):
         super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
         if 'service_id' not in dataDict['ConfigJSON']:
             print("Missing service ID")
+            raise InvalidAuthConfigException
+        if dataDict['ConfigJSON']['service_id'] == "":
+            print("Empty service ID")
             raise InvalidAuthConfigException
 
         if not isinstance(dataDict['ConfigJSON']['service_id'], str):
@@ -121,7 +123,7 @@ class authProviderApple(authProvider):
             if "identityToken" not in credentialDICT:
                 raise constants.authFailedException
             retVal["enriched"] = {
-                "decodedjwt": decodeAppleJwtToken(identityToken=credentialDICT["identityToken"], clientId=self.__getClientID(), isAppRunningInTestingMode=appObj.isAppRunningInTestingMode)
+                "decodedjwt": decodeAppleJwtToken(identityToken=credentialDICT["identityToken"], clientId=self.__getClientID(), authProviders_AppleJwtPubKeyCache=appObj.authProviders_AppleJwtPubKeyCache)
             }
             return retVal
         except Exception as err:

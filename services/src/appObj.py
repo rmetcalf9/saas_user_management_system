@@ -31,6 +31,7 @@ import json
 from refreshTokenGeneration import RefreshTokenManager
 from persons import GetPerson
 from userPersonCommon import GetUser
+from AuthProviders import AuthProviders_AppleJwtPubKeyCache
 from AuthProviders.authProviders_base import resetStaticData as authProviders_resetStaticData
 
 import autoConfigRunner as autoConfig
@@ -65,6 +66,7 @@ class appObjClass(parAppObj):
   TicketManager = None
   ApiKeyManager = None
   isAppRunningInTestingMode = None
+  authProviders_AppleJwtPubKeyCache = None
 
   def setupLogging(self):
     root = logging.getLogger()
@@ -90,6 +92,7 @@ class appObjClass(parAppObj):
       self.isAppRunningInTestingMode = True
       self.defaultUserGUID = conDefaultUserGUID
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
+    self.authProviders_AppleJwtPubKeyCache = AuthProviders_AppleJwtPubKeyCache(self.isAppRunningInTestingMode)
 
     super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='public/info')
 
