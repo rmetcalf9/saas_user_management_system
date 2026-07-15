@@ -7,7 +7,10 @@ import jwt
 '''
 Example credentialDICT:
 {
-  "identityToken": "eyJraWQiOi..."
+  "authorization": {
+    "id_token": "eyJraWQiOi..."
+  }
+  "user": {} (ONLY on first login)
 }
 '''
 def credentialDictGet_unique_user_id(credentialDICT):
@@ -96,8 +99,11 @@ class authProviderApple(authProvider):
             self.setStaticData(staticDataValue)
 
     def _makeKey(self, credentialDICT):
-        if 'identityToken' not in credentialDICT:
-            print("Missing identity token")
+        if 'authorization' not in credentialDICT:
+            print("Missing authorization token")
+            raise InvalidAuthConfigException
+        if 'id_token' not in credentialDICT["authorization"]:
+            print("Missing authorization.id_token token")
             raise InvalidAuthConfigException
         extra = ""
         if 'userSufix' in self.getConfig():
@@ -117,10 +123,14 @@ class authProviderApple(authProvider):
     def _enrichCredentialDictForAuth(self, credentialDICT, appObj):
         try:
             retVal = copy.deepcopy(credentialDICT)
-            if "identityToken" not in credentialDICT:
+            if 'authorization' not in credentialDICT:
+                print("Missing authorization token")
+                raise constants.authFailedException
+            if 'id_token' not in credentialDICT["authorization"]:
+                print("Missing authorization.id_token token")
                 raise constants.authFailedException
             retVal["enriched"] = {
-                "decodedjwt": decodeAppleJwtToken(identityToken=credentialDICT["identityToken"], clientId=self.__getClientID(), authProviders_AppleJwtPubKeyCache=appObj.authProviders_AppleJwtPubKeyCache)
+                "decodedjwt": decodeAppleJwtToken(identityToken=credentialDICT["authorization"]["id_token"], clientId=self.__getClientID(), authProviders_AppleJwtPubKeyCache=appObj.authProviders_AppleJwtPubKeyCache)
             }
             return retVal
         except Exception as err:

@@ -49,5 +49,16 @@
     "AllowLink": true,
     "AllowUnlink": true,
     "LinkText": "Google Auth"
-  }}
+  }},
+  { "type": "addAuthProvider", "data": {
+    "tenantName": "usersystem",
+    "menuText": "Apple Auth",
+    "iconLink": "",
+    "Type": "apple",
+    "AllowUserCreation": true,
+    "configJSON": {"service_id": "app.socialclubhub.login", "userSufix": "@saassocialappl"},
+    "AllowLink": true,
+    "AllowUnlink": true,
+    "LinkText": "Apple Auth"
+  }}  
 ]}

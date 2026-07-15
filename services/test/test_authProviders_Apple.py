@@ -39,9 +39,18 @@ appleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
 
 appleLoginAccounts = []
 appleLoginAccounts.append({
-  "identityToken": "AAA"
+  "authorization": {
+    "code": "c1234567890abcdef...",
+    "id_token": "eyJraWQiOiJFb...eyJhbGciOiJSUzI1NiJ9...",
+    "state": "optional-state-value"
+  }
 })
 appleLoginAccounts.append({
+  "authorization": {
+    "code": "c1234567890abcdef...",
+    "id_token": "eyJraWQiOiJFb...eyJhbGciOiJSUzI1NiJ9...",
+    "state": "optional-state-value"
+  },
   "identityToken": "FirstTime",
   "user": {
     "email": "bob@example.com",
@@ -122,7 +131,7 @@ class helpers(ticketManagerAPICommonUtilsClass):
 
     def loginWithApple(self, appleLoginAccountNum, tenantName, authProviderDICT, expectedResults, ticketToPass=None):
         creds = copy.deepcopy(appleLoginAccounts[appleLoginAccountNum])
-        creds["identityToken"] = generateIdentityToken()
+        creds["authorization"]["id_token"] = generateIdentityToken()
         loginJSON = {
           "credentialJSON": creds,
           "authProviderGUID": authProviderDICT['guid']

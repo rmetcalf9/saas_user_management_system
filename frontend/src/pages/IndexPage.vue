@@ -98,7 +98,8 @@ export default defineComponent({
       const targets = {
         internal: '/auth/internal',
         google: '/auth/google',
-        facebook: '/auth/facebook'
+        facebook: '/auth/facebook',
+        apple: '/auth/apple'
       }
       if (!Object.keys(targets).includes(authProvider.Type)) {
         console.log('Uknown type', authProvider)
