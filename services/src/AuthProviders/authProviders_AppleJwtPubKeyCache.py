@@ -1,6 +1,6 @@
 import constants
 import requests
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 
 class AuthProviders_AppleJwtPubKeyCache():
     isAppRunningInTestingMode = None
@@ -22,7 +22,7 @@ class AuthProviders_AppleJwtPubKeyCache():
         if kid in self.cachedKeys:
             return self.cachedKeys[kid]
 
-        if self.lastLoaded < datetime.now(UTC) - timedelta(hours=5):
+        if self.lastLoaded < datetime.now(timezone.utc) - timedelta(hours=5):
             self.loadCachedKeys()
             if kid in self.cachedKeys:
                 return self.cachedKeys[kid]
@@ -36,4 +36,4 @@ class AuthProviders_AppleJwtPubKeyCache():
             key["kid"]: key
             for key in response.json()["keys"]
         }
-        self.lastLoaded = datetime.now(UTC)
+        self.lastLoaded = datetime.now(timezone.utc)

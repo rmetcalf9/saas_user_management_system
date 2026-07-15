@@ -1,9 +1,6 @@
 from .authProviders_base import authProvider, InvalidAuthConfigException
 import constants
 import copy
-import requests
-import json
-from .Exceptions import CustomAuthProviderExceptionClass
 import uuid
 import jwt
 
