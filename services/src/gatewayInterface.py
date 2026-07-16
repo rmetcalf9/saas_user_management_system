@@ -1,7 +1,7 @@
 #Factory methods for gateway interface
 import json
 
-from baseapp_for_restapi_backend_with_swagger import readFromEnviroment
+from baseapp_for_restapi_backend_with_swagger import getReadFromEnviromentFn
 from gatewayInterface_none import gatewayInterfaceClass as gi_none
 from gatewayInterface_kong import gatewayInterfaceClass as gi_kong
 from constants import customExceptionClass
@@ -10,7 +10,7 @@ InvalidGatewayInterfaceConfigException = customExceptionClass('APIAPP_GATEWAYINT
 InvalidGatewayInterfaceTypeSpecifiedException = customExceptionClass('APIAPP_GATEWAYINTERFACECONFIG invalid Type')
 
 def getGatewayInterface(env, appObj):
-  APIAPP_GATEWAYINTERFACETYPE = readFromEnviroment(env, 'APIAPP_GATEWAYINTERFACECONFIG', '{"Type": "none"}', None)
+  APIAPP_GATEWAYINTERFACETYPE = getReadFromEnviromentFn(env, 'APIAPP_GATEWAYINTERFACECONFIG', '{"Type": "none"}', None, False, None)()
   
   gatewayInterfaceTypeConfigDict = None
   try:

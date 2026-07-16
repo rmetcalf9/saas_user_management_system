@@ -6,7 +6,7 @@
 
 import pytz
 
-from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, readFromEnviroment, uniqueCommaSeperatedListClass
+from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, getReadFromEnviromentFn, uniqueCommaSeperatedListClass
 from flask_restx import fields
 from flask import request
 import time
@@ -101,20 +101,21 @@ class appObjClass(parAppObj):
       print("ERROR - APIAPP_JWTSECRET should always be set")
       raise invalidConfigurationException
 
-    self.APIAPP_MASTERPASSWORDFORPASSHASH = readFromEnviroment(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None).strip()
-    self.APIAPP_DEFAULTHOMEADMINUSERNAME  = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None).strip()
-    self.APIAPP_DEFAULTHOMEADMINPASSWORD = readFromEnviroment(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None).strip() #no default must be read in
-    self.APIAPP_JWT_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 10, None)) #default to 10 minutes
-    self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 60 * 2, None)) #default to 2 hours
-    self.APIAPP_REFRESH_SESSION_TIMEOUT = int(readFromEnviroment(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 12, None)) #default to 12 hours
+    self.APIAPP_MASTERPASSWORDFORPASSHASH = getReadFromEnviromentFn(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None, False, None)().strip()
+    self.APIAPP_DEFAULTHOMEADMINUSERNAME  = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None, False, None)().strip()
+    self.APIAPP_DEFAULTHOMEADMINPASSWORD = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None, False, None)().strip() #no default must be read in
+    self.APIAPP_JWT_TOKEN_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 10, None, False, None)()) #default to 10 minutes
+    self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 60 * 2, None, False, None)()) #default to 2 hours
+    self.APIAPP_REFRESH_SESSION_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 12, None, False, None)()) #default to 12 hours
 
-    autoconfigraw = readFromEnviroment(
+    autoconfigraw = getReadFromEnviromentFn(
       env=env,
       envVarName='APIAPP_AUTOCONFIG',
       defaultValue='',
       acceptableValues=None,
-      nullValueAllowed=False
-    ).strip()
+      nullValueAllowed=False,
+      vaultClient=None
+    )().strip()
     if autoconfigraw == '':
       self.APIAPP_AUTOCONFIG = None
     else:
@@ -131,7 +132,7 @@ class appObjClass(parAppObj):
       print("ERROR - APIAPP_REFRESH_SESSION_TIMEOUT should never be less than APIAPP_REFRESH_SESSION_TIMEOUT")
       raise invalidConfigurationException
 
-    self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = readFromEnviroment(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None)
+    self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None, False, None)()
 
     # add to the baseapp default so allowed origins are in this list and extra vals
     self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD + ", " + self.accessControlAllowOriginObj.toString())
@@ -142,7 +143,7 @@ class appObjClass(parAppObj):
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
 
-    objectStoreConfigJSON = readFromEnviroment(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None)
+    objectStoreConfigJSON = getReadFromEnviromentFn(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None, False, None)()
     objectStoreConfigDict = None
     try:
       if objectStoreConfigJSON != '{}':
@@ -153,13 +154,14 @@ class appObjClass(parAppObj):
       print(err.args) # the arguments that the exception has been called with.
       raise(InvalidObjectStoreConfigInvalidJSONException)
 
-    self.APIAPP_OBJECTSTOREDETAILLOGGING = readFromEnviroment(
+    self.APIAPP_OBJECTSTOREDETAILLOGGING = getReadFromEnviromentFn(
       env=env,
       envVarName='APIAPP_OBJECTSTOREDETAILLOGGING',
       defaultValue='N',
       acceptableValues=['Y', 'N'],
-      nullValueAllowed=True
-    ).strip()
+      nullValueAllowed=True,
+      vaultClient=None
+    )().strip()
     if (self.APIAPP_OBJECTSTOREDETAILLOGGING=='Y'):
       print("APIAPP_OBJECTSTOREDETAILLOGGING set to Y - statement logging enabled")
 
