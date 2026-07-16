@@ -96,26 +96,35 @@ export default defineComponent({
       })
       console.log(err)
       this.$router.replace('/' + this.$route.params.tenantName + '/')
+    },
+    async waitForGoogle () {
+      while (!window.google?.accounts?.oauth2) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      this.startGoogleLogin()
+    },
+    startGoogleLogin () {
+      const TTT = this
+      const client = window.google.accounts.oauth2.initCodeClient({
+        client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
+        scope: 'openid email profile',
+        ux_mode: 'popup', // important
+        callback: (response) => {
+          if (response.code) {
+            TTT.signInCallback({
+              code: response.code
+            })
+          } else {
+            TTT.signInError(response)
+          }
+        }
+      })
+      client.requestCode()
     }
+
   },
   mounted () {
-    const TTT = this
-    const client = window.google.accounts.oauth2.initCodeClient({
-      client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
-      scope: 'openid email profile',
-      ux_mode: 'popup', // important
-      callback: (response) => {
-        if (response.code) {
-          TTT.signInCallback({
-            code: response.code
-          })
-        } else {
-          TTT.signInError(response)
-        }
-      }
-    })
-
-    client.requestCode()
+    this.waitForGoogle()
   }
 })
 </script>
