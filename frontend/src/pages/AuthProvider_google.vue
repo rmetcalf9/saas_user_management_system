@@ -12,6 +12,7 @@
       <div rows>
         <div v-html="tenantInfo.TenantBannerHTML" />
         <div>Log in with Google</div>
+        <div>{{ googleLoginState }}</div>
       </div>
     </div>
     <ProcessLoginResponse ref="processLoginResponseInstance" />
@@ -38,10 +39,7 @@ export default defineComponent({
   },
   data () {
     return {
-      usernamePass: {
-        username: '',
-        password: ''
-      }
+      googleLoginState: 'Setting up...'
     }
   },
   computed: {
@@ -66,6 +64,7 @@ export default defineComponent({
     },
     signInCallback (responseFromGoogle) {
       const TTT = this
+      TTT.googleLoginState = 'Callback Received...'
       const callback = {
         ok: function (response) {
           Loading.hide()
@@ -98,7 +97,9 @@ export default defineComponent({
       this.$router.replace('/' + this.$route.params.tenantName + '/')
     },
     async waitForGoogle () {
+      const TTT = this
       try {
+        TTT.googleLoginState = 'Waiting for Google...'
         const maxWait = 20000
         const start = Date.now()
 
@@ -108,20 +109,23 @@ export default defineComponent({
 
           if (googleReady && clientId) {
             console.log('Google login prerequisites ready')
-            this.startGoogleLogin()
+            TTT.googleLoginState = 'Google Ready...'
+            TTT.startGoogleLogin()
             return
           }
 
           await new Promise(resolve => setTimeout(resolve, 100))
         }
 
+        TTT.googleLoginState = 'Google load timed out'
         console.error('Google login timed out')
 
         this.signInError({
-          error: 'Google login could not be initialised'
+          error: 'Google login could not be initialized'
         })
       } catch (err) {
         console.error('Google login initialisation exception', err)
+        TTT.googleLoginState = 'Google load exception received'
 
         this.signInError({
           error: 'Google login initialisation failed: ' + err?.message
@@ -130,16 +134,19 @@ export default defineComponent({
     },
     startGoogleLogin () {
       const TTT = this
+      TTT.googleLoginState = 'Launching Dialog...'
       const client = window.google.accounts.oauth2.initCodeClient({
         client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
         scope: 'openid email profile',
         ux_mode: 'popup', // important
         callback: (response) => {
           if (response.code) {
+            TTT.googleLoginState = 'Launched'
             TTT.signInCallback({
               code: response.code
             })
           } else {
+            TTT.googleLoginState = 'Failed'
             TTT.signInError(response)
           }
         }
