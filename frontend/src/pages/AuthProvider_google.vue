@@ -109,6 +109,18 @@ export default defineComponent({
           const googleReady = !!window.google?.accounts?.oauth2
           const clientId = this.selectedAuthProvider?.StaticlyLoadedData?.client_id
 
+          if (!googleReady) {
+            if (!clientId) {
+              TTT.googleLoginState = 'Waiting for Google (Google, client)...'
+            } else {
+              TTT.googleLoginState = 'Waiting for Google (Google)...'
+            }
+          } else {
+            if (!clientId) {
+              TTT.googleLoginState = 'Waiting for Google (client)...'
+            }
+          }
+
           if (googleReady && clientId) {
             console.log('Google login prerequisites ready')
             TTT.googleLoginState = 'Google Ready...'
