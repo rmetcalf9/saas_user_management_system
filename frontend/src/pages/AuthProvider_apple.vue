@@ -107,7 +107,7 @@ export default defineComponent({
       Loading.hide()
       Notify.create({
         color: 'negative',
-        message: 'Apple signin error - ' + callbackHelper.getErrorFromResponse(err)
+        message: 'Apple signin error - ' + JSON.stringify(err)
       })
       console.log(err)
       this.$router.replace('/' + this.$route.params.tenantName + '/')
