@@ -12,7 +12,7 @@
       <div rows>
         <div v-html="tenantInfo.TenantBannerHTML" />
         <q-btn
-          @click="startGoogleLogin"
+          @click="waitForGoogle"
         >Click here to login with google</q-btn>
         <div>{{ googleLoginState }}</div>
       </div>
