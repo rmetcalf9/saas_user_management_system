@@ -13,12 +13,17 @@ import { defineComponent } from 'vue'
 import { Notify, Loading } from 'quasar'
 import callbackHelper from '../../callbackHelper'
 import frontendFns from '../../frontendFns.js'
+import { useTenantInfoStore } from 'stores/tenantInfo'
 
 export default defineComponent({
   name: 'AuthProviderButtomComponent_Apple',
   props: [
     'authProvider'
   ],
+  setup () {
+    const tenantInfoStore = useTenantInfoStore()
+    return { tenantInfoStore }
+  },
   data () {
     return {
     }
@@ -26,7 +31,10 @@ export default defineComponent({
   methods: {
     clickSignin () {
       const TTT = this
-      console.log('ClickSignIn')
+      TTT.tenantInfoStore.selectAuthProvider({
+        selectedAuthProvider: TTT.authProvider,
+        tenantName: TTT.$route.params.tenantName
+      })
       window.AppleID.auth.signIn()
         .then(response => {
           TTT.signInCallback(response)
