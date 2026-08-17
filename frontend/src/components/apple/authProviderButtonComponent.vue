@@ -4,6 +4,7 @@
       :label="authProvider.MenuText"
       @click="clickSignin"
     />
+    <ProcessLoginResponse ref="processLoginResponseInstance" />
   </div>
 </template>
 
@@ -25,6 +26,7 @@ export default defineComponent({
   methods: {
     clickSignin () {
       const TTT = this
+      console.log('ClickSignIn')
       window.AppleID.auth.signIn()
         .then(response => {
           TTT.signInCallback(response)
@@ -52,9 +54,11 @@ export default defineComponent({
       const TTT = this
       const callback = {
         ok: function (response) {
+          console.log('usersystem sign in ok')
           Loading.hide()
         },
         error: function (response) {
+          console.log('usersystem sign in error')
           Loading.hide()
           Notify.create({
             color: 'negative',
@@ -63,6 +67,7 @@ export default defineComponent({
           TTT.$router.replace('/' + TTT.$route.params.tenantName + '/')
         }
       }
+      console.log('Got response from Apple login')
       Loading.show()
       frontendFns.callLoginAPI({
         credentialJSON: responseFromApple,
@@ -78,7 +83,7 @@ export default defineComponent({
         color: 'negative',
         message: 'Apple signin error - ' + JSON.stringify(err)
       })
-      console.log(err)
+      console.log('Apple signInError', err)
       this.$router.replace('/' + this.$route.params.tenantName + '/')
     }
   },
