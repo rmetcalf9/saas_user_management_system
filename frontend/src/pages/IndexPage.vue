@@ -22,13 +22,17 @@
               :key="authProvider.guid"
             >
               <q-btn
-                v-if="authProvider.Type != 'apple'"
+                v-if="authProvider.Type != 'apple' && authProvider.Type != 'google'"
                 class="col q-ma-sm"
                 :label="authProvider.MenuText"
                 @click="clickAuth(authProvider)"
               />
               <appleAuthComponent
                 v-if="authProvider.Type === 'apple'"
+                :authProvider="authProvider"
+              />
+              <googleAuthComponent
+                v-if="authProvider.Type === 'google'"
                 :authProvider="authProvider"
               />
             </div>
@@ -47,6 +51,7 @@ import { useTenantInfoStore } from 'stores/tenantInfo'
 import { useInputParamsStore } from 'stores/inputParams'
 import DisplayInputMessage from '../components/displayInputMessage.vue'
 import appleAuthComponent from '../components/apple/authProviderButtonComponent.vue'
+import googleAuthComponent from '../components/google/authProviderButtonComponent.vue'
 
 // import saasAPiClientCallBackend from '../saasAPiClientCallBackend.js'
 // import callbackHelper from '../callbackHelper'
@@ -54,7 +59,7 @@ import appleAuthComponent from '../components/apple/authProviderButtonComponent.
 export default defineComponent({
   name: 'IndexPage',
   components: {
-    DisplayInputMessage, appleAuthComponent
+    DisplayInputMessage, appleAuthComponent, googleAuthComponent
   },
   setup () {
     const userManagementClientStoreStore = useUserManagementClientStoreStore()
