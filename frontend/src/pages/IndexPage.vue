@@ -21,7 +21,16 @@
             <div v-for="authProvider in tenantInfo.res.AuthProviders"
               :key="authProvider.guid"
             >
-              <q-btn class="col q-ma-sm" :label="authProvider.MenuText" @click="clickAuth(authProvider)"/>
+              <q-btn
+                v-if="authProvider.Type != 'apple'"
+                class="col q-ma-sm"
+                :label="authProvider.MenuText"
+                @click="clickAuth(authProvider)"
+              />
+              <appleAuthComponent
+                v-if="authProvider.Type === 'apple'"
+                :authProvider="authProvider"
+              />
             </div>
           </div>
         </div>
@@ -37,6 +46,7 @@ import { useUserManagementClientStoreStore } from 'stores/saasUserManagementClie
 import { useTenantInfoStore } from 'stores/tenantInfo'
 import { useInputParamsStore } from 'stores/inputParams'
 import DisplayInputMessage from '../components/displayInputMessage.vue'
+import appleAuthComponent from '../components/apple/authProviderButtonComponent.vue'
 
 // import saasAPiClientCallBackend from '../saasAPiClientCallBackend.js'
 // import callbackHelper from '../callbackHelper'
@@ -44,7 +54,7 @@ import DisplayInputMessage from '../components/displayInputMessage.vue'
 export default defineComponent({
   name: 'IndexPage',
   components: {
-    DisplayInputMessage
+    DisplayInputMessage, appleAuthComponent
   },
   setup () {
     const userManagementClientStoreStore = useUserManagementClientStoreStore()

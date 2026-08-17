@@ -1,68 +1,37 @@
 <template>
-  <q-page class="flex flex-center indexpage-main">
-    <DisplayInputMessage />
+  <div>
     <q-btn
-      round
-      icon="arrow_back" color="primary" style="position: fixed; left: 16px; top: 56px"
-      size="md"
-      v-if="hasMutipleLoginMethods"
-      @click="goBackToSelectAuthProviderScreen"
+      :label="authProvider.MenuText"
+      @click="clickSignin"
     />
-    <div>
-      <div rows>
-        <div v-html="tenantInfo.TenantBannerHTML" />
-        <div>Log in with Apple</div>
-      </div>
-    </div>
-    <ProcessLoginResponse ref="processLoginResponseInstance" />
-  </q-page>
+  </div>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
 import { Notify, Loading } from 'quasar'
-import DisplayInputMessage from '../components/displayInputMessage.vue'
-import { useTenantInfoStore } from 'stores/tenantInfo'
-import ProcessLoginResponse from '../components/processLoginResponse'
-import callbackHelper from '../callbackHelper'
-import frontendFns from '../frontendFns.js'
+import callbackHelper from '../../callbackHelper'
+import frontendFns from '../../frontendFns.js'
 
 export default defineComponent({
-  name: 'IndexPage',
-  components: {
-    DisplayInputMessage, ProcessLoginResponse
-  },
-  setup () {
-    const tenantInfoStore = useTenantInfoStore()
-    return { tenantInfoStore }
-  },
+  name: 'AuthProviderButtomComponent_Apple',
+  props: [
+    'authProvider'
+  ],
   data () {
     return {
-      usernamePass: {
-        username: '',
-        password: ''
-      }
-    }
-  },
-  computed: {
-    tenantInfo () {
-      return this.tenantInfoStore.getInfo({
-        router: this.$router,
-        tenantName: this.$route.params.tenantName,
-        skipcache: false
-      })
-    },
-    selectedAuthProvider () {
-      return this.tenantInfoStore.selectedAuth
-    },
-    hasMutipleLoginMethods () {
-      return this.tenantInfo.res.AuthProviders.length !== 1
     }
   },
   methods: {
-    goBackToSelectAuthProviderScreen () {
-      this.tenantInfoStore.clearAuthProvider()
-      this.$router.push('/' + this.$route.params.tenantName + '/')
+    clickSignin () {
+      const TTT = this
+      window.AppleID.auth.signIn()
+        .then(response => {
+          TTT.signInCallback(response)
+        })
+        .catch(err => {
+          TTT.signInError(err)
+        })
     },
     signInCallback (responseFromApple) {
       // responseFromApple Sample
@@ -118,25 +87,14 @@ export default defineComponent({
     // console.log('apple service id=', JSON.parse(TTT.selectedAuthProvider.ConfigJSON).service_id)
 
     window.AppleID.auth.init({
-      clientId: JSON.parse(TTT.selectedAuthProvider.ConfigJSON).service_id,
+      clientId: JSON.parse(TTT.authProvider.ConfigJSON).service_id,
       scope: 'name email',
       redirectURI: 'https://api.metcarob.com/auth/apple/callback',
       usePopup: true
     })
-
-    window.AppleID.auth.signIn()
-      .then(response => {
-        TTT.signInCallback(response)
-      })
-      .catch(err => {
-        TTT.signInError(err)
-      })
   }
 })
 </script>
 
 <style>
-.authprovider_internal_loginbuttons {
-  padding: 10px;
-}
 </style>
