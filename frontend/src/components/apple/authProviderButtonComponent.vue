@@ -14,12 +14,16 @@ import { Notify, Loading } from 'quasar'
 import callbackHelper from '../../callbackHelper'
 import frontendFns from '../../frontendFns.js'
 import { useTenantInfoStore } from 'stores/tenantInfo'
+import ProcessLoginResponse from '../../components/processLoginResponse'
 
 export default defineComponent({
   name: 'AuthProviderButtomComponent_Apple',
   props: [
     'authProvider'
   ],
+  components: {
+    ProcessLoginResponse
+  },
   setup () {
     const tenantInfoStore = useTenantInfoStore()
     return { tenantInfoStore }
