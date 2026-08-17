@@ -134,26 +134,45 @@ export default defineComponent({
     },
     startGoogleLogin () {
       const TTT = this
-      TTT.googleLoginState = 'Launching Dialog...'
-      const client = window.google.accounts.oauth2.initCodeClient({
-        client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
-        scope: 'openid email profile',
-        ux_mode: 'popup', // important
-        callback: (response) => {
-          if (response.code) {
-            TTT.googleLoginState = 'Launched'
-            TTT.signInCallback({
-              code: response.code
-            })
-          } else {
-            TTT.googleLoginState = 'Failed'
-            TTT.signInError(response)
-          }
-        }
-      })
-      client.requestCode()
-    }
 
+      try {
+        TTT.googleLoginState = 'Creating Google client...'
+
+        const client = window.google.accounts.oauth2.initCodeClient({
+          client_id: TTT.selectedAuthProvider.StaticlyLoadedData.client_id,
+          scope: 'openid email profile',
+          ux_mode: 'popup',
+          callback: (response) => {
+            try {
+              if (response.code) {
+                TTT.googleLoginState = 'Launched'
+                TTT.signInCallback({
+                  code: response.code
+                })
+              } else {
+                TTT.googleLoginState = 'Failed'
+                TTT.signInError(response)
+              }
+            } catch (err) {
+              TTT.googleLoginState = 'Callback exception: ' + (err?.message || String(err))
+            }
+          }
+        })
+
+        TTT.googleLoginState = 'Google client created...'
+
+        try {
+          TTT.googleLoginState = 'Calling requestCode...'
+          client.requestCode()
+          TTT.googleLoginState = 'requestCode returned...'
+        } catch (err) {
+          TTT.googleLoginState = 'requestCode exception: ' + (err?.message || String(err))
+        }
+      } catch (err) {
+        TTT.googleLoginState = 'initCodeClient exception: ' + (err?.message || String(err))
+        console.error('Google initCodeClient exception:', err)
+      }
+    }
   },
   mounted () {
     this.waitForGoogle()
