@@ -98,10 +98,24 @@ export default defineComponent({
       this.$router.replace('/' + this.$route.params.tenantName + '/')
     },
     async waitForGoogle () {
-      while (!window.google?.accounts?.oauth2) {
+      const maxWait = 20000
+      const start = Date.now()
+      while (Date.now() - start < maxWait) {
+        const googleReady = !!window.google?.accounts?.oauth2
+        const clientId = this.selectedAuthProvider?.StaticlyLoadedData?.client_id
+        if (googleReady && clientId) {
+          this.startGoogleLogin()
+          return
+        }
         await new Promise(resolve => setTimeout(resolve, 100))
       }
-      this.startGoogleLogin()
+      console.error('Google login timed out', {
+        googleReady: !!window.google?.accounts?.oauth2,
+        clientId: this.selectedAuthProvider?.StaticlyLoadedData?.client_id
+      })
+      this.signInError({
+        error: 'Google login could not be initialised'
+      })
     },
     startGoogleLogin () {
       const TTT = this
