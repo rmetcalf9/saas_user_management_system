@@ -24,4 +24,5 @@ export DOCKER_USERNAME=metcarob
 
 export RJM_USERMANAGEMENT_CONTAINER="metcarob/saas_user_management:0.0.224_nonkongver"
 
-export VAULT_DEPLOYMENT_APPROLE_SECRET_LOCATION=/deploymentapproles/${PROJECT_NAME}
+# Secret location MUST MATCH APPROLE NAME
+export VAULT_DEPLOYMENT_APPROLE_SECRET_LOCATION=/deploymentapproles/deploy_${PROJECT_NAME}
