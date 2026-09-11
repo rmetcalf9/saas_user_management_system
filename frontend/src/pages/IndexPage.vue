@@ -28,10 +28,12 @@
                 @click="clickAuth(authProvider)"
               />
               <appleAuthComponent
+                ref="appleAuthComponent"
                 v-if="authProvider.Type === 'apple'"
                 :authProvider="authProvider"
               />
               <googleAuthComponent
+                ref="googleAuthComponent"
                 v-if="authProvider.Type === 'google'"
                 :authProvider="authProvider"
               />
@@ -104,11 +106,22 @@ export default defineComponent({
   watch: {
     hasMutipleLoginMethods (newVal) {
       if (newVal === false) {
-        this.clickAuth(this.tenantInfo.res.AuthProviders[0])
+        this.justFoundOnlyOneAuthMethod()
       }
     }
   },
   methods: {
+    justFoundOnlyOneAuthMethod () {
+      if (this.tenantInfo.res.AuthProviders[0].Type === 'google') {
+        this.$refs.googleAuthComponent.clickSignin()
+        return
+      }
+      if (this.tenantInfo.res.AuthProviders[0].Type === 'apple') {
+        this.$refs.appleAuthComponent.clickSignin()
+        return
+      }
+      this.clickAuth(this.tenantInfo.res.AuthProviders[0])
+    },
     clickAuth (authProvider) {
       const targets = {
         internal: '/auth/internal',
