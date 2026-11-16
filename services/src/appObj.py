@@ -101,12 +101,12 @@ class appObjClass(parAppObj):
       print("ERROR - APIAPP_JWTSECRET should always be set")
       raise invalidConfigurationException
 
-    self.APIAPP_MASTERPASSWORDFORPASSHASH = getReadFromEnviromentFn(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None, False, None)().strip()
-    self.APIAPP_DEFAULTHOMEADMINUSERNAME  = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None, False, None)().strip()
-    self.APIAPP_DEFAULTHOMEADMINPASSWORD = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None, False, None)().strip() #no default must be read in
-    self.APIAPP_JWT_TOKEN_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 10, None, False, None)()) #default to 10 minutes
-    self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 60 * 2, None, False, None)()) #default to 2 hours
-    self.APIAPP_REFRESH_SESSION_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 12, None, False, None)()) #default to 12 hours
+    self.APIAPP_MASTERPASSWORDFORPASSHASH = getReadFromEnviromentFn(env, 'APIAPP_MASTERPASSWORDFORPASSHASH', None, None, False, self.vaultClient)().strip()
+    self.APIAPP_DEFAULTHOMEADMINUSERNAME  = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTHOMEADMINUSERNAME', 'Admin', None, False, self.vaultClient)().strip()
+    self.APIAPP_DEFAULTHOMEADMINPASSWORD = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTHOMEADMINPASSWORD', None, None, False, self.vaultClient)().strip() #no default must be read in
+    self.APIAPP_JWT_TOKEN_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_JWT_TOKEN_TIMEOUT', 60 * 10, None, False, self.vaultClient)()) #default to 10 minutes
+    self.APIAPP_REFRESH_TOKEN_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_REFRESH_TOKEN_TIMEOUT', 60 * 60 * 2, None, False, self.vaultClient)()) #default to 2 hours
+    self.APIAPP_REFRESH_SESSION_TIMEOUT = int(getReadFromEnviromentFn(env, 'APIAPP_REFRESH_SESSION_TIMEOUT', 60 * 60 * 12, None, False, self.vaultClient)()) #default to 12 hours
 
     autoconfigraw = getReadFromEnviromentFn(
       env=env,
@@ -114,7 +114,7 @@ class appObjClass(parAppObj):
       defaultValue='',
       acceptableValues=None,
       nullValueAllowed=False,
-      vaultClient=None
+      vaultClient=self.vaultClient
     )().strip()
     if autoconfigraw == '':
       self.APIAPP_AUTOCONFIG = None
@@ -132,7 +132,7 @@ class appObjClass(parAppObj):
       print("ERROR - APIAPP_REFRESH_SESSION_TIMEOUT should never be less than APIAPP_REFRESH_SESSION_TIMEOUT")
       raise invalidConfigurationException
 
-    self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None, False, None)()
+    self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD = getReadFromEnviromentFn(env, 'APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD', 'http://localhost', None, False, self.vaultClient)()
 
     # add to the baseapp default so allowed origins are in this list and extra vals
     self.accessControlAllowOriginObj = uniqueCommaSeperatedListClass(self.APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD + ", " + self.accessControlAllowOriginObj.toString())
@@ -143,7 +143,7 @@ class appObjClass(parAppObj):
     print('APIAPP_REFRESH_TOKEN_TIMEOUT:'+str(self.APIAPP_REFRESH_TOKEN_TIMEOUT) + ' seconds')
     print('APIAPP_REFRESH_SESSION_TIMEOUT:'+str(self.APIAPP_REFRESH_SESSION_TIMEOUT) + ' seconds')
 
-    objectStoreConfigJSON = getReadFromEnviromentFn(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None, False, None)()
+    objectStoreConfigJSON = getReadFromEnviromentFn(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None, False, self.vaultClient)()
     objectStoreConfigDict = None
     try:
       if objectStoreConfigJSON != '{}':
@@ -160,7 +160,7 @@ class appObjClass(parAppObj):
       defaultValue='N',
       acceptableValues=['Y', 'N'],
       nullValueAllowed=True,
-      vaultClient=None
+      vaultClient=self.vaultClient
     )().strip()
     if (self.APIAPP_OBJECTSTOREDETAILLOGGING=='Y'):
       print("APIAPP_OBJECTSTOREDETAILLOGGING set to Y - statement logging enabled")
