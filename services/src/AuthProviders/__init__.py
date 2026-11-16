@@ -12,6 +12,8 @@ from base64 import b64encode
 from .authsCommon import getAuthRecord, SaveAuthRecord, UpdateAuthRecord, DeleteAuthRecord
 
 def authProviderFactory(dataDict, guid, tenantName, tenantObj, appObj):
+  if appObj is None:
+    raise Exception("No appObj provided")
   if dataDict["Type"]=='internal':
     return authProviderInternal(dataDict, guid, tenantName, tenantObj, appObj)
   if dataDict["Type"]=='google':

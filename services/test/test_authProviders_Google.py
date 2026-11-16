@@ -32,6 +32,22 @@ googleAuthProv001_CREATE = {
 googleAuthProv001_CREATE_withAllowCreate = copy.deepcopy(googleAuthProv001_CREATE)
 googleAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
 
+googleAuthProv002_CREATE_withVaultConfig = copy.deepcopy(googleAuthProv001_CREATE)
+# mock vault instances will return the ref as the value
+cli_secret_value = {
+  "web":{
+    "client_id":"someGoogleID.apps.googleusercontent.com",
+    "project_id":"someProject-metcarob",
+    "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+    "token_uri":"https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret":"some_secret",
+    "redirect_uris":["https://localhost"],
+    "javascript_origins":["https://api.metcarob.com"]
+  }
+}
+googleAuthProv002_CREATE_withVaultConfig['ConfigJSON'] = '{"clientSecretJSONVault": "' + json.dumps(cli_secret_value).replace("\"", "@a@") + '"}'
+
 googleLoginAccounts = []
 googleLoginAccounts.append({
   "code": "AAA",
@@ -151,7 +167,7 @@ class test_api(google_auth_test_api_helper_functions):
 
 #@TestHelperSuperClass.wipd
 class test_addGoogleAuthProviderToMasterTenant(test_api):
-  def test_createAuth(self):
+  def test_createAuth_fileconfig(self):
     resultJSON2 = self.setupGoogleAuthOnMainTenantForTests()
 
     expectedResult = copy.deepcopy(googleAuthProv001_CREATE)
@@ -162,7 +178,20 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     if not resultJSON2["AuthProviders"][1]["StaticlyLoadedData"]["client_id"].endswith(".apps.googleusercontent.com"):
       self.assertFalse(True,msg="Invalid Client ID")
 
-  def test_createAuthMissingclientSecretJSONFileParam(self):
+  def test_createAuth_vaultconfig(self):
+    resultJSON2 = self.setupGoogleAuthOnMainTenantForTests(googleAuthProv002_CREATE_withVaultConfig)
+
+    expectedResult = copy.deepcopy(googleAuthProv002_CREATE_withVaultConfig)
+    expectedResult["StaticlyLoadedData"] = {"client_id": "someGoogleID.apps.googleusercontent.com"}
+
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1], expectedResult, ["guid","saltForPasswordHashing","StaticlyLoadedData"], msg='JSON of google Auth provider not right')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1]["StaticlyLoadedData"], expectedResult["StaticlyLoadedData"], ["client_id"], msg='StaticallyLoadedData Mismatch')
+    if not resultJSON2["AuthProviders"][1]["StaticlyLoadedData"]["client_id"].endswith(".apps.googleusercontent.com"):
+      self.assertFalse(True,msg="Invalid Client ID")
+
+
+
+  def test_createAuthMissingAnyClientSecretParam(self):
     result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
@@ -179,7 +208,7 @@ class test_addGoogleAuthProviderToMasterTenant(test_api):
     self.assertEqual(result.status_code, 400, msg='Create should have failed')
 
 
-  def test_createAuthMissingclientSecretJSONFile(self):
+  def test_createAuth_clientsecret_file_missing(self):
     result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))

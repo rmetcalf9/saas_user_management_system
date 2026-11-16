@@ -11,13 +11,23 @@ from oauth2client import client
 # https://google-auth.readthedocs.io/en/latest/index.html?highlight=google-auth
 # https://developers.google.com/api-client-library/python/guide/aaa_oauth
 
-def loadStaticData(fileName):
+def loadStaticData(config, appObj):
+  if 'clientSecretJSONFile' in config:
+    try:
+      ##print('authProviderGoogle loadStaticData')
+      with open(config["clientSecretJSONFile"], 'r') as f:
+        return json.load(f)
+    except FileNotFoundError:
+      raise CustomAuthProviderExceptionClass('Google secret file not found - ' + config["clientSecretJSONFile"], 'InvalidAuthConfigException')
+
   try:
-    ##print('authProviderGoogle loadStaticData')
-    with open(fileName, 'r') as f:
-      return json.load(f)
-  except FileNotFoundError:
-    raise CustomAuthProviderExceptionClass('Google secret file not found - ' + fileName, 'InvalidAuthConfigException')
+    sec_value = appObj.vaultClient.get_secret(config["clientSecretJSONVault"])
+    # Note mock references will in just return the reference exactly.
+    if sec_value == appObj.vaultClient.get_secret(config["clientSecretJSONVault"]):
+      sec_value = sec_value.replace("@a@", "\"")
+    return json.loads(sec_value)
+  except Exception:
+    raise CustomAuthProviderExceptionClass("Google secret not found in vault - " + config["clientSecretJSONVault"])
 
 '''
 Example
@@ -88,22 +98,14 @@ class authProviderGoogle(authProvider):
     super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
 
     if 'clientSecretJSONFile' not in dataDict['ConfigJSON']:
-      raise InvalidAuthConfigException
+      if 'clientSecretJSONVault' not in dataDict['ConfigJSON']:
+        raise InvalidAuthConfigException
 
     #Only load the static data once
     if not self.hasStaticData():
       #print('Static data not present loading')
       staticDataValue = {
-        'secretJSONDownloadedFromGoogle': loadStaticData(dataDict['ConfigJSON']['clientSecretJSONFile']),
-#        'flow': flow_from_clientsecrets(
-#          dataDict['ConfigJSON']['clientSecretJSONFile'],
-#          scope='https://www.googleapis.com/auth/userinfo.email',
-#          redirect_uri='https://localhost'
-#        )
-#        'flow': InstalledAppFlow.from_client_secrets_file(
-#          dataDict['ConfigJSON']['clientSecretJSONFile'],
-#          scopes=['https://www.googleapis.com/auth/userinfo.email']
-#        )
+        'secretJSONDownloadedFromGoogle': loadStaticData(dataDict['ConfigJSON'], appObj),
       }
       self.setStaticData(staticDataValue)
       if self.getStaticData()['secretJSONDownloadedFromGoogle'] is None:
@@ -113,15 +115,6 @@ class authProviderGoogle(authProvider):
         raise constants.customExceptionClass('Google secret file invalid (missing web)', 'InvalidAuthConfigException')
       if "client_id" not in self.getStaticData()['secretJSONDownloadedFromGoogle']["web"]:
         raise constants.customExceptionClass('Google secret file invalid (missing client_id)', 'InvalidAuthConfigException')
-
-    #else:
-    #  print('authProviderGoogle static data present NOT loading')
-
-
-    #self.operationFunctions['ResetPassword'] = {
-    #  'fn': self._executeAuthOperation_resetPassword,
-    #  'requiredDictElements': ['newPassword']
-    #}
 
   def _makeKey(self, credentialDICT):
     if 'code' not in credentialDICT:
