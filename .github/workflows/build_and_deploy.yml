@@ -65,7 +65,7 @@ jobs:
       - name: Build main image
         run: |
           source ./_repo_vars.sh && \
-          docker build --build-arg PROJECT_NAME="${PROJECT_NAME}" z
+          docker build --build-arg PROJECT_NAME="${PROJECT_NAME}" \
           --build-arg QUASARBUILDMODE_FRONTEND="${QUASARBUILDMODE_FRONTEND}" \
           --build-arg QUASARBUILDMODE_ADMINFRONTEND="${QUASARBUILDMODE_ADMINFRONTEND}" \
           -t ghcr.io/${{ github.repository_owner }}/${PROJECT_NAME}:${RJM_VERSION} .
