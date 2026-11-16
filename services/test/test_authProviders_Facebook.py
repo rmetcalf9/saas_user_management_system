@@ -28,6 +28,19 @@ facebookAuthProv001_CREATE = {
 facebookAuthProv001_CREATE_withAllowCreate = copy.deepcopy(facebookAuthProv001_CREATE)
 facebookAuthProv001_CREATE_withAllowCreate['AllowUserCreation'] = True
 
+facebookAuthProv001_CREATE_withVaultConfig = copy.deepcopy(facebookAuthProv001_CREATE)
+# mock vault instances will return the ref as the value
+cli_secret_value = {
+  "web":{
+    "client_id":"FB_APP_ID",
+    "client_secret":"FB APP SECRET",
+    "auth_uri":"https://graph.facebook.com/v3.3/oauth/access_token",
+    "redirect_uri":"https://localhost"
+  }
+}
+facebookAuthProv001_CREATE_withVaultConfig['ConfigJSON'] = '{"clientSecretJSONVault": "' + json.dumps(cli_secret_value).replace("\"", "@a@") + '"}'
+
+
 facebookAuthProv001_CREATE_missingClientSecretParam = copy.deepcopy(facebookAuthProv001_CREATE)
 facebookAuthProv001_CREATE_missingClientSecretParam['ConfigJSON'] = "{}"
 facebookAuthProv001_CREATE_badSecretFileParam = copy.deepcopy(facebookAuthProv001_CREATE)
@@ -115,6 +128,30 @@ class test_facebook_api(facebook_auth_test_api_helper_functions):
     resultJSON2 = self.setupFacebookAuthOnMainTenantForTests()
 
     expectedResult = copy.deepcopy(facebookAuthProv001_CREATE)
+    expectedResult["StaticlyLoadedData"] = {"client_id": "FB_APP_ID"}
+
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1], expectedResult, ["guid","saltForPasswordHashing","StaticlyLoadedData"], msg='JSON of facebook Auth provider not right')
+    self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1]["StaticlyLoadedData"], expectedResult["StaticlyLoadedData"], ["client_id"], msg='StaticallyLoadedData Mismatch')
+
+    result = self.testClient.get(self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants', headers={ constants.jwtHeaderName: self.getNormalJWTToken()})
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+
+    tenantJSON = copy.deepcopy(resultJSON['result'][0])
+    tenantJSON['AuthProviders'].append(copy.deepcopy(facebookAuthProv001_CREATE_missingClientSecretParam))
+    tenantJSON['ObjectVersion'] = resultJSON['result'][0]['ObjectVersion']
+    result = self.testClient.put(
+      self.adminAPIPrefix + '/' + constants.masterTenantName + '/tenants/' + tenantJSON['Name'],
+      headers={ constants.jwtHeaderName: self.getNormalJWTToken()},
+      data=json.dumps(tenantJSON),
+      content_type='application/json'
+    )
+    self.assertEqual(result.status_code, 400, msg='Create should have failed')
+
+  def test_createAuth_vaultconfig(self):
+    resultJSON2 = self.setupFacebookAuthOnMainTenantForTests(facebookAuthProv001_CREATE_withVaultConfig)
+
+    expectedResult = copy.deepcopy(facebookAuthProv001_CREATE_withVaultConfig)
     expectedResult["StaticlyLoadedData"] = {"client_id": "FB_APP_ID"}
 
     self.assertJSONStringsEqualWithIgnoredKeys(resultJSON2["AuthProviders"][1], expectedResult, ["guid","saltForPasswordHashing","StaticlyLoadedData"], msg='JSON of facebook Auth provider not right')

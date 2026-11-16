@@ -13,13 +13,23 @@ def credentialDictGet_unique_access_token(credentialDICT):
   #print(credentialDICT)
   return credentialDICT["creds"]["accessToken"]
 
-def loadStaticData(fileName):
+def loadStaticData(config, appObj):
+  if 'clientSecretJSONFile' in config:
+    try:
+      ##print('authProviderFacebook loadStaticData')
+      with open(config['clientSecretJSONFile'], 'r') as f:
+        return json.load(f)
+    except FileNotFoundError:
+      raise CustomAuthProviderExceptionClass('Facebook secret file not found - ' + config['clientSecretJSONFile'], 'InvalidAuthConfigException')
+
   try:
-    ##print('authProviderFacebook loadStaticData')
-    with open(fileName, 'r') as f:
-      return json.load(f)
-  except FileNotFoundError:
-    raise CustomAuthProviderExceptionClass('Facebook secret file not found - ' + fileName, 'InvalidAuthConfigException')
+    sec_value = appObj.vaultClient.get_secret(config["clientSecretJSONVault"])
+    # Note mock references will in just return the reference exactly.
+    if sec_value == appObj.vaultClient.get_secret(config["clientSecretJSONVault"]):
+      sec_value = sec_value.replace("@a@", "\"")
+    return json.loads(sec_value)
+  except Exception:
+    raise CustomAuthProviderExceptionClass("Google secret not found in vault - " + config["clientSecretJSONVault"])
 
 
 class authProviderFacebook(authProvider):
@@ -27,14 +37,14 @@ class authProviderFacebook(authProvider):
     super().__init__(dataDict, guid, tenantName, tenantObj, appObj)
 
     if 'clientSecretJSONFile' not in dataDict['ConfigJSON']:
-      print('ERROR - clientSecretJSONFile not in authConfig')
-      raise InvalidAuthConfigException
+      if 'clientSecretJSONVault' not in dataDict['ConfigJSON']:
+        raise InvalidAuthConfigException
 
     #Only load the static data once
     if not self.hasStaticData():
       #print('Static data not present loading')
       staticDataValue = {
-        'secretJSON': loadStaticData(dataDict['ConfigJSON']['clientSecretJSONFile']),
+        'secretJSON': loadStaticData(config=dataDict['ConfigJSON'], appObj=self.appObj),
       }
       self.setStaticData(staticDataValue)
       if self.getStaticData()['secretJSON'] is None:

@@ -23,6 +23,17 @@ Step 4 -> Remove google secrets
 
 Then repeat for faceboob
 
+clientSecretJSONFile
+
+Tenants:
+usersystem: {"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}
+thumbsum: {"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}
+linkvis: {"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}
+thumbsumstage: {"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}
+challengeapp: {"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}
+
+
+
 # Gateway config
 The gateway config class puts extra claims in the JWT token to be read by a gateway
 In this case it just adds "kong_iss"
