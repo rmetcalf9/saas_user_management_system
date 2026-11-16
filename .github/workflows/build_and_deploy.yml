@@ -70,85 +70,87 @@ jobs:
           --build-arg QUASARBUILDMODE_ADMINFRONTEND="${QUASARBUILDMODE_ADMINFRONTEND}" \
           -t ghcr.io/${{ github.repository_owner }}/${PROJECT_NAME}:${RJM_VERSION} .
 
-#      - name: Build test image
-#        run: |
-#          source ./_repo_vars.sh && \
-#          docker build \
-#            -t ${DOCKER_USERNAME}/${PROJECT_NAME}test:develop \
-#            -f services/testContainer/Dockerfile services/testContainer
-#
-#      - name: Container level tests
-#        run: |
-#          source ./_repo_vars.sh && \
-#          docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from main_apptest
-#
-#      - name: Log in to GitHub Container Registry
-#        uses: docker/login-action@v3
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#
-#      - name: Push image to GitHub Container Registry
-#        run: |
-#          source ./_repo_vars.sh
-#          docker push ghcr.io/${{ github.repository_owner }}/${PROJECT_NAME}:${RJM_VERSION}
-#
-#      - name: Deploy to Docker Swarm
-#        run: |
-#          source ./_repo_vars.sh
-#          mkdir -p ~/.ssh
-#          chmod 700 ~/.ssh
-#
-#          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
-#          chmod 600 ~/.ssh/deploy_key
-#
-#          python3 - <<'PY' | ssh \
-#            -o IdentitiesOnly=yes \
-#            -o StrictHostKeyChecking=no \
-#            -o UserKnownHostsFile=/dev/null \
-#            -i ~/.ssh/deploy_key \
-#            -p "$SSH_PORT" \
-#            "$SSH_USER@$SSH_HOST"
-#
-#          import json
-#          import os
-#
-#          project_name = os.environ["PROJECT_NAME"]
-#          rjm_major_version = os.environ["RJM_MAJOR_VERSION"]
-#
-#          request = {
-#              "operation": "deploy",
-#              "version": os.environ["RJM_VERSION"],
-#              "project_name": project_name,
-#              "target_server": os.environ["TARGET_SERVER"],
-#              "docker_username": os.environ["DOCKER_USERNAME"],
-#              "gchr_pat": os.environ["GCHR_PAT"],
-#              "extra_environment": {
-#                  "APIAPP_DEFAULTHOMEADMINUSERNAME": "admin",
-#                  "APIAPP_APIURL": "https://api2.metcarob.com/api",
-#                  "APIAPP_APIDOCSURL": (
-#                      f"https://api2.metcarob.com/"
-#                      f"{project_name}/"
-#                      f"v{rjm_major_version}/public/web/apidocs"
-#                  ),
-#                  "APIAPP_FRONTENDURL": (
-#                      f"https://api2.metcarob.com/"
-#                      f"{project_name}/"
-#                      f"v{rjm_major_version}/public/web/frontend"
-#                  ),
-#                  "APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN": (
-#                      "https://api2.metcarob.com,"
-#                      "https://localhost,"
-#                      "http://localhost"
-#                  ),
-#                  "APIAPP_JWTSECRETVAULT": "/asfplatform/webapps/_common:APIAPP_JWTSECRET"
-#              }
-#          }
-#
-#          print(json.dumps(request))
-#          PY
-#
+      - name: Build test image
+        run: |
+          source ./_repo_vars.sh && \
+          docker build \
+            -t ${DOCKER_USERNAME}/${PROJECT_NAME}test:develop \
+            -f services/testContainer/Dockerfile services/testContainer
+
+      - name: Container level tests
+        run: |
+          source ./_repo_vars.sh && \
+          docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from main_apptest
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          source ./_repo_vars.sh
+          docker push ghcr.io/${{ github.repository_owner }}/${PROJECT_NAME}:${RJM_VERSION}
+
+      - name: Deploy to Docker Swarm
+        run: |
+          source ./_repo_vars.sh
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          python3 - <<'PY' | ssh \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -i ~/.ssh/deploy_key \
+            -p "$SSH_PORT" \
+            "$SSH_USER@$SSH_HOST"
+
+          import json
+          import os
+
+          project_name = os.environ["PROJECT_NAME"]
+          rjm_major_version = os.environ["RJM_MAJOR_VERSION"]
+
+          request = {
+              "operation": "deploy",
+              "version": os.environ["RJM_VERSION"],
+              "project_name": project_name,
+              "target_server": os.environ["TARGET_SERVER"],
+              "docker_username": os.environ["DOCKER_USERNAME"],
+              "gchr_pat": os.environ["GCHR_PAT"],
+              "extra_environment": {
+                  "APIAPP_DEFAULTHOMEADMINUSERNAME": "admin",
+                  "APIAPP_APIURL": "https://api2.metcarob.com/api",
+                  "APIAPP_APIDOCSURL": (
+                      f"https://api2.metcarob.com/"
+                      f"{project_name}/"
+                      f"v{rjm_major_version}/public/web/apidocs"
+                  ),
+                  "APIAPP_FRONTENDURL": (
+                      f"https://api2.metcarob.com/"
+                      f"{project_name}/"
+                      f"v{rjm_major_version}/public/web/frontend"
+                  ),
+                  "APIAPP_JWTSECRETVAULT": "/asfplatform/webapps/_common:APIAPP_JWTSECRET",
+                  "APIAPP_OBJECTSTOREDETAILLOGGING": "N",
+                  "APIAPP_PROJECT_NAME": f"{project_name}",
+                  "APIAPP_GATEWAYINTERFACECONFIGVAULT": "/asfplatform/webapps/saas_user_management/objectstore:gateway_config",
+                  "APIAPP_OBJECTSTORECONFIGVAULT": "/asfplatform/webapps/saas_user_management/objectstore:config",
+                  "APIAPP_MASTERPASSWORDFORPASSHASHVAULT": "/asfplatform/webapps/saas_user_management/objectstore:hashpw",
+                  "APIAPP_DEFAULTHOMEADMINPASSWORDVAULT": "/asfplatform/webapps/saas_user_management/objectstore:adminpw",
+                  "APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD": "https://api.metcarob.com,https://api2.metcarob.com,https://localhost,http://localhost"
+              }
+          }
+
+          print(json.dumps(request))
+          PY
+
 #      - name: Test the newly deployed container using test endpoint
 #        run: |
 #          source ./_repo_vars.sh && \
