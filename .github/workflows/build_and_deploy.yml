@@ -77,17 +77,17 @@ jobs:
             -t ${DOCKER_USERNAME}/${PROJECT_NAME}test:develop \
             -f services/testContainer/Dockerfile services/testContainer
 
-      - name: Container level tests
-        run: |
-          source ./_repo_vars.sh && \
-          docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from main_apptest
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Container level tests
+        run: |
+          source ./_repo_vars.sh && \
+          docker compose -f .github/compose-test.yml up --abort-on-container-exit --exit-code-from main_apptest
 
       - name: Push image to GitHub Container Registry
         run: |
