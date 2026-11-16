@@ -151,47 +151,47 @@ jobs:
           print(json.dumps(request))
           PY
 
-#      - name: Test the newly deployed container using test endpoint
-#        run: |
-#          source ./_repo_vars.sh && \
-#          sleep 5 && \
-#          docker run --rm \
-#            -e HTTPORIGIN_TO_TEST=https://api2.metcarob.com \
-#            -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user \
-#            -e APIAPP_DEFAULTHOMEADMINPASSWORD=${SAASCODEFRESHTESTUSERPASSWORD} \
-#            -e TESTPARAM_ENDPOINTURL=https://api2.metcarob.com/${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION} \
-#            -e TESTPARAM_THROUGHKONG="TRUE" \
-#            -e TESTPARAM_EXPECTED_CONTAINER_VERSION="${RJM_VERSION}" \
-#            ${DOCKER_USERNAME}/${PROJECT_NAME}test:develop \
-#            python3 -m pytest /test
-#
-#      - name: Switch to prod and clean up old services
-#        run: |
-#          mkdir -p ~/.ssh
-#          chmod 700 ~/.ssh
-#
-#          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
-#          chmod 600 ~/.ssh/deploy_key
-#
-#          python3 - <<'PY' | ssh \
-#            -o IdentitiesOnly=yes \
-#            -o StrictHostKeyChecking=no \
-#            -o UserKnownHostsFile=/dev/null \
-#            -i ~/.ssh/deploy_key \
-#            -p "$SSH_PORT" \
-#            "$SSH_USER@$SSH_HOST"
-#
-#          import json
-#          import os
-#
-#          project_name = os.environ["PROJECT_NAME"]
-#          rjm_major_version = os.environ["RJM_MAJOR_VERSION"]
-#
-#          request = {
-#              "operation": "deployprod",
-#              "version": os.environ["RJM_VERSION"],
-#              "project_name": project_name
-#          }
-#
-#          print(json.dumps(request))
-#          PY
+      - name: Test the newly deployed container using test endpoint
+        run: |
+          source ./_repo_vars.sh && \
+          sleep 5 && \
+          docker run --rm \
+            -e HTTPORIGIN_TO_TEST=https://api2.metcarob.com \
+            -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user \
+            -e APIAPP_DEFAULTHOMEADMINPASSWORD=${SAASCODEFRESHTESTUSERPASSWORD} \
+            -e TESTPARAM_ENDPOINTURL=https://api2.metcarob.com/${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION} \
+            -e TESTPARAM_THROUGHKONG="TRUE" \
+            -e TESTPARAM_EXPECTED_CONTAINER_VERSION="${RJM_VERSION}" \
+            ${DOCKER_USERNAME}/${PROJECT_NAME}test:develop \
+            python3 -m pytest /test
+
+      - name: Switch to prod and clean up old services
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          python3 - <<'PY' | ssh \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -i ~/.ssh/deploy_key \
+            -p "$SSH_PORT" \
+            "$SSH_USER@$SSH_HOST"
+
+          import json
+          import os
+
+          project_name = os.environ["PROJECT_NAME"]
+          rjm_major_version = os.environ["RJM_MAJOR_VERSION"]
+
+          request = {
+              "operation": "deployprod",
+              "version": os.environ["RJM_VERSION"],
+              "project_name": project_name
+          }
+
+          print(json.dumps(request))
+          PY
