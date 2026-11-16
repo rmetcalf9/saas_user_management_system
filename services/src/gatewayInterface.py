@@ -10,7 +10,7 @@ InvalidGatewayInterfaceConfigException = customExceptionClass('APIAPP_GATEWAYINT
 InvalidGatewayInterfaceTypeSpecifiedException = customExceptionClass('APIAPP_GATEWAYINTERFACECONFIG invalid Type')
 
 def getGatewayInterface(env, appObj):
-  APIAPP_GATEWAYINTERFACETYPE = getReadFromEnviromentFn(env, 'APIAPP_GATEWAYINTERFACECONFIG', '{"Type": "none"}', None, False, None)()
+  APIAPP_GATEWAYINTERFACETYPE = getReadFromEnviromentFn(env, 'APIAPP_GATEWAYINTERFACECONFIG', '{"Type": "none"}', None, False, appObj.vaultClient)()
   
   gatewayInterfaceTypeConfigDict = None
   try:
