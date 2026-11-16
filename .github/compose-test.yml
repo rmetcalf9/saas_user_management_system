@@ -1,6 +1,6 @@
 version: "2"
 services:
-  saas_user_management_system:
+  main_app:
     image: metcarob/saas_user_management:${RJM_VERSION}
     environment:
       APIAPP_VAULT_URL: "MOCK"
@@ -15,7 +15,7 @@ services:
       APIAPP_DEFAULTHOMEADMINPASSWORD: admin
       APIAPP_JWTSECRET: someDummy3245SecretForTesting
 
-  saas_user_management_systemtest:
+  main_apptest:
     image: metcarob/saas_user_managementtest:develop
     command: /ext_volume/run_tests_with_wait.sh
     environment:
