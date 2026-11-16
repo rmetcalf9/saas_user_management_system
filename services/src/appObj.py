@@ -94,7 +94,7 @@ class appObjClass(parAppObj):
       self.testingDefaultPersonGUID = conTestingDefaultPersonGUID
     self.authProviders_AppleJwtPubKeyCache = AuthProviders_AppleJwtPubKeyCache(self.isAppRunningInTestingMode)
 
-    super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='public/info')
+    super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='public/info', useVault=True)
 
     #This app always needs a JWT key
     if self.APIAPP_JWTSECRET is None:
