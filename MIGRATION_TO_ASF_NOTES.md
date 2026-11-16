@@ -33,6 +33,9 @@ thumbsumstage: {"clientSecretJSONFile": "/run/secrets/saas_user_management_syste
 challengeapp: {"clientSecretJSONFile": "/run/secrets/saas_user_management_system_authprov_facebook"}
 
 
+{"clientSecretJSONVault": "/asfplatform/webapps/saas_user_management/authprov_secret_files:facebook"}
+
+
 
 # Gateway config
 The gateway config class puts extra claims in the JWT token to be read by a gateway

@@ -155,7 +155,6 @@ jobs:
             --network main_net \
             --secret webapp_saas_user_management_vault_secret_id \
             --secret webapp_saas_user_management_vault_role_id \
-            --secret saas_user_management_system_authprov_facebook \
             -e APIAPP_VAULT_URL=https://vault.metcarob.com/ \
             -e APIAPP_VAULT_SECRET_IDFILE=/run/secrets/webapp_saas_user_management_vault_secret_id \
             -e APIAPP_VAULT_ROLE_IDFILE=/run/secrets/webapp_saas_user_management_vault_role_id \
