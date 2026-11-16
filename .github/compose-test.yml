@@ -1,7 +1,7 @@
 version: "2"
 services:
   main_app:
-    image: metcarob/saas_user_management:${RJM_VERSION}
+    image: ${DOCKER_USERNAME}/${PROJECT_NAME}:${RJM_VERSION}
     environment:
       APIAPP_VAULT_URL: "MOCK"
       APIAPP_VAULT_ROLE_ID: "MOCK"
@@ -16,7 +16,7 @@ services:
       APIAPP_JWTSECRET: someDummy3245SecretForTesting
 
   main_apptest:
-    image: metcarob/saas_user_managementtest:develop
+    image: ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}test:develop
     command: /ext_volume/run_tests_with_wait.sh
     environment:
       EXPECTED_CONTAINER_VERSION: ${RJM_VERSION}
