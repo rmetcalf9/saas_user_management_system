@@ -155,11 +155,6 @@ jobs:
             --network main_net \
             --secret webapp_saas_user_management_vault_secret_id \
             --secret webapp_saas_user_management_vault_role_id \
-            --secret saas_user_management_system_objectstore_config_dynamodb \
-            --secret saas_user_management_system_objectstore_hashpw \
-            --secret saas_user_management_system_objectstore_adminpw \
-            --secret saas_user_management_system_gateway_config \
-            --secret saas_jwtsecret \
             --secret saas_user_management_system_authprov_google \
             --secret saas_user_management_system_authprov_facebook \
             --secret saas_user_management_system_authprov_saassocial_google \
@@ -168,10 +163,10 @@ jobs:
             -e APIAPP_VAULT_ROLE_IDFILE=/run/secrets/webapp_saas_user_management_vault_role_id \
             -e APIAPP_PROJECT_NAME=${PROJECT_NAME} \
             -e APIAPP_JWTSECRETVAULT=/asfplatform/webapps/_common:APIAPP_JWTSECRET \
-            -e APIAPP_GATEWAYINTERFACECONFIGFILE=/run/secrets/saas_user_management_system_gateway_config \
-            -e APIAPP_OBJECTSTORECONFIGFILE=/run/secrets/saas_user_management_system_objectstore_config_dynamodb \
-            -e APIAPP_MASTERPASSWORDFORPASSHASHFILE=/run/secrets/saas_user_management_system_objectstore_hashpw \
-            -e APIAPP_DEFAULTHOMEADMINPASSWORDFILE=/run/secrets/saas_user_management_system_objectstore_adminpw \
+            -e APIAPP_GATEWAYINTERFACECONFIGVAULT=/asfplatform/webapps/saas_user_management/objectstore:gateway_config \
+            -e APIAPP_OBJECTSTORECONFIGVAULT=/asfplatform/webapps/saas_user_management/objectstore:config \
+            -e APIAPP_MASTERPASSWORDFORPASSHASHVAULT=/asfplatform/webapps/saas_user_management/objectstore:hashpw \
+            -e APIAPP_DEFAULTHOMEADMINPASSWORDVAULT=/asfplatform/webapps/saas_user_management/objectstore:adminpw \
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin \
             -e APIAPP_APIURL=https://api.metcarob.com/api \
             -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v${RJM_MAJOR_VERSION}/public/web/apidocs \

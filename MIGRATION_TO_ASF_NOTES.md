@@ -45,3 +45,23 @@ These are read into the template as
 
 I think I can add this to my memset deploy for this
 
+
+
+Secrets got rid of:
+--secret saas_jwtsecret \  (Shared)
+
+--secret saas_user_management_system_objectstore_config_dynamodb APIAPP_OBJECTSTORECONFIGFILE
+/asfplatform/webapps/saas_user_management/objectstore:config
+
+--secret saas_user_management_system_objectstore_hashpw APIAPP_MASTERPASSWORDFORPASSHASHFILE
+/asfplatform/webapps/saas_user_management/objectstore:hashpw
+
+--secret saas_user_management_system_objectstore_adminpw APIAPP_DEFAULTHOMEADMINPASSWORDFILE
+/asfplatform/webapps/saas_user_management/objectstore:adminpw
+
+--secret saas_user_management_system_gateway_config APIAPP_GATEWAYINTERFACECONFIGFILE
+/asfplatform/webapps/saas_user_management/objectstore:gateway_config
+
+
+
+TODO Investifate gateway_config - it refers to kong. how is it being used
