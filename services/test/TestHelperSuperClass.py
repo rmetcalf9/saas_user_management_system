@@ -73,6 +73,9 @@ sampleInternalAuthProv001_CREATE_WithAllowUserCreation = copy.deepcopy(sampleInt
 sampleInternalAuthProv001_CREATE_WithAllowUserCreation['AllowUserCreation'] = True
 
 env = {
+  'APIAPP_VAULT_URL': 'MOCK',
+  'APIAPP_VAULT_ROLE_ID': 'MOCK',
+  'APIAPP_VAULT_SECRET_ID': 'MOCK',
   'APIAPP_PROJECT_NAME': 'saas_user_management',
   'APIAPP_MODE': 'DOCKER',
   'APIAPP_JWTSECRET': 'DOsaddsaCKER',
