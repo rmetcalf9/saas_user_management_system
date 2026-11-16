@@ -18,8 +18,8 @@ I can not see saas_user_management_system_authprov_saassocial_google used anywhe
 Step 1 -> Make google work with either
 clientSecretJSONFile or clientSecretJSONVault
 Step 2 -> Migrate all to vault
-Step 3 -> Remove File option
 Step 4 -> Remove google secrets
+
 
 Then repeat for faceboob
 
