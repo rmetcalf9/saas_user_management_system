@@ -3,6 +3,8 @@ FROM python:3.11-bookworm
 MAINTAINER Robert Metcalf
 
 ARG PROJECT_NAME
+ARG QUASARBUILDMODE_FRONTEND
+ARG QUASARBUILDMODE_ADMINFRONTEND
 ENV APIAPP_PROJECT_NAME=${PROJECT_NAME}
 
 ENV APP_DIR /app
@@ -40,8 +42,8 @@ RUN apt-get update && apt-get install -y ca-certificates build-essential libpcre
 COPY ./services/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirements.txt
 
-COPY ./frontend/dist/spa ${APIAPP_FRONTEND_FRONTEND}
-COPY ./adminfrontend/dist/pwa ${APIAPP_FRONTEND_ADMINFRONTEND}
+COPY ./frontend/dist/${QUASARBUILDMODE_FRONTEND} ${APIAPP_FRONTEND_FRONTEND}
+COPY ./adminfrontend/dist/${QUASARBUILDMODE_ADMINFRONTEND} ${APIAPP_FRONTEND_ADMINFRONTEND}
 COPY ./VERSION /VERSION
 COPY ./services/run_app_docker.sh /run_app_docker.sh
 COPY ./nginx_default.conf /etc/nginx/conf.d/default.conf

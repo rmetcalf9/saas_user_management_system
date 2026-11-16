@@ -18,6 +18,10 @@ export AUTHED_ACL_WHITELIST="saas_user_management"
 export AUTHED_ACL_BLACKLIST=""
 export RJM_KONG_UPSTREAM_NAME=${PROJECT_NAME}_${RJM_MAJOR_VERSION}
 
+## frontend and adminfrontend are different
+export QUASARBUILDMODE_FRONTEND=spa
+export QUASARBUILDMODE_ADMINFRONTEND=pwa
+
 export RJM_PYTHON_TEST_IMAGE=python:3.10
 
 export DOCKER_USERNAME=metcarob
