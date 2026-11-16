@@ -17,30 +17,77 @@ def getHashedPasswordUsingSameMethodAsJavascriptFrontendShouldUse(appObj, userna
 
   return res
 
-def _INT_hashPassword(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
-  #Used for debugging - not in main code as would be security risk
-  #print("_INT_hashPassword call with:")
-  #print(" - APIAPP_MASTERPASSWORDFORPASSHASH:", APIAPP_MASTERPASSWORDFORPASSHASH, ' (', type(APIAPP_MASTERPASSWORDFORPASSHASH), ')')
-  #print(" - password:", password, ' (', type(password), ')')
-  #print(" - salt:", salt, ' (', type(salt), ')')
+import hashlib
+import hmac
 
-  masterSecretKey = (constants.masterInternalAuthTypePassword + "f" + APIAPP_MASTERPASSWORDFORPASSHASH)
-  if (type(password)) is not bytes:
-    #print(type(password))
-    raise Exception('Password passed to hashPassword must be bytes')
-    #password = bytes(password, 'utf-8')
-  #raise Exception(type(salt))
-  if (type(salt)) is not bytes:
-    print ("ERROR Type of SALT is ", type(salt))
-    print ("  - salt:", salt)
-    raise Exception('Salt passed to hashPassword must be bytes')
+new_password_hash_version = 2
+def _INT_hashPassword_for_new_passwords(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
+  return hash_password(new_password_hash_version, APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt)
+
+def hash_password(hash_version, APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
+  if not isinstance(password, bytes):
+    raise TypeError("Password must be bytes")
+
+  if not isinstance(salt, bytes):
+    raise TypeError("Salt must be bytes")
+
+  if hash_version == 1:
+    return _INT_hashPasswordLegacy(
+      APIAPP_MASTERPASSWORDFORPASSHASH,
+      bcryptObj,
+      password,
+      salt
+    )
+  elif hash_version == 2:
+    return _INT_hashPasswordV2(
+      APIAPP_MASTERPASSWORDFORPASSHASH,
+      bcryptObj,
+      password,
+      salt
+    )
+  else:
+    raise Exception("Unsupported password hash version: " + str(hash_version))
+
+def _INT_hashPasswordLegacy(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
+    """
+    Original hashing algorithm.
+    Reproduces the behaviour of bcrypt versions that silently truncated
+    passwords longer than 72 bytes.
+    """
+    masterSecretKey = (
+        constants.masterInternalAuthTypePassword
+        + "f"
+        + APIAPP_MASTERPASSWORDFORPASSHASH
+    )
+    combo_password = password + salt + str.encode(masterSecretKey)
+
+    # Required for compatibility with existing bcrypt hashes.
+    combo_password = combo_password[:72]
+
+    return bcryptObj.hashpw(combo_password, salt)
+
+
+def _INT_hashPasswordV2(APIAPP_MASTERPASSWORDFORPASSHASH, bcryptObj, password, salt):
+  """
+  Version 2 hashing algorithm.
+  SHA-256 + Base64 preprocessing ensures bcrypt receives UTF-8-safe bytes.
+  """
+
+  masterSecretKey = (
+          constants.masterInternalAuthTypePassword
+          + "f"
+          + APIAPP_MASTERPASSWORDFORPASSHASH
+  )
+
   combo_password = password + salt + str.encode(masterSecretKey)
-  hashed_password = bcryptObj.hashpw(combo_password, salt)
 
-  #print("Resulting hashed password:")
-  #print("hashed_password:", hashed_password, ' (', type(APIAPP_MASTERPASSWORDFORPASSHASH), ')')
+  # SHA-256 produces 32 binary bytes.
+  digest = hashlib.sha256(combo_password).digest()
 
-  return hashed_password
+  # Base64 produces ASCII-compatible bytes (44 bytes).
+  combo_password = b64encode(digest)
+
+  return bcryptObj.hashpw(combo_password, salt)
 
 class authProviderInternal(authProvider):
   def __init__(self, dataDict, guid, tenantName, tenantObj, appObj):
@@ -66,8 +113,9 @@ class authProviderInternal(authProvider):
     self.__normalizeCredentialDICT(credentialDICT)
     salt = appObj.bcrypt.gensalt()
     objToStore = {
-      "password": _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], salt),
-      "salt": salt
+      "password": _INT_hashPassword_for_new_passwords(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], salt),
+      "salt": salt,
+      "hashVersion": new_password_hash_version
     }
     return objToStore
 
@@ -87,13 +135,22 @@ class authProviderInternal(authProvider):
 
     if obj["AuthProviderJSON"]['salt'].__class__.__name__ != "bytes":
       raise Exception("ERROR - authproviderJSON Salt retrieved from UserAuth in dynamoDB is not bytes - it is " + obj["AuthProviderJSON"]['salt'].__class__.__name__ )
-    hashedPass = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, credentialDICT['password'], obj["AuthProviderJSON"]['salt'])
 
-    if hashedPass != obj["AuthProviderJSON"]['password']:
-      #print("DEBUG LING IN AUTHPROVIDERS_INTERNAL TO BE REMOVED")
-      #print("Auth failed - hashedpass mismatch -")
-      #print("RECANDHASHED=" + str(hashedPass))
-      #print("      FROMDB=" + str(obj["AuthProviderJSON"]['password']))
+    # get the hashversion but default to 1 if it is not there
+    hashVersion = obj["AuthProviderJSON"].get('hashVersion', 1)
+
+    hashedPass = hash_password(
+      hash_version=hashVersion,
+      APIAPP_MASTERPASSWORDFORPASSHASH=appObj.APIAPP_MASTERPASSWORDFORPASSHASH,
+      bcryptObj=appObj.bcrypt,
+      password=credentialDICT['password'],
+      salt=obj["AuthProviderJSON"]['salt']
+    )
+
+    if not hmac.compare_digest(
+            hashedPass,
+            obj["AuthProviderJSON"]['password']
+    ):
       raise constants.authFailedException
 
   def _getTypicalAuthData(self, credentialDICT):
@@ -113,12 +170,27 @@ class authProviderInternal(authProvider):
     if (type(operationDICT["newPassword"])) is not bytes:
       operationDICT["newPassword"] = bytes(operationDICT["newPassword"], 'utf-8')
 
-    newHashedPassword = _INT_hashPassword(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, operationDICT["newPassword"], authObj['AuthProviderJSON']['salt'])
-    if newHashedPassword == authObj['AuthProviderJSON']['password']:
-      raise constants.customExceptionClass('ERROR - New password matches origional','authopException')
+    new_password_hashed_with_old_method = hash_password(
+      hash_version=authObj['AuthProviderJSON'].get('hashVersion', 1),
+      APIAPP_MASTERPASSWORDFORPASSHASH=appObj.APIAPP_MASTERPASSWORDFORPASSHASH,
+      bcryptObj=appObj.bcrypt,
+      password=operationDICT["newPassword"],
+      salt=authObj['AuthProviderJSON']['salt']
+    )
+    if hmac.compare_digest(
+            new_password_hashed_with_old_method,
+            authObj['AuthProviderJSON']['password']
+    ):
+      raise constants.customExceptionClass('ERROR - New password matches original','authopException')
 
+    newSalt = appObj.bcrypt.gensalt()
+
+    newHashedPassword = _INT_hashPassword_for_new_passwords(appObj.APIAPP_MASTERPASSWORDFORPASSHASH, appObj.bcrypt, operationDICT["newPassword"], newSalt)
     authObj['AuthProviderJSON']['password'] = newHashedPassword
+    authObj['AuthProviderJSON']['salt'] = newSalt
+    authObj['AuthProviderJSON']['hashVersion'] = new_password_hash_version
     resultValue = {}
+
     return resultValue, authObj
 
   def requireRegisterCallToAutocreateUser(self):
