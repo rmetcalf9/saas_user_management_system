@@ -35,5 +35,3 @@ export VAULT_DEPLOYMENT_APPROLE_SECRET_LOCATION=/deploymentapproles/deploy_${PRO
 
 export TARGET_SERVER="vx5-jt8u19"
 
-export SAASCODEFRESHTESTUSERPASSWORD="unused"
-

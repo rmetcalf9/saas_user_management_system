@@ -36,7 +36,8 @@ jobs:
             kv/data/asfplatform/webapps/${{ env.PROJECT_NAME }}/ssh private_key | SSH_KEY ;
             kv/data/asfplatform/webapps/${{ env.PROJECT_NAME }}/ssh ssh_port | SSH_PORT ;
             kv/data/asfplatform/webapps/${{ env.PROJECT_NAME }}/ssh ssh_host | SSH_HOST ;
-            kv/data/asfplatform/webapps/${{ env.PROJECT_NAME }}/ssh ssh_user | SSH_USER
+            kv/data/asfplatform/webapps/${{ env.PROJECT_NAME }}/ssh ssh_user | SSH_USER ;
+            kv/data/asfplatform/webapps/saas_user_management/smoketest SAASCODEFRESHTESTUSERPASSWORD | SAASCODEFRESHTESTUSERPASSWORD ;
 
       - name: Unit tests
         run: |
