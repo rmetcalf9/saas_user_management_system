@@ -123,8 +123,11 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
     print("Sending " + method + " to ", targetURL)
     if dataDICT is not None:
       print(" data:", dataDICT)
+    if "Origin" in _headers:
+      print(f"Header has an orgin={_headers['Origin']}")
     print("Got response ",result.status_code)
     print("     ",result.text)
+    print(f"Expected result status code: {expectedResponses}")
     raise Exception("Did not get expected response")
   if api in [LOGIN, ADMIN, SERVERINFO]:
     return json.loads(result.text), result.status_code
