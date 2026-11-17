@@ -34,3 +34,6 @@ export RJM_USERMANAGEMENT_CONTAINER="metcarob/saas_user_management:0.0.224_nonko
 export VAULT_DEPLOYMENT_APPROLE_SECRET_LOCATION=/deploymentapproles/deploy_${PROJECT_NAME}
 
 export TARGET_SERVER="vx5-jt8u19"
+
+export SAASCODEFRESHTESTUSERPASSWORD="unused"
+
