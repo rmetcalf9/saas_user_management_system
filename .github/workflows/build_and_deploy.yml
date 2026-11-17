@@ -159,7 +159,7 @@ jobs:
             -e HTTPORIGIN_TO_TEST=https://api2.metcarob.com \
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user \
             -e APIAPP_DEFAULTHOMEADMINPASSWORD=${SAASCODEFRESHTESTUSERPASSWORD} \
-            -e TESTPARAM_ENDPOINTURL=https://api2.metcarob.com/${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION} \
+            -e BASEURL_TO_TEST=https://api2.metcarob.com/${PROJECT_NAME}/test/v${RJM_MAJOR_VERSION} \
             -e RUNNINGVIAKONG="TRUE" \
             -e EXPECTED_CONTAINER_VERSION="${RJM_VERSION}" \
             ${DOCKER_USERNAME}/${PROJECT_NAME}test:develop \
