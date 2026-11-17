@@ -124,7 +124,7 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
     if dataDICT is not None:
       print(" data:", dataDICT)
     if "Origin" in _headers:
-      print(f"Header has an orgin={_headers['Origin']}")
+      print(f"Header Origin: {_headers['Origin']}")
     print("Got response ",result.status_code)
     print("     ",result.text)
     print(f"Expected result status code: {expectedResponses}")
