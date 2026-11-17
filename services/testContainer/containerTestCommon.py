@@ -6,6 +6,7 @@ import copy_of_main_constants_do_not_edit as constants
 import bcrypt
 from base64 import b64decode
 import copy
+from baseapp_for_restapi_backend_with_swagger import getInvalidEnvVarParamaterException
 
 securityTestAPIEndpoint = '/securityTestEndpoint'
 
