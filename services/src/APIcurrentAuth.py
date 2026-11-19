@@ -77,7 +77,7 @@ def requiredInPayload(content, fieldList):
 
 
 def registerAPI(appObj):
-  nsCurAuth = appObj.flastRestPlusAPIObject.namespace('authed/currentAuth', description='API for accessing functions for the currently authed user/person.')
+  nsCurAuth = appObj.flastRestPlusAPIObject.namespace('private/currentAuth', description='API for accessing functions for the currently authed user/person.')
 
   @nsCurAuth.route('/<string:tenant>/currentAuthInfo')
   class currentAuthInfo(Resource):

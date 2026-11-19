@@ -256,8 +256,8 @@ class testClassWithTestClient(testHelperSuperClass):
 
   serverinfoAPIPrefix = '/api/public/info'
   loginAPIPrefix = '/api/public/login'
-  adminAPIPrefix = '/api/authed/admin'
-  currentAuthAPIPrefix = '/api/authed/currentAuth'
+  adminAPIPrefix = '/api/private/admin'
+  currentAuthAPIPrefix = '/api/private/currentAuth'
 
   def _getEnvironment(self):
     raise Exception("Should be overridden")

@@ -26,7 +26,7 @@ class APIAdminCommonClass():
 
 
 def registerAPI(appObj):
-  nsAdmin = appObj.flastRestPlusAPIObject.namespace('authed/admin', description='API for accessing admin functions.')
+  nsAdmin = appObj.flastRestPlusAPIObject.namespace('private/admin', description='API for accessing admin functions.')
 
   APIadmin_Legacy.registerAPI(appObj=appObj, APIAdminCommon=APIAdminCommonClass(), nsAdmin=nsAdmin)
   APIadmin_Tickets.registerAPI(appObj=appObj, APIAdminCommon=APIAdminCommonClass(), nsAdmin=nsAdmin)

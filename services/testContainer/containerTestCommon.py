@@ -14,7 +14,7 @@ securityTestAPIEndpoint = '/securityTestEndpoint'
 ## They are reversed because container test go through nginx which switches them abound
 serverinfoAPIPrefix = '/public/api/info'
 loginAPIPrefix = '/public/api/login'
-adminAPIPrefix = '/authed/api/admin'
+adminAPIPrefix = '/private/api/admin'
 
 
 baseURL="http://saas_user_management_system:80"

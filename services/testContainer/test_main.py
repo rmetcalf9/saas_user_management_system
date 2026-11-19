@@ -53,7 +53,7 @@ class test_containerAPI(unittest.TestCase):
       print("Skipping test_testNormalJWTHeader as this won't work via Kong - Kong can not read custom headers")
       return
 
-    #https://api2.metcarob.com/saas_user_management/v0/authed/api/admin/usersystem/users?query=code&pagesize=100&offset=0
+    #https://api2.metcarob.com/saas_user_management/v0/private/api/admin/usersystem/users?query=code&pagesize=100&offset=0
     loginDICT = containerTestCommon.getLoginDICTForDefaultUser(self)
     jwtToken = loginDICT['jwtData']['JWTToken']
     headers = {}

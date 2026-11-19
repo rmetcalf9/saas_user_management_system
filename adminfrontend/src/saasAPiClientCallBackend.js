@@ -21,7 +21,7 @@ const apiPrefixes = {
     endpoint: saasServiceName,
     path: '/admin',
     storeFn: authedStoreFn,
-    orveridePublicPrivatePart: 'authed'
+    orveridePublicPrivatePart: 'private'
   }
 }
 

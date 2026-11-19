@@ -11,7 +11,7 @@ The frontend is the userinterface for the management system
  | API Docs            | http://host:8098/apidocs/          | http://host:80/public/web/apidocs/          | https://api2.metcarob.com/saas_user_management/test/v0/public/web/apidocs/       |                                           |
  | public login API    | http://host:8098/api/public/login/ | http://host:80/public/api/login/            | https://api2.metcarob.com/saas_user_management/test/v0/public/api/login/         | http://host:X/api/public/login/XXserverinfo |
  | public serverinfo API    | http://host:8098/api/public/login/ | http://host:80/public/api/info/            | https://api2.metcarob.com/saas_user_management/test/v0/public/api/info/         | http://host:X/api/public/info/serverinfo |
- | authed admin API    | http://host:8098/api/authed/admin/ | http://host:80/authed/api/admin/            | https://api2.metcarob.com/saas_user_management/test/v0/authed/api/admin/         |                                           |
+ | authed admin API    | http://host:8098/api/private/admin/ | http://host:80/private/api/admin/            | https://api2.metcarob.com/saas_user_management/test/v0/private/api/admin/         |                                           |
 
 Note: due to Python limitations the API switchs from /api/public to /public/api because python needs it one way and Kong security needs it the other way round. This is only for the api section and dosen't affect the web.
 
@@ -22,7 +22,7 @@ Endpoints setup in Kong
  | Endpoint in Kong | Endpoint mapped to on server | Notes |
  |---|---|---|
  | /vx/public | /public | |
- | /vx/authed | /authed | Verifies JWT Tokens |
+ | /vx/private | /private | Verifies JWT Tokens |
 
 Nginx paths: (In docker container nginx servers on single port)
 
@@ -31,7 +31,7 @@ Nginx paths: (In docker container nginx servers on single port)
  | /public/web/frontend | frontend dist folder |
  | /public/web/adminfrontend | adminfrontend dist folder |
  | /public/api | /api/public |
- | /authed/api | /api/authed |
+ | /private/api | /api/private |
 
 On development machine these must run on different ports, accessed by root on all:
  - /vx/public/__web__/frontend  -> / (8091)
@@ -52,8 +52,8 @@ Direct on Server: http://somefunnyhostname.com:5098/api/public/login/serverinfo
 
 ## Example Authed API Access
 
-External Through Kong: https://somefunnyhostname.com/vx/authed/api/admin/tenantname/tenants
-Direct on Server: http://somefunnyhostname.com:5098/api/authed/admin/tenantname/tenants
+External Through Kong: https://somefunnyhostname.com/vx/private/api/admin/tenantname/tenants
+Direct on Server: http://somefunnyhostname.com:5098/api/private/admin/tenantname/tenants
 
 
 ## For webapps calling service
@@ -69,6 +69,6 @@ authed is true or false
 api is "/admin/tenantname/tenants" or "/login/serverinfo"
 
 If Authed this maps to:
-apiPrefix + '/authed/api' + api
+apiPrefix + '/private/api' + api
 Not Authed:
 apiPrefix + '/public/api' + api
