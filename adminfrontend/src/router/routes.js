@@ -4,7 +4,7 @@ import { useGlobalValsStore } from 'stores/globalValsStore'
 import { Cookies } from 'quasar'
 import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
-const prodDomain = 'platform.challengeswipe.com'
+const prodDomain = 'api2.metcarob.com'
 const preferredTenantName = 'usersystem'
 export const saasServiceName = 'saas_user_management'
 export const projectName = 'saas_user_management' // Must match what is output from _repo_vars PROJECT_NAME

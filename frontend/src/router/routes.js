@@ -4,7 +4,7 @@ import { useInputParamsStore } from 'stores/inputParams'
 import { Cookies } from 'quasar'
 import saasApiClientServerRequestQueue from '../saasApiClientServerRequestQueue'
 
-const prodDomain = 'api.metcarob.com'
+const prodDomain = 'api2.metcarob.com'
 const preferredTenantName = 'user_management'
 export const saasServiceName = 'saas_' + preferredTenantName
 export const projectName = 'saas_user_management' // Must match what is output from _repo_vars PROJECT_NAME
