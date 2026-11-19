@@ -6,12 +6,12 @@ The frontend is the userinterface for the management system
 
  | Type of Access      | run_all_parts_on_dev_machine       | Container on dev machine (expose port 80)   | container via Kong redirects (test) | Nice Test URL                                    |
  |---|---|---|---|---|
- | login Webpage       | http://host:8081/                  | http://host:80/public/web/frontend/#/       | https://api.metcarob.com/saas_user_management/test/v0/public/web/frontend/      | http://host:X/frontend/#/                 |
- | login Admin Webpage | http://host:8082/                  | http://host:80/public/web/adminfrontend/#/  | https://api.metcarob.com/saas_user_management/test/v0/public/web/adminfrontend/ | http://host:X/adminfrontend/#/usersystem  |
- | API Docs            | http://host:8098/apidocs/          | http://host:80/public/web/apidocs/          | https://api.metcarob.com/saas_user_management/test/v0/public/web/apidocs/       |                                           |
- | public login API    | http://host:8098/api/public/login/ | http://host:80/public/api/login/            | https://api.metcarob.com/saas_user_management/test/v0/public/api/login/         | http://host:X/api/public/login/XXserverinfo |
- | public serverinfo API    | http://host:8098/api/public/login/ | http://host:80/public/api/info/            | https://api.metcarob.com/saas_user_management/test/v0/public/api/info/         | http://host:X/api/public/info/serverinfo |
- | authed admin API    | http://host:8098/api/authed/admin/ | http://host:80/authed/api/admin/            | https://api.metcarob.com/saas_user_management/test/v0/authed/api/admin/         |                                           |
+ | login Webpage       | http://host:8081/                  | http://host:80/public/web/frontend/#/       | https://api2.metcarob.com/saas_user_management/test/v0/public/web/frontend/      | http://host:X/frontend/#/                 |
+ | login Admin Webpage | http://host:8082/                  | http://host:80/public/web/adminfrontend/#/  | https://api2.metcarob.com/saas_user_management/test/v0/public/web/adminfrontend/ | http://host:X/adminfrontend/#/usersystem  |
+ | API Docs            | http://host:8098/apidocs/          | http://host:80/public/web/apidocs/          | https://api2.metcarob.com/saas_user_management/test/v0/public/web/apidocs/       |                                           |
+ | public login API    | http://host:8098/api/public/login/ | http://host:80/public/api/login/            | https://api2.metcarob.com/saas_user_management/test/v0/public/api/login/         | http://host:X/api/public/login/XXserverinfo |
+ | public serverinfo API    | http://host:8098/api/public/login/ | http://host:80/public/api/info/            | https://api2.metcarob.com/saas_user_management/test/v0/public/api/info/         | http://host:X/api/public/info/serverinfo |
+ | authed admin API    | http://host:8098/api/authed/admin/ | http://host:80/authed/api/admin/            | https://api2.metcarob.com/saas_user_management/test/v0/authed/api/admin/         |                                           |
 
 Note: due to Python limitations the API switchs from /api/public to /public/api because python needs it one way and Kong security needs it the other way round. This is only for the api section and dosen't affect the web.
 

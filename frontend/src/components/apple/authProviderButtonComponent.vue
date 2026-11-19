@@ -106,7 +106,7 @@ export default defineComponent({
     window.AppleID.auth.init({
       clientId: JSON.parse(TTT.authProvider.ConfigJSON).service_id,
       scope: 'name email',
-      redirectURI: 'https://api.metcarob.com/auth/apple/callback',
+      redirectURI: 'https://api2.metcarob.com/auth/apple/callback',
       usePopup: true
     })
   }

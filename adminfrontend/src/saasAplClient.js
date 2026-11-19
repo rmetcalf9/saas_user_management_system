@@ -11,7 +11,7 @@ import saasApiClientEndpointIdentificationProcess from './saasApiClientEndpointI
 const loginFrontendIsDev = true
 
 // Change this variable to use different major versions of login service
-const prodLoginServiceBaseURL = 'https://api.metcarob.com/saas_user_management/v0/'
+const prodLoginServiceBaseURL = 'https://api2.metcarob.com/saas_user_management/v0/'
 
 function finishEndPointIdentificationHook (rjmStateChange, { serverInfo, apiPrefix }) {
   // Do nothing
@@ -98,8 +98,7 @@ export function registerEndpointsWithStore (params) {
       tenantName: params.tenantName
     })
 
-    // https://api.metcarob.com/saas_linkvis/v0
-    const possibleApiPrefixes = [{ prefix: 'https://api.metcarob.com/' + params.saasServiceName + '/v' + majorCodeVersion, connectingthroughnginx: true, apitype: 'public' }]
+    const possibleApiPrefixes = [{ prefix: 'https://api2.metcarob.com/' + params.saasServiceName + '/v' + majorCodeVersion, connectingthroughnginx: true, apitype: 'public' }]
     rjmStateChange.executeAction('registerEndpoint', {
       endpointName: params.saasServiceName,
       apiPrefixIdentificationProcessConfig: {
@@ -110,7 +109,7 @@ export function registerEndpointsWithStore (params) {
   } else {
     const prodVer = getProdVer(window.location.href, params.saasServiceName)
     if (prodVer.prod) {
-      // Running in prod but from api.metcarob.com
+      // Running in prod but from api2.metcarob.com
       console.log('PROD taking api version from url ', params.runtype)
       rjmStateChange.executeAction('registerLoginEndpoint', {
         baseUrl: prodLoginServiceBaseURL,

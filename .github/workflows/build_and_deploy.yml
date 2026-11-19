@@ -147,7 +147,7 @@ jobs:
                   "APIAPP_OBJECTSTORECONFIGVAULT": "/asfplatform/webapps/saas_user_management/objectstore:config",
                   "APIAPP_MASTERPASSWORDFORPASSHASHVAULT": "/asfplatform/webapps/saas_user_management/objectstore:hashpw",
                   "APIAPP_DEFAULTHOMEADMINPASSWORDVAULT": "/asfplatform/webapps/saas_user_management/objectstore:adminpw",
-                  "APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD": "https://api.metcarob.com,https://api2.metcarob.com,https://localhost,http://localhost"
+                  "APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD": "https://api2.metcarob.com,https://api2.metcarob.com,https://localhost,http://localhost"
               }
           }
 

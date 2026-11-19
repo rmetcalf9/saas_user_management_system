@@ -168,10 +168,10 @@ jobs:
             -e APIAPP_MASTERPASSWORDFORPASSHASHVAULT=/asfplatform/webapps/saas_user_management/objectstore:hashpw \
             -e APIAPP_DEFAULTHOMEADMINPASSWORDVAULT=/asfplatform/webapps/saas_user_management/objectstore:adminpw \
             -e APIAPP_DEFAULTHOMEADMINUSERNAME=admin \
-            -e APIAPP_APIURL=https://api.metcarob.com/api \
-            -e APIAPP_APIDOCSURL=https://api.metcarob.com/saas_user_management/v${RJM_MAJOR_VERSION}/public/web/apidocs \
-            -e APIAPP_FRONTENDURL=https://api.metcarob.com/saas_user_management/v${RJM_MAJOR_VERSION}/public/web/frontend \
-            -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api.metcarob.com,https://localhost,http://localhost" \
+            -e APIAPP_APIURL=https://api2.metcarob.com/api \
+            -e APIAPP_APIDOCSURL=https://api2.metcarob.com/saas_user_management/v${RJM_MAJOR_VERSION}/public/web/apidocs \
+            -e APIAPP_FRONTENDURL=https://api2.metcarob.com/saas_user_management/v${RJM_MAJOR_VERSION}/public/web/frontend \
+            -e APIAPP_DEFAULTMASTERTENANTJWTCOLLECTIONALLOWEDORIGINFIELD="https://api2.metcarob.com,https://localhost,http://localhost" \
             -e APIAPP_OBJECTSTOREDETAILLOGGING="N" \
             --constraint 'node.labels.legacy == true' \
             "metcarob/saas_user_management:${RJM_VERSION}"

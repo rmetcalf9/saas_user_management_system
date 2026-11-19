@@ -43,7 +43,7 @@ cli_secret_value = {
     "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
     "client_secret":"some_secret",
     "redirect_uris":["https://localhost"],
-    "javascript_origins":["https://api.metcarob.com"]
+    "javascript_origins":["https://api2.metcarob.com"]
   }
 }
 googleAuthProv002_CREATE_withVaultConfig['ConfigJSON'] = '{"clientSecretJSONVault": "' + json.dumps(cli_secret_value).replace("\"", "@a@") + '"}'

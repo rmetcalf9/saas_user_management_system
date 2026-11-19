@@ -7,7 +7,7 @@ import saasApiClientEndpointIdentificationProcess from './saasApiClientEndpointI
 import saasApiClientServerRequestQueue from './saasApiClientServerRequestQueue'
 
 // Change this variable to use different major bersions of login service
-const prodLoginServiceBaseURL = 'https://api.metcarob.com/saas_user_management/v0/'
+const prodLoginServiceBaseURL = 'https://api2.metcarob.com/saas_user_management/v0/'
 
 function finishEndPointIdentificationHook (rjmStateChange, { serverInfo, apiPrefix }) {
   // Do nothing
@@ -93,8 +93,8 @@ export function registerEndpointsWithStore (params) {
       tenantName: params.tenantName
     })
 
-    // https://api.metcarob.com/saas_linkvis/v0
-    const possibleApiPrefixes = [{ prefix: 'https://api.metcarob.com/' + params.saasServiceName + '/v' + majorCodeVersion, connectingthroughnginx: true, apitype: 'public' }]
+    // https://api2.metcarob.com/saas_linkvis/v0
+    const possibleApiPrefixes = [{ prefix: 'https://api2.metcarob.com/' + params.saasServiceName + '/v' + majorCodeVersion, connectingthroughnginx: true, apitype: 'public' }]
     rjmStateChange.executeAction('registerEndpoint', {
       endpointName: params.saasServiceName,
       apiPrefixIdentificationProcessConfig: {

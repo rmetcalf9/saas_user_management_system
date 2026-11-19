@@ -6,7 +6,7 @@ if [[ "E${SAASCODEFRESHTESTUSERPASSWORD}" == "E" ]]; then
 fi
 
 docker run --rm --network main_net \
--e BASEURL_TO_TEST=https://api.metcarob.com/saas_user_management/test/v0 \
+-e BASEURL_TO_TEST=https://api2.metcarob.com/saas_user_management/test/v0 \
 -e APIAPP_DEFAULTHOMEADMINUSERNAME=codefresh_test_user \
 -e APIAPP_DEFAULTHOMEADMINPASSWORD=${SAASCODEFRESHTESTUSERPASSWORD} \
 -e EXPECTED_CONTAINER_VERSION=$(cat ../../VERSION) \
