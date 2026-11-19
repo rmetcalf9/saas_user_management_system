@@ -107,7 +107,7 @@ export default defineComponent({
     window.AppleID.auth.init({
       clientId: JSON.parse(TTT.authProvider.ConfigJSON).service_id,
       scope: 'name email',
-      redirectURI: 'https://${currentHost}/auth/apple/callback',
+      redirectURI: 'https://' + currentHost + '/auth/apple/callback',
       usePopup: true
     })
   }
