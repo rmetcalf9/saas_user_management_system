@@ -127,7 +127,7 @@ jobs:
               "target_server": os.environ["TARGET_SERVER"],
               "docker_username": os.environ["DOCKER_USERNAME"],
               "gchr_pat": os.environ["GCHR_PAT"],
-              "extra_hosts": ["login.metcarob.com"]
+              "extra_hosts": ["login.metcarob.com"],
               "extra_environment": {
                   "APIAPP_DEFAULTHOMEADMINUSERNAME": "admin",
                   "APIAPP_APIURL": "https://api2.metcarob.com/api",
