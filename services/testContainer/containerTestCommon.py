@@ -128,6 +128,7 @@ def _callService(api, url, method, dataDICT, expectedResponses, loginDICT, heade
     print("Got response ",result.status_code)
     print("     ",result.text)
     print(f"Expected result status code: {expectedResponses}")
+    print("NOTE IF ERROR IS INVALID ORIGIN - it might be in the dataset")
     raise Exception("Did not get expected response")
   if api in [LOGIN, ADMIN, SERVERINFO]:
     return json.loads(result.text), result.status_code

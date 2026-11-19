@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fd52ab2-4684-47f6-ad13-e13ca6bd3cad" name="Default Changelist" comment="Tenant properties added for custom html">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build_and_deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build_and_deploy.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/testContainer/containerTestCommon.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/testContainer/containerTestCommon.py" afterDir="false" />
     </list>
@@ -45,7 +46,7 @@
     &quot;SHELLCHECK.PATH&quot;: &quot;I do mind&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/robert/asfGit/template_pythonservice_with_quasar_frontend&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/robert/otherGit/template_pythonservice_with_quasar_frontend&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,

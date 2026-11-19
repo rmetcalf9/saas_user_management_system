@@ -53,6 +53,7 @@ jobs:
         run: |
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
+            -e OVERRIDE_PUBLIC_PATH="saas_user_management/v${RJM_MAJOR_VERSION}/public/web/frontend/" \
             ${QUASARBUILDIMAGE} \
             -c "build_quasar_app ./frontend ${QUASARBUILDMODE_FRONTEND} ${RJM_VERSION}"
 
@@ -60,6 +61,7 @@ jobs:
         run: |
           source ./_repo_vars.sh && \
           docker run --rm -v "$PWD:/opt/work" -w /opt/work \
+            -e OVERRIDE_PUBLIC_PATH="saas_user_management/v${RJM_MAJOR_VERSION}/public/web/adminfrontend/" \
             ${QUASARBUILDIMAGE_ADMINFRONTEND} \
             -c "build_quasar_app ./adminfrontend ${QUASARBUILDMODE_ADMINFRONTEND} ${RJM_VERSION}"
 
