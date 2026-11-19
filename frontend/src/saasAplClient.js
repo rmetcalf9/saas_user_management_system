@@ -7,7 +7,8 @@ import saasApiClientEndpointIdentificationProcess from './saasApiClientEndpointI
 import saasApiClientServerRequestQueue from './saasApiClientServerRequestQueue'
 
 // Change this variable to use different major bersions of login service
-const prodLoginServiceBaseURL = 'https://api2.metcarob.com/saas_user_management/v0/'
+// const prodLoginServiceBaseURL = 'https://api2.metcarob.com/saas_user_management/v0/'
+const prodLoginServiceBaseURL = 'https://login.metcarob.com/'
 
 function finishEndPointIdentificationHook (rjmStateChange, { serverInfo, apiPrefix }) {
   // Do nothing
