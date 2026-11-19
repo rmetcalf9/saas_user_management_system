@@ -101,12 +101,13 @@ export default defineComponent({
   },
   mounted () {
     const TTT = this
+    const currentHost = window.location.hostname
     // console.log('apple service id=', JSON.parse(TTT.selectedAuthProvider.ConfigJSON).service_id)
 
     window.AppleID.auth.init({
       clientId: JSON.parse(TTT.authProvider.ConfigJSON).service_id,
       scope: 'name email',
-      redirectURI: 'https://api2.metcarob.com/auth/apple/callback',
+      redirectURI: 'https://${currentHost}/auth/apple/callback',
       usePopup: true
     })
   }
