@@ -11,7 +11,8 @@ import saasApiClientEndpointIdentificationProcess from './saasApiClientEndpointI
 const loginFrontendIsDev = true
 
 // Change this variable to use different major versions of login service
-const prodLoginServiceBaseURL = 'https://api2.metcarob.com/saas_user_management/v0/'
+// const prodLoginServiceBaseURL = 'https://api2.metcarob.com/saas_user_management/v0/'
+const prodLoginServiceBaseURL = 'https://login.metcarob.com/'
 
 function finishEndPointIdentificationHook (rjmStateChange, { serverInfo, apiPrefix }) {
   // Do nothing
